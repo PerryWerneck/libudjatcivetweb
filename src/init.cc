@@ -17,27 +17,37 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
- #include <udjat.h>
+ #include <udjat/defs.h>
  #include <udjat/module.h>
- #include <udjat/tools/logger.h>
- #include <udjat/worker.h>
- #include <pugixml.hpp>
+ #include <udjat/tools/quark.h>
 
- using namespace std;
  using namespace Udjat;
+ using namespace std;
 
-//---[ Implement ]------------------------------------------------------------------------------------------
+ class Module : public Udjat::Module {
+ public:
 
-int main(int argc, char **argv) {
+ 	Module(void *handle) : Udjat::Module(Quark::getFromStatic("civetweb"),handle) {
 
-	Logger::redirect();
+ 	};
 
-	auto module = udjat_module_init(NULL);
+ 	virtual ~Module() {
 
-	auto root_agent = Abstract::Agent::set_root(make_shared<Abstract::Agent>("root","System","Application"));
+ 	}
 
-	//Udjat::run();
+	void start() override {
 
-	delete module;
-	return 0;
-}
+
+	}
+
+	void stop() override {
+
+	}
+
+ };
+
+ /// @brief Register udjat module.
+ Udjat::Module * udjat_module_init(void *handle) {
+	return new ::Module(handle);
+ }
+

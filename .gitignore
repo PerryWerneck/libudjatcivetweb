@@ -37,6 +37,11 @@ autom4te.cache
 *.log
 *.status
 *.bak
+.bin
+.obj
+*.depend
+*.layout
+
 configure
 scripts
 config.h
