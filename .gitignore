@@ -30,3 +30,15 @@
 *.exe
 *.out
 *.app
+
+*.m4
+*~
+autom4te.cache
+*.log
+*.status
+*.bak
+configure
+scripts
+config.h
+stamp-h1
+
