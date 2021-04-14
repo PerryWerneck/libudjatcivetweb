@@ -34,6 +34,7 @@
 		</Compiler>
 		<Linker>
 			<Add library="udjat" />
+			<Add library="civetweb" />
 		</Linker>
 		<Unit filename="src/include/config.h" />
 		<Unit filename="src/init.cc" />
