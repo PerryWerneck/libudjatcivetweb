@@ -20,6 +20,7 @@
  #include <udjat/defs.h>
  #include <udjat/module.h>
  #include <udjat/tools/quark.h>
+ #include <udjat/worker.h>
  #include <udjat/url.h>
  #include <udjat/tools/configuration.h>
  #include <civetweb.h>
@@ -43,9 +44,45 @@
 
 	try {
 
+		const char *uri = ri->local_uri;
+
+		// Extract 'API' prefix.
+		if(strncasecmp(uri,"/api/",5) == 0) {
+			uri += 5;
+		} else {
+			mg_send_http_error(conn, 400, "Request must be in the format /api/version/worker/path");
+			return 400;
+		}
+
+		// Extract version prefix.
+		{
+			const char *ptr = strchr(uri,'/');
+			if(!ptr) {
+				mg_send_http_error(conn, 400, "Request must be in the format /api/version/worker/path");
+				return 400;
+			}
+			uri = ptr+1;
+		}
+
+		// Get worker.
+		{
+			const char *ptr = strchr(uri,'/');
+			string worker, path;
+
+			if(ptr) {
+				worker.assign(uri,ptr-uri);
+				path = ptr+1;
+			} else {
+				worker = uri;
+			}
+
 #ifdef DEBUG
-		cout << "local_uri='" << ri->local_uri << "'" << endl;
+			cout << "Worker: '" << worker << "' Path: '" << path << "'" << endl;
 #endif // DEBUG
+
+			Worker::work(worker.c_str(),Request(path),response);
+
+		}
 
 	} catch(const system_error &e) {
 

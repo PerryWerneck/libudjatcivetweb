@@ -22,21 +22,21 @@
 
  int sysErrorToHttp(int syserror) {
 
-	 static const struct Translate {
+	// https://en.wikipedia.org/wiki/List_of_HTTP_status_codes
+	static const struct Translate {
 		int	syserror;
 		int httperror;
-	 } translate[] = {
+	} translate[] = {
 		{ ENOENT, 404 }
-	 };
+	};
 
-	 for(int ix = 0; ix < (sizeof(translate)/sizeof(translate[0])); ix++) {
+	for(unsigned int ix = 0; ix < (sizeof(translate)/sizeof(translate[0])); ix++) {
 
 		if(translate[ix].syserror == syserror) {
 			return translate[ix].httperror;
 		}
 
-	 }
-
+	}
 
 	 return 500;
  }
