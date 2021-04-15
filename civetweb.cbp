@@ -31,13 +31,19 @@
 		<Compiler>
 			<Add option="-Wall" />
 			<Add option="-std=gnu++11" />
+			<Add option="`pkg-config --cflags jsoncpp`" />
+			<Add directory="src/include" />
 		</Compiler>
 		<Linker>
+			<Add option="`pkg-config --libs jsoncpp`" />
 			<Add library="udjat" />
 			<Add library="civetweb" />
 		</Linker>
+		<Unit filename="conf/50-civetweb.conf" />
 		<Unit filename="src/include/config.h" />
-		<Unit filename="src/init.cc" />
+		<Unit filename="src/include/tools.h" />
+		<Unit filename="src/module/init.cc" />
+		<Unit filename="src/module/tools.cc" />
 		<Unit filename="src/testprogram/testprogram.cc" />
 		<Extensions>
 			<lib_finder disable_auto="1" />

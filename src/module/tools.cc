@@ -17,27 +17,28 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
- #include <udjat.h>
- #include <udjat/module.h>
- #include <udjat/tools/logger.h>
- #include <udjat/worker.h>
- #include <pugixml.hpp>
+ #include <tools.h>
+ #include <errno.h>
 
- using namespace std;
- using namespace Udjat;
+ int sysErrorToHttp(int syserror) {
 
-//---[ Implement ]------------------------------------------------------------------------------------------
+	 static const struct Translate {
+		int	syserror;
+		int httperror;
+	 } translate[] = {
+		{ ENOENT, 404 }
+	 };
 
-int main(int argc, char **argv) {
+	 for(int ix = 0; ix < (sizeof(translate)/sizeof(translate[0])); ix++) {
 
-	//Logger::redirect();
+		if(translate[ix].syserror == syserror) {
+			return translate[ix].httperror;
+		}
 
-	auto module = udjat_module_init(NULL);
+	 }
 
-	auto root_agent = Abstract::Agent::set_root(make_shared<Abstract::Agent>("root","System","Application"));
 
-	Udjat::run();
+	 return 500;
+ }
 
-	delete module;
-	return 0;
-}
+

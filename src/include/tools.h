@@ -17,27 +17,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
- #include <udjat.h>
- #include <udjat/module.h>
- #include <udjat/tools/logger.h>
- #include <udjat/worker.h>
- #include <pugixml.hpp>
+ #pragma once
 
- using namespace std;
- using namespace Udjat;
+ #include <config.h>
+ #include <stdint.h>
 
-//---[ Implement ]------------------------------------------------------------------------------------------
+ /// @brief Convert system error to http
+ int sysErrorToHttp(int syserror);
 
-int main(int argc, char **argv) {
-
-	//Logger::redirect();
-
-	auto module = udjat_module_init(NULL);
-
-	auto root_agent = Abstract::Agent::set_root(make_shared<Abstract::Agent>("root","System","Application"));
-
-	Udjat::run();
-
-	delete module;
-	return 0;
-}
