@@ -3,6 +3,9 @@
 /* do we have civetweb.h? */
 #undef HAVE_CIVETWEB
 
+/* Do we have econf? */
+#undef HAVE_ECONF
+
 /* supports GCC visibility attributes */
 #undef HAVE_GNUC_VISIBILITY
 
@@ -12,16 +15,13 @@
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 
-/* do we have jsoncpp */
+/* Do we have JSONCPP? */
 #undef HAVE_JSONCPP
-
-/* Do we have libudjat */
-#undef HAVE_LIBUDJAT
 
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
 
-/* do we have pugixml */
+/* Do we have PUGIXML? */
 #undef HAVE_PUGIXML
 
 /* Define to 1 if you have the <stdint.h> header file. */
@@ -48,7 +48,7 @@
 /* Define as const if the declaration of iconv() needs const. */
 #undef ICONV_CONST
 
-/* The module path */
+/* The path for module installation */
 #undef MODULE_PATH
 
 /* Name of package */
@@ -57,10 +57,10 @@
 /* Define to the address where bug reports for this package should be sent. */
 #undef PACKAGE_BUGREPORT
 
-/* The package major version */
+/* The module major version */
 #undef PACKAGE_MAJOR_VERSION
 
-/* The package minor version */
+/* The module minor version */
 #undef PACKAGE_MINOR_VERSION
 
 /* Define to the full name of this package. */

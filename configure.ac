@@ -38,8 +38,8 @@ dnl ---------------------------------------------------------------------------
 app_vrs_major=$(echo $VERSION | cut -d. -f1)
 app_vrs_minor=$(echo $VERSION | cut -d. -f2)
 
-AC_DEFINE_UNQUOTED(PACKAGE_MAJOR_VERSION, $app_vrs_major, [The package major version])
-AC_DEFINE_UNQUOTED(PACKAGE_MINOR_VERSION, $app_vrs_minor, [The package minor version])
+AC_DEFINE_UNQUOTED(PACKAGE_MAJOR_VERSION, $app_vrs_major, [The module major version])
+AC_DEFINE_UNQUOTED(PACKAGE_MINOR_VERSION, $app_vrs_minor, [The module minor version])
 
 AC_SUBST(PACKAGE_MAJOR_VERSION,$app_vrs_major)
 AC_SUBST(PACKAGE_MINOR_VERSION,$app_vrs_minor)
@@ -149,26 +149,32 @@ dnl ---------------------------------------------------------------------------
 PKG_CHECK_EXISTS
 
 dnl ---------------------------------------------------------------------------
+dnl Check for civetweb
+dnl ---------------------------------------------------------------------------
+
+AC_CHECK_HEADER(civetweb.h, AC_DEFINE(HAVE_CIVETWEB,,[do we have civetweb.h?]))
+
+dnl ---------------------------------------------------------------------------
 dnl Check for libudjat
 dnl ---------------------------------------------------------------------------
-PKG_CHECK_MODULES( [UDJAT], [libudjat], AC_DEFINE(HAVE_LIBUDJAT,,[Do we have libudjat]), AC_MSG_ERROR([libudjat not present.]) )
+PKG_CHECK_MODULES( [UDJAT], [libudjat], AC_DEFINE(HAVE_ECONF,[],[Do we have econf?]), AC_MSG_ERROR([libudjat not present.]) )
 
 AC_SUBST(UDJAT_LIBS)
 AC_SUBST(UDJAT_CFLAGS)
 
 app_cv_product=`pkg-config --variable=product_name libudjat`
-AC_DEFINE_UNQUOTED(PRODUCT_NAME, $app_cv_product,[The product name])
+AC_DEFINE_UNQUOTED(PRODUCT_NAME, $app_cv_product, [The product name])
 AC_SUBST(PRODUCT_NAME,$app_cv_product)
 
 app_cv_module_path=`pkg-config --variable=module_path libudjat`
-AC_DEFINE_UNQUOTED(MODULE_PATH, $app_cv_module_path,[The module path])
+AC_DEFINE_UNQUOTED(MODULE_PATH, $app_cv_module_path, [The path for module installation])
 AC_SUBST(MODULE_PATH,$app_cv_module_path)
 
 dnl ---------------------------------------------------------------------------
 dnl test for pugixml
 dnl ---------------------------------------------------------------------------
 
-PKG_CHECK_MODULES(PUGIXML, pugixml, AC_DEFINE(HAVE_PUGIXML,,[do we have pugixml]),AC_MSG_ERROR(pugixml is required))
+PKG_CHECK_MODULES(PUGIXML, pugixml, AC_DEFINE(HAVE_PUGIXML,[],[Do we have PUGIXML?]),AC_MSG_ERROR(pugixml is required))
 
 AC_SUBST(PUGIXML_LIBS)
 AC_SUBST(PUGIXML_CFLAGS)
@@ -176,26 +182,17 @@ AC_SUBST(PUGIXML_CFLAGS)
 dnl ---------------------------------------------------------------------------
 dnl Test for jsoncpp
 dnl ---------------------------------------------------------------------------
-PKG_CHECK_MODULES( [JSONCPP], [jsoncpp], AC_DEFINE(HAVE_JSONCPP,,[do we have jsoncpp]), AC_MSG_ERROR([libjsoncpp not present.]) )
+PKG_CHECK_MODULES( [JSONCPP], [jsoncpp], AC_DEFINE(HAVE_JSONCPP,[],[Do we have JSONCPP?]), AC_MSG_ERROR([libjsoncpp not present.]) )
 
 AC_SUBST(JSONCPP_LIBS)
 AC_SUBST(JSONCPP_CFLAGS)
-
-dnl ---------------------------------------------------------------------------
-dnl Test for civetweb
-dnl ---------------------------------------------------------------------------
-AC_CHECK_HEADER(civetweb.h, AC_DEFINE(HAVE_CIVETWEB,,[do we have civetweb.h?]))
-WEB_LIBS=-lcivetweb
-
-AC_SUBST(WEB_LIBS)
-AC_SUBST(WEB_CFLAGS)
 
 dnl ---------------------------------------------------------------------------
 dnl Output config
 dnl ---------------------------------------------------------------------------
 
 AC_SUBST(BASEDIR,$ac_pwd)
-dnl AC_CONFIG_FILES(Makefile)
+AC_CONFIG_FILES(Makefile)
 
 dnl ---------------------------------------------------------------------------
 dnl Output the generated config.status script.
