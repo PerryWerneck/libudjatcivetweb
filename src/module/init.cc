@@ -36,7 +36,7 @@
 	const struct mg_request_info *ri = mg_get_request_info(conn);
 
 	if(strcasecmp(ri->request_method,"get")) {
-		mg_send_http_error(conn, 405, "Invalid request method");
+		mg_send_http_error(conn, 405, "Method Not Allowed");
 		return 405;
 	}
 

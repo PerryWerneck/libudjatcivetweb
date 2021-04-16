@@ -27,7 +27,12 @@
 		int	syserror;
 		int httperror;
 	} translate[] = {
-		{ ENOENT, 404 }
+		{ ENOENT,		404 },
+		{ EPERM,		403	},
+		{ ETIMEDOUT,	408 },
+		{ ENOTSUP,		501 },
+		{ EBUSY,		503 },
+
 	};
 
 	for(unsigned int ix = 0; ix < (sizeof(translate)/sizeof(translate[0])); ix++) {
