@@ -45,7 +45,9 @@
 		<Unit filename="conf/50-civetweb.conf" />
 		<Unit filename="src/include/config.h" />
 		<Unit filename="src/include/tools.h" />
+		<Unit filename="src/module/api.cc" />
 		<Unit filename="src/module/init.cc" />
+		<Unit filename="src/module/private.h" />
 		<Unit filename="src/module/tools.cc" />
 		<Unit filename="src/testprogram/testprogram.cc" />
 		<Extensions>

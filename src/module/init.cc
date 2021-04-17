@@ -17,97 +17,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
- #include <config.h>
- #include <udjat/defs.h>
+ #include "private.h"
  #include <udjat/module.h>
  #include <udjat/tools/quark.h>
- #include <udjat/worker.h>
  #include <udjat/url.h>
  #include <udjat/tools/configuration.h>
- #include <civetweb.h>
  #include <tools.h>
 
  using namespace Udjat;
  using namespace std;
 
  static int log_message(const struct mg_connection *conn, const char *message);
-
- static int WebHandler(struct mg_connection *conn, void UDJAT_UNUSED(*cbdata)) {
-
-	const struct mg_request_info *ri = mg_get_request_info(conn);
-
-	if(strcasecmp(ri->request_method,"get")) {
-		mg_send_http_error(conn, 405, "Method Not Allowed");
-		return 405;
-	}
-
-	Udjat::Response response;
-
-	try {
-
-		const char *uri = ri->local_uri;
-
-		// Extract 'API' prefix.
-		if(strncasecmp(uri,"/api/",5) == 0) {
-			uri += 5;
-		} else {
-			mg_send_http_error(conn, 400, "Request must be in the format /api/version/worker/path");
-			return 400;
-		}
-
-		// Extract version prefix.
-		{
-			const char *ptr = strchr(uri,'/');
-			if(!ptr) {
-				mg_send_http_error(conn, 400, "Request must be in the format /api/version/worker/path");
-				return 400;
-			}
-			uri = ptr+1;
-		}
-
-		// Get worker.
-		{
-			const char *ptr = strchr(uri,'/');
-			string worker, path;
-
-			if(ptr) {
-				worker.assign(uri,ptr-uri);
-				path = ptr+1;
-			} else {
-				worker = uri;
-			}
-
-#ifdef DEBUG
-			cout << "Worker: '" << worker << "' Path: '" << path << "'" << endl;
-#endif // DEBUG
-
-			Worker::work(worker.c_str(),Request(path),response);
-
-		}
-
-	} catch(const system_error &e) {
-
-		int code = sysErrorToHttp(e.code().value());
-		mg_send_http_error(conn, code, e.what());
-		return code;
-
-	} catch(const exception &e) {
-
-		mg_send_http_error(conn, 500, e.what());
-		return 500;
-
-	}
-
-	string rsp = response.toStyledString();
-
-	cout << "Response:" << endl << rsp << endl;
-
-	mg_send_http_ok(conn, "application/json; charset=utf-8", rsp.size());
-	mg_write(conn, rsp.c_str(), rsp.size());
-
-	return 200;
-
- }
 
  class Module : public Udjat::Module {
  private:
@@ -154,8 +74,6 @@
 				NULL
 			};
 
-			cout << "[" << options[1] << "]" << endl;
-
 			// https://github.com/civetweb/civetweb/blob/master/docs/api/mg_start.md
 			struct mg_callbacks callbacks;
 			memset(&callbacks,0,sizeof(callbacks));
@@ -166,7 +84,7 @@
 				throw runtime_error("Cannot start CivetWeb - mg_start failed.");
 			}
 
-			mg_set_request_handler(ctx, "/api/", WebHandler, 0);
+			mg_set_request_handler(ctx, "/api/", apiWebHandler, 0);
 
 			cout << "civetweb\tListening on port " << options[1] << endl;
 
