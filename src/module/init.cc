@@ -17,6 +17,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+ #include <config.h>
  #include <udjat/defs.h>
  #include <udjat/module.h>
  #include <udjat/tools/quark.h>
@@ -115,6 +116,19 @@
  public:
 
  	Module(void *handle) : Udjat::Module(Quark::getFromStatic("civetweb"),handle), ctx(NULL) {
+
+		static const Udjat::ModuleInfo info = {
+
+			PACKAGE_NAME,										// The module name.
+			"CivetWEB " CIVETWEB_VERSION " HTTP exporter", 		// The module description.
+			PACKAGE_VERSION, 									// The module version.
+			PACKAGE_BUGREPORT, 									// The bugreport address.
+			PACKAGE_URL, 										// The package URL.
+
+		};
+
+		this->info = &info;
+
 		mg_init_library(0);
  	};
 

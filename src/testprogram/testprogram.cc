@@ -22,6 +22,7 @@
  #include <udjat/tools/logger.h>
  #include <udjat/worker.h>
  #include <pugixml.hpp>
+ #include <unistd.h>
 
  using namespace std;
  using namespace Udjat;
