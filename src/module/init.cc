@@ -37,15 +37,13 @@
 
  	Module(void *handle) : Udjat::Module(Quark::getFromStatic("civetweb"),handle), ctx(NULL) {
 
-		static const Udjat::ModuleInfo info = {
+		static Udjat::ModuleInfo info;
 
-			PACKAGE_NAME,										// The module name.
-			"CivetWEB " CIVETWEB_VERSION " HTTP exporter", 		// The module description.
-			PACKAGE_VERSION, 									// The module version.
-			PACKAGE_BUGREPORT, 									// The bugreport address.
-			PACKAGE_URL, 										// The package URL.
-
-		};
+		info.name = PACKAGE_NAME;
+		info.description = "CivetWEB " CIVETWEB_VERSION " HTTP exporter";
+		info.version = PACKAGE_VERSION;
+		info.bugreport = PACKAGE_BUGREPORT;
+		info.url = PACKAGE_URL;
 
 		this->info = &info;
 
@@ -85,6 +83,7 @@
 			}
 
 			mg_set_request_handler(ctx, "/api/", apiWebHandler, 0);
+			mg_set_request_handler(ctx, "/info/", infoWebHandler, 0);
 
 			cout << "civetweb\tListening on port " << options[1] << endl;
 

@@ -37,6 +37,9 @@ int main(int argc, char **argv) {
 
 	auto root_agent = Abstract::Agent::set_root(make_shared<Abstract::Agent>("root","System","Application"));
 
+	cout << "http://localhost:8989/info/1.0/modules" << endl;
+	cout << "http://localhost:8989/info/1.0/workers" << endl;
+	cout << "http://localhost:8989/info/1.0/factory" << endl;
 	Udjat::run();
 
 	delete module;
