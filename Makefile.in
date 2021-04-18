@@ -168,11 +168,11 @@ install-linux-module: \
 install-conf:
 
 	@$(MKDIR) \
-		$(sysconfdir)/udjat.conf.d
+		$(DESTDIR)$(sysconfdir)/udjat.conf.d
 		
 	@$(INSTALL_DATA) \
 		conf/50-civetweb.conf \
-		$(sysconfdir)/udjat.conf.d		
+		$(DESTDIR)$(sysconfdir)/udjat.conf.d		
 			
 #---[ Uninstall Targets ]----------------------------------------------------------------
 
