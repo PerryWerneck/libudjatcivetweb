@@ -35,15 +35,16 @@
 
  public:
 
- 	Module(void *handle) : Udjat::Module(Quark::getFromStatic("civetweb"),handle), ctx(NULL) {
+ 	Module() : Udjat::Module(Quark::getFromStatic("civetweb")), ctx(NULL) {
 
-		static Udjat::ModuleInfo info;
-
-		info.name = PACKAGE_NAME;
-		info.description = "CivetWEB " CIVETWEB_VERSION " HTTP exporter";
-		info.version = PACKAGE_VERSION;
-		info.bugreport = PACKAGE_BUGREPORT;
-		info.url = PACKAGE_URL;
+		static const Udjat::ModuleInfo info{
+			PACKAGE_NAME,									// The module name.
+			"CivetWEB " CIVETWEB_VERSION " HTTP exporter", 	// The module description.
+			PACKAGE_VERSION, 								// The module version.
+			PACKAGE_BUGREPORT, 								// The bugreport address.
+			PACKAGE_URL, 									// The package URL.
+			nullptr
+		};
 
 		this->info = &info;
 
@@ -103,8 +104,8 @@
  };
 
  /// @brief Register udjat module.
- Udjat::Module * udjat_module_init(void *handle) {
-	return new ::Module(handle);
+ Udjat::Module * udjat_module_init() {
+	return new ::Module();
  }
 
  #pragma GCC diagnostic push

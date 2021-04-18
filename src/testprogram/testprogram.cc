@@ -33,7 +33,7 @@ int main(int argc, char **argv) {
 
 	//Logger::redirect();
 
-	auto module = udjat_module_init(NULL);
+	auto module = udjat_module_init();
 
 	auto root_agent = Abstract::Agent::set_root(make_shared<Abstract::Agent>("root","System","Application"));
 
