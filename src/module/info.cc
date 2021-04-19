@@ -65,7 +65,7 @@
 
 			Worker::getInfo(response);
 
-		} else if(!strcasecmp(uri,"factory")) {
+		} else if(!strcasecmp(uri,"agenttypes")) {
 
 			Abstract::Agent::Factory::getInfo(response);
 

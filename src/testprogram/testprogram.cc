@@ -39,7 +39,7 @@ int main(int argc, char **argv) {
 
 	cout << "http://localhost:8989/info/1.0/modules" << endl;
 	cout << "http://localhost:8989/info/1.0/workers" << endl;
-	cout << "http://localhost:8989/info/1.0/factory" << endl;
+	cout << "http://localhost:8989/info/1.0/agenttypes" << endl;
 	Udjat::run();
 
 	delete module;
