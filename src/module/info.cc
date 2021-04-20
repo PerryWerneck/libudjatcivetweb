@@ -21,6 +21,7 @@
  #include <tools.h>
  #include <udjat/worker.h>
  #include <udjat/module.h>
+ #include <udjat/factory.h>
 
  int infoWebHandler(struct mg_connection *conn, void UDJAT_UNUSED(*cbdata)) {
 
@@ -65,9 +66,9 @@
 
 			Worker::getInfo(response);
 
-		} else if(!strcasecmp(uri,"agenttypes")) {
+		} else if(!strcasecmp(uri,"factory")) {
 
-			Abstract::Agent::Factory::getInfo(response);
+			Factory::getInfo(response);
 
 		} else {
 			mg_send_http_error(conn, 404, (string{"I don't know nothing about '"} + uri + "'").c_str());
