@@ -42,8 +42,7 @@
 			"CivetWEB " CIVETWEB_VERSION " HTTP exporter", 	// The module description.
 			PACKAGE_VERSION, 								// The module version.
 			PACKAGE_URL, 									// The package URL.
-			PACKAGE_BUGREPORT, 								// The bugreport address.
-			nullptr
+			PACKAGE_BUGREPORT 								// The bugreport address.
 		};
 
 		this->info = &info;
