@@ -23,11 +23,56 @@
  #include <udjat/worker.h>
  #include <pugixml.hpp>
  #include <unistd.h>
+ #include <civetweb.h>
 
  using namespace std;
  using namespace Udjat;
 
 //---[ Implement ]------------------------------------------------------------------------------------------
+
+static void test_httpd() {
+
+	auto root_agent = Abstract::Agent::set_root(make_shared<Abstract::Agent>("root","System","Application"));
+
+	cout << "http://localhost:8989/info/1.0/modules" << endl;
+	cout << "http://localhost:8989/info/1.0/workers" << endl;
+	cout << "http://localhost:8989/info/1.0/factory" << endl;
+	cout << "http://localhost:8989/swagger.json" << endl;
+
+	Udjat::run();
+
+}
+
+void test_http_get(const char *url) {
+
+	char error_buffer[256] = "";
+
+	struct mg_connection *conn =
+		mg_download(
+			"localhost",
+			80,
+			0,
+			error_buffer,
+			sizeof(error_buffer),
+			"GET %s HTTP/1.0\r\n\r\n",
+			"http://localhost"
+		);
+
+	if(!conn) {
+		cout << error_buffer << endl;
+		return;
+	}
+
+	const struct mg_response_info *info = mg_get_response_info(conn);
+
+	cout << "Status: " << info->status_code << " " << info->status_text << endl;
+
+	cout << "Length: " << info->content_length << endl;
+
+
+	mg_close_connection(conn);
+
+}
 
 int main(int argc, char **argv) {
 
@@ -35,12 +80,8 @@ int main(int argc, char **argv) {
 
 	auto module = udjat_module_init();
 
-	auto root_agent = Abstract::Agent::set_root(make_shared<Abstract::Agent>("root","System","Application"));
-
-	cout << "http://localhost:8989/info/1.0/modules" << endl;
-	cout << "http://localhost:8989/info/1.0/workers" << endl;
-	cout << "http://localhost:8989/info/1.0/factory" << endl;
-	Udjat::run();
+	// test_httpd();
+	test_http_get("http://localhost/");
 
 	delete module;
 	return 0;

@@ -17,25 +17,24 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
- #pragma once
+ /**
+  * @brief Implements the swagger.json output.
+  *
+  * References:
+  *
+  * https://samanthaneilen.github.io/2018/12/08/Using-and-extending-swagger.json-for-API-documentation.html
+  *
+  */
 
- #include <config.h>
- #include <udjat/defs.h>
- #include <cstring>
- #include <string>
- #include <stdexcept>
- #include <civetweb.h>
- #include <iostream>
+ #include "private.h"
+ #include <tools.h>
+ #include <udjat/worker.h>
+ #include <udjat/module.h>
+ #include <udjat/factory.h>
 
- using namespace Udjat;
- using namespace std;
+ int swaggerWebHandler(struct mg_connection *conn, void UDJAT_UNUSED(*cbdata)) {
 
- /// @brief Handler for API requests.
- int apiWebHandler(struct mg_connection *conn, void *cbdata);
+	mg_send_http_error(conn, 404, "Not implemented");
+	return 404;
 
- /// @brief Handler for application info.
- int infoWebHandler(struct mg_connection *conn, void *cbdata);
-
- /// @brief Handler for swagger request.
- int swaggerWebHandler(struct mg_connection *conn, void *cbdata);
-
+ }
