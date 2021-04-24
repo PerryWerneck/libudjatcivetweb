@@ -21,6 +21,7 @@
  #include <udjat/module.h>
  #include <udjat/tools/logger.h>
  #include <udjat/worker.h>
+ #include <udjat/url.h>
  #include <pugixml.hpp>
  #include <unistd.h>
  #include <civetweb.h>
@@ -43,8 +44,15 @@ static void test_httpd() {
 
 }
 
-void test_http_get(const char *url) {
+void test_http_get() {
 
+	Udjat::URL url("http://localhost");
+
+	auto response = url.get();
+	cout << "Response was: " << response->getStatusCode() << " " << response->getStatusMessage() << endl;
+	cout << response->c_str() << endl;
+
+	/*
 	char error_buffer[256] = "";
 
 	struct mg_connection *conn =
@@ -55,7 +63,7 @@ void test_http_get(const char *url) {
 			error_buffer,
 			sizeof(error_buffer),
 			"GET %s HTTP/1.0\r\n\r\n",
-			"http://localhost"
+			"/"
 		);
 
 	if(!conn) {
@@ -69,8 +77,17 @@ void test_http_get(const char *url) {
 
 	cout << "Length: " << info->content_length << endl;
 
+	char * buffer = new char[info->content_length+1];
 
+	int i = mg_read(conn, buffer, info->content_length);
+	cout << "Read: " << i << endl;
+	buffer[i] = 0;
+
+	cout << buffer << endl;
+
+	delete[] buffer;
 	mg_close_connection(conn);
+	*/
 
 }
 
@@ -81,7 +98,7 @@ int main(int argc, char **argv) {
 	auto module = udjat_module_init();
 
 	// test_httpd();
-	test_http_get("http://localhost/");
+	test_http_get();
 
 	delete module;
 	return 0;

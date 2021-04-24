@@ -105,6 +105,10 @@
 
  /// @brief Register udjat module.
  Udjat::Module * udjat_module_init() {
+
+ 	Udjat::URL::insert(make_shared<::Protocol>(Quark::getFromStatic("http"),Quark::getFromStatic("80"),0));
+ 	Udjat::URL::insert(make_shared<::Protocol>(Quark::getFromStatic("https"),Quark::getFromStatic("443"),1));
+
 	return new ::Module();
  }
 

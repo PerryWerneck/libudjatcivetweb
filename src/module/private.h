@@ -21,6 +21,7 @@
 
  #include <config.h>
  #include <udjat/defs.h>
+ #include <udjat/url.h>
  #include <cstring>
  #include <string>
  #include <stdexcept>
@@ -38,4 +39,26 @@
 
  /// @brief Handler for swagger request.
  int swaggerWebHandler(struct mg_connection *conn, void *cbdata);
+
+ /// @brief CivetWeb HTTP Response
+ class Response : public Udjat::URL::Response {
+ private:
+
+ public:
+	Response(struct mg_connection *conn);
+	virtual ~Response();
+
+ };
+
+ /// @brief Base class for HTTP Protocol
+ class Protocol : public Udjat::URL::Protocol {
+ protected:
+	int use_ssl;
+
+ public:
+	Protocol(const Quark &name, const Quark &portname, int use_ssl);
+	virtual ~Protocol();
+	std::shared_ptr<URL::Response> call(const URL &url, const URL::Method method, const char *mimetype, const char *payload) override;
+
+ };
 
