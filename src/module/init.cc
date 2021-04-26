@@ -48,6 +48,10 @@
 		this->info = &info;
 
 		mg_init_library(0);
+
+		Udjat::URL::insert(make_shared<::Protocol>(Quark::getFromStatic("http"),Quark::getFromStatic("80"),0));
+		Udjat::URL::insert(make_shared<::Protocol>(Quark::getFromStatic("https"),Quark::getFromStatic("443"),1));
+
  	};
 
  	virtual ~Module() {
@@ -105,11 +109,14 @@
 
  /// @brief Register udjat module.
  Udjat::Module * udjat_module_init() {
-
- 	Udjat::URL::insert(make_shared<::Protocol>(Quark::getFromStatic("http"),Quark::getFromStatic("80"),0));
- 	Udjat::URL::insert(make_shared<::Protocol>(Quark::getFromStatic("https"),Quark::getFromStatic("443"),1));
-
 	return new ::Module();
+ }
+
+ bool udjat_module_deinit() {
+
+	// Can't unload this module because of the http/https protocol modules.
+	return false;
+
  }
 
  #pragma GCC diagnostic push
