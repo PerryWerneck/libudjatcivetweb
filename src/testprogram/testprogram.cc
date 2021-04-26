@@ -50,7 +50,10 @@ void test_http_get() {
 
 	auto response = url.get();
 	cout << "Response was: " << response->getStatusCode() << " " << response->getStatusMessage() << endl;
-	cout << response->c_str() << endl;
+
+	if(response->isValid()) {
+		cout << response->c_str() << endl;
+	}
 
 	/*
 	char error_buffer[256] = "";

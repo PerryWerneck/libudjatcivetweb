@@ -47,6 +47,7 @@
  public:
 	Response(struct mg_connection *conn);
 	virtual ~Response();
+	bool isValid() const noexcept override;
 
  };
 

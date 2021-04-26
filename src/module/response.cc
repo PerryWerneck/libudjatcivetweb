@@ -63,6 +63,10 @@
 
  }
 
+ bool ::Response::isValid() const noexcept {
+	return status.code == 200 && URL::Response::isValid();
+ }
+
  ::Response::~Response() {
 	munmap(response.payload,response.length);
  }
