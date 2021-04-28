@@ -20,7 +20,7 @@
  #include "private.h"
  #include <sys/mman.h>
 
- ::Response::Response(struct mg_connection *conn) {
+ ::URLResponse::URLResponse(struct mg_connection *conn) {
 
 	const struct mg_response_info *info = mg_get_response_info(conn);
 
@@ -63,10 +63,24 @@
 
  }
 
- bool ::Response::isValid() const noexcept {
+ bool ::URLResponse::isValid() const noexcept {
 	return status.code == 200 && URL::Response::isValid();
  }
 
- ::Response::~Response() {
+ ::URLResponse::~URLResponse() {
 	munmap(response.payload,response.length);
  }
+
+ /*
+ std::shared_ptr<Udjat::Response::Report> ::Response::open(const char *name, const char *column_name, ...) {
+
+	auto report = make_shared<::JSON>();
+
+	va_list args;
+	va_start(args, column_name);
+	report->setColumns(column_name, args);
+	va_end(args);
+
+	return report;
+ }
+ */

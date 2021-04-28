@@ -36,6 +36,7 @@
 					"User-Agent: " STRINGIZE_VALUE_OF(PRODUCT_NAME) "\r\n"
 					"Host: "
 				};
+
 	header += url.getDomainName();
 	header += "\r\n";
 
@@ -64,20 +65,20 @@
 	// If-None-Match: "c561c68d0ba92bbeb8b0fff2a9199f722e3a621a"
 	// Cache-Control: max-age=0
 	//
-/*
-                if(this->maxage) {
+	/*
+	if(this->maxage) {
 
-                        rsp     << "Cache-Control: " << (auth.isAuthenticated() ? "private" : "public") << ", max-age=" << string().set("%u",(unsigned int) maxage) << "\r\n"
-                                << "Expires: " << getTimeString(this->timestamp + maxage) << "\r\n"
-                                << "Vary: Accept-Encoding\r\n";
+			rsp     << "Cache-Control: " << (auth.isAuthenticated() ? "private" : "public") << ", max-age=" << string().set("%u",(unsigned int) maxage) << "\r\n"
+					<< "Expires: " << getTimeString(this->timestamp + maxage) << "\r\n"
+					<< "Vary: Accept-Encoding\r\n";
 
-                } else {
+	} else {
 
-                        rsp     << "Cache-Control: no-cache, no-store\r\n"
-                                << "Pragma: no-cache\r\n"
-                                << "Expires: 0\r\n";
-                }
-*/
+			rsp     << "Cache-Control: no-cache, no-store\r\n"
+					<< "Pragma: no-cache\r\n"
+					<< "Expires: 0\r\n";
+	}
+	*/
 
  	struct mg_connection *conn =
 		mg_download(
@@ -97,7 +98,7 @@
 
 	try {
 
-		response = make_shared<::Response>(conn);
+		response = make_shared<::URLResponse>(conn);
 
 	} catch(...) {
 

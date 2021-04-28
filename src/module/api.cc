@@ -30,7 +30,7 @@
 		return 405;
 	}
 
-	Udjat::Response response;
+	::Response response;
 
 	try {
 

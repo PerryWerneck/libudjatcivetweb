@@ -17,7 +17,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
- #include <report.h>
+ #include <response.h>
  #include <cstdarg>
 
  namespace Reports {
@@ -38,19 +38,29 @@
 	JSON::~JSON() {
 	}
 
-	void JSON::open() {
-		Udjat::Response::Report::open();
-		row = Json::Value(Json::objectValue);
+	bool JSON::open() {
+		if(Udjat::Response::Report::open()) {
+			row = Json::Value(Json::objectValue);
+			return true;
+		}
+		return false;
 	}
 
-	void JSON::close() {
-		report.append(row);
-		Udjat::Response::Report::close();
+	bool JSON::close() {
+		if(Udjat::Response::Report::close()) {
+			report.append(row);
+			return true;
+		}
+		return false;
+	}
+
+	std::string JSON::to_string() {
+		close();
+		return report.toStyledString();
 	}
 
 	Udjat::Response::Report & JSON::push_back(const char *str) {
-		auto x = next();
-		row[x.c_str()] = str;
+		row[next()] = str;
 		return *this;
 	}
 

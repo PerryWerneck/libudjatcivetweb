@@ -22,6 +22,14 @@
  #include <udjat/defs.h>
  #include <udjat/request.h>
 
+ /*
+ class Response : Udjat::Response {
+ public:
+ 	Response() = default;
+
+ };
+ */
+
  namespace Reports {
 
 	class UDJAT_API JSON : public Udjat::Response::Report {
@@ -38,8 +46,10 @@
 		JSON(const char *column_name, ...) __attribute__ ((sentinel));
 		virtual ~JSON();
 
-		void open() override;
-		void close() override;
+		bool open() override;
+		bool close() override;
+
+		std::string to_string() override;
 
 		Udjat::Response::Report & push_back(const char *str) override;
 		Udjat::Response::Report & push_back(const bool value) override;

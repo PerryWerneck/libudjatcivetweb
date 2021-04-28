@@ -25,7 +25,7 @@
  #include <pugixml.hpp>
  #include <unistd.h>
  #include <civetweb.h>
- #include <report.h>
+ #include <response.h>
 
  using namespace std;
  using namespace Udjat;
@@ -99,11 +99,14 @@ static void test_report() {
 
 	Reports::JSON report("v1","v2","v3",nullptr);
 
-	report 	<< "1"
-			<< "2"
-			<< "3";
+	report 	<< 1
+			<< 2
+			<< 3
+			<< "4"
+			<< "5"
+			<< "6";
 
-
+	cout << report.to_string() << endl;
 }
 
 int main(int argc, char **argv) {

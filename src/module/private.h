@@ -41,12 +41,12 @@
  int swaggerWebHandler(struct mg_connection *conn, void *cbdata);
 
  /// @brief CivetWeb HTTP Response
- class Response : public Udjat::URL::Response {
+ class URLResponse : public Udjat::URL::Response {
  private:
 
  public:
-	Response(struct mg_connection *conn);
-	virtual ~Response();
+	URLResponse(struct mg_connection *conn);
+	virtual ~URLResponse();
 	bool isValid() const noexcept override;
 
  };

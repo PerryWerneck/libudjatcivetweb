@@ -22,6 +22,7 @@
  #include <udjat/worker.h>
  #include <udjat/module.h>
  #include <udjat/factory.h>
+ #include <response.h>
 
  int infoWebHandler(struct mg_connection *conn, void UDJAT_UNUSED(*cbdata)) {
 
@@ -32,7 +33,7 @@
 		return 405;
 	}
 
-	Udjat::Response response;
+	::Response response;
 
 	try {
 
