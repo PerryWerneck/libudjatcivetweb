@@ -25,6 +25,7 @@
  #include <pugixml.hpp>
  #include <unistd.h>
  #include <civetweb.h>
+ #include <report.h>
 
  using namespace std;
  using namespace Udjat;
@@ -94,6 +95,17 @@ void test_http_get() {
 
 }
 
+static void test_report() {
+
+	Reports::JSON report("v1","v2","v3",nullptr);
+
+	report 	<< "1"
+			<< "2"
+			<< "3";
+
+
+}
+
 int main(int argc, char **argv) {
 
 	//Logger::redirect();
@@ -101,7 +113,8 @@ int main(int argc, char **argv) {
 	auto module = udjat_module_init();
 
 	// test_httpd();
-	test_http_get();
+	// test_http_get();
+	test_report();
 
 	delete module;
 	return 0;

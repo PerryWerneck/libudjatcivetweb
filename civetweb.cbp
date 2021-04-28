@@ -44,12 +44,14 @@
 		</Linker>
 		<Unit filename="conf/50-civetweb.conf" />
 		<Unit filename="src/include/config.h" />
+		<Unit filename="src/include/report.h" />
 		<Unit filename="src/include/tools.h" />
 		<Unit filename="src/module/api.cc" />
 		<Unit filename="src/module/info.cc" />
 		<Unit filename="src/module/init.cc" />
 		<Unit filename="src/module/private.h" />
 		<Unit filename="src/module/protocol.cc" />
+		<Unit filename="src/module/report/json.cc" />
 		<Unit filename="src/module/response.cc" />
 		<Unit filename="src/module/swagger.cc" />
 		<Unit filename="src/module/tools.cc" />
