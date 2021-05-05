@@ -38,7 +38,7 @@ static void test_httpd() {
 
 	cout << "http://localhost:8989/info/1.0/modules" << endl;
 	cout << "http://localhost:8989/info/1.0/workers" << endl;
-	cout << "http://localhost:8989/info/1.0/factory" << endl;
+	cout << "http://localhost:8989/info/1.0/factories" << endl;
 	cout << "http://localhost:8989/swagger.json" << endl;
 
 	Udjat::run();

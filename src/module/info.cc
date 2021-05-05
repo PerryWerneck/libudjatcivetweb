@@ -67,7 +67,7 @@
 
 			Worker::getInfo(response);
 
-		} else if(!strcasecmp(uri,"factory")) {
+		} else if(!strcasecmp(uri,"factories")) {
 
 			Factory::getInfo(response);
 
