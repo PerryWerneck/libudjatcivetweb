@@ -39,9 +39,12 @@ static void test_httpd() {
 
 	Abstract::Agent::set_root(make_shared<Abstract::Agent>("root","System","Application"));
 
+	/*
 	cout << "http://localhost:8989/api/1.0/info/modules" << endl;
 	cout << "http://localhost:8989/api/1.0/info/workers" << endl;
 	cout << "http://localhost:8989/api/1.0/info/factories" << endl;
+	*/
+
 	cout << "http://localhost:8989/swagger.json" << endl;
 
 	Udjat::run();
@@ -118,7 +121,6 @@ int main(int argc, char **argv) {
 
 	setlocale( LC_ALL, "" );
 	auto module = udjat_module_init();
-	Module::load();
 
 	test_httpd();
 	// test_http_get();
