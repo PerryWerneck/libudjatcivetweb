@@ -70,7 +70,8 @@
 			cout << "Worker: '" << worker << "' Path: '" << path << "'" << endl;
 #endif // DEBUG
 
-			Worker::work(worker.c_str(),Request(path),response);
+			Request request(path);
+			Worker::work(worker.c_str(),request,response);
 
 		}
 
