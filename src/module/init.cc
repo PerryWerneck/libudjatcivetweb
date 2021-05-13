@@ -87,7 +87,6 @@
 			}
 
 			mg_set_request_handler(ctx, "/api/", apiWebHandler, 0);
-			mg_set_request_handler(ctx, "/info/", infoWebHandler, 0);
 			mg_set_request_handler(ctx, "/swagger.json", swaggerWebHandler, 0);
 
 			cout << "civetweb\tListening on port " << options[1] << endl;

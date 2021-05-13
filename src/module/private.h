@@ -34,9 +34,6 @@
  /// @brief Handler for API requests.
  int apiWebHandler(struct mg_connection *conn, void *cbdata);
 
- /// @brief Handler for application info.
- int infoWebHandler(struct mg_connection *conn, void *cbdata);
-
  /// @brief Handler for swagger request.
  int swaggerWebHandler(struct mg_connection *conn, void *cbdata);
 

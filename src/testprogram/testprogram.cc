@@ -30,15 +30,18 @@
  using namespace std;
  using namespace Udjat;
 
+ #pragma GCC diagnostic ignored "-Wunused-parameter"
+ #pragma GCC diagnostic ignored "-Wunused-function"
+
 //---[ Implement ]------------------------------------------------------------------------------------------
 
 static void test_httpd() {
 
-	auto root_agent = Abstract::Agent::set_root(make_shared<Abstract::Agent>("root","System","Application"));
+	Abstract::Agent::set_root(make_shared<Abstract::Agent>("root","System","Application"));
 
-	cout << "http://localhost:8989/info/1.0/modules" << endl;
-	cout << "http://localhost:8989/info/1.0/workers" << endl;
-	cout << "http://localhost:8989/info/1.0/factories" << endl;
+	cout << "http://localhost:8989/api/1.0/info/modules" << endl;
+	cout << "http://localhost:8989/api/1.0/info/workers" << endl;
+	cout << "http://localhost:8989/api/1.0/info/factories" << endl;
 	cout << "http://localhost:8989/swagger.json" << endl;
 
 	Udjat::run();
@@ -113,11 +116,13 @@ int main(int argc, char **argv) {
 
 	//Logger::redirect();
 
+	setlocale( LC_ALL, "" );
 	auto module = udjat_module_init();
+	Module::load();
 
-	// test_httpd();
+	test_httpd();
 	// test_http_get();
-	test_report();
+	// test_report();
 
 	delete module;
 	return 0;

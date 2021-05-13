@@ -47,7 +47,6 @@
 		<Unit filename="src/include/response.h" />
 		<Unit filename="src/include/tools.h" />
 		<Unit filename="src/module/api.cc" />
-		<Unit filename="src/module/info.cc" />
 		<Unit filename="src/module/init.cc" />
 		<Unit filename="src/module/private.h" />
 		<Unit filename="src/module/protocol.cc" />
