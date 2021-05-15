@@ -18,10 +18,12 @@
  */
 
  #include "private.h"
+ #include <udjat/defs.h>
  #include <udjat/module.h>
  #include <udjat/tools/quark.h>
  #include <udjat/url.h>
  #include <udjat/tools/configuration.h>
+ #include <udjat/tools/mainloop.h>
  #include <tools.h>
 
  using namespace Udjat;
@@ -29,23 +31,21 @@
 
  static int log_message(const struct mg_connection *conn, const char *message);
 
- class Module : public Udjat::Module {
+ static const Udjat::ModuleInfo moduleinfo{
+	PACKAGE_NAME,									// The module name.
+	"CivetWEB " CIVETWEB_VERSION " HTTP exporter", 	// The module description.
+	PACKAGE_VERSION, 								// The module version.
+	PACKAGE_URL, 									// The package URL.
+	PACKAGE_BUGREPORT 								// The bugreport address.
+ };
+
+ class Module : public Udjat::Module, public MainLoop::Service {
  private:
 	struct mg_context *ctx;
 
  public:
 
- 	Module() : Udjat::Module(Quark::getFromStatic("civetweb")), ctx(NULL) {
-
-		static const Udjat::ModuleInfo info{
-			PACKAGE_NAME,									// The module name.
-			"CivetWEB " CIVETWEB_VERSION " HTTP exporter", 	// The module description.
-			PACKAGE_VERSION, 								// The module version.
-			PACKAGE_URL, 									// The package URL.
-			PACKAGE_BUGREPORT 								// The bugreport address.
-		};
-
-		this->info = &info;
+ 	Module() : Udjat::Module(Quark::getFromStatic("civetweb"),&moduleinfo), MainLoop::Service(&moduleinfo), ctx(NULL) {
 
 		mg_init_library(0);
 
@@ -55,11 +55,12 @@
  	};
 
  	virtual ~Module() {
-		stop();
 		mg_exit_library();
  	}
 
-	void start() override {
+	void start() noexcept override {
+
+		cout << "civetweb\tStarting service" << endl;
 
 		if(!ctx) {
 
@@ -83,7 +84,8 @@
 
 			ctx = mg_start(&callbacks, 0, options);
 			if (ctx == NULL) {
-				throw runtime_error("Cannot start CivetWeb - mg_start failed.");
+				cerr << "civetweb\tCannot start: mg_start failed." << endl;
+				return;
 			}
 
 			mg_set_request_handler(ctx, "/api/", apiWebHandler, 0);
@@ -95,7 +97,9 @@
 
 	}
 
-	void stop() override {
+	void stop() noexcept override {
+
+		cout << "civetweb\tStopping service" << endl;
 
 		if(ctx) {
 			mg_stop(ctx);

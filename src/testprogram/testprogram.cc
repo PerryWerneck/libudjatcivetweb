@@ -26,6 +26,7 @@
  #include <unistd.h>
  #include <civetweb.h>
  #include <response.h>
+ #include <udjat/tools/threadpool.h>
 
  using namespace std;
  using namespace Udjat;
@@ -37,7 +38,7 @@
 
 static void test_httpd() {
 
-	Abstract::Agent::set_root(make_shared<Abstract::Agent>("root","System","Application"));
+	//Abstract::Agent::set_root(make_shared<Abstract::Agent>("root","System","Application"));
 
 	/*
 	cout << "http://localhost:8989/api/1.0/info/modules" << endl;
@@ -120,12 +121,15 @@ int main(int argc, char **argv) {
 	//Logger::redirect();
 
 	setlocale( LC_ALL, "" );
-	auto module = udjat_module_init();
+	Module * module = udjat_module_init();
 
-	test_httpd();
+	// test_httpd();
 	// test_http_get();
 	// test_report();
 
+	Udjat::run();
+
 	delete module;
+
 	return 0;
 }
