@@ -54,7 +54,7 @@
 	int use_ssl;
 
  public:
-	Protocol(const Quark &name, const Quark &portname, int use_ssl);
+	Protocol(const char *name, const char *port, const ModuleInfo *info, int use_ssl);
 	virtual ~Protocol();
 	std::shared_ptr<URL::Response> call(const URL &url, const URL::Method method, const char *mimetype, const char *payload) override;
 

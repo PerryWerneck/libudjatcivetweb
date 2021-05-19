@@ -121,15 +121,30 @@ int main(int argc, char **argv) {
 	//Logger::redirect();
 
 	setlocale( LC_ALL, "" );
+
+	try {
+
+		Module::load("udjat-module-information");
+
+	} catch(const std::exception &e) {
+		cerr << "Error '" << e.what() << "' loading information module" << endl;
+	}
+
 	Module * module = udjat_module_init();
 
 	// test_httpd();
 	// test_http_get();
 	// test_report();
 
+	cout << "http://localhost:8989/api/1.0/info/modules" << endl;
+	cout << "http://localhost:8989/api/1.0/info/workers" << endl;
+	cout << "http://localhost:8989/api/1.0/info/factories" << endl;
+
 	Udjat::run();
 
 	delete module;
+
+	Module::unload();
 
 	return 0;
 }

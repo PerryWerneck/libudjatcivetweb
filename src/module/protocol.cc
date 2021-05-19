@@ -19,7 +19,7 @@
 
  #include "private.h"
 
- Protocol::Protocol(const Quark &name, const Quark &portname, int s) : Udjat::URL::Protocol(name,portname), use_ssl(s) {
+ Protocol::Protocol(const char *name, const char *portname, const ModuleInfo *info, int s) : Udjat::URL::Protocol(name,portname,info), use_ssl(s) {
  }
 
  Protocol::~Protocol() {

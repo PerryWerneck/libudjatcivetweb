@@ -90,7 +90,9 @@
 
 	string rsp = response.toStyledString();
 
+#ifdef DEBUG
 	cout << "Response:" << endl << rsp << endl;
+#endif // DEBUG
 
 	mg_send_http_ok(conn, "application/json; charset=utf-8", rsp.size());
 	mg_write(conn, rsp.c_str(), rsp.size());

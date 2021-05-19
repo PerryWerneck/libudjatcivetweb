@@ -45,12 +45,12 @@
 
  public:
 
- 	Module() : Udjat::Module(Quark::getFromStatic("civetweb"),&moduleinfo), MainLoop::Service(&moduleinfo), ctx(NULL) {
+ 	Module() : Udjat::Module("civetweb",&moduleinfo), MainLoop::Service(&moduleinfo), ctx(NULL) {
 
 		mg_init_library(0);
 
-		Udjat::URL::insert(make_shared<::Protocol>(Quark::getFromStatic("http"),Quark::getFromStatic("80"),0));
-		Udjat::URL::insert(make_shared<::Protocol>(Quark::getFromStatic("https"),Quark::getFromStatic("443"),1));
+		Udjat::URL::insert(make_shared<::Protocol>("http","80",&moduleinfo,0));
+		Udjat::URL::insert(make_shared<::Protocol>("https","443",&moduleinfo,1));
 
  	};
 
@@ -64,10 +64,10 @@
 
 		if(!ctx) {
 
-			Config::Value<std::string> listening_ports("civetweb","listening_ports","8989");
-			Config::Value<std::string> request_timeout_ms("civetweb","request_timeout_ms","10000");
-			Config::Value<std::string> error_log_file("civetweb","error_log_file","error.log");
-			Config::Value<std::string> enable_auth_domain_check("civetweb","enable_auth_domain_check","no");
+			Config::Value<std::string> listening_ports{"civetweb","listening_ports","8989"};
+			Config::Value<std::string> request_timeout_ms{"civetweb","request_timeout_ms","10000"};
+			Config::Value<std::string> error_log_file{"civetweb","error_log_file","error.log"};
+			Config::Value<std::string> enable_auth_domain_check{"civetweb","enable_auth_domain_check","no"};
 
 			const char *options[] = {
 				"listening_ports", 			listening_ports.c_str(),
