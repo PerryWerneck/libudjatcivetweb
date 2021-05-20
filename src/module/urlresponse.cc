@@ -55,9 +55,9 @@
 		throw system_error(errno, system_category(), "Cant map response block");
 	}
 
-	int szRead = mg_read(conn, response.payload, response.length);
+	int szRead = mg_read(conn, (void *) response.payload, response.length);
 	if(szRead != (int) response.length) {
-		munmap(response.payload,response.length);
+		munmap((void *) response.payload,response.length);
 		throw runtime_error(string{"Got '"} + to_string(szRead) + "' when expecting '" + to_string(response.length) + "'");
 	}
 
@@ -68,7 +68,7 @@
  }
 
  ::URLResponse::~URLResponse() {
-	munmap(response.payload,response.length);
+	munmap((void *) response.payload,response.length);
  }
 
  /*

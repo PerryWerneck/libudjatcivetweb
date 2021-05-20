@@ -27,6 +27,10 @@
 
  std::shared_ptr<URL::Response> Protocol::call(const URL &url, const URL::Method method, const char *mimetype, const char *payload) {
 
+	if(!method.equal(URL::Method::Get)) {
+		throw system_error(ENOTSUP,system_category(),"Unsupported URL method");
+	}
+
 	std::shared_ptr<URL::Response> response;
 
 	char error_buffer[256] = "";
