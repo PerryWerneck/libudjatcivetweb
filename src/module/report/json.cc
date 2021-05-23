@@ -22,24 +22,15 @@
 
  namespace Reports {
 
-	JSON::JSON() : Udjat::Response::Report() {
+	JSON::JSON() : Udjat::Report() {
 		report = Json::Value(Json::arrayValue);
-	}
-
-	JSON::JSON(const char *column_name, ...) : JSON() {
-
-		va_list args;
-		va_start(args, column_name);
-		setColumns(column_name,args);
-		va_end(args);
-
 	}
 
 	JSON::~JSON() {
 	}
 
 	bool JSON::open() {
-		if(Udjat::Response::Report::open()) {
+		if(Udjat::Report::open()) {
 			row = Json::Value(Json::objectValue);
 			return true;
 		}
@@ -47,7 +38,7 @@
 	}
 
 	bool JSON::close() {
-		if(Udjat::Response::Report::close()) {
+		if(Udjat::Report::close()) {
 			report.append(row);
 			return true;
 		}
@@ -59,42 +50,42 @@
 		return report.toStyledString();
 	}
 
-	Udjat::Response::Report & JSON::push_back(const char *str) {
+	Udjat::Report & JSON::push_back(const char *str) {
 		row[next()] = str;
 		return *this;
 	}
 
-	Udjat::Response::Report & JSON::push_back(const bool value) {
+	Udjat::Report & JSON::push_back(const bool value) {
 		row[next().c_str()] = value;
 		return *this;
 	}
 
-	Udjat::Response::Report & JSON::push_back(const int8_t value) {
+	Udjat::Report & JSON::push_back(const int8_t value) {
 		row[next().c_str()] = (int) value;
 		return *this;
 	}
 
-	Udjat::Response::Report & JSON::push_back(const int16_t value) {
+	Udjat::Report & JSON::push_back(const int16_t value) {
 		row[next().c_str()] = (int) value;
 		return *this;
 	}
 
-	Udjat::Response::Report & JSON::push_back(const int32_t value) {
+	Udjat::Report & JSON::push_back(const int32_t value) {
 		row[next().c_str()] = (int) value;
 		return *this;
 	}
 
-	Udjat::Response::Report & JSON::push_back(const uint8_t value) {
+	Udjat::Report & JSON::push_back(const uint8_t value) {
 		row[next().c_str()] = (unsigned int) value;
 		return *this;
 	}
 
-	Udjat::Response::Report & JSON::push_back(const uint16_t value) {
+	Udjat::Report & JSON::push_back(const uint16_t value) {
 		row[next().c_str()] = (unsigned int) value;
 		return *this;
 	}
 
-	Udjat::Response::Report & JSON::push_back(const uint32_t value) {
+	Udjat::Report & JSON::push_back(const uint32_t value) {
 		row[next().c_str()] = (unsigned int) value;
 		return *this;
 	}

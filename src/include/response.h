@@ -32,7 +32,7 @@
 
  namespace Reports {
 
-	class UDJAT_API JSON : public Udjat::Response::Report {
+	class UDJAT_API JSON : public Udjat::Report {
 	private:
 
 		/// @brief Report contents (Json Array)
@@ -43,7 +43,6 @@
 
 	public:
 		JSON();
-		JSON(const char *column_name, ...) __attribute__ ((sentinel));
 		virtual ~JSON();
 
 		bool open() override;
@@ -51,14 +50,14 @@
 
 		std::string to_string() override;
 
-		Udjat::Response::Report & push_back(const char *str) override;
-		Udjat::Response::Report & push_back(const bool value) override;
-		Udjat::Response::Report & push_back(const int8_t value) override;
-		Udjat::Response::Report & push_back(const int16_t value) override;
-		Udjat::Response::Report & push_back(const int32_t value) override;
-		Udjat::Response::Report & push_back(const uint8_t value) override;
-		Udjat::Response::Report & push_back(const uint16_t value) override;
-		Udjat::Response::Report & push_back(const uint32_t value) override;
+		Udjat::Report & push_back(const char *str) override;
+		Udjat::Report & push_back(const bool value) override;
+		Udjat::Report & push_back(const int8_t value) override;
+		Udjat::Report & push_back(const int16_t value) override;
+		Udjat::Report & push_back(const int32_t value) override;
+		Udjat::Report & push_back(const uint8_t value) override;
+		Udjat::Report & push_back(const uint16_t value) override;
+		Udjat::Report & push_back(const uint32_t value) override;
 
 	};
 

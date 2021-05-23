@@ -72,7 +72,7 @@
  }
 
  /*
- std::shared_ptr<Udjat::Response::Report> ::Response::open(const char *name, const char *column_name, ...) {
+ std::shared_ptr<Udjat::Report> ::Response::open(const char *name, const char *column_name, ...) {
 
 	auto report = make_shared<::JSON>();
 
