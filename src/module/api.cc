@@ -25,11 +25,6 @@
 
 	const struct mg_request_info *ri = mg_get_request_info(conn);
 
-	if(strcasecmp(ri->request_method,"get")) {
-		mg_send_http_error(conn, 405, "Method Not Allowed");
-		return 405;
-	}
-
 	::Response response;
 
 	try {
@@ -70,8 +65,11 @@
 			cout << "Worker: '" << worker << "' Path: '" << path << "'" << endl;
 #endif // DEBUG
 
-			Request request(path);
-			Worker::work(worker.c_str(),request,response);
+			Request request(path.c_str(),ri->request_method);
+			if(!Worker::work(worker.c_str(),request,response)) {
+				mg_send_http_error(conn, 405, "Method Not Allowed");
+				return 405;
+			}
 
 		}
 
