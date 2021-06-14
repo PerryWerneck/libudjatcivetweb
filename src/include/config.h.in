@@ -3,9 +3,6 @@
 /* do we have civetweb.h? */
 #undef HAVE_CIVETWEB
 
-/* Do we have econf? */
-#undef HAVE_ECONF
-
 /* supports GCC visibility attributes */
 #undef HAVE_GNUC_VISIBILITY
 
@@ -14,9 +11,6 @@
 
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
-
-/* Do we have JSONCPP? */
-#undef HAVE_JSONCPP
 
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
@@ -41,6 +35,9 @@
 
 /* Define to 1 if you have the <sys/types.h> header file. */
 #undef HAVE_SYS_TYPES_H
+
+/* Do we have libudjat? */
+#undef HAVE_UDJAT
 
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H

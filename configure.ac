@@ -157,7 +157,7 @@ AC_CHECK_HEADER(civetweb.h, AC_DEFINE(HAVE_CIVETWEB,,[do we have civetweb.h?]))
 dnl ---------------------------------------------------------------------------
 dnl Check for libudjat
 dnl ---------------------------------------------------------------------------
-PKG_CHECK_MODULES( [UDJAT], [libudjat], AC_DEFINE(HAVE_ECONF,[],[Do we have econf?]), AC_MSG_ERROR([libudjat not present.]) )
+PKG_CHECK_MODULES( [UDJAT], [libudjat], AC_DEFINE(HAVE_UDJAT,[],[Do we have libudjat?]), AC_MSG_ERROR([libudjat not present.]) )
 
 AC_SUBST(UDJAT_LIBS)
 AC_SUBST(UDJAT_CFLAGS)
@@ -182,11 +182,11 @@ AC_SUBST(PUGIXML_CFLAGS)
 dnl ---------------------------------------------------------------------------
 dnl Test for jsoncpp
 dnl ---------------------------------------------------------------------------
-PKG_CHECK_MODULES( [JSONCPP], [jsoncpp], AC_DEFINE(HAVE_JSONCPP,[],[Do we have JSONCPP?]), AC_MSG_ERROR([libjsoncpp not present.]) )
-
-AC_SUBST(JSONCPP_LIBS)
-AC_SUBST(JSONCPP_CFLAGS)
-
+dnl PKG_CHECK_MODULES( [JSONCPP], [jsoncpp], AC_DEFINE(HAVE_JSONCPP,[],[Do we have JSONCPP?]), AC_MSG_ERROR([libjsoncpp not present.]) )
+dnl 
+dnl AC_SUBST(JSONCPP_LIBS)
+dnl AC_SUBST(JSONCPP_CFLAGS)
+dnl 
 dnl ---------------------------------------------------------------------------
 dnl Output config
 dnl ---------------------------------------------------------------------------

@@ -21,15 +21,67 @@
 
  #include <udjat/defs.h>
  #include <udjat/request.h>
+ #include <udjat/tools/value.h>
+ #include <sstream>
+ #include <map>
 
- /*
- class Response : Udjat::Response {
+ class UDJAT_API Value : public Udjat::Value {
+ private:
+	Udjat::Value::Type type;
+	std::string value;
+	std::map<std::string,Value *> children;
+
  public:
- 	Response() = default;
+
+ 	Value(const Value &src) = delete;
+ 	Value(const Value *src) = delete;
+
+ 	Value(Udjat::Value::Type t = Udjat::Value::Undefined);
+ 	virtual ~Value();
+
+	bool isNull() const override;
+
+	void json(std::stringstream &ss) const;
+
+	std::string to_string() const override;
+
+	Udjat::Value & operator[](const char *name) override;
+
+	Udjat::Value & append(const Type type) override;
+
+	Udjat::Value & reset(const Type type) override;
+
+	Udjat::Value & set(const Udjat::Value &value) override;
+
+	Udjat::Value & set(const char *value, const Type type) override;
 
  };
- */
 
+ class UDJAT_API Response : public Udjat::Response {
+ private:
+	::Value *value;
+
+ public:
+ 	Response();
+ 	virtual ~Response();
+
+	bool isNull() const override;
+
+	std::string to_string() const override;
+
+	Udjat::Value & operator[](const char *name) override;
+
+	Udjat::Value & append(const Type type) override;
+
+	Udjat::Value & reset(const Type type) override;
+
+	Udjat::Value & set(const Value &value) override;
+
+	Udjat::Value & set(const char *value, const Type type) override;
+
+ };
+
+	/*
  namespace Reports {
 
 	class UDJAT_API JSON : public Udjat::Report {
@@ -60,5 +112,5 @@
 		Udjat::Report & push_back(const uint32_t value) override;
 
 	};
-
  }
+	*/

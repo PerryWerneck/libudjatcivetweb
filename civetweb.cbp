@@ -52,9 +52,11 @@
 		<Unit filename="src/module/protocol.cc" />
 		<Unit filename="src/module/report.cc" />
 		<Unit filename="src/module/report/json.cc" />
+		<Unit filename="src/module/response.cc" />
 		<Unit filename="src/module/swagger.cc" />
 		<Unit filename="src/module/tools.cc" />
 		<Unit filename="src/module/urlresponse.cc" />
+		<Unit filename="src/module/value.cc" />
 		<Unit filename="src/testprogram/testprogram.cc" />
 		<Extensions>
 			<lib_finder disable_auto="1" />

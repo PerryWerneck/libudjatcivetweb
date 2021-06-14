@@ -98,7 +98,9 @@ void test_http_get() {
 
 }
 
+/*
 static void test_report() {
+
 
 	Reports::JSON report;
 
@@ -113,6 +115,7 @@ static void test_report() {
 
 	cout << report.to_string() << endl;
 }
+*/
 
 int main(int argc, char **argv) {
 
@@ -130,9 +133,9 @@ int main(int argc, char **argv) {
 
 	Module * module = udjat_module_init();
 
-	// test_httpd();
+	test_httpd();
 	// test_http_get();
-	test_report();
+	// test_report();
 
 	delete module;
 

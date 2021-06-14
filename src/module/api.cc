@@ -20,6 +20,7 @@
  #include "private.h"
  #include <tools.h>
  #include <udjat/worker.h>
+ #include <response.h>
 
  int apiWebHandler(struct mg_connection *conn, void UDJAT_UNUSED(*cbdata)) {
 
@@ -86,7 +87,7 @@
 
 	}
 
-	string rsp = response.toStyledString();
+	string rsp = response.to_string();
 
 #ifdef DEBUG
 	cout << "Response:" << endl << rsp << endl;

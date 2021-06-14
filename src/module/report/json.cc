@@ -20,6 +20,7 @@
  #include <response.h>
  #include <cstdarg>
 
+ /*
  namespace Reports {
 
 	JSON::JSON() : Udjat::Report() {
@@ -91,3 +92,5 @@
 	}
 
  }
+
+ */

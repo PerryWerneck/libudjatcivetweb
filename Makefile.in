@@ -59,8 +59,7 @@ CFLAGS= \
 	-Isrc/include \
 	-DBUILD_DATE=`date +%Y%m%d` \
 	@UDJAT_CFLAGS@ \
-	@PUGIXML_CFLAGS@ \
-	@JSONCPP_CFLAGS@
+	@PUGIXML_CFLAGS@
 
 LDFLAGS=\
 	@LDFLAGS@
@@ -69,7 +68,6 @@ LIBS= \
 	@LIBS@ \
 	@UDJAT_LIBS@ \
 	@PUGIXML_LIBS@ \
-	@JSONCPP_LIBS@ \
 	-lcivetweb
 
 #---[ Debug Rules ]----------------------------------------------------------------------
@@ -179,12 +177,17 @@ install-conf:
 
 uninstall: \
 	uninstall-@OSNAME@-lib
+	uninstall-conf
 
 uninstall-linux-lib:
 
 	@rm -f \
 		$(DESTDIR)@MODULE_PATH@/$(PACKAGE_NAME)@LIBEXT@
-		
+
+uninstall-conf:
+
+	@rm -f \
+		$(DESTDIR)$(sysconfdir)/udjat.conf.d 50-civetweb.conf
 
 #---[ Debug Targets ]--------------------------------------------------------------------
 
