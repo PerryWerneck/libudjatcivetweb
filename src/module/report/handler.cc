@@ -17,7 +17,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
- #include "private.h"
+ #include "../private.h"
  #include <tools.h>
  #include <udjat/worker.h>
  #include <response.h>
@@ -32,8 +32,7 @@
 		return 405;
 	}
 
-	/*
-	Reports::JSON response;
+	::Report response;
 
 	try {
 
@@ -81,7 +80,6 @@
 
 	mg_send_http_ok(conn, "application/json; charset=utf-8", rsp.size());
 	mg_write(conn, rsp.c_str(), rsp.size());
-	*/
 
 	return 200;
 

@@ -24,6 +24,7 @@
  #include <udjat/tools/value.h>
  #include <sstream>
  #include <map>
+ #include <list>
 
  class UDJAT_API Value : public Udjat::Value {
  private:
@@ -33,8 +34,8 @@
 
  public:
 
- 	Value(const Value &src) = delete;
- 	Value(const Value *src) = delete;
+ //	Value(const Value &src) = delete;
+ //	Value(const Value *src) = delete;
 
  	Value(Udjat::Value::Type t = Udjat::Value::Undefined);
  	virtual ~Value();
@@ -43,7 +44,7 @@
 
 	void json(std::stringstream &ss) const;
 
-	std::string to_string() const override;
+	std::string to_string() const;
 
 	Udjat::Value & operator[](const char *name) override;
 
@@ -67,7 +68,7 @@
 
 	bool isNull() const override;
 
-	std::string to_string() const override;
+	std::string to_string() const;
 
 	Udjat::Value & operator[](const char *name) override;
 
@@ -81,36 +82,37 @@
 
  };
 
-	/*
- namespace Reports {
+ class UDJAT_API Report : public Udjat::Report {
+ private:
 
-	class UDJAT_API JSON : public Udjat::Report {
-	private:
+	/// @brief Report contents
+	std::list<::Value> values;
 
-		/// @brief Report contents (Json Array)
-		Json::Value report;
+	void json(std::stringstream &ss) const;
 
-		/// @brief Current row (Json Object)
-		Json::Value row;
+ public:
+	Report();
+	virtual ~Report();
 
-	public:
-		JSON();
-		virtual ~JSON();
+	std::string to_string() const;
 
-		bool open() override;
-		bool close() override;
+	Udjat::Report & push_back(const char *str) override;
 
-		std::string to_string() override;
+	Udjat::Report & push_back(const std::string &value) override;
 
-		Udjat::Report & push_back(const char *str) override;
-		Udjat::Report & push_back(const bool value) override;
-		Udjat::Report & push_back(const int8_t value) override;
-		Udjat::Report & push_back(const int16_t value) override;
-		Udjat::Report & push_back(const int32_t value) override;
-		Udjat::Report & push_back(const uint8_t value) override;
-		Udjat::Report & push_back(const uint16_t value) override;
-		Udjat::Report & push_back(const uint32_t value) override;
+	Udjat::Report & push_back(const short value) override;
+	Udjat::Report & push_back(const unsigned short value) override;
 
-	};
- }
-	*/
+	Udjat::Report & push_back(const int value) override;
+	Udjat::Report & push_back(const unsigned int value) override;
+
+	Udjat::Report & push_back(const long value) override;
+	Udjat::Report & push_back(const unsigned long value) override;
+
+	Udjat::Report & push_back(const Udjat::TimeStamp value) override;
+	Udjat::Report & push_back(const bool value) override;
+
+	Udjat::Report & push_back(const float value) override;
+	Udjat::Report & push_back(const double value) override;
+
+};
