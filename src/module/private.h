@@ -31,6 +31,9 @@
  using namespace Udjat;
  using namespace std;
 
+ /// @brief Web handler.
+ int webHandler(struct mg_connection *conn, function<string (const char *uri, const char *method)> worker) noexcept;
+
  /// @brief Handler for API requests.
  int apiWebHandler(struct mg_connection *conn, void *cbdata);
 
@@ -63,3 +66,24 @@
 
  };
 
+ class http_error : public std::exception {
+ private:
+	int id = 500;
+	string message;
+
+ public:
+	http_error(int i, const char *m) : id(i), message(m) {
+	}
+
+	virtual ~http_error() {
+	}
+
+	inline int code() const noexcept {
+		return this->id;
+	}
+
+	const char* what() const noexcept override {
+		return this->message.c_str();
+	}
+
+ };

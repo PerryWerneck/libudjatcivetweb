@@ -25,63 +25,20 @@
 
  int reportWebHandler(struct mg_connection *conn, void UDJAT_UNUSED(*cbdata)) {
 
-	const struct mg_request_info *ri = mg_get_request_info(conn);
+	return webHandler(conn,[](const char *uri, const char *method){
 
-	if(strcasecmp(ri->request_method,"get")) {
-		mg_send_http_error(conn, 405, "Method Not Allowed");
-		return 405;
-	}
-
-	::Report response;
-
-	try {
-
-		const char *uri = ri->local_uri;
-
-		// Extract 'API' prefix.
-		if(strncasecmp(uri,"/api/",5) == 0) {
-			uri += 5;
-		} else {
-			mg_send_http_error(conn, 400, "Request must be in the format /api/version/worker/path");
-			return 400;
+		if(strcasecmp(method,"get")) {
+			throw http_error(405, "Method Not Allowed");
 		}
 
-		// Extract version prefix.
-		{
-			const char *ptr = strchr(uri,'/');
-			if(!ptr) {
-				mg_send_http_error(conn, 400, "Request must be in the format /report/version/path");
-				return 400;
-			}
-			uri = ptr+1;
-		}
+		::Report response;
 
 		// Run report.
 		Abstract::Agent::get_root()->find(uri)->get(Request(""),response);
 
-	} catch(const system_error &e) {
+		return response.to_string();
 
-		int code = sysErrorToHttp(e.code().value());
-		mg_send_http_error(conn, code, e.what());
-		return code;
-
-	} catch(const exception &e) {
-
-		mg_send_http_error(conn, 500, e.what());
-		return 500;
-
-	}
-
-	string rsp = response.to_string();
-
-#ifdef DEBUG
-	cout << "Response:" << endl << rsp << endl;
-#endif // DEBUG
-
-	mg_send_http_ok(conn, "application/json; charset=utf-8", rsp.size());
-	mg_write(conn, rsp.c_str(), rsp.size());
-
-	return 200;
+	});
 
  }
 

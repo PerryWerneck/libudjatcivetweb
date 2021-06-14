@@ -130,9 +130,9 @@ int main(int argc, char **argv) {
 
 	Module * module = udjat_module_init();
 
-	// test_httpd();
+	test_httpd();
 	// test_http_get();
-	test_report();
+	// test_report();
 
 	delete module;
 
