@@ -91,6 +91,10 @@
 	return *this;
  }
 
+ Udjat::Value & Value::set(const Udjat::TimeStamp value) {
+	this->set(value.to_string(TIMESTAMP_FORMAT_JSON).c_str(),Udjat::Value::String);
+ }
+
  std::string Value::to_string() const {
 	return this->value;
  }

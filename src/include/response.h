@@ -56,6 +56,8 @@
 
 	Udjat::Value & set(const char *value, const Type type) override;
 
+	Udjat::Value & set(const Udjat::TimeStamp value) override;
+
  };
 
  class UDJAT_API Response : public Udjat::Response {
