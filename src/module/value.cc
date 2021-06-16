@@ -20,6 +20,7 @@
  #include <config.h>
  #include <response.h>
  #include <iostream>
+ #include <iomanip>
 
  using namespace std;
 
@@ -92,7 +93,28 @@
  }
 
  Udjat::Value & Value::set(const Udjat::TimeStamp value) {
-	this->set(value.to_string(TIMESTAMP_FORMAT_JSON).c_str(),Udjat::Value::String);
+	return this->set(value.to_string(TIMESTAMP_FORMAT_JSON).c_str(),Udjat::Value::String);
+ }
+
+ Udjat::Value & Value::setFraction(const float fraction) {
+	std::stringstream out;
+	out.imbue(std::locale("C"));
+	out << std::fixed << std::setprecision(2) << (fraction *100);
+	return Udjat::Value::set(out.str(),Value::Real);
+ }
+
+ Udjat::Value & Value::set(const float value) {
+	std::stringstream out;
+	out.imbue(std::locale("C"));
+	out << value;
+	return Udjat::Value::set(out.str(),Value::Real);
+ }
+
+ Udjat::Value & Value::set(const double value) {
+	std::stringstream out;
+	out.imbue(std::locale("C"));
+	out << value;
+	return Udjat::Value::set(out.str(),Value::Real);
  }
 
  std::string Value::to_string() const {
@@ -101,7 +123,7 @@
 
  void Value::json(std::stringstream &ss) const {
 
- 	switch(this->type) {
+  	switch(this->type) {
 	case Udjat::Value::Undefined:
 		ss << "null";
 		break;
@@ -145,6 +167,34 @@
 
 		// TODO: Convert special chars.
 		ss << '"' << this->value << '"';
+		break;
+
+	default:
+		ss << this->value;
+ 	}
+
+ }
+
+ void Value::xml(std::stringstream &ss) const {
+
+ 	switch(this->type) {
+	case Udjat::Value::Undefined:
+		break;
+
+	case Udjat::Value::Array:
+		for(auto &child : children) {
+			ss << "<item>";
+			child.second->xml(ss);
+			ss << "</item>";
+		}
+		break;
+
+	case Udjat::Value::Object:
+		for(auto &child : children) {
+			ss << "<" << child.first << ">";
+			child.second->xml(ss);
+			ss << "</" << child.first << ">";
+		}
 		break;
 
 	default:

@@ -43,6 +43,7 @@
 	bool isNull() const override;
 
 	void json(std::stringstream &ss) const;
+	void xml(std::stringstream &ss) const;
 
 	std::string to_string() const;
 
@@ -57,6 +58,12 @@
 	Udjat::Value & set(const char *value, const Type type) override;
 
 	Udjat::Value & set(const Udjat::TimeStamp value) override;
+
+	Udjat::Value & setFraction(const float fraction);
+
+	Udjat::Value & set(const float value);
+
+	Udjat::Value & set(const double value);
 
  };
 
