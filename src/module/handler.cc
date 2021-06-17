@@ -21,32 +21,43 @@
  #include <tools.h>
  #include <cstring>
 
- int webHandler(struct mg_connection *conn, function<string (const char *uri, const char *method)> worker) noexcept {
+ int webHandler(struct mg_connection *conn, function<string (const string &uri, const char *method, const MimeType mimetype)> worker) noexcept {
 
 	const struct mg_request_info *ri = mg_get_request_info(conn);
+	MimeType mimetype = MimeType::json;
 	string rsp;
 
 	try {
 
-		const char *uri = ri->local_uri;
+		const char *local_uri = ri->local_uri;
 
 		// Extract 'API' prefix.
-		if(strncasecmp(uri,"/api/",5) == 0) {
-			uri += 5;
+		if(strncasecmp(local_uri,"/api/",5) == 0) {
+			local_uri += 5;
 		} else {
 			throw http_error( 400, "Request must be in the format /api/version/worker/path");
 		}
 
 		// Extract version prefix.
 		{
-			const char *ptr = strchr(uri,'/');
+			const char *ptr = strchr(local_uri,'/');
 			if(!ptr) {
 				throw http_error( 400, "Request must be in the format /api/version/worker/path");
 			}
-			uri = ptr+1;
+			local_uri = ptr+1;
 		}
 
-		rsp = worker(uri,ri->request_method);
+		// Extract mimetype
+		string uri = local_uri;
+		{
+			auto ext = uri.find_last_of('.');
+			if(ext != string::npos && ext > 1) {
+				mimetype = str2mime(uri.c_str()+ext+1);
+				uri.resize(ext);
+			}
+		}
+
+		rsp = worker(uri,ri->request_method,mimetype);
 
 	} catch(const http_error &error) {
 
@@ -75,7 +86,7 @@
 	cout << "Response:" << endl << rsp << endl;
 #endif // DEBUG
 
-	mg_send_http_ok(conn, "application/json; charset=utf-8", rsp.size());
+	mg_send_http_ok(conn, to_string(mimetype).c_str(), rsp.size());
 	mg_write(conn, rsp.c_str(), rsp.size());
 
 	return 200;

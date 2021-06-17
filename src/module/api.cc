@@ -24,32 +24,12 @@
 
  int apiWebHandler(struct mg_connection *conn, void UDJAT_UNUSED(*cbdata)) {
 
-	return webHandler(conn,[](const char *uri, const char *method){
-
-		Udjat::MimeType mimetype = Udjat::MimeType::json;
-		const char *ptr = strchr(uri,'/');
-		string worker, path;
-
-		if(ptr) {
-			worker.assign(uri,ptr-uri);
-			path = ptr+1;
-		} else {
-			worker = uri;
-		}
-
-		// Check for extension
-		{
-			auto ext = path.find_last_of('.');
-			if(ext != string::npos && ext > 1) {
-				mimetype = str2mime(path.c_str()+ext+1);
-				path.resize(ext);
-			}
-		}
+	return webHandler(conn,[](const string &uri, const char *method, const MimeType mimetype){
 
 		::Response response(mimetype);
+		::Request request(uri.c_str(),method);
 
-		Request request(path.c_str(),method);
-		if(!Worker::work(worker.c_str(),request,response)) {
+		if(!Worker::work(request.pop().c_str(),request,response)) {
 			throw http_error(405, "Method Not Allowed");
 		}
 

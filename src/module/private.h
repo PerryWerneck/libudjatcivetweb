@@ -22,6 +22,7 @@
  #include <config.h>
  #include <udjat/defs.h>
  #include <udjat/url.h>
+ #include <udjat/tools/mimetype.h>
  #include <cstring>
  #include <string>
  #include <stdexcept>
@@ -32,7 +33,7 @@
  using namespace std;
 
  /// @brief Web handler.
- int webHandler(struct mg_connection *conn, function<string (const char *uri, const char *method)> worker) noexcept;
+ int webHandler(struct mg_connection *conn, function<string (const string &uri, const char *method, const MimeType mimetype)> worker) noexcept;
 
  /// @brief Handler for API requests.
  int apiWebHandler(struct mg_connection *conn, void *cbdata);

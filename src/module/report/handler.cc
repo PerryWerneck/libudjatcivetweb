@@ -22,19 +22,24 @@
  #include <udjat/worker.h>
  #include <response.h>
  #include <udjat/agent.h>
+ #include <udjat/tools/mimetype.h>
 
  int reportWebHandler(struct mg_connection *conn, void UDJAT_UNUSED(*cbdata)) {
 
-	return webHandler(conn,[](const char *uri, const char *method){
+	return webHandler(conn,[](const string &uri, const char *method, const MimeType mimetype){
 
 		if(strcasecmp(method,"get")) {
 			throw http_error(405, "Method Not Allowed");
 		}
 
+		if(mimetype != MimeType::json) {
+			throw http_error(501, "Mimetype Not Supported");
+		}
+
 		::Report response;
 
 		// Run report.
-		Abstract::Agent::get_root()->find(uri)->get(Request(""),response);
+		Abstract::Agent::get_root()->find(uri.c_str())->get(Request(""),response);
 
 		return response.to_string();
 
