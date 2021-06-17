@@ -72,7 +72,7 @@
 	::Value *value;
 
  public:
- 	Response();
+ 	Response(Udjat::MimeType type);
  	virtual ~Response();
 
 	bool isNull() const override;

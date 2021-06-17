@@ -23,7 +23,8 @@
 
  using namespace std;
 
- Response::Response() {
+ Response::Response(Udjat::MimeType type) {
+ 	this->type = type;
 	this->value = new ::Value();
  }
 
