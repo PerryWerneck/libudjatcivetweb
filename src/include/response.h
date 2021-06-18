@@ -42,6 +42,10 @@
 
 	bool isNull() const override;
 
+	inline Udjat::Value::Type getType() const noexcept {
+		return this->type;
+	}
+
 	void json(std::stringstream &ss) const;
 	void xml(std::stringstream &ss) const;
 
