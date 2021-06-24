@@ -33,7 +33,7 @@
 	std::string CivetWeb::Request::pop() {
 
 		if(path.empty()) {
-			throw system_error(ENODATA,system_category(),"No more arguments");
+			throw system_error(ENODATA,system_category(),"Not enough arguments");
 		}
 
 		size_t pos = path.find('/');
