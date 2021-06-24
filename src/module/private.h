@@ -27,6 +27,7 @@
  #include <string>
  #include <stdexcept>
  #include <civetweb.h>
+ #include <udjat/civetweb.h>
  #include <iostream>
 
  using namespace Udjat;

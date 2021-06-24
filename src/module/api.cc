@@ -20,14 +20,14 @@
  #include "private.h"
  #include <tools.h>
  #include <udjat/worker.h>
- #include <response.h>
+ #include <udjat/civetweb.h>
 
  int apiWebHandler(struct mg_connection *conn, void UDJAT_UNUSED(*cbdata)) {
 
 	return webHandler(conn,[](const string &uri, const char *method, const MimeType mimetype){
 
-		::Response response(mimetype);
-		::Request request(uri.c_str(),method);
+		CivetWeb::Response response(mimetype);
+		CivetWeb::Request request(uri.c_str(),method);
 
 		if(!Worker::work(request.pop().c_str(),request,response)) {
 			throw http_error(405, "Method Not Allowed");

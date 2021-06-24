@@ -18,106 +18,110 @@
  */
 
  #include <config.h>
- #include <response.h>
+ #include <udjat/civetweb.h>
  #include <iostream>
  #include <iomanip>
 
  using namespace std;
 
- Value::Value(Udjat::Value::Type t) : type(t) {
- }
+ namespace Udjat {
 
- Value::~Value() {
- 	reset(Udjat::Value::Undefined);
- }
+	CivetWeb::Value::Value(Udjat::Value::Type t) : type(t) {
+	}
 
- Udjat::Value & Value::reset(const Udjat::Value::Type type) {
+	CivetWeb::Value::~Value() {
+		reset(Udjat::Value::Undefined);
+	}
 
-	if(type != this->type) {
+	Value & CivetWeb::Value::reset(const Udjat::Value::Type type) {
 
-		// Reset value.
-		this->type = type;
-		this->value.clear();
+		if(type != this->type) {
 
-		// cleanup children.
-		for(auto child : children) {
-			delete child.second;
+			// Reset value.
+			this->type = type;
+			this->value.clear();
+
+			// cleanup children.
+			for(auto child : children) {
+				delete child.second;
+			}
+
+			children.clear();
+
 		}
 
-		children.clear();
+		return *this;
 
 	}
 
-	return *this;
-
- }
-
- bool Value::isNull() const {
-	return this->type == Udjat::Value::Undefined;
- }
-
- Udjat::Value & Value::operator[](const char *name) {
-
-	reset(Udjat::Value::Object);
-
-	auto search = children.find(name);
-	if(search != children.end()) {
-		return *search->second;
+	bool CivetWeb::Value::isNull() const {
+		return this->type == Udjat::Value::Undefined;
 	}
 
-	Value * rc = new Value();
+	Value & CivetWeb::Value::operator[](const char *name) {
 
-	children[name] = rc;
+		reset(Udjat::Value::Object);
 
-	return *rc;
+		auto search = children.find(name);
+		if(search != children.end()) {
+			return *search->second;
+		}
+
+		Value * rc = new Value();
+
+		children[name] = rc;
+
+		return *rc;
+	}
+
+	Value & CivetWeb::Value::append(const Type type) {
+		reset(Udjat::Value::Array);
+
+		Value * rc = new Value(type);
+		children[std::to_string((int) children.size()).c_str()] = rc;
+
+		return *rc;
+	}
+
+	Value & CivetWeb::Value::set(const char *value, const Type type) {
+		reset(type);
+		this->value = value;
+		return *this;
+	}
+
+	Value & CivetWeb::Value::set(const Udjat::Value &value) {
+		throw runtime_error("Not implemented");
+		return *this;
+	}
+
+	Value & CivetWeb::Value::set(const Udjat::TimeStamp value) {
+		return this->set(value.to_string(TIMESTAMP_FORMAT_JSON).c_str(),Udjat::Value::String);
+	}
+
+	Udjat::Value & CivetWeb::Value::setFraction(const float fraction) {
+		std::stringstream out;
+		out.imbue(std::locale("C"));
+		out << std::fixed << std::setprecision(2) << (fraction *100);
+		return Udjat::Value::set(out.str(),Value::Real);
+	}
+
+	Value & CivetWeb::Value::set(const float value) {
+		std::stringstream out;
+		out.imbue(std::locale("C"));
+		out << value;
+		return Udjat::Value::set(out.str(),Value::Real);
+	}
+
+	Value & CivetWeb::Value::set(const double value) {
+		std::stringstream out;
+		out.imbue(std::locale("C"));
+		out << value;
+		return Udjat::Value::set(out.str(),Value::Real);
+	}
+
+	std::string CivetWeb::Value::to_string() const {
+		return this->value;
+	}
+
+
  }
-
- Udjat::Value & Value::append(const Type type) {
-	reset(Udjat::Value::Array);
-
-	Value * rc = new Value(type);
-	children[std::to_string((int) children.size()).c_str()] = rc;
-
-	return *rc;
- }
-
- Udjat::Value & Value::set(const char *value, const Type type) {
-	reset(type);
-	this->value = value;
-	return *this;
- }
-
- Udjat::Value & Value::set(const Udjat::Value &value) {
- 	throw runtime_error("Not implemented");
-	return *this;
- }
-
- Udjat::Value & Value::set(const Udjat::TimeStamp value) {
-	return this->set(value.to_string(TIMESTAMP_FORMAT_JSON).c_str(),Udjat::Value::String);
- }
-
- Udjat::Value & Value::setFraction(const float fraction) {
-	std::stringstream out;
-	out.imbue(std::locale("C"));
-	out << std::fixed << std::setprecision(2) << (fraction *100);
-	return Udjat::Value::set(out.str(),Value::Real);
- }
-
- Udjat::Value & Value::set(const float value) {
-	std::stringstream out;
-	out.imbue(std::locale("C"));
-	out << value;
-	return Udjat::Value::set(out.str(),Value::Real);
- }
-
- Udjat::Value & Value::set(const double value) {
-	std::stringstream out;
-	out.imbue(std::locale("C"));
-	out << value;
-	return Udjat::Value::set(out.str(),Value::Real);
- }
-
- std::string Value::to_string() const {
-	return this->value;
- }
-

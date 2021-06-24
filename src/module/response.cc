@@ -18,62 +18,66 @@
  */
 
  #include <config.h>
- #include <response.h>
+ #include <udjat/civetweb.h>
  #include <iostream>
 
  using namespace std;
 
- Response::Response(Udjat::MimeType type) {
- 	this->type = type;
-	this->value = new ::Value();
- }
+ namespace Udjat {
 
- Response::~Response() {
-	delete this->value;
- }
+	CivetWeb::Response::Response(Udjat::MimeType type) {
+		this->type = type;
+		this->value = new CivetWeb::Value();
+	}
 
- bool Response::isNull() const {
-	return this->value->isNull();
- }
+	CivetWeb::Response::~Response() {
+		delete this->value;
+	}
 
- std::string Response::to_string() const {
+	bool CivetWeb::Response::isNull() const {
+		return this->value->isNull();
+	}
 
- 	std::stringstream ss;
+	std::string CivetWeb::Response::to_string() const {
 
- 	if(type == Udjat::MimeType::xml) {
+		std::stringstream ss;
 
-		// Format as XML
-		ss << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
-		ss << "<response>";
-		this->value->xml(ss);
-		ss << "</response>";
+		if(type == Udjat::MimeType::xml) {
 
- 	} else {
+			// Format as XML
+			ss << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
+			ss << "<response>";
+			this->value->xml(ss);
+			ss << "</response>";
 
-		// Default, format as JSON.
-		this->value->json(ss);
+		} else {
 
- 	}
+			// Default, format as JSON.
+			this->value->json(ss);
 
- 	return ss.str();
-  }
+		}
 
- Udjat::Value & Response::operator[](const char *name) {
-	return (*this->value)[name];
- }
+		return ss.str();
+	}
 
- Udjat::Value & Response::append(const Type type) {
- 	return this->value->append(type);
- }
+	Udjat::Value & CivetWeb::Response::operator[](const char *name) {
+		return (*this->value)[name];
+	}
 
- Udjat::Value & Response::reset(const Type type) {
- 	return this->value->reset(type);
- }
+	Udjat::Value & CivetWeb::Response::append(const Type type) {
+		return this->value->append(type);
+	}
 
- Udjat::Value & Response::set(const Value &value) {
- 	return this->value->set(value);
- }
+	Udjat::Value & CivetWeb::Response::reset(const Type type) {
+		return this->value->reset(type);
+	}
 
- Udjat::Value & Response::set(const char *value, const Type type) {
-	return this->value->set(value,type);
+	Udjat::Value & CivetWeb::Response::set(const Value &value) {
+		return this->value->set(value);
+	}
+
+	Udjat::Value & CivetWeb::Response::set(const char *value, const Type type) {
+		return this->value->set(value,type);
+	}
+
  }

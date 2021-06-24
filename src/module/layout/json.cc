@@ -18,61 +18,65 @@
  */
 
  #include <config.h>
- #include <response.h>
+ #include <udjat/civetweb.h>
  #include <iostream>
  #include <iomanip>
 
- void Value::json(std::stringstream &ss) const {
+ namespace Udjat {
 
-  	switch(this->type) {
-	case Udjat::Value::Undefined:
-		ss << "null";
-		break;
+	void CivetWeb::Value::json(std::stringstream &ss) const {
 
-	case Udjat::Value::Array:
-		{
-			ss << '[';
+		switch(this->type) {
+		case Udjat::Value::Undefined:
+			ss << "null";
+			break;
 
-			bool sep = false;
-			for(auto &child : children) {
-				if(sep) {
-					ss << ',';
+		case Udjat::Value::Array:
+			{
+				ss << '[';
+
+				bool sep = false;
+				for(auto &child : children) {
+					if(sep) {
+						ss << ',';
+					}
+					sep = true;
+					child.second->json(ss);
 				}
-				sep = true;
-				child.second->json(ss);
+
+				ss << ']';
 			}
+			break;
 
-			ss << ']';
-		}
-		break;
+		case Udjat::Value::Object:
+			{
+				ss << '{';
 
-	case Udjat::Value::Object:
-		{
-			ss << '{';
-
-			bool sep = false;
-			for(auto &child : children) {
-				if(sep) {
-					ss << ',';
+				bool sep = false;
+				for(auto &child : children) {
+					if(sep) {
+						ss << ',';
+					}
+					sep = true;
+					ss << '"' << child.first << "\":";
+					child.second->json(ss);
 				}
-				sep = true;
-				ss << '"' << child.first << "\":";
-				child.second->json(ss);
+
+				ss << '}';
 			}
+			break;
 
-			ss << '}';
+		case Udjat::Value::String:
+
+			// TODO: Convert special chars.
+			ss << '"' << this->value << '"';
+			break;
+
+		default:
+			ss << this->value;
 		}
-		break;
 
-	case Udjat::Value::String:
-
-		// TODO: Convert special chars.
-		ss << '"' << this->value << '"';
-		break;
-
-	default:
-		ss << this->value;
- 	}
+	}
 
  }
 

@@ -20,7 +20,6 @@
  #include "../private.h"
  #include <tools.h>
  #include <udjat/worker.h>
- #include <response.h>
  #include <udjat/agent.h>
  #include <udjat/tools/mimetype.h>
 
@@ -36,7 +35,7 @@
 			throw http_error(501, "Mimetype Not Supported");
 		}
 
-		::Report response;
+		CivetWeb::Report response;
 
 		// Run report.
 		Abstract::Agent::get_root()->find(uri.c_str())->get(Request(""),response);

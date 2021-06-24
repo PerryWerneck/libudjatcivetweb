@@ -18,38 +18,32 @@
  */
 
  #include <config.h>
- #include <udjat/civetweb.h>
- #include <iostream>
- #include <iomanip>
+ #include "private.h"
+ #include <udjat/request.h>
 
  namespace Udjat {
 
-	void CivetWeb::Value::xml(std::stringstream &ss) const {
+	CivetWeb::Request::Request(const string &u, const char *m)
+		: Udjat::Request(m), path(u) {
+	}
 
-		switch(this->type) {
-		case Udjat::Value::Undefined:
-			break;
+	std::string CivetWeb::Request::pop() {
 
-		case Udjat::Value::Array:
-			for(auto &child : children) {
-				ss << "<item>";
-				child.second->xml(ss);
-				ss << "</item>";
-			}
-			break;
-
-		case Udjat::Value::Object:
-			for(auto &child : children) {
-				ss << "<" << child.first << " type='" << std::to_string(child.second->getType()) << "'"<< ">";
-				child.second->xml(ss);
-				ss << "</" << child.first << ">";
-			}
-			break;
-
-		default:
-			ss << this->value;
+		if(path.empty()) {
+			throw system_error(ENODATA,system_category(),"No more arguments");
 		}
 
+		size_t pos = path.find('/');
+		if(pos == string::npos) {
+			string rc = path;
+			path.clear();
+			return rc;
+		}
+
+		string rc{path.c_str(),pos};
+		path.erase(0,pos+1);
+
+		return rc;
 	}
 
  }

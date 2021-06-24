@@ -17,136 +17,143 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
- #include <response.h>
+ #include <config.h>
+ #include <udjat/civetweb.h>
  #include <cstdarg>
  #include <iostream>
 
  using namespace std;
 
- Report::Report() : Udjat::Report() {
- }
+ namespace Udjat {
 
- Report::~Report() {
- }
+	namespace CivetWeb {
 
- std::string Report::to_string() const {
-  	std::stringstream ss;
- 	this->json(ss);
- 	return ss.str();
- }
-
- void Report::json(std::stringstream &ss) const {
-
-	bool sep = false;
-	auto column = columns.names.begin();
-
-	ss << "[{";
-	for(auto value : values) {
-
-		if(column == columns.names.end()) {
-			ss << "},{";
-			column = columns.names.begin();
-			sep = false;
+		Report::Report() : Udjat::Report() {
 		}
 
-		if(sep) {
-			ss << ',';
+		Report::~Report() {
 		}
-		sep = true;
 
-		ss << "\"" << column->c_str() << "\":";
-		value.json(ss);
+		std::string Report::to_string() const {
+			std::stringstream ss;
+			this->json(ss);
+			return ss.str();
+		}
 
-		column++;
+		void Report::json(std::stringstream &ss) const {
+
+			bool sep = false;
+			auto column = columns.names.begin();
+
+			ss << "[{";
+			for(auto value : values) {
+
+				if(column == columns.names.end()) {
+					ss << "},{";
+					column = columns.names.begin();
+					sep = false;
+				}
+
+				if(sep) {
+					ss << ',';
+				}
+				sep = true;
+
+				ss << "\"" << column->c_str() << "\":";
+				value.json(ss);
+
+				column++;
+
+			}
+
+			ss << "}]";
+
+		}
+
+		Udjat::Report & Report::push_back(const char *value) {
+			Value v;
+			v << value;
+			values.push_back(v);
+			return *this;
+		}
+
+		Udjat::Report & Report::push_back(const std::string &value) {
+			Value v;
+			v << value;
+			values.push_back(v);
+			return *this;
+		}
+
+		Udjat::Report & Report::push_back(const short value) {
+			Value v;
+			v << value;
+			values.push_back(v);
+			return *this;
+		}
+
+		Udjat::Report & Report::push_back(const unsigned short value) {
+			Value v;
+			v << value;
+			values.push_back(v);
+			return *this;
+		}
+
+		Udjat::Report & Report::push_back(const int value) {
+			Value v;
+			v << value;
+			values.push_back(v);
+			return *this;
+		}
+
+		Udjat::Report & Report::push_back(const unsigned int value) {
+			Value v;
+			v << value;
+			values.push_back(v);
+			return *this;
+		}
+
+		Udjat::Report & Report::push_back(const long value) {
+			Value v;
+			v << value;
+			values.push_back(v);
+			return *this;
+		}
+
+		Udjat::Report & Report::push_back(const unsigned long value) {
+			Value v;
+			v << value;
+			values.push_back(v);
+			return *this;
+		}
+
+		Udjat::Report & Report::push_back(const Udjat::TimeStamp value) {
+			Value v;
+			v << value;
+			values.push_back(v);
+			return *this;
+		}
+
+		Udjat::Report & Report::push_back(const bool value) {
+			Value v;
+			v << value;
+			values.push_back(v);
+			return *this;
+		}
+
+		Udjat::Report & Report::push_back(const float value) {
+			Value v;
+			v << value;
+			values.push_back(v);
+			return *this;
+		}
+
+		Udjat::Report & Report::push_back(const double value) {
+			Value v;
+			v << value;
+			values.push_back(v);
+			return *this;
+		}
 
 	}
 
-	ss << "}]";
-
  }
-
- Udjat::Report & Report::push_back(const char *value) {
-	Value v;
-	v << value;
-	values.push_back(v);
-	return *this;
- }
-
- Udjat::Report & Report::push_back(const std::string &value) {
-	Value v;
-	v << value;
-	values.push_back(v);
-	return *this;
- }
-
- Udjat::Report & Report::push_back(const short value) {
-	Value v;
-	v << value;
-	values.push_back(v);
-	return *this;
- }
-
- Udjat::Report & Report::push_back(const unsigned short value) {
-	Value v;
-	v << value;
-	values.push_back(v);
-	return *this;
- }
-
- Udjat::Report & Report::push_back(const int value) {
-	Value v;
-	v << value;
-	values.push_back(v);
-	return *this;
- }
-
- Udjat::Report & Report::push_back(const unsigned int value) {
-	Value v;
-	v << value;
-	values.push_back(v);
-	return *this;
- }
-
- Udjat::Report & Report::push_back(const long value) {
-	Value v;
-	v << value;
-	values.push_back(v);
-	return *this;
- }
-
- Udjat::Report & Report::push_back(const unsigned long value) {
-	Value v;
-	v << value;
-	values.push_back(v);
-	return *this;
- }
-
- Udjat::Report & Report::push_back(const Udjat::TimeStamp value) {
-	Value v;
-	v << value;
-	values.push_back(v);
-	return *this;
- }
-
- Udjat::Report & Report::push_back(const bool value) {
-	Value v;
-	v << value;
-	values.push_back(v);
-	return *this;
- }
-
- Udjat::Report & Report::push_back(const float value) {
-	Value v;
-	v << value;
-	values.push_back(v);
-	return *this;
- }
-
- Udjat::Report & Report::push_back(const double value) {
-	Value v;
-	v << value;
-	values.push_back(v);
-	return *this;
- }
-
-

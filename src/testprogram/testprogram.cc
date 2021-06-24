@@ -25,7 +25,7 @@
  #include <pugixml.hpp>
  #include <unistd.h>
  #include <civetweb.h>
- #include <response.h>
+ #include <udjat/civetweb.h>
  #include <udjat/tools/threadpool.h>
 
  using namespace std;
@@ -100,7 +100,7 @@ void test_http_get() {
 
 static void test_report() {
 
-	::Report report;
+	CivetWeb::Report report;
 
 	report.start("sample","v1","v2","v3",nullptr);
 
