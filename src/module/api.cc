@@ -29,7 +29,7 @@
 		CivetWeb::Response response(mimetype);
 		CivetWeb::Request request(uri.c_str(),method);
 
-		if(!Worker::work(request.pop().c_str(),request,response)) {
+		if(!Worker::work(request.c_str(),request,response)) {
 			throw http_error(405, "Method Not Allowed");
 		}
 

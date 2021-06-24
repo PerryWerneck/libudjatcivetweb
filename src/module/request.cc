@@ -25,6 +25,9 @@
 
 	CivetWeb::Request::Request(const string &u, const char *m)
 		: Udjat::Request(m), path(u) {
+
+		this->name = pop();
+
 	}
 
 	std::string CivetWeb::Request::pop() {
