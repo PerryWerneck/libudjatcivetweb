@@ -42,9 +42,13 @@ static void test_httpd() {
 	cout << "http://localhost:8989/api/1.0/info/workers" << endl;
 	cout << "http://localhost:8989/api/1.0/info/factories" << endl;
 
-	cout << "http://localhost:8989/swagger.json" << endl;
+	// cout << "http://localhost:8989/swagger.json" << endl;
+
+	auto agent = Abstract::Agent::init("${PWD}/test.xml");
 
 	Udjat::run();
+
+	agent->deinit();
 
 }
 

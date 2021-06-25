@@ -73,11 +73,8 @@
 		};
 
 		class UDJAT_API Request : public Udjat::Request {
-		private:
-			std::string path;
-
 		public:
-			Request(const std::string &uri, const char *method);
+			Request(const std::string &uri, const char *type);
 
 			std::string pop() override;
 

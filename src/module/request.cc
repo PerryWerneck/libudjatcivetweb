@@ -23,10 +23,11 @@
 
  namespace Udjat {
 
-	CivetWeb::Request::Request(const string &u, const char *m)
-		: Udjat::Request(m), path(u) {
+	CivetWeb::Request::Request(const string &u, const char *t)
+		: Udjat::Request(t) {
 
-		this->name = pop();
+		this->path = u;
+		this->method = pop();
 
 	}
 
