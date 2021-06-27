@@ -89,13 +89,15 @@
 		return *this;
 	}
 
-	Value & CivetWeb::Value::set(const Udjat::Value &value) {
+	Value & CivetWeb::Value::set(const Udjat::Value UDJAT_UNUSED(&value)) {
 		throw runtime_error("Not implemented");
 		return *this;
 	}
 
 	Value & CivetWeb::Value::set(const Udjat::TimeStamp value) {
-		return this->set(value.to_string(TIMESTAMP_FORMAT_JSON).c_str(),Udjat::Value::String);
+		if(value)
+			return this->set(value.to_string(TIMESTAMP_FORMAT_JSON).c_str(),Udjat::Value::String);
+		return this->set("false",Value::Type::Boolean);
 	}
 
 	Udjat::Value & CivetWeb::Value::setFraction(const float fraction) {
