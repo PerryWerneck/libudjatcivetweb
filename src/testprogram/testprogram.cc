@@ -22,6 +22,7 @@
  #include <udjat/tools/logger.h>
  #include <udjat/worker.h>
  #include <udjat/url.h>
+ #include <udjat/factory.h>
  #include <pugixml.hpp>
  #include <unistd.h>
  #include <civetweb.h>
@@ -38,13 +39,49 @@
 
 static void test_httpd() {
 
-	cout << "http://localhost:8989/api/1.0/info/modules" << endl;
-	cout << "http://localhost:8989/api/1.0/info/workers" << endl;
-	cout << "http://localhost:8989/api/1.0/info/factories" << endl;
+	class Factory : public Udjat::Factory {
+	public:
+		Factory() : Udjat::Factory("random") {
+			cout << "random agent factory was created" << endl;
+			srand(time(NULL));
+		}
 
-	// cout << "http://localhost:8989/swagger.json" << endl;
+		void parse(Abstract::Agent &parent, const pugi::xml_node &node) const override {
+
+			class RandomAgent : public Agent<unsigned int> {
+			private:
+				unsigned int limit = 5;
+
+			public:
+				RandomAgent(const pugi::xml_node &node) : Agent<unsigned int>() {
+					cout << "Creating random Agent" << endl;
+					load(node);
+				}
+
+				void refresh() override {
+					set( ((unsigned int) rand()) % limit);
+				}
+
+			};
+
+			parent.insert(make_shared<RandomAgent>(node));
+
+		}
+
+	};
+
+	static Factory factory;
 
 	auto agent = Abstract::Agent::init("${PWD}/test.xml");
+
+	cout << "http://localhost:8989/api/1.0/info/modules.xml" << endl;
+	cout << "http://localhost:8989/api/1.0/info/workers.xml" << endl;
+	cout << "http://localhost:8989/api/1.0/info/factories.xml" << endl;
+
+	for(auto agent : *agent) {
+		cout << "http://localhost:8989/api/1.0/agent/" << agent->getName() << ".xml" << endl;
+	}
+
 
 	Udjat::run();
 
