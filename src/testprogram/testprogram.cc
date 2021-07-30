@@ -46,7 +46,7 @@ static void test_httpd() {
 			srand(time(NULL));
 		}
 
-		void parse(Abstract::Agent &parent, const pugi::xml_node &node) const override {
+		bool parse(Abstract::Agent &parent, const pugi::xml_node &node) const override {
 
 			class RandomAgent : public Agent<unsigned int> {
 			private:
@@ -65,6 +65,8 @@ static void test_httpd() {
 			};
 
 			parent.insert(make_shared<RandomAgent>(node));
+
+			return true;
 
 		}
 
