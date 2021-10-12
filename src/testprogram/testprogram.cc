@@ -28,6 +28,7 @@
  #include <civetweb.h>
  #include <udjat/civetweb.h>
  #include <udjat/tools/threadpool.h>
+ #include <udjat/tools/systemservice.h>
 
  using namespace std;
  using namespace Udjat;
@@ -58,8 +59,9 @@ static void test_httpd() {
 					load(node);
 				}
 
-				void refresh() override {
+				bool refresh() override {
 					set( ((unsigned int) rand()) % limit);
+					return true;
 				}
 
 			};
@@ -84,8 +86,7 @@ static void test_httpd() {
 		cout << "http://localhost:8989/api/1.0/agent/" << agent->getName() << ".xml" << endl;
 	}
 
-
-	Udjat::run();
+	Udjat::SystemService().run();
 
 	agent->deinit();
 
