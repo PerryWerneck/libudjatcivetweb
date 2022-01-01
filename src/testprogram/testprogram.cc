@@ -21,13 +21,14 @@
  #include <udjat/module.h>
  #include <udjat/tools/logger.h>
  #include <udjat/worker.h>
- #include <udjat/url.h>
+ #include <udjat/tools/url.h>
  #include <udjat/factory.h>
  #include <pugixml.hpp>
  #include <unistd.h>
  #include <civetweb.h>
  #include <udjat/civetweb.h>
  #include <udjat/tools/threadpool.h>
+ #include <udjat/tools/mainloop.h>
 
  using namespace std;
  using namespace Udjat;
@@ -58,8 +59,9 @@ static void test_httpd() {
 					load(node);
 				}
 
-				void refresh() override {
+				bool refresh() override {
 					set( ((unsigned int) rand()) % limit);
+					return true;
 				}
 
 			};
@@ -85,7 +87,7 @@ static void test_httpd() {
 	}
 
 
-	Udjat::run();
+	Udjat::MainLoop::getInstance().run();
 
 	agent->deinit();
 
