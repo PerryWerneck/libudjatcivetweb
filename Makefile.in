@@ -193,9 +193,9 @@ uninstall-conf:
 #---[ Debug Targets ]--------------------------------------------------------------------
 
 Debug: \
-	$(BINDBG)/$(PACKAGE_NAME)-test@EXEEXT@
+	$(BINDBG)/udjat@EXEEXT@
 
-$(BINDBG)/$(PACKAGE_NAME)-test@EXEEXT@: \
+$(BINDBG)/udjat@EXEEXT@: \
 	$(foreach SRC, $(basename $(TEST_SOURCES)), $(OBJDBG)/$(SRC).o) \
 	$(BINDBG)/$(PACKAGE_NAME)@LIBEXT@
 
@@ -225,19 +225,19 @@ $(BINDBG)/$(PACKAGE_NAME)@LIBEXT@: \
 
 
 run: \
-	$(BINDBG)/$(PACKAGE_NAME)-test@EXEEXT@
+	$(BINDBG)/udjat@EXEEXT@
 
 ifeq ($(VALGRIND),no)
 
 	@LD_LIBRARY_PATH=$(BINDBG) \
-		$(BINDBG)/$(PACKAGE_NAME)-test@EXEEXT@
+		$(BINDBG)/udjat@EXEEXT@
 
 else
 	@touch valgrind.suppression
 
 	@LD_LIBRARY_PATH=$(BINDBG) \
 		$(VALGRIND) --leak-check=full --track-origins=yes --gen-suppressions=all --suppressions=valgrind.suppression \
-		$(BINDBG)/$(PACKAGE_NAME)-test@EXEEXT@
+		$(BINDBG)/udjat@EXEEXT@
 endif
 
 #---[ Clean Targets ]--------------------------------------------------------------------

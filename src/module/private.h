@@ -21,7 +21,7 @@
 
  #include <config.h>
  #include <udjat/defs.h>
- #include <udjat/url.h>
+ #include <udjat/tools/url.h>
  #include <udjat/tools/mimetype.h>
  #include <cstring>
  #include <string>

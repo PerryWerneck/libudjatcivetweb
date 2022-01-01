@@ -23,6 +23,9 @@ AM_INIT_AUTOMAKE
 dnl Check for iconv
 AM_ICONV
 
+dnl Set gettext version
+AM_GNU_GETTEXT_VERSION([0.14])
+
 dnl Checks for programs.
 AC_PROG_CXX
 AC_PROG_CC
@@ -152,7 +155,7 @@ dnl ---------------------------------------------------------------------------
 dnl Check for civetweb
 dnl ---------------------------------------------------------------------------
 
-AC_CHECK_HEADER(civetweb.h, AC_DEFINE(HAVE_CIVETWEB,,[do we have civetweb.h?]))
+AC_CHECK_HEADER(civetweb.h, AC_DEFINE(HAVE_CIVETWEB,,[do we have civetweb.h?]), AC_MSG_ERROR([libcivetweb not present.]))
 
 dnl ---------------------------------------------------------------------------
 dnl Check for libudjat
