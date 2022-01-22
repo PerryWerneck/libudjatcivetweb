@@ -22,17 +22,18 @@
  #include <udjat/worker.h>
  #include <udjat/agent.h>
  #include <udjat/tools/mimetype.h>
+ #include <udjat/tools/protocol.h>
 
  int reportWebHandler(struct mg_connection *conn, void UDJAT_UNUSED(*cbdata)) {
 
 	return webHandler(conn,[](const string &uri, const char *method, const MimeType mimetype){
 
 		if(strcasecmp(method,"get")) {
-			throw http_error(405, "Method Not Allowed");
+			throw HTTP::Exception(405, uri.c_str(), "Method Not Allowed");
 		}
 
 		if(mimetype != MimeType::json) {
-			throw http_error(501, "Mimetype Not Supported");
+			throw HTTP::Exception(501, uri.c_str(), "Mimetype Not Supported");
 		}
 
 		CivetWeb::Report response;

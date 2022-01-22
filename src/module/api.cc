@@ -21,6 +21,7 @@
  #include <tools.h>
  #include <udjat/worker.h>
  #include <udjat/civetweb.h>
+ #include <udjat/tools/protocol.h>
 
  int apiWebHandler(struct mg_connection *conn, void UDJAT_UNUSED(*cbdata)) {
 
@@ -30,7 +31,7 @@
 		CivetWeb::Request request(uri.c_str(),method);
 
 		if(!Worker::work(request.getMethod(),request,response)) {
-			throw http_error(405, "Method Not Allowed");
+			throw HTTP::Exception(405, uri.c_str(), "Method Not Allowed");
 		}
 
 		return response.to_string();

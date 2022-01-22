@@ -32,16 +32,21 @@
  static int log_message(const struct mg_connection *conn, const char *message);
 
  static const Udjat::ModuleInfo moduleinfo{
-	PACKAGE_NAME,									// The module name.
-	"CivetWEB " CIVETWEB_VERSION " HTTP exporter", 	// The module description.
-	PACKAGE_VERSION, 								// The module version.
-	PACKAGE_URL, 									// The package URL.
-	PACKAGE_BUGREPORT 								// The bugreport address.
+	PACKAGE_NAME,																		// The module name.
+	"CivetWEB " CIVETWEB_VERSION " HTTP module for " STRINGIZE_VALUE_OF(PRODUCT_NAME), 	// The module description.
+	PACKAGE_VERSION, 																	// The module version.
+	PACKAGE_URL, 																		// The package URL.
+	PACKAGE_BUGREPORT 																	// The bugreport address.
  };
 
  class Module : public Udjat::Module, public MainLoop::Service {
  private:
 	struct mg_context *ctx;
+
+	struct {
+		CivetWeb::Protocol http{"http",&moduleinfo,0};
+		CivetWeb::Protocol https{"https",&moduleinfo,1};
+	} protocols;
 
  public:
 
@@ -49,13 +54,12 @@
 
 		mg_init_library(0);
 
-		Udjat::URL::insert(make_shared<::Protocol>("http","80",&moduleinfo,0));
-		Udjat::URL::insert(make_shared<::Protocol>("https","443",&moduleinfo,1));
-
  	};
 
  	virtual ~Module() {
+
 		mg_exit_library();
+
  	}
 
 	void start() noexcept override {

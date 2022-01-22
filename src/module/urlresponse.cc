@@ -20,6 +20,7 @@
  #include "private.h"
  #include <sys/mman.h>
 
+ /*
  ::URLResponse::URLResponse(struct mg_connection *conn) {
 
 	const struct mg_response_info *info = mg_get_response_info(conn);
@@ -70,7 +71,7 @@
  ::URLResponse::~URLResponse() {
 	munmap((void *) response.payload,response.length);
  }
-
+ */
  /*
  std::shared_ptr<Udjat::Report> ::Response::open(const char *name, const char *column_name, ...) {
 

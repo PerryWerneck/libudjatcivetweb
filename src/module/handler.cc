@@ -19,6 +19,7 @@
 
  #include "private.h"
  #include <tools.h>
+ #include <udjat/tools/protocol.h>
  #include <cstring>
 
  int webHandler(struct mg_connection *conn, function<string (const string &uri, const char *method, const MimeType mimetype)> worker) noexcept {
@@ -35,14 +36,14 @@
 		if(strncasecmp(local_uri,"/api/",5) == 0) {
 			local_uri += 5;
 		} else {
-			throw http_error( 400, "Request must be in the format /api/version/worker/path");
+			throw HTTP::Exception( 400, ri->local_uri, "Request must be in the format /api/version/worker/path");
 		}
 
 		// Extract version prefix.
 		{
 			const char *ptr = strchr(local_uri,'/');
 			if(!ptr) {
-				throw http_error( 400, "Request must be in the format /api/version/worker/path");
+				throw HTTP::Exception( 400, ri->local_uri, "Request must be in the format /api/version/worker/path");
 			}
 			local_uri = ptr+1;
 		}
@@ -59,10 +60,10 @@
 
 		rsp = worker(uri,ri->request_method,mimetype);
 
-	} catch(const http_error &error) {
+	} catch(const HTTP::Exception &error) {
 
-		mg_send_http_error(conn, error.code(), error.what());
-		return error.code();
+		mg_send_http_error(conn, error.codes().http, error.what());
+		return error.codes().http;
 
 	} catch(const system_error &e) {
 
