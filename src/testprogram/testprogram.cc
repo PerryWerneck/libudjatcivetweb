@@ -75,7 +75,7 @@ static void test_httpd() {
 
 	static Factory factory;
 
-	auto agent = Abstract::Agent::init("${PWD}/test.xml");
+	auto agent = Udjat::init("test.xml");
 
 	cout << "http://localhost:8989/api/1.0/info/modules.xml" << endl;
 	cout << "http://localhost:8989/api/1.0/info/workers.xml" << endl;
@@ -127,14 +127,14 @@ static void test_report() {
 
 int main(int argc, char **argv) {
 
-	//Logger::redirect();
+	Logger::redirect();
 
 	setlocale( LC_ALL, "" );
 
 	Module * module = udjat_module_init();
 
-	// test_httpd();
-	test_http_get();
+	test_httpd();
+	// test_http_get();
 	// test_report();
 
 	delete module;
