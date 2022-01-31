@@ -50,7 +50,7 @@
 
  public:
 
- 	Module() : Udjat::Module("civetweb",&moduleinfo), MainLoop::Service(&moduleinfo), ctx(NULL) {
+ 	Module() : Udjat::Module("httpd",&moduleinfo), MainLoop::Service(&moduleinfo), ctx(NULL) {
 
 		mg_init_library(0);
 

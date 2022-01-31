@@ -77,9 +77,11 @@ static void test_httpd() {
 
 	auto agent = Udjat::init("test.xml");
 
-	cout << "http://localhost:8989/api/1.0/info/modules.xml" << endl;
-	cout << "http://localhost:8989/api/1.0/info/workers.xml" << endl;
-	cout << "http://localhost:8989/api/1.0/info/factories.xml" << endl;
+	if(Module::find("information")) {
+		cout << "http://localhost:8989/api/1.0/info/modules.xml" << endl;
+		cout << "http://localhost:8989/api/1.0/info/workers.xml" << endl;
+		cout << "http://localhost:8989/api/1.0/info/factories.xml" << endl;
+	}
 
 	for(auto agent : *agent) {
 		cout << "http://localhost:8989/api/1.0/agent/" << agent->getName() << ".xml" << endl;
