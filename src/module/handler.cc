@@ -20,7 +20,7 @@
  #include "private.h"
  #include <tools.h>
  #include <udjat/tools/protocol.h>
- #include <udjat/tools/httpexception.h>
+ #include <udjat/tools/http/exception.h>
  #include <cstring>
 
  int webHandler(struct mg_connection *conn, function<string (const string &uri, const char *method, const MimeType mimetype)> worker) noexcept {

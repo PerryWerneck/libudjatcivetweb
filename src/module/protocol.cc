@@ -19,7 +19,7 @@
 
  #include "private.h"
  #include <udjat/tools/protocol.h>
- #include <udjat/tools/httpexception.h>
+ #include <udjat/tools/http/exception.h>
 
  using namespace Udjat;
 
