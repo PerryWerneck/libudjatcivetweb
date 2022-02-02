@@ -18,7 +18,6 @@
  */
 
  #include "../private.h"
- #include <tools.h>
  #include <udjat/worker.h>
  #include <udjat/agent.h>
  #include <udjat/tools/mimetype.h>

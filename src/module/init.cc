@@ -24,7 +24,6 @@
  #include <udjat/tools/url.h>
  #include <udjat/tools/configuration.h>
  #include <udjat/tools/mainloop.h>
- #include <tools.h>
 
  using namespace Udjat;
  using namespace std;

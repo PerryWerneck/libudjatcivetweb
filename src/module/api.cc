@@ -18,7 +18,6 @@
  */
 
  #include "private.h"
- #include <tools.h>
  #include <udjat/worker.h>
  #include <udjat/civetweb.h>
  #include <udjat/tools/protocol.h>

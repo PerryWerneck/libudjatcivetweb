@@ -18,7 +18,6 @@
  */
 
  #include "private.h"
- #include <tools.h>
  #include <udjat/tools/protocol.h>
  #include <udjat/tools/http/exception.h>
  #include <cstring>
@@ -26,7 +25,7 @@
  int webHandler(struct mg_connection *conn, function<string (const string &uri, const char *method, const MimeType mimetype)> worker) noexcept {
 
 	const struct mg_request_info *ri = mg_get_request_info(conn);
-	MimeType mimetype = MimeType::json;
+	MimeType mimetype{MimeType::json};
 	string rsp;
 
 	try {
@@ -54,7 +53,7 @@
 		{
 			auto ext = uri.find_last_of('.');
 			if(ext != string::npos && ext > 1) {
-				mimetype = str2mime(uri.c_str()+ext+1);
+				mimetype = MimeTypeFactory(uri.c_str()+ext+1);
 				uri.resize(ext);
 			}
 		}
@@ -68,7 +67,7 @@
 
 	} catch(const system_error &e) {
 
-		int code = sysErrorToHttp(e.code().value());
+		int code = HTTP::Exception::translate(e);
 		mg_send_http_error(conn, code, e.what());
 		return code;
 
