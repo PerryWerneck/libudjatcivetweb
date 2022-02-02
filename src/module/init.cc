@@ -67,35 +67,51 @@
 
 		if(!ctx) {
 
-			Config::Value<std::string> listening_ports{"civetweb","listening_ports","8989"};
-			Config::Value<std::string> request_timeout_ms{"civetweb","request_timeout_ms","10000"};
-			Config::Value<std::string> error_log_file{"civetweb","error_log_file","error.log"};
-			Config::Value<std::string> enable_auth_domain_check{"civetweb","enable_auth_domain_check","no"};
-
-			const char *options[] = {
-				"listening_ports", 			listening_ports.c_str(),
-				"request_timeout_ms",		request_timeout_ms.c_str(),
-				"error_log_file",			error_log_file.c_str(),
-				"enable_auth_domain_check",	enable_auth_domain_check.c_str(),
-				NULL
-			};
-
+			// Start
 			// https://github.com/civetweb/civetweb/blob/master/docs/api/mg_start.md
-			struct mg_callbacks callbacks;
-			memset(&callbacks,0,sizeof(callbacks));
-			callbacks.log_message = log_message;
+			{
+				std::vector<string> optionlist;
 
-			ctx = mg_start(&callbacks, 0, options);
-			if (ctx == NULL) {
-				cerr << "civetweb\tCannot start: mg_start failed." << endl;
-				return;
+				Config::for_each("civetweb-options",[&optionlist](const char *key, const char *value){
+					optionlist.emplace_back(key);
+					optionlist.emplace_back(value);
+#ifdef DEBUG
+					cout << "civetweb\t" << key << "= '" << value << "'" << endl;
+#endif // DEBUG
+					return true;
+				});
+
+				if(optionlist.empty()) {
+					cerr << "civetweb\tNo civetweb configuration" << endl;
+					return;
+				}
+
+				const char **options = new const char *[optionlist.size()+1];
+				size_t ix = 0;
+				for(string & option : optionlist) {
+					options[ix++] = option.c_str();
+				}
+				options[ix] = NULL;
+
+				struct mg_callbacks callbacks;
+				memset(&callbacks,0,sizeof(callbacks));
+				callbacks.log_message = log_message;
+
+				ctx = mg_start(&callbacks, this, options);
+
+				delete[] options;
+
+				if (ctx == NULL) {
+					cerr << "civetweb\tCannot start: mg_start failed." << endl;
+					return;
+				}
 			}
 
 			mg_set_request_handler(ctx, "/api/", apiWebHandler, 0);
 			mg_set_request_handler(ctx, "/report/", reportWebHandler, 0);
 			mg_set_request_handler(ctx, "/swagger.json", swaggerWebHandler, 0);
 
-			cout << "civetweb\tListening on port " << options[1] << endl;
+			// cout << "civetweb\tListening on port " << options[1] << endl;
 
 		}
 
