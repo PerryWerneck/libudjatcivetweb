@@ -26,6 +26,9 @@
  #include <udjat/tools/mainloop.h>
  #include <udjat/tools/mimetype.h>
  #include <udjat/tools/application.h>
+ #include <udjat/tools/file.h>
+ #include <udjat/tools/expander.h>
+ #include <unistd.h>
 
  using namespace Udjat;
  using namespace std;
@@ -194,6 +197,55 @@
 		break;
 
 	default:
+
+		try {
+
+#ifdef DEBUG
+			string page = "templates/error.html";
+#else
+			string page = Application::DataDir("www/templates/error.") + MimeTypeSuffix(mimetype);
+#endif // DEBUG
+
+			if(access(page.c_str(),R_OK)) {
+				clog << "civetweb\tNo access to '" << page << "' using default error page" << endl;
+				return 1;
+			}
+
+			string text = File::Text(page.c_str()).c_str();
+
+			Udjat::expand(text,[&status,&message](const char *key, std::string &value){
+
+				if(!strcasecmp(key,"code")) {
+					value = to_string(status);
+				} else if(!strcasecmp(key,"message")) {
+					value = message;
+				} else {
+					value.clear();
+				}
+
+				return true;
+			});
+
+			mg_printf(
+				conn,
+				"HTTP/1.1 %d %s\r\n"
+				"Content-Type: %s\r\n"
+				"Content-Length: %u\r\n"
+				"\r\n"
+				"%s",
+				status,message,
+				std::to_string(mimetype).c_str(),
+				(unsigned int) text.size(),
+				text.c_str()
+			);
+			return 0;
+
+		} catch(const std::exception &e) {
+			cerr << "civetweb\tError '" << e.what() << "' processing error page using default" << endl;
+		} catch(...) {
+			cerr << "civetweb\tUnexpected error processing error page using default" << endl;
+		}
+
 		return 1;
 	}
 
