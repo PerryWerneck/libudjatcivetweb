@@ -58,7 +58,6 @@
 		<Unit filename="src/module/request.cc" />
 		<Unit filename="src/module/response.cc" />
 		<Unit filename="src/module/swagger.cc" />
-		<Unit filename="src/module/tools.cc" />
 		<Unit filename="src/module/urlresponse.cc" />
 		<Unit filename="src/module/value.cc" />
 		<Unit filename="src/testprogram/testprogram.cc" />

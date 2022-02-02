@@ -24,11 +24,14 @@
  #include <udjat/tools/url.h>
  #include <udjat/tools/configuration.h>
  #include <udjat/tools/mainloop.h>
+ #include <udjat/tools/mimetype.h>
+ #include <udjat/tools/application.h>
 
  using namespace Udjat;
  using namespace std;
 
  static int log_message(const struct mg_connection *conn, const char *message);
+ static int http_error( struct mg_connection *conn, int status, const char *msg );
 
  static const Udjat::ModuleInfo moduleinfo{
 	PACKAGE_NAME,																		// The module name.
@@ -96,6 +99,7 @@
 				struct mg_callbacks callbacks;
 				memset(&callbacks,0,sizeof(callbacks));
 				callbacks.log_message = log_message;
+				callbacks.http_error = http_error;
 
 				ctx = mg_start(&callbacks, this, options);
 
@@ -149,4 +153,50 @@
 	return 1;
  }
  #pragma GCC diagnostic pop
+
+ int http_error( struct mg_connection *conn, int status, const char *message ) {
+
+	Udjat::MimeType mimetype = (Udjat::MimeType) 0;
+
+	const struct mg_request_info *request_info = mg_get_request_info(conn);
+
+	//
+	// Search for mime-type on request headers.
+	//
+	for(int ix=0;ix<request_info->num_headers;ix++) {
+		cout << request_info->http_headers[ix].name << "=" << request_info->http_headers[ix].value << endl;
+	}
+
+	if(!mimetype && request_info->local_uri_raw && *request_info->local_uri_raw) {
+		//
+		// Not found on headers, try by the path
+		//
+		const char *ptr = strrchr(request_info->local_uri_raw,'.');
+		if(ptr) {
+			mimetype = MimeTypeFactory(ptr+1);
+		}
+	}
+
+	clog << "civetweb\t" << status << " " << message << " (" << mimetype << ")" << endl;
+
+	switch(mimetype) {
+	case Udjat::json:
+		mg_printf(
+			conn,
+			"HTTP/1.1 %d %s\r\n"
+			"Content-Type: %s\r\n"
+			"\r\n"
+			"{\"error\":{\"code\":%d,\"message\":\"%s\"}}",
+			status,message,
+			std::to_string(mimetype).c_str(),
+			status,message
+			);
+		break;
+
+	default:
+		return 1;
+	}
+
+	return 0;
+ }
 
