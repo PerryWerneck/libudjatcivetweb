@@ -180,8 +180,67 @@
 		}
 	}
 
-	clog << "civetweb\t" << status << " " << message << " (" << mimetype << ")" << endl;
+	clog << "civetweb\t" << request_info->remote_addr << " " << status << " " << message << " (" << mimetype << ")" << endl;
 
+	try {
+
+		string response;
+
+#ifdef DEBUG
+		string page = "templates/error.";
+		page +=  + to_string(mimetype,true);
+#else
+		string page = Application::DataDir("www/templates") + "error." + to_string(mimetype,true);
+#endif // DEBUG
+
+		if(!access(page.c_str(),R_OK)) {
+			response = File::Text(page.c_str()).c_str();
+		} else if(mimetype == Udjat::json) {
+			response = "{\"error\":{\"application\":\"${application}\",\"code\":${code},\"message\":\"${message}\"}}";
+		} else {
+			cout << "civetweb\tNo access to '" << page << "' using default response" << endl;
+		}
+
+		if(!response.empty()) {
+
+			Udjat::expand(response,[&status,&message](const char *key, std::string &value){
+
+				if(!strcasecmp(key,"code")) {
+					value = to_string(status);
+				} else if(!strcasecmp(key,"message")) {
+					value = message;
+				} else if(!strcasecmp(key,"application")) {
+					value = Application::Name();
+				} else {
+					value.clear();
+				}
+
+				return true;
+			});
+
+			mg_printf(
+				conn,
+				"HTTP/1.1 %d %s\r\n"
+				"Content-Type: %s\r\n"
+				"Content-Length: %u\r\n"
+				"\r\n"
+				"%s",
+				status,message,
+				std::to_string(mimetype),
+				(unsigned int) response.size(),
+				response.c_str()
+			);
+			return 0;
+
+		}
+
+	} catch(const std::exception &e) {
+		cerr << "civetweb\tError '" << e.what() << "' processing error page using default" << endl;
+	} catch(...) {
+		cerr << "civetweb\tUnexpected error processing error page using default" << endl;
+	}
+
+	/*
 	switch(mimetype) {
 	case Udjat::json:
 		mg_printf(
@@ -249,7 +308,8 @@
 
 		return 1;
 	}
+	*/
+	return 1;
 
-	return 0;
  }
 
