@@ -24,7 +24,7 @@
  #include <udjat/tools/url.h>
  #include <udjat/tools/configuration.h>
  #include <udjat/tools/mainloop.h>
- #include <udjat/tools/mimetype.h>
+ #include <udjat/tools/http/mimetype.h>
  #include <udjat/tools/application.h>
  #include <udjat/tools/file.h>
  #include <udjat/tools/expander.h>
@@ -191,7 +191,7 @@
 			"\r\n"
 			"{\"error\":{\"code\":%d,\"message\":\"%s\"}}",
 			status,message,
-			std::to_string(mimetype).c_str(),
+			std::to_string(mimetype),
 			status,message
 			);
 		break;
@@ -201,9 +201,10 @@
 		try {
 
 #ifdef DEBUG
-			string page = "templates/error.html";
+			string page = "templates/error.";
+			page +=  + to_string(mimetype,true);
 #else
-			string page = Application::DataDir("www/templates/error.") + MimeTypeSuffix(mimetype);
+			string page = Application::DataDir("www/templates") + "error." + to_string(mimetype,true);
 #endif // DEBUG
 
 			if(access(page.c_str(),R_OK)) {
@@ -234,7 +235,7 @@
 				"\r\n"
 				"%s",
 				status,message,
-				std::to_string(mimetype).c_str(),
+				std::to_string(mimetype),
 				(unsigned int) text.size(),
 				text.c_str()
 			);

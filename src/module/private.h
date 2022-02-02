@@ -23,7 +23,7 @@
  #include <udjat/defs.h>
  #include <udjat/tools/url.h>
  #include <udjat/tools/protocol.h>
- #include <udjat/tools/mimetype.h>
+ #include <udjat/tools/http/mimetype.h>
  #include <cstring>
  #include <string>
  #include <stdexcept>

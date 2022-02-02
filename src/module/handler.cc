@@ -87,7 +87,7 @@
 	cout << "Response:" << endl << rsp << endl;
 #endif // DEBUG
 
-	mg_send_http_ok(conn, to_string(mimetype).c_str(), rsp.size());
+	mg_send_http_ok(conn, to_string(mimetype), rsp.size());
 	mg_write(conn, rsp.c_str(), rsp.size());
 
 	return 200;

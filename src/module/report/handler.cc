@@ -20,7 +20,7 @@
  #include "../private.h"
  #include <udjat/worker.h>
  #include <udjat/agent.h>
- #include <udjat/tools/mimetype.h>
+ #include <udjat/tools/http/mimetype.h>
  #include <udjat/tools/protocol.h>
  #include <udjat/tools/http/exception.h>
 
