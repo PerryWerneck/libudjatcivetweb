@@ -60,6 +60,7 @@
 			virtual ~Protocol();
 
 			std::string call(const URL &url, const HTTP::Method method, const char *payload = "") const override;
+			bool get(const URL &url, const char *filename) const override;
 
 		};
 
