@@ -66,18 +66,17 @@
 
 		const struct mg_response_info *info = mg_get_response_info(conn);
 
-		if(info->content_length < 1) {
+		// cout << "civetweb\tServer response was '" << info->status_code << " " << info->status_code << "'" << endl;
 
-			// Empty response
-			if(info->status_code != 200) {
-				throw HTTP::Exception(info->status_code, url.c_str(), info->status_text);
-			}
+		if(info->status_code < 200 || info->status_code > 299) {
+
+			throw HTTP::Exception(info->status_code, url.c_str(), info->status_text);
 
 		} else if((unsigned int) info->content_length >= response.max_size()) {
 
 			throw system_error(E2BIG,system_category(),"The response is too big for current implementation");
 
-		} else {
+		} else if(info->content_length > 0) {
 
 			response.reserve(info->content_length+1);
 
@@ -94,8 +93,8 @@
 			buffer[info->content_length] = 0;
 			response.assign(buffer);
 			delete[] buffer;
-		}
 
+		}
 
 	} catch(...) {
 

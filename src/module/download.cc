@@ -119,13 +119,18 @@
 
 		const struct mg_response_info *info = mg_get_response_info(conn);
 
-		switch(info->status_code) {
-		case 304:	// Not modified.
-			cout << "civetweb\tFile '" << filename << "' was not modified" << endl;
-			status = false;
-			break;
+		if(info->status_code == 304) {
 
-		case 200:	// Modified.
+			// Not modified.
+			cout << "civetweb\tServer response was '" << info->status_code << " " << info->status_text
+					<< "' keeping '" << filename << "'" << endl;
+			status = false;
+
+		} else if(info->status_code >= 200 && info->status_code <= 299) {
+
+			cout << "civetweb\tServer response was '" << info->status_code << " " << info->status_text
+					<< "' updating '" << filename << "'" << endl;
+
 			{
 				size_t loaded = 0;
 				char buffer[4096];
@@ -173,10 +178,12 @@
 				cout << "civetweb\t'" << filename << "' time set to " << TimeStamp(ub.modtime) << endl;
 			}
 
-			break;
+		} else {
 
-		default:
+			cout << "civetweb\tServer response was '" << info->status_code << " " << info->status_text << "'" << endl;
+
 			throw HTTP::Exception(info->status_code, url.c_str(), info->status_text);
+
 		}
 
 	} catch(...) {
