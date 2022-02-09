@@ -75,7 +75,8 @@ static void test_httpd() {
 
 	static Factory factory;
 
-	auto agent = Udjat::init("test.xml");
+	Udjat::load("./test.xml");
+	auto agent = Abstract::Agent::root();
 
 	if(Module::find("information")) {
 		cout << "http://localhost:8989/api/1.0/info/modules.xml" << endl;
@@ -84,7 +85,7 @@ static void test_httpd() {
 	}
 
 	for(auto agent : *agent) {
-		cout << "http://localhost:8989/api/1.0/agent/" << agent->getName() << ".xml" << endl;
+		cout << "http://localhost:8989/api/1.0/agent/" << agent->name() << ".xml" << endl;
 	}
 
 	Udjat::MainLoop::getInstance().run();

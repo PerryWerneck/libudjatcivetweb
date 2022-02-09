@@ -23,7 +23,7 @@
 
  using namespace Udjat;
 
- CivetWeb::Protocol::Protocol(const char *name, const ModuleInfo *info, int ssl) : Udjat::Protocol(name,info), use_ssl(ssl) {
+ CivetWeb::Protocol::Protocol(const char *name, const ModuleInfo &info, int ssl) : Udjat::Protocol(name,info), use_ssl(ssl) {
  }
 
  CivetWeb::Protocol::~Protocol() {

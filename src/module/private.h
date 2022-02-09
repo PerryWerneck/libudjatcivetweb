@@ -56,7 +56,7 @@
 			int use_ssl;
 
 		public:
-			Protocol(const char *name, const ModuleInfo *info, int use_ssl);
+			Protocol(const char *name, const ModuleInfo &info, int use_ssl);
 			virtual ~Protocol();
 
 			std::string call(const URL &url, const HTTP::Method method, const char *payload = "") const override;

@@ -36,26 +36,20 @@
  static int log_message(const struct mg_connection *conn, const char *message);
  static int http_error( struct mg_connection *conn, int status, const char *msg );
 
- static const Udjat::ModuleInfo moduleinfo{
-	PACKAGE_NAME,																		// The module name.
-	"CivetWEB " CIVETWEB_VERSION " HTTP module for " STRINGIZE_VALUE_OF(PRODUCT_NAME), 	// The module description.
-	PACKAGE_VERSION, 																	// The module version.
-	PACKAGE_URL, 																		// The package URL.
-	PACKAGE_BUGREPORT 																	// The bugreport address.
- };
+ static const Udjat::ModuleInfo moduleinfo{"CivetWEB " CIVETWEB_VERSION " HTTP module for " STRINGIZE_VALUE_OF(PRODUCT_NAME) };
 
  class Module : public Udjat::Module, public MainLoop::Service {
  private:
 	struct mg_context *ctx;
 
 	struct {
-		CivetWeb::Protocol http{"http",&moduleinfo,0};
-		CivetWeb::Protocol https{"https",&moduleinfo,1};
+		CivetWeb::Protocol http{"http",moduleinfo,0};
+		CivetWeb::Protocol https{"https",moduleinfo,1};
 	} protocols;
 
  public:
 
- 	Module() : Udjat::Module("httpd",&moduleinfo), MainLoop::Service(&moduleinfo), ctx(NULL) {
+ 	Module() : Udjat::Module("httpd",moduleinfo), MainLoop::Service(moduleinfo), ctx(NULL) {
 
 		mg_init_library(0);
 

@@ -39,7 +39,7 @@
 		CivetWeb::Report response;
 
 		// Run report.
-		Abstract::Agent::get_root()->find(uri.c_str())->get(Request(""),response);
+		Abstract::Agent::root()->find(uri.c_str())->get(Request(""),response);
 
 		return response.to_string();
 
