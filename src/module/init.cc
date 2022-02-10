@@ -137,10 +137,7 @@
  }
 
  bool udjat_module_deinit() {
-
-	// Can't unload this module because of the http/https protocol modules.
-	return false;
-
+	return true;
  }
 
  #pragma GCC diagnostic push
