@@ -44,26 +44,25 @@
 		</Linker>
 		<Unit filename="conf/50-civetweb.conf" />
 		<Unit filename="src/include/config.h" />
-		<Unit filename="src/include/tools.h" />
 		<Unit filename="src/include/udjat/civetweb.h" />
+		<Unit filename="src/include/udjat/tools/http/report.h" />
+		<Unit filename="src/include/udjat/tools/http/request.h" />
 		<Unit filename="src/include/udjat/tools/http/value.h" />
+		<Unit filename="src/library/layout/json.cc" />
+		<Unit filename="src/library/layout/xml.cc" />
+		<Unit filename="src/library/report.cc" />
 		<Unit filename="src/library/request.cc" />
+		<Unit filename="src/library/response.cc" />
 		<Unit filename="src/library/value.cc" />
 		<Unit filename="src/module/api.cc" />
 		<Unit filename="src/module/download.cc" />
 		<Unit filename="src/module/handler.cc" />
 		<Unit filename="src/module/init.cc" />
-		<Unit filename="src/module/layout/json.cc" />
-		<Unit filename="src/module/layout/xml.cc" />
 		<Unit filename="src/module/private.h" />
 		<Unit filename="src/module/protocol.cc" />
-		<Unit filename="src/module/report/handler.cc" />
-		<Unit filename="src/module/report/report.cc" />
-		<Unit filename="src/module/request.cc" />
-		<Unit filename="src/module/response.cc" />
+		<Unit filename="src/module/report.cc" />
 		<Unit filename="src/module/swagger.cc" />
 		<Unit filename="src/module/urlresponse.cc" />
-		<Unit filename="src/module/value.cc" />
 		<Unit filename="src/testprogram/testprogram.cc" />
 		<Extensions>
 			<lib_finder disable_auto="1" />

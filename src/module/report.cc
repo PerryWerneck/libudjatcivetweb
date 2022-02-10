@@ -19,20 +19,27 @@
 
  #include "private.h"
  #include <udjat/worker.h>
- #include <udjat/civetweb.h>
+ #include <udjat/agent.h>
+ #include <udjat/tools/http/mimetype.h>
  #include <udjat/tools/protocol.h>
  #include <udjat/tools/http/exception.h>
 
- int apiWebHandler(struct mg_connection *conn, void UDJAT_UNUSED(*cbdata)) {
+ int reportWebHandler(struct mg_connection *conn, void UDJAT_UNUSED(*cbdata)) {
 
-	return webHandler(conn,[](const string &url, const char *method, const MimeType mimetype){
+	return webHandler(conn,[](const string &uri, const char *method, const MimeType mimetype){
 
-		HTTP::Response response(mimetype);
-		HTTP::Request request(url.c_str(),method);
-
-		if(!Worker::work(request.getMethod(),request,response)) {
-			throw HTTP::Exception(405, url.c_str(), "Method Not Allowed");
+		if(strcasecmp(method,"get")) {
+			throw HTTP::Exception(405, uri.c_str(), "Method Not Allowed");
 		}
+
+		if(mimetype != MimeType::json) {
+			throw HTTP::Exception(501, uri.c_str(), "Mimetype Not Supported");
+		}
+
+		HTTP::Report response;
+
+		// Run report.
+		Abstract::Agent::root()->find(uri.c_str())->get(Request(""),response);
 
 		return response.to_string();
 

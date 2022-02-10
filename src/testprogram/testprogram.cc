@@ -114,7 +114,7 @@ void test_http_get() {
 
 static void test_report() {
 
-	CivetWeb::Report report;
+	HTTP::Report report;
 
 	report.start("sample","v1","v2","v3",nullptr);
 
@@ -136,11 +136,13 @@ int main(int argc, char **argv) {
 
 	Module * module = udjat_module_init();
 
+	/*
 	if(URL("http://127.0.0.1/~perry/test.xml").get("/tmp/localhost.html")) {
 		cout << endl << endl << "File was updated!" << endl << endl;
 	}
+	*/
 
-	// test_httpd();
+	test_httpd();
 	// test_http_get();
 	// test_report();
 

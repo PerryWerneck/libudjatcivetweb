@@ -25,7 +25,7 @@
 
  namespace Udjat {
 
-	CivetWeb::Request::Request(const string &u, const char *t)
+	HTTP::Request::Request(const string &u, const char *t)
 		: Udjat::Request(t) {
 
 		this->path = u;
@@ -33,7 +33,7 @@
 
 	}
 
-	std::string CivetWeb::Request::pop() {
+	std::string HTTP::Request::pop() {
 
 		if(path.empty()) {
 			throw system_error(ENODATA,system_category(),"Not enough arguments");

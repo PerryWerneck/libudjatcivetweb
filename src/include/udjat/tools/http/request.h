@@ -17,34 +17,48 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
- #include "../private.h"
- #include <udjat/worker.h>
- #include <udjat/agent.h>
- #include <udjat/tools/http/mimetype.h>
- #include <udjat/tools/protocol.h>
- #include <udjat/tools/http/exception.h>
+ #pragma once
 
- int reportWebHandler(struct mg_connection *conn, void UDJAT_UNUSED(*cbdata)) {
+ #include <udjat/defs.h>
+ #include <udjat/request.h>
 
-	return webHandler(conn,[](const string &uri, const char *method, const MimeType mimetype){
+ namespace Udjat {
 
-		if(strcasecmp(method,"get")) {
-			throw HTTP::Exception(405, uri.c_str(), "Method Not Allowed");
-		}
+	namespace HTTP {
 
-		if(mimetype != MimeType::json) {
-			throw HTTP::Exception(501, uri.c_str(), "Mimetype Not Supported");
-		}
+		class UDJAT_API Request : public Udjat::Request {
+		public:
+			Request(const std::string &url, const char *type);
 
-		CivetWeb::Report response;
+			std::string pop() override;
 
-		// Run report.
-		Abstract::Agent::root()->find(uri.c_str())->get(Request(""),response);
+		};
 
-		return response.to_string();
+		class UDJAT_API Response : public Udjat::Response {
+		private:
+			Udjat::HTTP::Value *value;
 
-	});
+		public:
+			Response(Udjat::MimeType type);
+			virtual ~Response();
+
+			bool isNull() const override;
+
+			std::string to_string() const;
+
+			Udjat::Value & operator[](const char *name) override;
+
+			Udjat::Value & append(const Type type) override;
+
+			Udjat::Value & reset(const Type type) override;
+
+			Udjat::Value & set(const Value &value) override;
+
+			Udjat::Value & set(const char *value, const Type type) override;
+
+		};
+
+	}
 
  }
-
 

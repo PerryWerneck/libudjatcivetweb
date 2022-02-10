@@ -18,15 +18,16 @@
  */
 
  #include <config.h>
- #include <udjat/civetweb.h>
+ #include <udjat/tools/http/report.h>
  #include <cstdarg>
  #include <iostream>
+ #include <sstream>
 
  using namespace std;
 
  namespace Udjat {
 
-	namespace CivetWeb {
+	namespace HTTP {
 
 		Report::Report() : Udjat::Report() {
 		}

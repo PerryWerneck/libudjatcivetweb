@@ -6,8 +6,7 @@ PACKAGE_NAME=@PACKAGE_NAME@
 MAIN_SOURCES= \
 	$(wildcard src/library/*.cc) \
 	$(wildcard src/module/*.cc) \
-	$(wildcard src/module/report/*.cc) \
-	$(wildcard src/module/layout/*.cc)
+	$(wildcard src/library/layout/*.cc)
 
 TEST_SOURCES= \
 	$(wildcard src/testprogram/*.cc)
