@@ -18,8 +18,10 @@
  */
 
  #include <config.h>
- #include "private.h"
+ #include <udjat/civetweb.h>
  #include <udjat/request.h>
+
+ using namespace std;
 
  namespace Udjat {
 
