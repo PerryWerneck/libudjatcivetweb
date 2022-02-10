@@ -17,7 +17,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
- #include <udjat.h>
  #include <udjat/module.h>
  #include <udjat/tools/logger.h>
  #include <udjat/worker.h>
@@ -76,16 +75,18 @@ static void test_httpd() {
 
 	static Factory factory;
 
-	auto agent = Abstract::Agent::init("${PWD}/test.xml");
+	Udjat::load("./test.xml");
+	auto agent = Abstract::Agent::root();
 
-	cout << "http://localhost:8989/api/1.0/info/modules.xml" << endl;
-	cout << "http://localhost:8989/api/1.0/info/workers.xml" << endl;
-	cout << "http://localhost:8989/api/1.0/info/factories.xml" << endl;
-
-	for(auto agent : *agent) {
-		cout << "http://localhost:8989/api/1.0/agent/" << agent->getName() << ".xml" << endl;
+	if(Module::find("information")) {
+		cout << "http://localhost:8989/api/1.0/info/modules.xml" << endl;
+		cout << "http://localhost:8989/api/1.0/info/workers.xml" << endl;
+		cout << "http://localhost:8989/api/1.0/info/factories.xml" << endl;
 	}
 
+	for(auto agent : *agent) {
+		cout << "http://localhost:8989/api/1.0/agent/" << agent->name() << ".xml" << endl;
+	}
 
 	Udjat::MainLoop::getInstance().run();
 
@@ -95,57 +96,25 @@ static void test_httpd() {
 
 void test_http_get() {
 
-	Udjat::URL url("http://localhost");
 
-	auto response = url.get();
-	cout << "Response was: " << response->getStatusCode() << " " << response->getStatusMessage() << endl;
 
-	if(response->isValid()) {
-		cout << response->c_str() << endl;
+	try {
+
+		Udjat::URL url("http://localhost");
+		cout << "Response for " << url << ": " << endl << url.get() << endl;
+
+	} catch(const std::exception &e) {
+
+		cerr << "Exception: " << e.what() << endl;
+
 	}
 
-	/*
-	char error_buffer[256] = "";
-
-	struct mg_connection *conn =
-		mg_download(
-			"localhost",
-			80,
-			0,
-			error_buffer,
-			sizeof(error_buffer),
-			"GET %s HTTP/1.0\r\n\r\n",
-			"/"
-		);
-
-	if(!conn) {
-		cout << error_buffer << endl;
-		return;
-	}
-
-	const struct mg_response_info *info = mg_get_response_info(conn);
-
-	cout << "Status: " << info->status_code << " " << info->status_text << endl;
-
-	cout << "Length: " << info->content_length << endl;
-
-	char * buffer = new char[info->content_length+1];
-
-	int i = mg_read(conn, buffer, info->content_length);
-	cout << "Read: " << i << endl;
-	buffer[i] = 0;
-
-	cout << buffer << endl;
-
-	delete[] buffer;
-	mg_close_connection(conn);
-	*/
 
 }
 
 static void test_report() {
 
-	CivetWeb::Report report;
+	HTTP::Report report;
 
 	report.start("sample","v1","v2","v3",nullptr);
 
@@ -161,19 +130,17 @@ static void test_report() {
 
 int main(int argc, char **argv) {
 
-	//Logger::redirect();
+	Logger::redirect();
 
 	setlocale( LC_ALL, "" );
 
-	try {
-
-		Module::load("udjat-module-information");
-
-	} catch(const std::exception &e) {
-		cerr << "Error '" << e.what() << "' loading information module" << endl;
-	}
-
 	Module * module = udjat_module_init();
+
+	/*
+	if(URL("http://127.0.0.1/~perry/test.xml").get("/tmp/localhost.html")) {
+		cout << endl << endl << "File was updated!" << endl << endl;
+	}
+	*/
 
 	test_httpd();
 	// test_http_get();

@@ -22,7 +22,8 @@
  #include <config.h>
  #include <udjat/defs.h>
  #include <udjat/tools/url.h>
- #include <udjat/tools/mimetype.h>
+ #include <udjat/tools/protocol.h>
+ #include <udjat/tools/http/mimetype.h>
  #include <cstring>
  #include <string>
  #include <stdexcept>
@@ -45,47 +46,25 @@
  /// @brief Handler for swagger request.
  int swaggerWebHandler(struct mg_connection *conn, void *cbdata);
 
- /// @brief CivetWeb HTTP Response
- class URLResponse : public Udjat::URL::Response {
- private:
+ namespace Udjat {
 
- public:
-	URLResponse(struct mg_connection *conn);
-	virtual ~URLResponse();
-	bool isValid() const noexcept override;
+	namespace CivetWeb {
 
- };
+		/// @brief Base class for HTTP Protocol
+		class Protocol : public Udjat::Protocol {
+		protected:
+			int use_ssl;
 
- /// @brief Base class for HTTP Protocol
- class Protocol : public Udjat::URL::Protocol {
- protected:
-	int use_ssl;
+		public:
+			Protocol(const char *name, const ModuleInfo &info, int use_ssl);
+			virtual ~Protocol();
 
- public:
-	Protocol(const char *name, const char *port, const ModuleInfo *info, int use_ssl);
-	virtual ~Protocol();
-	std::shared_ptr<URL::Response> call(const URL &url, const URL::Method method, const char *mimetype, const char *payload) override;
+			std::string call(const URL &url, const HTTP::Method method, const char *payload = "") const override;
+			bool get(const URL &url, const char *filename) const override;
 
- };
+		};
 
- class http_error : public std::exception {
- private:
-	int id = 500;
-	string message;
-
- public:
-	http_error(int i, const char *m) : id(i), message(m) {
 	}
 
-	virtual ~http_error() {
-	}
+ }
 
-	inline int code() const noexcept {
-		return this->id;
-	}
-
-	const char* what() const noexcept override {
-		return this->message.c_str();
-	}
-
- };

@@ -20,25 +20,26 @@
  #include <config.h>
  #include <udjat/civetweb.h>
  #include <iostream>
+ #include <sstream>
 
  using namespace std;
 
  namespace Udjat {
 
-	CivetWeb::Response::Response(Udjat::MimeType type) {
+	HTTP::Response::Response(Udjat::MimeType type) {
 		this->type = type;
-		this->value = new CivetWeb::Value();
+		this->value = new HTTP::Value();
 	}
 
-	CivetWeb::Response::~Response() {
+	HTTP::Response::~Response() {
 		delete this->value;
 	}
 
-	bool CivetWeb::Response::isNull() const {
+	bool HTTP::Response::isNull() const {
 		return this->value->isNull();
 	}
 
-	std::string CivetWeb::Response::to_string() const {
+	std::string HTTP::Response::to_string() const {
 
 		std::stringstream ss;
 
@@ -60,23 +61,23 @@
 		return ss.str();
 	}
 
-	Udjat::Value & CivetWeb::Response::operator[](const char *name) {
+	Udjat::Value & HTTP::Response::operator[](const char *name) {
 		return (*this->value)[name];
 	}
 
-	Udjat::Value & CivetWeb::Response::append(const Type type) {
+	Udjat::Value & HTTP::Response::append(const Type type) {
 		return this->value->append(type);
 	}
 
-	Udjat::Value & CivetWeb::Response::reset(const Type type) {
+	Udjat::Value & HTTP::Response::reset(const Type type) {
 		return this->value->reset(type);
 	}
 
-	Udjat::Value & CivetWeb::Response::set(const Value &value) {
+	Udjat::Value & HTTP::Response::set(const Value &value) {
 		return this->value->set(value);
 	}
 
-	Udjat::Value & CivetWeb::Response::set(const char *value, const Type type) {
+	Udjat::Value & HTTP::Response::set(const char *value, const Type type) {
 		return this->value->set(value,type);
 	}
 

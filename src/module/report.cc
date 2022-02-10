@@ -17,37 +17,34 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
- #include <config.h>
  #include "private.h"
- #include <udjat/request.h>
+ #include <udjat/worker.h>
+ #include <udjat/agent.h>
+ #include <udjat/tools/http/mimetype.h>
+ #include <udjat/tools/protocol.h>
+ #include <udjat/tools/http/exception.h>
 
- namespace Udjat {
+ int reportWebHandler(struct mg_connection *conn, void UDJAT_UNUSED(*cbdata)) {
 
-	CivetWeb::Request::Request(const string &u, const char *t)
-		: Udjat::Request(t) {
+	return webHandler(conn,[](const string &uri, const char *method, const MimeType mimetype){
 
-		this->path = u;
-		this->method = pop();
-
-	}
-
-	std::string CivetWeb::Request::pop() {
-
-		if(path.empty()) {
-			throw system_error(ENODATA,system_category(),"Not enough arguments");
+		if(strcasecmp(method,"get")) {
+			throw HTTP::Exception(405, uri.c_str(), "Method Not Allowed");
 		}
 
-		size_t pos = path.find('/');
-		if(pos == string::npos) {
-			string rc = path;
-			path.clear();
-			return rc;
+		if(mimetype != MimeType::json) {
+			throw HTTP::Exception(501, uri.c_str(), "Mimetype Not Supported");
 		}
 
-		string rc{path.c_str(),pos};
-		path.erase(0,pos+1);
+		HTTP::Report response;
 
-		return rc;
-	}
+		// Run report.
+		Abstract::Agent::root()->find(uri.c_str())->get(Request(""),response);
+
+		return response.to_string();
+
+	});
 
  }
+
+

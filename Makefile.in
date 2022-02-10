@@ -4,9 +4,9 @@
 PACKAGE_NAME=@PACKAGE_NAME@
 
 MAIN_SOURCES= \
+	$(wildcard src/library/*.cc) \
 	$(wildcard src/module/*.cc) \
-	$(wildcard src/module/report/*.cc) \
-	$(wildcard src/module/layout/*.cc)
+	$(wildcard src/library/layout/*.cc)
 
 TEST_SOURCES= \
 	$(wildcard src/testprogram/*.cc)
@@ -171,7 +171,7 @@ install-conf:
 		$(DESTDIR)$(sysconfdir)/udjat.conf.d
 		
 	@$(INSTALL_DATA) \
-		conf/50-civetweb.conf \
+		conf.d/50-civetweb.conf \
 		$(DESTDIR)$(sysconfdir)/udjat.conf.d		
 			
 #---[ Uninstall Targets ]----------------------------------------------------------------

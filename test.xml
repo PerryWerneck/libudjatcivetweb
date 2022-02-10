@@ -2,6 +2,8 @@
 
 <config>
 
+	<module name='information' required='no' />
+
 	<agent name='intvalue' type='integer' value='0'>
 
 	</agent>

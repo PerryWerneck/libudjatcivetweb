@@ -19,9 +19,46 @@
 
  #pragma once
 
- #include <config.h>
- #include <stdint.h>
+ #include <udjat/defs.h>
+ #include <udjat/request.h>
 
- /// @brief Convert system error to http
- int sysErrorToHttp(int syserror);
+ namespace Udjat {
+
+	namespace HTTP {
+
+		class UDJAT_API Request : public Udjat::Request {
+		public:
+			Request(const std::string &url, const char *type);
+
+			std::string pop() override;
+
+		};
+
+		class UDJAT_API Response : public Udjat::Response {
+		private:
+			Udjat::HTTP::Value *value;
+
+		public:
+			Response(Udjat::MimeType type);
+			virtual ~Response();
+
+			bool isNull() const override;
+
+			std::string to_string() const;
+
+			Udjat::Value & operator[](const char *name) override;
+
+			Udjat::Value & append(const Type type) override;
+
+			Udjat::Value & reset(const Type type) override;
+
+			Udjat::Value & set(const Value &value) override;
+
+			Udjat::Value & set(const char *value, const Type type) override;
+
+		};
+
+	}
+
+ }
 

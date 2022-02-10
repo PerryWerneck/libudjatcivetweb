@@ -18,7 +18,96 @@
  */
 
  #include "private.h"
+ #include <udjat/tools/protocol.h>
+ #include <udjat/tools/http/exception.h>
 
+ using namespace Udjat;
+
+ CivetWeb::Protocol::Protocol(const char *name, const ModuleInfo &info, int ssl) : Udjat::Protocol(name,info), use_ssl(ssl) {
+ }
+
+ CivetWeb::Protocol::~Protocol() {
+ }
+
+ std::string CivetWeb::Protocol::call(const URL &url, const HTTP::Method method, const char *payload) const {
+
+	URL::Components components = url.ComponentsFactory();
+
+	string header{	"Connection: close\r\n"
+					"User-Agent: " STRINGIZE_VALUE_OF(PRODUCT_NAME) "\r\n"
+					"Host: "
+				};
+
+	header += components.hostname;
+	header += "\r\n";
+
+	char error_buffer[256] = "";
+ 	struct mg_connection *conn =
+		mg_download(
+			components.hostname.c_str(),
+			components.portnumber(),
+			use_ssl,
+			error_buffer,
+			sizeof(error_buffer),
+			"%s %s HTTP/1.0\r\n%s\r\n%s",
+			std::to_string(method),
+			(components.path.empty() ? "/" : components.path.c_str()),
+			header.c_str(),
+			payload
+		);
+
+	if(!conn) {
+		throw runtime_error(error_buffer);
+	}
+
+	string response;
+
+	try {
+
+		const struct mg_response_info *info = mg_get_response_info(conn);
+
+		// cout << "civetweb\tServer response was '" << info->status_code << " " << info->status_code << "'" << endl;
+
+		if(info->status_code < 200 || info->status_code > 299) {
+
+			throw HTTP::Exception(info->status_code, url.c_str(), info->status_text);
+
+		} else if((unsigned int) info->content_length >= response.max_size()) {
+
+			throw system_error(E2BIG,system_category(),"The response is too big for current implementation");
+
+		} else if(info->content_length > 0) {
+
+			response.reserve(info->content_length+1);
+
+			// Has data, read it.
+			char * buffer = new char [info->content_length + 1];
+
+			int szRead = mg_read(conn, (void *) buffer, info->content_length);
+
+			if(szRead != info->content_length) {
+				delete[] buffer;
+				throw runtime_error(string{"Got '"} + to_string(szRead) + "' when expecting '" + to_string(info->content_length) + "'");
+			}
+
+			buffer[info->content_length] = 0;
+			response.assign(buffer);
+			delete[] buffer;
+
+		}
+
+	} catch(...) {
+
+		mg_close_connection(conn);
+		throw;
+	}
+
+	mg_close_connection(conn);
+
+	return response;
+ }
+
+ /*
  Protocol::Protocol(const char *name, const char *portname, const ModuleInfo *info, int s) : Udjat::URL::Protocol(name,portname,info), use_ssl(s) {
  }
 
@@ -59,7 +148,7 @@
 	// GET /home.html HTTP/1.1
 	// Host: developer.mozilla.org
 	// User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:50.0) Gecko/20100101 Firefox/50.0
-	// Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+	// Accept: text/html,application/xhtml+xml,application/xml;q=0.9,-/-;q=0.8
 	// Accept-Language: en-US,en;q=0.5
 	// Accept-Encoding: gzip, deflate, br
 	// Referer: https://developer.mozilla.org/testpage.html
@@ -69,7 +158,6 @@
 	// If-None-Match: "c561c68d0ba92bbeb8b0fff2a9199f722e3a621a"
 	// Cache-Control: max-age=0
 	//
-	/*
 	if(this->maxage) {
 
 			rsp     << "Cache-Control: " << (auth.isAuthenticated() ? "private" : "public") << ", max-age=" << string().set("%u",(unsigned int) maxage) << "\r\n"
@@ -82,7 +170,6 @@
 					<< "Pragma: no-cache\r\n"
 					<< "Expires: 0\r\n";
 	}
-	*/
 
  	struct mg_connection *conn =
 		mg_download(
@@ -114,3 +201,4 @@
 
 	return response;
  }
+*/
