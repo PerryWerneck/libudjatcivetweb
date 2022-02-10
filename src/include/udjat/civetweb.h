@@ -21,56 +21,13 @@
 
  #include <udjat/defs.h>
  #include <udjat/request.h>
- #include <udjat/tools/value.h>
+ #include <udjat/tools/http/value.h>
  #include <sstream>
- #include <map>
  #include <list>
 
  namespace Udjat {
 
  	namespace CivetWeb {
-
-		class UDJAT_API Value : public Udjat::Value {
-		private:
-			Udjat::Value::Type type;
-			std::string value;
-			std::map<std::string,Value *> children;
-
-		public:
-
-			Value(Udjat::Value::Type t = Udjat::Value::Undefined);
-			virtual ~Value();
-
-			bool isNull() const override;
-
-			inline Udjat::Value::Type getType() const noexcept {
-				return this->type;
-			}
-
-			void json(std::stringstream &ss) const;
-			void xml(std::stringstream &ss) const;
-
-			std::string to_string() const;
-
-			Udjat::Value & operator[](const char *name) override;
-
-			Udjat::Value & append(const Type type) override;
-
-			Udjat::Value & reset(const Type type) override;
-
-			Udjat::Value & set(const Udjat::Value &value) override;
-
-			Udjat::Value & set(const char *value, const Type type) override;
-
-			Udjat::Value & set(const Udjat::TimeStamp value) override;
-
-			Udjat::Value & setFraction(const float fraction);
-
-			Udjat::Value & set(const float value);
-
-			Udjat::Value & set(const double value);
-
-		};
 
 		class UDJAT_API Request : public Udjat::Request {
 		public:
@@ -82,7 +39,7 @@
 
 		class UDJAT_API Response : public Udjat::Response {
 		private:
-			CivetWeb::Value *value;
+			Udjat::HTTP::Value *value;
 
 		public:
 			Response(Udjat::MimeType type);
@@ -108,7 +65,7 @@
 		private:
 
 			/// @brief Report contents
-			std::list<Value> values;
+			std::list<HTTP::Value> values;
 
 			void json(std::stringstream &ss) const;
 

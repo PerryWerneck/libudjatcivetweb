@@ -46,6 +46,9 @@
 		<Unit filename="src/include/config.h" />
 		<Unit filename="src/include/tools.h" />
 		<Unit filename="src/include/udjat/civetweb.h" />
+		<Unit filename="src/include/udjat/tools/http/value.h" />
+		<Unit filename="src/library/request.cc" />
+		<Unit filename="src/library/value.cc" />
 		<Unit filename="src/module/api.cc" />
 		<Unit filename="src/module/download.cc" />
 		<Unit filename="src/module/handler.cc" />

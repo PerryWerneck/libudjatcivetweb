@@ -71,84 +71,84 @@
 		}
 
 		Udjat::Report & Report::push_back(const char *value) {
-			Value v;
+			HTTP::Value v;
 			v << value;
 			values.push_back(v);
 			return *this;
 		}
 
 		Udjat::Report & Report::push_back(const std::string &value) {
-			Value v;
+			HTTP::Value v;
 			v << value;
 			values.push_back(v);
 			return *this;
 		}
 
 		Udjat::Report & Report::push_back(const short value) {
-			Value v;
+			HTTP::Value v;
 			v << value;
 			values.push_back(v);
 			return *this;
 		}
 
 		Udjat::Report & Report::push_back(const unsigned short value) {
-			Value v;
+			HTTP::Value v;
 			v << value;
 			values.push_back(v);
 			return *this;
 		}
 
 		Udjat::Report & Report::push_back(const int value) {
-			Value v;
+			HTTP::Value v;
 			v << value;
 			values.push_back(v);
 			return *this;
 		}
 
 		Udjat::Report & Report::push_back(const unsigned int value) {
-			Value v;
+			HTTP::Value v;
 			v << value;
 			values.push_back(v);
 			return *this;
 		}
 
 		Udjat::Report & Report::push_back(const long value) {
-			Value v;
+			HTTP::Value v;
 			v << value;
 			values.push_back(v);
 			return *this;
 		}
 
 		Udjat::Report & Report::push_back(const unsigned long value) {
-			Value v;
+			HTTP::Value v;
 			v << value;
 			values.push_back(v);
 			return *this;
 		}
 
 		Udjat::Report & Report::push_back(const Udjat::TimeStamp value) {
-			Value v;
+			HTTP::Value v;
 			v << value;
 			values.push_back(v);
 			return *this;
 		}
 
 		Udjat::Report & Report::push_back(const bool value) {
-			Value v;
+			HTTP::Value v;
 			v << value;
 			values.push_back(v);
 			return *this;
 		}
 
 		Udjat::Report & Report::push_back(const float value) {
-			Value v;
+			HTTP::Value v;
 			v << value;
 			values.push_back(v);
 			return *this;
 		}
 
 		Udjat::Report & Report::push_back(const double value) {
-			Value v;
+			HTTP::Value v;
 			v << value;
 			values.push_back(v);
 			return *this;

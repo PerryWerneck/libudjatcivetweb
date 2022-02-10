@@ -26,14 +26,14 @@
 
  namespace Udjat {
 
-	CivetWeb::Value::Value(Udjat::Value::Type t) : type(t) {
+	HTTP::Value::Value(Udjat::Value::Type t) : type(t) {
 	}
 
-	CivetWeb::Value::~Value() {
+	HTTP::Value::~Value() {
 		reset(Udjat::Value::Undefined);
 	}
 
-	Value & CivetWeb::Value::reset(const Udjat::Value::Type type) {
+	Value & HTTP::Value::reset(const Udjat::Value::Type type) {
 
 		if(type != this->type) {
 
@@ -54,11 +54,11 @@
 
 	}
 
-	bool CivetWeb::Value::isNull() const {
+	bool HTTP::Value::isNull() const {
 		return this->type == Udjat::Value::Undefined;
 	}
 
-	Value & CivetWeb::Value::operator[](const char *name) {
+	Value & HTTP::Value::operator[](const char *name) {
 
 		reset(Udjat::Value::Object);
 
@@ -74,7 +74,7 @@
 		return *rc;
 	}
 
-	Value & CivetWeb::Value::append(const Type type) {
+	Value & HTTP::Value::append(const Type type) {
 		reset(Udjat::Value::Array);
 
 		Value * rc = new Value(type);
@@ -83,45 +83,45 @@
 		return *rc;
 	}
 
-	Value & CivetWeb::Value::set(const char *value, const Type type) {
+	Value & HTTP::Value::set(const char *value, const Type type) {
 		reset(type);
 		this->value = value;
 		return *this;
 	}
 
-	Value & CivetWeb::Value::set(const Udjat::Value UDJAT_UNUSED(&value)) {
+	Value & HTTP::Value::set(const Udjat::Value UDJAT_UNUSED(&value)) {
 		throw runtime_error("Not implemented");
 		return *this;
 	}
 
-	Value & CivetWeb::Value::set(const Udjat::TimeStamp value) {
+	Value & HTTP::Value::set(const Udjat::TimeStamp value) {
 		if(value)
 			return this->set(value.to_string(TIMESTAMP_FORMAT_JSON).c_str(),Udjat::Value::String);
 		return this->set("false",Value::Type::Boolean);
 	}
 
-	Udjat::Value & CivetWeb::Value::setFraction(const float fraction) {
+	Udjat::Value & HTTP::Value::setFraction(const float fraction) {
 		std::stringstream out;
 		out.imbue(std::locale("C"));
 		out << std::fixed << std::setprecision(2) << (fraction *100);
 		return Udjat::Value::set(out.str(),Value::Real);
 	}
 
-	Value & CivetWeb::Value::set(const float value) {
+	Value & HTTP::Value::set(const float value) {
 		std::stringstream out;
 		out.imbue(std::locale("C"));
 		out << value;
 		return Udjat::Value::set(out.str(),Value::Real);
 	}
 
-	Value & CivetWeb::Value::set(const double value) {
+	Value & HTTP::Value::set(const double value) {
 		std::stringstream out;
 		out.imbue(std::locale("C"));
 		out << value;
 		return Udjat::Value::set(out.str(),Value::Real);
 	}
 
-	std::string CivetWeb::Value::to_string() const {
+	std::string HTTP::Value::to_string() const {
 		return this->value;
 	}
 

@@ -27,7 +27,7 @@
 
 	CivetWeb::Response::Response(Udjat::MimeType type) {
 		this->type = type;
-		this->value = new CivetWeb::Value();
+		this->value = new HTTP::Value();
 	}
 
 	CivetWeb::Response::~Response() {

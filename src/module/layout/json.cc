@@ -24,7 +24,7 @@
 
  namespace Udjat {
 
-	void CivetWeb::Value::json(std::stringstream &ss) const {
+	void HTTP::Value::json(std::stringstream &ss) const {
 
 		switch(this->type) {
 		case Udjat::Value::Undefined:
