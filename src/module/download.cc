@@ -33,7 +33,7 @@
  using namespace Udjat;
  using namespace std;
 
- bool CivetWeb::Protocol::get(const URL &url, const char *filename) const {
+ bool CivetWeb::Protocol::get(const URL &url, const char *filename, const std::function<bool(double current, double total)> &progress) const {
 
 	//
 	// Get file status.
@@ -91,6 +91,8 @@
 	cout << header << endl;
 #endif // DEBUG
 
+	progress(0,0);
+
 	//
 	// Create connection
 	//
@@ -132,10 +134,10 @@
 					<< "' updating '" << filename << "'" << endl;
 
 			{
-				size_t loaded = 0;
+				long long loaded = 0;
 				char buffer[4096];
 
-				while(loaded < (size_t) info->content_length) {
+				while(loaded < info->content_length) {
 
 					int szRead = mg_read(conn, (void *) buffer, 4096);
 
@@ -146,6 +148,9 @@
 					} else {
 						loaded += (size_t) szRead;
 						response.write((void *) buffer, szRead);
+						if(!progress((double) loaded, (double) info->content_length)) {
+							throw system_error(ECANCELED,system_category());
+						}
 					}
 
 				}

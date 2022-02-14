@@ -39,9 +39,11 @@
 
 static void test_httpd() {
 
+	static const ModuleInfo moduleinfo{"civetweb-tester"};
+
 	class Factory : public Udjat::Factory {
 	public:
-		Factory() : Udjat::Factory("random") {
+		Factory() : Udjat::Factory("random",moduleinfo) {
 			cout << "random agent factory was created" << endl;
 			srand(time(NULL));
 		}
