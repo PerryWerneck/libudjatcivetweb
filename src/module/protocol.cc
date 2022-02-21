@@ -29,7 +29,7 @@
  CivetWeb::Protocol::~Protocol() {
  }
 
- std::string CivetWeb::Protocol::call(const URL &url, const HTTP::Method method, const char *payload) const {
+ Udjat::String CivetWeb::Protocol::call(const URL &url, const HTTP::Method method, const char *payload) const {
 
 	URL::Components components = url.ComponentsFactory();
 
@@ -60,7 +60,7 @@
 		throw runtime_error(error_buffer);
 	}
 
-	string response;
+	Udjat::String response;
 
 	try {
 

@@ -24,6 +24,7 @@
  #include <udjat/tools/url.h>
  #include <udjat/tools/protocol.h>
  #include <udjat/tools/http/mimetype.h>
+ #include <udjat/tools/string.h>
  #include <cstring>
  #include <string>
  #include <stdexcept>
@@ -59,7 +60,7 @@
 			Protocol(const char *name, const ModuleInfo &info, int use_ssl);
 			virtual ~Protocol();
 
-			std::string call(const URL &url, const HTTP::Method method, const char *payload = "") const override;
+			Udjat::String call(const URL &url, const HTTP::Method method, const char *payload = "") const override;
 			bool get(const URL &url, const char *filename, const std::function<bool(double current, double total)> &progress) const override;
 
 		};
