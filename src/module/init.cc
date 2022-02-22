@@ -43,8 +43,8 @@
 	struct mg_context *ctx;
 
 	struct {
-		CivetWeb::Protocol http{"http",moduleinfo,0};
-		CivetWeb::Protocol https{"https",moduleinfo,1};
+		CivetWeb::Protocol http{"http",moduleinfo};
+		CivetWeb::Protocol https{"https",moduleinfo};
 	} protocols;
 
  public:
@@ -53,16 +53,7 @@
 
 		mg_init_library(0);
 
-#ifdef DEBUG
-		cout << "---------------------------------" << endl;
-
-		CivetWeb::Worker worker{"http://localhost"};
-		cout << worker.Udjat::Protocol::Worker::get() << endl;
-
-		cout << "---------------------------------" << endl;
-#endif // DEBUG
-
- 	};
+	};
 
  	virtual ~Module() {
 

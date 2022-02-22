@@ -137,11 +137,9 @@ int main(int argc, char **argv) {
 
 	Module * module = udjat_module_init();
 
-	/*
 	if(URL("http://127.0.0.1/~perry/test.xml").get("/tmp/localhost.html")) {
 		cout << endl << endl << "File was updated!" << endl << endl;
 	}
-	*/
 
 	// test_httpd();
 	// test_http_get();

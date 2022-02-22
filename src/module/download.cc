@@ -33,6 +33,7 @@
  using namespace Udjat;
  using namespace std;
 
+ /*
  bool CivetWeb::Protocol::get(const URL &url, const char *filename, const std::function<bool(double current, double total)> &progress) const {
 
 	//
@@ -202,5 +203,6 @@
 	return status;
 
  }
+ */
 
 

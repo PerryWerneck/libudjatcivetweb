@@ -23,12 +23,17 @@
 
  using namespace Udjat;
 
- CivetWeb::Protocol::Protocol(const char *name, const ModuleInfo &info, int ssl) : Udjat::Protocol(name,info), use_ssl(ssl) {
+ CivetWeb::Protocol::Protocol(const char *name, const ModuleInfo &info) : Udjat::Protocol(name,info) {
  }
 
  CivetWeb::Protocol::~Protocol() {
  }
 
+ std::shared_ptr<Udjat::Protocol::Worker> CivetWeb::Protocol::WorkerFactory() const {
+	return make_shared<CivetWeb::Worker>();
+ }
+
+ /*
  Udjat::String CivetWeb::Protocol::call(const URL &url, const HTTP::Method method, const char *payload) const {
 
 	URL::Components components = url.ComponentsFactory();
@@ -106,6 +111,7 @@
 
 	return response;
  }
+ */
 
  /*
  Protocol::Protocol(const char *name, const char *portname, const ModuleInfo *info, int s) : Udjat::URL::Protocol(name,portname,info), use_ssl(s) {

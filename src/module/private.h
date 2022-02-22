@@ -95,15 +95,17 @@
 
 		/// @brief Base class for HTTP Protocol
 		class Protocol : public Udjat::Protocol {
-		protected:
-			int use_ssl;
+		//protected:
+		//	int use_ssl;
 
 		public:
-			Protocol(const char *name, const ModuleInfo &info, int use_ssl);
+			Protocol(const char *name, const ModuleInfo &info);
 			virtual ~Protocol();
 
-			Udjat::String call(const URL &url, const HTTP::Method method, const char *payload = "") const override;
-			bool get(const URL &url, const char *filename, const std::function<bool(double current, double total)> &progress) const override;
+			std::shared_ptr<Worker> WorkerFactory() const override;
+
+			// Udjat::String call(const URL &url, const HTTP::Method method, const char *payload = "") const override;
+			// bool get(const URL &url, const char *filename, const std::function<bool(double current, double total)> &progress) const override;
 
 		};
 
