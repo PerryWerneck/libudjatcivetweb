@@ -31,6 +31,8 @@
  #include <civetweb.h>
  #include <udjat/civetweb.h>
  #include <iostream>
+ #include <list>
+ #include <cstring>
 
  using namespace Udjat;
  using namespace std;
@@ -50,6 +52,46 @@
  namespace Udjat {
 
 	namespace CivetWeb {
+
+		class Worker;
+
+		/// @brief CivetWeb protocol header
+		class Header : public Udjat::Protocol::Header {
+		private:
+			friend class Worker;
+
+			std::string name;
+
+		public:
+			Header(const Header &src) = delete;
+			Header(const Header *src) = delete;
+
+			Header(const char *n) : name(n) {
+			}
+
+			inline bool operator == (const char *name) const noexcept {
+				return strcasecmp(name,this->name.c_str()) == 0;
+			}
+
+		};
+
+		/// @brief CivetWeb protocol worker.
+		class Worker : public Udjat::Protocol::Worker {
+		private:
+			std::list<Header> headers;
+
+			/// @brief Connect to server, send request.
+			struct mg_connection * connect();
+
+		public:
+			Worker(const char *url = "", const HTTP::Method method = HTTP::Get, const char *payload = "");
+
+			Udjat::Protocol::Header & header(const char *name) override;
+
+			Udjat::String get(const std::function<bool(double current, double total)> &progress) override;
+			bool save(const char *filename, const std::function<bool(double current, double total)> &progress) override;
+
+		};
 
 		/// @brief Base class for HTTP Protocol
 		class Protocol : public Udjat::Protocol {

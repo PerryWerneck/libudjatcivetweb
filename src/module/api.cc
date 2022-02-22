@@ -22,6 +22,7 @@
  #include <udjat/civetweb.h>
  #include <udjat/tools/protocol.h>
  #include <udjat/tools/http/exception.h>
+ #include <udjat/tools/http/request.h>
 
  int apiWebHandler(struct mg_connection *conn, void UDJAT_UNUSED(*cbdata)) {
 

@@ -20,6 +20,7 @@
  #include <config.h>
  #include <udjat/civetweb.h>
  #include <udjat/request.h>
+ #include <udjat/tools/http/request.h>
 
  using namespace std;
 

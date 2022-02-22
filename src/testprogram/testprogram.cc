@@ -19,6 +19,7 @@
 
  #include <udjat/module.h>
  #include <udjat/tools/logger.h>
+ #include <udjat/tools/http/report.h>
  #include <udjat/worker.h>
  #include <udjat/tools/url.h>
  #include <udjat/factory.h>
@@ -98,8 +99,6 @@ static void test_httpd() {
 
 void test_http_get() {
 
-
-
 	try {
 
 		Udjat::URL url("http://localhost");
@@ -144,7 +143,7 @@ int main(int argc, char **argv) {
 	}
 	*/
 
-	test_httpd();
+	// test_httpd();
 	// test_http_get();
 	// test_report();
 

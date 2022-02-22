@@ -23,6 +23,7 @@
  #include <udjat/tools/http/mimetype.h>
  #include <udjat/tools/protocol.h>
  #include <udjat/tools/http/exception.h>
+ #include <udjat/tools/http/report.h>
 
  int reportWebHandler(struct mg_connection *conn, void UDJAT_UNUSED(*cbdata)) {
 

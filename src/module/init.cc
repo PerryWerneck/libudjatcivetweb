@@ -53,6 +53,15 @@
 
 		mg_init_library(0);
 
+#ifdef DEBUG
+		cout << "---------------------------------" << endl;
+
+		CivetWeb::Worker worker{"http://localhost"};
+		cout << worker.Udjat::Protocol::Worker::get() << endl;
+
+		cout << "---------------------------------" << endl;
+#endif // DEBUG
+
  	};
 
  	virtual ~Module() {
