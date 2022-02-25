@@ -44,27 +44,17 @@
 
 		}
 
-		Udjat::Protocol::Header & Worker::header(const char *name) {
-
-			for(Header &header : headers) {
-				if(header == name) {
-					return header;
-				}
-			}
-
-			headers.emplace_back(name);
-			return headers.back();
-
-		}
-
 		struct mg_connection * Worker::connect() {
 
-			URL::Components components = args.url.ComponentsFactory();
+			URL::Components components = url().ComponentsFactory();
 			header("Host") = components.hostname;
 
 			string hdr;
-			for(Header &header : headers) {
-				hdr += header.name + ":" + header.c_str() + "\r\n";
+			for(Protocol::Header &header : headers) {
+				hdr += header.name();
+				hdr += ":";
+				hdr += header.value();
+				hdr += "\r\n";
 			}
 
 			char error_buffer[256] = "";
@@ -76,10 +66,10 @@
 					error_buffer,
 					sizeof(error_buffer),
 					"%s %s HTTP/1.0\r\n%s\r\n%s",
-					std::to_string(args.method),
+					std::to_string(method()),
 					(components.path.empty() ? "/" : components.path.c_str()),
 					hdr.c_str(),
-					args.payload.c_str()
+					out.payload.c_str()
 				);
 
 			if(!conn) {
@@ -107,7 +97,7 @@
 
 				if(info->status_code < 200 || info->status_code > 299) {
 
-					throw HTTP::Exception(info->status_code, args.url.c_str(), info->status_text);
+					throw HTTP::Exception(info->status_code, url().c_str(), info->status_text);
 
 				} else if((unsigned int) info->content_length >= response.max_size()) {
 
@@ -248,7 +238,7 @@
 
 					cout << "civetweb\tServer response was '" << info->status_code << " " << info->status_text << "'" << endl;
 
-					throw HTTP::Exception(info->status_code, args.url.c_str(), info->status_text);
+					throw HTTP::Exception(info->status_code, url().c_str(), info->status_text);
 
 				}
 
