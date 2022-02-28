@@ -53,11 +53,22 @@
 
 	namespace CivetWeb {
 
-		class Worker;
+		class Header : public Udjat::Protocol::Header {
+		public:
+			Header(const char *name) : Protocol::Header(name) {
+			}
+
+			Protocol::Header & assign(const Udjat::TimeStamp &value) override;
+
+		};
 
 		/// @brief CivetWeb protocol worker.
 		class Worker : public Udjat::Protocol::Worker {
 		private:
+
+			/// @brief Request headers.
+			std::list<Header> headers;
+
 			/// @brief Connect to server, send request.
 			struct mg_connection * connect();
 
@@ -66,6 +77,8 @@
 
 			Udjat::String get(const std::function<bool(double current, double total)> &progress) override;
 			bool save(const char *filename, const std::function<bool(double current, double total)> &progress) override;
+
+			Protocol::Header & header(const char *name) override;
 
 		};
 

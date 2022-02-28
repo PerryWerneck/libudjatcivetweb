@@ -32,15 +32,7 @@
 		Worker::Worker(const char *url, const HTTP::Method method, const char *payload) : Udjat::Protocol::Worker(url,method,payload) {
 
 			header("Connection") = "close";
-			header("User-Agent") = STRINGIZE_VALUE_OF(PRODUCT_NAME);
-
-			Config::for_each(
-				"http-default-headers",
-				[this](const char *key, const char *value) {
-					header(key) = value;
-					return true;
-				}
-			);
+			header("User-Agent") = "civetweb/" CIVETWEB_VERSION " (linux) " PACKAGE_NAME "/" PACKAGE_VERSION;
 
 		}
 
@@ -48,6 +40,14 @@
 
 			URL::Components components = url().ComponentsFactory();
 			header("Host") = components.hostname;
+
+			Config::for_each(
+				(components.scheme + "-default-headers").c_str(),
+				[this](const char *key, const char *value) {
+					header(key) = value;
+					return true;
+				}
+			);
 
 			string hdr;
 			for(Protocol::Header &header : headers) {
@@ -78,6 +78,22 @@
 
 			return conn;
 
+		}
+
+		Protocol::Header & Header::assign(const Udjat::TimeStamp &value) {
+			std::string::assign(HTTP::TimeStamp((time_t) value).to_string());
+			return *this;
+		}
+
+		Protocol::Header & Worker::header(const char *name) {
+
+			auto it = std::find(headers.begin(),headers.end(),name);
+			if(it != headers.end()) {
+				return *it;
+			}
+
+			headers.emplace_back(name);
+			return headers.back();
 		}
 
 		Udjat::String Worker::get(const std::function<bool(double current, double total)> &progress) {
