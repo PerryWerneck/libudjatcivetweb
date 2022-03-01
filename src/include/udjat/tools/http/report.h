@@ -28,7 +28,7 @@
 
 	namespace HTTP {
 
-		class UDJAT_API Report : public Udjat::Report {
+		class UDJAT_PRIVATE Report : public Udjat::Report {
 		private:
 
 			/// @brief Report contents

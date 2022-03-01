@@ -27,7 +27,7 @@
 
 	namespace HTTP {
 
-		class UDJAT_API Request : public Udjat::Request {
+		class UDJAT_PRIVATE Request : public Udjat::Request {
 		public:
 			Request(const std::string &url, const char *type);
 
@@ -35,7 +35,7 @@
 
 		};
 
-		class UDJAT_API Response : public Udjat::Response {
+		class UDJAT_PRIVATE Response : public Udjat::Response {
 		private:
 			Udjat::HTTP::Value *value;
 
