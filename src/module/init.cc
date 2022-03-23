@@ -59,7 +59,70 @@
 		callbacks.http_error = http_error;
 	}
 
+	void initialize(const std::vector<string> &optionlist) {
+
+		if(optionlist.empty()) {
+			cerr << "civetweb\tNo civetweb configuration" << endl;
+			return;
+		}
+
+		const char **options = new const char *[optionlist.size()+1];
+		size_t ix = 0;
+		for(const string & option : optionlist) {
+			options[ix++] = option.c_str();
+		}
+		options[ix] = NULL;
+
+		struct mg_callbacks callbacks;
+		setCallbacks(callbacks);
+
+		ctx = mg_start(&callbacks, this, options);
+		delete[] options;
+
+		if (ctx == NULL) {
+			cerr << "civetweb\tCannot start: mg_start failed." << endl;
+			return;
+		}
+
+		setHandlers();
+
+	}
+
  public:
+
+ 	Module(const pugi::xml_node &node) : Udjat::Module("httpd",moduleinfo), MainLoop::Service(moduleinfo), ctx(NULL) {
+
+ 		mg_init_library(0);
+
+		// https://github.com/civetweb/civetweb/blob/master/docs/api/mg_start.md
+		std::vector<string> optionlist;
+
+		for(pugi::xml_node child = node.child("option"); child; child = child.next_sibling("option")) {
+			optionlist.emplace_back(child.attribute("name").as_string());
+			optionlist.emplace_back(child.attribute("value").as_string());
+		}
+
+		if(optionlist.empty()) {
+
+			clog << "civetweb\tUsing default settings" << endl;
+
+			static const char *default_options[] = {
+				"listening_ports",			"8989",
+				"request_timeout_ms",		"10000",
+				"enable_auth_domain_check",	"no"
+			};
+
+			for(size_t ix = 0; ix < (sizeof(default_options)/sizeof(default_options[0])); ix++) {
+				optionlist.emplace_back(default_options[ix]);
+			}
+
+		} else {
+			cout << "civetweb\tUsing settings from XML definition" << endl;
+		}
+
+		initialize(optionlist);
+
+ 	}
 
  	Module() : Udjat::Module("httpd",moduleinfo), MainLoop::Service(moduleinfo), ctx(NULL) {
 
@@ -67,48 +130,19 @@
 
 		cout << "civetweb\tUsing settings from configuration file" << endl;
 
-		// Start
 		// https://github.com/civetweb/civetweb/blob/master/docs/api/mg_start.md
-		{
-			std::vector<string> optionlist;
+		std::vector<string> optionlist;
 
-			Config::for_each("civetweb-options",[&optionlist](const char *key, const char *value){
-				optionlist.emplace_back(key);
-				optionlist.emplace_back(value);
+		Config::for_each("civetweb-options",[&optionlist](const char *key, const char *value){
+			optionlist.emplace_back(key);
+			optionlist.emplace_back(value);
 #ifdef DEBUG
-				cout << "civetweb\t" << key << "= '" << value << "'" << endl;
+			cout << "civetweb\t" << key << "= '" << value << "'" << endl;
 #endif // DEBUG
-				return true;
-			});
+			return true;
+		});
 
-			if(optionlist.empty()) {
-				cerr << "civetweb\tNo civetweb configuration" << endl;
-				return;
-			}
-
-			const char **options = new const char *[optionlist.size()+1];
-			size_t ix = 0;
-			for(string & option : optionlist) {
-				options[ix++] = option.c_str();
-			}
-			options[ix] = NULL;
-
-			struct mg_callbacks callbacks;
-			setCallbacks(callbacks);
-
-			cout << "civetweb\tUsing port " << options[1] << " for http server" << endl;
-			ctx = mg_start(&callbacks, this, options);
-			delete[] options;
-
-			if (ctx == NULL) {
-				cerr << "civetweb\tCannot start: mg_start failed." << endl;
-				return;
-			}
-
-
-		}
-
-		setHandlers();
+		initialize(optionlist);
 
 	};
 
@@ -124,6 +158,7 @@
 
  	}
 
+ 	/*
 	void start() noexcept override {
 #ifdef DEBUG
 		cout << "civetweb\t*** Starting" << endl;
@@ -135,6 +170,7 @@
 		cout << "civetweb\t*** Stopping" << endl;
 #endif // DEBUG
 	}
+	*/
 
  };
 
@@ -144,8 +180,7 @@
  }
 
  Udjat::Module * udjat_module_init_from_xml(const pugi::xml_node &node) {
- 	cout << "civetweb\tUsing settings from XML" << endl;
-	return new ::Module();
+	return new ::Module(node);
  }
 
  #pragma GCC diagnostic push
