@@ -49,7 +49,7 @@ static void test_httpd() {
 			srand(time(NULL));
 		}
 
-		bool parse(Abstract::Agent &parent, const pugi::xml_node &node) const override {
+		std::shared_ptr<Abstract::Agent> AgentFactory(const Abstract::Object &parent, const pugi::xml_node &node) const override {
 
 			class RandomAgent : public Agent<unsigned int> {
 			private:
@@ -68,9 +68,7 @@ static void test_httpd() {
 
 			};
 
-			parent.insert(make_shared<RandomAgent>(node));
-
-			return true;
+			return make_shared<RandomAgent>(node);
 
 		}
 
@@ -78,7 +76,7 @@ static void test_httpd() {
 
 	static Factory factory;
 
-	Udjat::load("./test.xml");
+	Udjat::reconfigure("./test.xml",true);
 	auto agent = Abstract::Agent::root();
 
 	if(Module::find("information")) {
@@ -137,11 +135,13 @@ int main(int argc, char **argv) {
 
 	Module * module = udjat_module_init();
 
+	/*
 	if(URL("http://127.0.0.1/~perry/test.xml").get("/tmp/localhost.html")) {
 		cout << endl << endl << "File was updated!" << endl << endl;
 	}
+	*/
 
-	// test_httpd();
+	test_httpd();
 	// test_http_get();
 	// test_report();
 

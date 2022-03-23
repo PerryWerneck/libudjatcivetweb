@@ -40,12 +40,24 @@
 
  class Module : public Udjat::Module, public MainLoop::Service {
  private:
-	struct mg_context *ctx;
+	struct mg_context *ctx = nullptr;
 
 	struct {
 		CivetWeb::Protocol http{"http",moduleinfo};
 		CivetWeb::Protocol https{"https",moduleinfo};
 	} protocols;
+
+	void setHandlers() noexcept {
+		mg_set_request_handler(ctx, "/api/", apiWebHandler, 0);
+		mg_set_request_handler(ctx, "/report/", reportWebHandler, 0);
+		mg_set_request_handler(ctx, "/swagger.json", swaggerWebHandler, 0);
+	}
+
+	void setCallbacks(struct mg_callbacks &callbacks) noexcept {
+		memset(&callbacks,0,sizeof(callbacks));
+		callbacks.log_message = log_message;
+		callbacks.http_error = http_error;
+	}
 
  public:
 
@@ -53,72 +65,54 @@
 
 		mg_init_library(0);
 
-	};
+		cout << "civetweb\tUsing settings from configuration file" << endl;
 
- 	virtual ~Module() {
+		// Start
+		// https://github.com/civetweb/civetweb/blob/master/docs/api/mg_start.md
+		{
+			std::vector<string> optionlist;
 
-		mg_exit_library();
-
- 	}
-
-	void start() noexcept override {
-
-		cout << "civetweb\tStarting service" << endl;
-
-		if(!ctx) {
-
-			// Start
-			// https://github.com/civetweb/civetweb/blob/master/docs/api/mg_start.md
-			{
-				std::vector<string> optionlist;
-
-				Config::for_each("civetweb-options",[&optionlist](const char *key, const char *value){
-					optionlist.emplace_back(key);
-					optionlist.emplace_back(value);
+			Config::for_each("civetweb-options",[&optionlist](const char *key, const char *value){
+				optionlist.emplace_back(key);
+				optionlist.emplace_back(value);
 #ifdef DEBUG
-					cout << "civetweb\t" << key << "= '" << value << "'" << endl;
+				cout << "civetweb\t" << key << "= '" << value << "'" << endl;
 #endif // DEBUG
-					return true;
-				});
+				return true;
+			});
 
-				if(optionlist.empty()) {
-					cerr << "civetweb\tNo civetweb configuration" << endl;
-					return;
-				}
-
-				const char **options = new const char *[optionlist.size()+1];
-				size_t ix = 0;
-				for(string & option : optionlist) {
-					options[ix++] = option.c_str();
-				}
-				options[ix] = NULL;
-
-				struct mg_callbacks callbacks;
-				memset(&callbacks,0,sizeof(callbacks));
-				callbacks.log_message = log_message;
-				callbacks.http_error = http_error;
-
-				ctx = mg_start(&callbacks, this, options);
-
-				delete[] options;
-
-				if (ctx == NULL) {
-					cerr << "civetweb\tCannot start: mg_start failed." << endl;
-					return;
-				}
+			if(optionlist.empty()) {
+				cerr << "civetweb\tNo civetweb configuration" << endl;
+				return;
 			}
 
-			mg_set_request_handler(ctx, "/api/", apiWebHandler, 0);
-			mg_set_request_handler(ctx, "/report/", reportWebHandler, 0);
-			mg_set_request_handler(ctx, "/swagger.json", swaggerWebHandler, 0);
+			const char **options = new const char *[optionlist.size()+1];
+			size_t ix = 0;
+			for(string & option : optionlist) {
+				options[ix++] = option.c_str();
+			}
+			options[ix] = NULL;
 
-			// cout << "civetweb\tListening on port " << options[1] << endl;
+			struct mg_callbacks callbacks;
+			setCallbacks(callbacks);
+
+			cout << "civetweb\tUsing port " << options[1] << " for http server" << endl;
+			ctx = mg_start(&callbacks, this, options);
+			delete[] options;
+
+			if (ctx == NULL) {
+				cerr << "civetweb\tCannot start: mg_start failed." << endl;
+				return;
+			}
+
 
 		}
 
-	}
+		setHandlers();
 
-	void stop() noexcept override {
+	};
+
+ 	virtual ~Module() {
 
 		cout << "civetweb\tStopping service" << endl;
 
@@ -126,18 +120,32 @@
 			mg_stop(ctx);
 		}
 
-		ctx = NULL;
+		mg_exit_library();
+
+ 	}
+
+	void start() noexcept override {
+#ifdef DEBUG
+		cout << "civetweb\t*** Starting" << endl;
+#endif // DEBUG
+	}
+
+	void stop() noexcept override {
+#ifdef DEBUG
+		cout << "civetweb\t*** Stopping" << endl;
+#endif // DEBUG
 	}
 
  };
 
  /// @brief Register udjat module.
  Udjat::Module * udjat_module_init() {
-	return new ::Module();
+ 	return new ::Module();
  }
 
- bool udjat_module_deinit() {
-	return true;
+ Udjat::Module * udjat_module_init_from_xml(const pugi::xml_node &node) {
+ 	cout << "civetweb\tUsing settings from XML" << endl;
+	return new ::Module();
  }
 
  #pragma GCC diagnostic push
