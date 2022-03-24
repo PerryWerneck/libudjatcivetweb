@@ -36,7 +36,7 @@
  static int log_message(const struct mg_connection *conn, const char *message);
  static int http_error( struct mg_connection *conn, int status, const char *msg );
 
- static const Udjat::ModuleInfo moduleinfo{"CivetWEB " CIVETWEB_VERSION " HTTP module for " STRINGIZE_VALUE_OF(PRODUCT_NAME) };
+ static const Udjat::ModuleInfo moduleinfo{ "CivetWEB " CIVETWEB_VERSION " HTTP module for " STRINGIZE_VALUE_OF(PRODUCT_NAME) };
 
  static const struct {
 	const char *name;
@@ -138,13 +138,6 @@
 			optionlist.emplace_back(value);
 		});
 
-		/*
-		for(pugi::xml_node child = node.child("option"); child; child = child.next_sibling("option")) {
-			optionlist.emplace_back(child.attribute("name").as_string());
-			optionlist.emplace_back(child.attribute("value").as_string());
-		}
-		*/
-
 		if(optionlist.empty()) {
 
 			clog << "civetweb\tUsing default settings" << endl;
@@ -195,9 +188,6 @@
 		Config::for_each("civetweb-options",[&optionlist](const char *key, const char *value){
 			optionlist.emplace_back(key);
 			optionlist.emplace_back(value);
-#ifdef DEBUG
-			cout << "civetweb\t" << key << "= '" << value << "'" << endl;
-#endif // DEBUG
 			return true;
 		});
 
@@ -217,13 +207,28 @@
 
  	}
 
- 	/*
 	void start() noexcept override {
-#ifdef DEBUG
-		cout << "civetweb\t*** Starting" << endl;
-#endif // DEBUG
+
+		struct mg_server_port ports[10];
+
+		int count = mg_get_server_ports(ctx,10,ports);
+
+		if(count) {
+			cout << "civetweb\tListening on";
+			for(int ix = 0; ix < count;ix++) {
+				cout << " " << ports[ix].port;
+				if(ports[ix].is_ssl) {
+					cout << " (ssl)";
+				}
+			}
+			cout << endl;
+		}
+
+
+		// mg_check_feature()
 	}
 
+	/*
 	void stop() noexcept override {
 #ifdef DEBUG
 		cout << "civetweb\t*** Stopping" << endl;
