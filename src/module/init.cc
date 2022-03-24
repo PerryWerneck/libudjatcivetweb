@@ -38,6 +38,28 @@
 
  static const Udjat::ModuleInfo moduleinfo{"CivetWEB " CIVETWEB_VERSION " HTTP module for " STRINGIZE_VALUE_OF(PRODUCT_NAME) };
 
+ static const struct {
+	const char *name;
+	unsigned int flag;
+	bool def;
+ } features[] = {
+
+	{ "files",			MG_FEATURES_FILES,				false	},
+	{ "tls", 			MG_FEATURES_TLS,				true	},
+	{ "cgi", 			MG_FEATURES_CGI,				false	},
+	{ "ipv6", 			MG_FEATURES_IPV6,				true	},
+	{ "websocket",		MG_FEATURES_WEBSOCKET,			false	},
+	{ "lua",			MG_FEATURES_LUA,				false	},
+	{ "ssjs",			MG_FEATURES_SSJS,				false	},
+	{ "cache",			MG_FEATURES_CACHE,				true	},
+	{ "stats",			MG_FEATURES_STATS,				false	},
+	{ "compression",	MG_FEATURES_COMPRESSION,		true	},
+	{ "http2",			MG_FEATURES_HTTP2,				false	},
+	{ "domain",			MG_FEATURES_X_DOMAIN_SOCKET,	false	},
+	{ "all",			MG_FEATURES_ALL,				false	},
+
+ };
+
  class Module : public Udjat::Module, public MainLoop::Service {
  private:
 	struct mg_context *ctx = nullptr;
@@ -92,15 +114,36 @@
 
  	Module(const pugi::xml_node &node) : Udjat::Module("httpd",moduleinfo), MainLoop::Service(moduleinfo), ctx(NULL) {
 
- 		mg_init_library(0);
+		unsigned int init = 0;
+
+		{
+			string info{"civetweb\tFeatures:"};
+			for(size_t ix = 0; ix < (sizeof(features)/sizeof(features[0]));ix++) {
+				if(node.attribute(features[ix].name).as_bool(features[ix].def)) {
+					init |= features[ix].flag;
+					info += " ";
+					info += features[ix].name;
+				}
+			}
+			cout << info << endl;
+		}
+
+ 		mg_init_library(init);
 
 		// https://github.com/civetweb/civetweb/blob/master/docs/api/mg_start.md
 		std::vector<string> optionlist;
 
+		options(node, [&optionlist](const char *name, const char *value){
+			optionlist.emplace_back(name);
+			optionlist.emplace_back(value);
+		});
+
+		/*
 		for(pugi::xml_node child = node.child("option"); child; child = child.next_sibling("option")) {
 			optionlist.emplace_back(child.attribute("name").as_string());
 			optionlist.emplace_back(child.attribute("value").as_string());
 		}
+		*/
 
 		if(optionlist.empty()) {
 
@@ -117,7 +160,9 @@
 			}
 
 		} else {
+
 			cout << "civetweb\tUsing settings from XML definition" << endl;
+
 		}
 
 		initialize(optionlist);
@@ -126,9 +171,23 @@
 
  	Module() : Udjat::Module("httpd",moduleinfo), MainLoop::Service(moduleinfo), ctx(NULL) {
 
-		mg_init_library(0);
+ 		unsigned int init = 0;
 
 		cout << "civetweb\tUsing settings from configuration file" << endl;
+
+		{
+			string info{"civetweb\tFeatures:"};
+			for(size_t ix = 0; ix < (sizeof(features)/sizeof(features[0]));ix++) {
+				if(Config::Value<bool>("civetweb-features",features[ix].name,features[ix].def)) {
+					init |= features[ix].flag;
+					info += " ";
+					info += features[ix].name;
+				}
+			}
+			cout << info << endl;
+		}
+
+		mg_init_library(init);
 
 		// https://github.com/civetweb/civetweb/blob/master/docs/api/mg_start.md
 		std::vector<string> optionlist;
