@@ -83,23 +83,41 @@
 
 	void initialize(const std::vector<string> &optionlist) {
 
-		if(optionlist.empty()) {
-			cerr << "civetweb\tNo civetweb configuration" << endl;
-			return;
-		}
-
-		const char **options = new const char *[optionlist.size()+1];
-		size_t ix = 0;
-		for(const string & option : optionlist) {
-			options[ix++] = option.c_str();
-		}
-		options[ix] = NULL;
-
 		struct mg_callbacks callbacks;
 		setCallbacks(callbacks);
 
-		ctx = mg_start(&callbacks, this, options);
-		delete[] options;
+
+		if(optionlist.empty()) {
+
+			// Use default options
+			cerr << "civetweb\tNo civetweb configuration, using defaults" << endl;
+
+			static const char *options[] = {
+				"listening_ports","8989",
+				"request_timeout_ms","10000",
+				"enable_auth_domain_check","no",
+				NULL
+			};
+
+			ctx = mg_start(&callbacks, this, options);
+
+		} else {
+
+			// Use configured options.
+			cerr << "civetweb\tFound civetweb configuration, using it" << endl;
+
+			const char **options = new const char *[optionlist.size()+1];
+			size_t ix = 0;
+			for(const string & option : optionlist) {
+				options[ix++] = option.c_str();
+			}
+			options[ix] = NULL;
+
+			ctx = mg_start(&callbacks, this, options);
+			delete[] options;
+
+
+		}
 
 		if (ctx == NULL) {
 			cerr << "civetweb\tCannot start: mg_start failed." << endl;
