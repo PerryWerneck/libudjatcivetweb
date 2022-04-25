@@ -217,7 +217,11 @@
 						}
 					}
 					status = true;
+#ifdef _WIN32
+					response.save(filename);
+#else
 					response.link(filename);
+#endif // _WIN32
 
 					// Set filetimestamp
 					utimbuf ub;
