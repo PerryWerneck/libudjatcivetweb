@@ -152,7 +152,6 @@ $(BINRLS)/$(PACKAGE_NAME)@LIBEXT@: \
 
 install: \
 	install-@OSNAME@-module \
-	install-conf
 
 install-linux-module: \
 	$(BINRLS)/$(PACKAGE_NAME)@LIBEXT@
@@ -164,15 +163,22 @@ install-linux-module: \
 		$(BINRLS)/$(PACKAGE_NAME)@LIBEXT@ \
 		$(DESTDIR)@MODULE_PATH@/$(PACKAGE_NAME)@LIBEXT@
 		
-		
-install-conf:
-
 	@$(MKDIR) \
 		$(DESTDIR)$(sysconfdir)/udjat.conf.d
 		
 	@$(INSTALL_DATA) \
 		conf.d/50-civetweb.conf \
 		$(DESTDIR)$(sysconfdir)/udjat.conf.d		
+
+install-windows-module: \
+	$(BINRLS)/$(PACKAGE_NAME)@LIBEXT@
+
+	@$(MKDIR) \
+		$(DESTDIR)@MODULE_PATH@
+
+	@$(INSTALL_PROGRAM) \
+		$(BINRLS)/$(PACKAGE_NAME)@LIBEXT@ \
+		$(DESTDIR)@MODULE_PATH@/$(PACKAGE_NAME)@LIBEXT@
 			
 #---[ Uninstall Targets ]----------------------------------------------------------------
 
