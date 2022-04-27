@@ -37,7 +37,7 @@
 			void json(std::stringstream &ss) const;
 
 		 public:
-			Report();
+			Report(const std::string &uri, const MimeType mimetype);
 			virtual ~Report();
 
 			std::string to_string() const;

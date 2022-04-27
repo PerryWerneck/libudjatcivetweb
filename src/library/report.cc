@@ -22,6 +22,7 @@
  #include <cstdarg>
  #include <iostream>
  #include <sstream>
+ #include <udjat/tools/http/exception.h>
 
  using namespace std;
 
@@ -29,7 +30,12 @@
 
 	namespace HTTP {
 
-		Report::Report() : Udjat::Report() {
+		Report::Report(const string &uri, const MimeType mimetype) : Udjat::Report() {
+
+			if(mimetype != MimeType::json) {
+				throw HTTP::Exception(501, uri.c_str(), "Mimetype Not Supported");
+			}
+
 		}
 
 		Report::~Report() {

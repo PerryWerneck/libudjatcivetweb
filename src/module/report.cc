@@ -33,11 +33,7 @@
 			throw HTTP::Exception(405, uri.c_str(), "Method Not Allowed");
 		}
 
-		if(mimetype != MimeType::json) {
-			throw HTTP::Exception(501, uri.c_str(), "Mimetype Not Supported");
-		}
-
-		HTTP::Report response;
+		HTTP::Report response{uri, mimetype};
 
 		// Run report.
 		Abstract::Agent::root()->find(uri.c_str())->get(Request(""),response);
