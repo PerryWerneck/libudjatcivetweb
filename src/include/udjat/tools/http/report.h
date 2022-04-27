@@ -31,10 +31,14 @@
 		class UDJAT_PRIVATE Report : public Udjat::Report {
 		private:
 
+			/// @brief Report format.
+			const MimeType mimetype;
+
 			/// @brief Report contents
 			std::list<HTTP::Value> values;
 
-			void json(std::stringstream &ss) const;
+			void to_json(std::stringstream &ss) const;
+			void to_html(std::stringstream &ss) const;
 
 		 public:
 			Report(const std::string &uri, const MimeType mimetype);
