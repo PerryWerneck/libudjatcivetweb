@@ -86,14 +86,13 @@
 		struct mg_callbacks callbacks;
 		setCallbacks(callbacks);
 
-
 		if(optionlist.empty()) {
 
 			// Use default options
 			cerr << "civetweb\tNo civetweb configuration, using defaults" << endl;
 
 			static const char *options[] = {
-				"listening_ports","8989",
+				"listening_ports","localhost:8989",
 				"request_timeout_ms","10000",
 				"enable_auth_domain_check","no",
 				NULL
