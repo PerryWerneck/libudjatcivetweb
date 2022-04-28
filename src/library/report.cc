@@ -101,11 +101,12 @@
 
 			auto column = columns.names.begin();
 			for(auto value : values) {
-				if(column++ == columns.names.end()) {
+				if(column == columns.names.end()) {
 					ss << "</tr><tr>";
 					column = columns.names.begin();
 				}
-				ss << value.to_string();
+				ss << "<td>" << value.to_string() << "</td>";
+				column++;
 			}
 
 			ss << "</tr></tbody></table>";

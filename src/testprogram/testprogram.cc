@@ -57,7 +57,7 @@ static void test_httpd() {
 				unsigned int limit = 5;
 
 			public:
-				RandomAgent(const pugi::xml_node &node) : Agent<unsigned int>() {
+				RandomAgent(const pugi::xml_node &node) : Agent<unsigned int>(node) {
 					cout << "Creating random Agent" << endl;
 					load(node);
 				}
@@ -72,9 +72,12 @@ static void test_httpd() {
 					report.start("sample","row","a","b","c",nullptr);
 
 					for(size_t row = 0; row < 3; row++) {
-						report << row;
-						for(size_t col; col < 3;col++) {
-							report << ((unsigned int) rand()) % limit;
+						string r{"r"};
+						r += std::to_string(row);
+
+						report << (string{"["} +r + "]");
+						for(size_t col = 0; col < 3;col++) {
+							report << (r + "." + std::to_string(col) + "." + std::to_string(((unsigned int) rand()) % limit));
 						}
 					}
 
