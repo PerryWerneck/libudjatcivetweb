@@ -48,11 +48,16 @@
 				auto search = cache.find(string{name});
 				if (search != cache.end()) {
 					// Found it.
+#ifdef DEBUG
+					cout << "Found cached '" << search->second << "'" << endl;
+#endif // DEBUG
 					return search->second;
 				}
 
 				// Not found, create new icon.
 				auto inserted = cache.emplace(make_pair(std::string{name},Icon(name)));
+
+				cout << "icons\tCaching " << inserted.first->second << " as " << name << endl;
 				return inserted.first->second;
 
 			}

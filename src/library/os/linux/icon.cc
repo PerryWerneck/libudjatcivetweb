@@ -30,6 +30,14 @@
 
 		Icon::Icon(const char *name) {
 
+			if(find(string{"/usr/share/icons/" STRINGIZE_VALUE_OF(PRODUCT_NAME)}, name)) {
+				return;
+			}
+
+			if(find(string{"/usr/share/icons"}, name)) {
+				return;
+			}
+
 			static String themelist{Config::Value<string>("theme","icon","Adwaita,gnome,hicolor,HighContrast").c_str()};
 			auto themes = themelist.split(",");
 
