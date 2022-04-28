@@ -17,33 +17,32 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
- #include "private.h"
- #include <udjat/worker.h>
- #include <udjat/agent.h>
- #include <udjat/tools/http/mimetype.h>
- #include <udjat/tools/protocol.h>
- #include <udjat/tools/http/exception.h>
- #include <udjat/tools/http/report.h>
+ #pragma once
 
- /*
- int reportWebHandler(struct mg_connection *conn, void UDJAT_UNUSED(*cbdata)) {
+ #include <udjat/defs.h>
+ #include <string>
 
-	return webHandler(conn,[](const string &uri, const char *method, const MimeType mimetype){
+ namespace Udjat {
 
-		if(strcasecmp(method,"get")) {
-			throw HTTP::Exception(405, uri.c_str(), "Method Not Allowed");
-		}
+	namespace HTTP {
 
-		HTTP::Report response{uri.c_str(), mimetype};
+		class UDJAT_API Icon {
+		private:
+			class Controller;
+			friend class Controller;
 
-		// Run report.
-		Abstract::Agent::root()->find(uri.c_str())->get(Request(""),response);
+			/// @brief Path to the icon file.
+			std::string filepath;
 
-		return response.to_string();
+		public:
 
-	});
+			/// @param name Icon name.
+			Icon(const char *name);
+
+			/// @brief Get cached icon instance, load it if necessary.
+			static Icon getInstance(const char *name);
+
+		};
+	}
 
  }
-
-	*/
-

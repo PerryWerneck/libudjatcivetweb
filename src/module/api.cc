@@ -24,18 +24,46 @@
  #include <udjat/tools/http/exception.h>
  #include <udjat/tools/http/request.h>
 
+ static void report(const struct mg_connection *conn, const char *path, const char *method, const MimeType mimetype) {
+
+	// It's a report
+	if(strcasecmp(method,"get")) {
+		throw HTTP::Exception(405, mg_get_request_info(conn)->request_uri, "Method Not Allowed");
+	}
+
+	throw HTTP::Exception(404, mg_get_request_info(conn)->request_uri, "Not implemented");
+
+ }
+
  int apiWebHandler(struct mg_connection *conn, void UDJAT_UNUSED(*cbdata)) {
 
-	return webHandler(conn,[](const string &url, const char *method, const MimeType mimetype){
+	return webHandler(conn,[](const struct mg_connection *conn, const char *path, const char *method, const MimeType mimetype){
 
-		HTTP::Response response(mimetype);
-		HTTP::Request request(url.c_str(),method);
+#ifdef DEBUG
+		cout << "*** path='" << path << "'" << endl;
+#endif // DEBUG
 
-		if(!Worker::work(request.getMethod(),request,response)) {
-			throw HTTP::Exception(405, url.c_str(), "Method Not Allowed");
+		if(mimetype == MimeType::csv) {
+
+			report(conn,path,method,mimetype);
+
+		} else if(!strncasecmp(path,"report/",7)) {
+
+			report(conn,path+7,method,mimetype);
+
+		} else {
+
+			// It's a 'normal' API request.
+			HTTP::Response response(mimetype);
+			HTTP::Request request(path,method);
+
+			if(!Worker::work(request.getMethod(),request,response)) {
+				throw HTTP::Exception(405, mg_get_request_info(conn)->request_uri, "Method Not Allowed");
+			}
+
+			return response.to_string();
+
 		}
-
-		return response.to_string();
 
 	});
 

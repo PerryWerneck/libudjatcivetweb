@@ -38,13 +38,16 @@
  using namespace std;
 
  /// @brief Web handler.
- int webHandler(struct mg_connection *conn, function<string (const string &uri, const char *method, const MimeType mimetype)> worker) noexcept;
+ int webHandler(struct mg_connection *conn, function<string (const struct mg_connection *conn, const char *path, const char *method, const MimeType mimetype)> worker) noexcept;
 
  /// @brief Handler for API requests.
  int apiWebHandler(struct mg_connection *conn, void *cbdata);
 
+ /// @brief Handler for API requests.
+ int iconWebHandler(struct mg_connection *conn, void *cbdata);
+
  /// @brief Handler for report requests.
- int reportWebHandler(struct mg_connection *conn, void *cbdata);
+ //int reportWebHandler(struct mg_connection *conn, void *cbdata);
 
  /// @brief Handler for swagger request.
  int swaggerWebHandler(struct mg_connection *conn, void *cbdata);

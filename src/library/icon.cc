@@ -17,33 +17,49 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
- #include "private.h"
- #include <udjat/worker.h>
- #include <udjat/agent.h>
- #include <udjat/tools/http/mimetype.h>
- #include <udjat/tools/protocol.h>
- #include <udjat/tools/http/exception.h>
- #include <udjat/tools/http/report.h>
+ #include <config.h>
+ #include <udjat/tools/http/icons.h>
+ #include <map>
+ #include <mutex>
 
- /*
- int reportWebHandler(struct mg_connection *conn, void UDJAT_UNUSED(*cbdata)) {
+ using namespace std;
 
-	return webHandler(conn,[](const string &uri, const char *method, const MimeType mimetype){
+ namespace Udjat {
 
-		if(strcasecmp(method,"get")) {
-			throw HTTP::Exception(405, uri.c_str(), "Method Not Allowed");
+	namespace HTTP {
+
+		class UDJAT_API Icon::Controller {
+		private:
+			map<std::string,Icon> cache;
+
+		public:
+			Icon find(const char *name) {
+				static mutex guard;
+				lock_guard<mutex> lock(guard);
+
+				// First check if its on cache.
+				auto search = cache.find(string{name});
+				if (search != cache.end()) {
+					// Found it.
+					return search->second;
+				}
+
+				// Not found, create new icon.
+				auto inserted = cache.emplace(make_pair(std::string{name},Icon(name)));
+				return inserted.first->second;
+
+			}
+
+		};
+
+		Icon Icon::getInstance(const char *name) {
+
+			static Controller controller;
+			return controller.find(name);
+
 		}
 
-		HTTP::Report response{uri.c_str(), mimetype};
 
-		// Run report.
-		Abstract::Agent::root()->find(uri.c_str())->get(Request(""),response);
-
-		return response.to_string();
-
-	});
+	}
 
  }
-
-	*/
-

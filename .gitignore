@@ -33,7 +33,7 @@
 
 *.m4
 *~
-autom4te.cache
+*.cache
 *.log
 *.status
 *.bak

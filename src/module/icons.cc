@@ -17,48 +17,24 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+ /**
+  * @brief Implements the swagger.json output.
+  *
+  * References:
+  *
+  * https://samanthaneilen.github.io/2018/12/08/Using-and-extending-swagger.json-for-API-documentation.html
+  *
+  */
+
  #include "private.h"
- #include <udjat/tools/protocol.h>
+ #include <udjat/tools/http/icons.h>
  #include <udjat/tools/http/exception.h>
- #include <cstring>
 
- int webHandler(struct mg_connection *conn, function<string (const struct mg_connection *conn, const char *path, const char *method, const MimeType mimetype)> worker) noexcept {
-
-	const struct mg_request_info *ri = mg_get_request_info(conn);
-	MimeType mimetype{MimeType::json};
-	string rsp;
+ int iconWebHandler(struct mg_connection *conn, void UDJAT_UNUSED(*cbdata)) {
 
 	try {
 
-		const char *local_uri = ri->local_uri;
-
-		// Extract 'API' prefix.
-		if(strncasecmp(local_uri,"/api/",5) == 0) {
-			local_uri += 5;
-		} else {
-			throw HTTP::Exception( 400, ri->local_uri, "Request must be in the format /api/version/worker/path");
-		}
-
-		// Extract version prefix.
-		{
-			const char *ptr = strchr(local_uri,'/');
-			if(!ptr) {
-				throw HTTP::Exception( 400, ri->local_uri, "Request must be in the format /api/version/worker/path");
-			}
-			local_uri = ptr+1;
-		}
-
-		// Extract mimetype
-		string uri = local_uri;
-		{
-			auto ext = uri.find_last_of('.');
-			if(ext != string::npos && ext > 1) {
-				mimetype = MimeTypeFactory(uri.c_str()+ext+1);
-				uri.resize(ext);
-			}
-		}
-
-		rsp = worker(conn,uri.c_str(),ri->request_method,mimetype);
+		Udjat::HTTP::Icon icon = Udjat::HTTP::Icon::getInstance(mg_get_request_info(conn)->local_uri);
 
 	} catch(const HTTP::Exception &error) {
 
@@ -83,13 +59,7 @@
 
 	}
 
-#ifdef DEBUG
-	cout << "Response:" << endl << rsp << endl;
-#endif // DEBUG
-
-	mg_send_http_ok(conn, to_string(mimetype), rsp.size());
-	mg_write(conn, rsp.c_str(), rsp.size());
-
-	return 200;
+	mg_send_http_error(conn, 404, "Not available");
+	return 404;
 
  }

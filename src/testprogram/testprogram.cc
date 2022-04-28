@@ -29,6 +29,7 @@
  #include <udjat/civetweb.h>
  #include <udjat/tools/threadpool.h>
  #include <udjat/tools/mainloop.h>
+ #include <udjat/tools/http/icons.h>
 
  using namespace std;
  using namespace Udjat;
@@ -155,9 +156,11 @@ int main(int argc, char **argv) {
 	}
 	*/
 
-	//test_httpd();
+	// test_httpd();
 	//test_http_get();
-	test_report();
+	//test_report();
+
+	HTTP::Icon("zoom-out-symbolic");
 
 	delete module;
 
