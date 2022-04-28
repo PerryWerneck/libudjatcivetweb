@@ -22,6 +22,7 @@
  #include <udjat/tools/configuration.h>
  #include <udjat/tools/string.h>
  #include <unistd.h>
+ #include<dirent.h>
 
  using namespace std;
 
@@ -47,7 +48,34 @@
 #endif // DEBUG
 					return;
 				}
-				cout << "------------[" << path << "]-----------------" << endl;
+
+				DIR *directory = opendir(path.c_str());
+				if(directory) {
+
+					struct dirent *entry;
+					while((entry=readdir(directory)) != NULL) {
+
+						if(!(entry->d_type & DT_DIR)) {
+							continue;
+						}
+
+						string fpath = path + entry->d_name + "/" + name + ".svg";
+						if(access(fpath.c_str(),F_OK) == 0) {
+							this->filepath = fpath;
+							break;
+						}
+
+					}
+
+					closedir(directory);
+
+					if(!this->filepath.empty()) {
+#ifdef DEBUG
+						cout << "Found '" << this->filepath << "'" << endl;
+#endif // DEBUG
+						return;
+					}
+				}
 
 			}
 
