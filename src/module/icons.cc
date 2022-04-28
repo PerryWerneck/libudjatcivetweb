@@ -29,12 +29,51 @@
  #include "private.h"
  #include <udjat/tools/http/icons.h>
  #include <udjat/tools/http/exception.h>
+ #include <udjat/tools/http/mimetype.h>
+ #include <sys/types.h>
+ #include <sys/stat.h>
+
+#ifndef _WIN32
+	#include <unistd.h>
+#endif // _WIN32
 
  int iconWebHandler(struct mg_connection *conn, void UDJAT_UNUSED(*cbdata)) {
 
 	try {
 
-		Udjat::HTTP::Icon icon = Udjat::HTTP::Icon::getInstance(mg_get_request_info(conn)->local_uri);
+		const char *path = mg_get_request_info(conn)->local_uri;
+		while(*path && *path == '/') {
+			path++;
+		}
+
+		const char *ptr = strchr(path,'/');
+
+		cout << "********************** " << ptr << endl;
+
+		if(ptr) {
+			path = ptr+1;
+		}
+
+		cout << "********************** " << path << endl;
+
+		Udjat::HTTP::Icon icon = Udjat::HTTP::Icon::getInstance(path);
+
+		mg_response_header_start(conn, 200);
+
+		struct stat st;
+		if(stat(icon.c_str(), &st) < 0) {
+			throw system_error(errno,system_category(),icon.c_str());
+		}
+
+		// mg_response_header_add(conn, "Last-Modified", lm, -1);
+		mg_response_header_add(conn, "Content-Length", std::to_string(st.st_size).c_str(), -1);
+		mg_response_header_add(conn, "Content-Type", "image/svg+xml", -1);
+
+		mg_response_header_send(conn);
+
+		mg_send_file_body(conn,icon.c_str());
+
+		return 200;
 
 	} catch(const HTTP::Exception &error) {
 

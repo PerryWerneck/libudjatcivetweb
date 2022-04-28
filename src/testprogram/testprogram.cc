@@ -100,8 +100,11 @@ static void test_httpd() {
 		cout << "http://localhost:8989/api/1.0/info/factories.xml" << endl;
 	}
 
+	cout << "http://localhost:8989/icon/user-info-symbolic" << endl;
+
 	for(auto agent : *agent) {
 		cout << "http://localhost:8989/api/1.0/agent/" << agent->name() << ".xml" << endl;
+		cout << "http://localhost:8989/api/1.0/report/agent/" << agent->name() << ".xml" << endl;
 	}
 
 	Udjat::MainLoop::getInstance().run();
@@ -156,11 +159,11 @@ int main(int argc, char **argv) {
 	}
 	*/
 
-	// test_httpd();
+	test_httpd();
 	//test_http_get();
-	//test_report();
+	// test_report();
 
-	HTTP::Icon("zoom-out-symbolic");
+	//HTTP::Icon("zoom-out-symbolic");
 
 	delete module;
 
