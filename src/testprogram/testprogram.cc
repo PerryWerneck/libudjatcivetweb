@@ -66,6 +66,20 @@ static void test_httpd() {
 					return true;
 				}
 
+				void get(const Request UDJAT_UNUSED(&request), Report &report) {
+
+					report.start("sample","row","a","b","c",nullptr);
+
+					for(size_t row = 0; row < 3; row++) {
+						report << row;
+						for(size_t col; col < 3;col++) {
+							report << ((unsigned int) rand()) % limit;
+						}
+					}
+
+
+				}
+
 			};
 
 			return make_shared<RandomAgent>(node);
@@ -113,7 +127,7 @@ void test_http_get() {
 
 static void test_report() {
 
-	HTTP::Report report;
+	HTTP::Report report{"http://sample",MimeType::html};
 
 	report.start("sample","v1","v2","v3",nullptr);
 
@@ -141,9 +155,9 @@ int main(int argc, char **argv) {
 	}
 	*/
 
-	test_httpd();
-	// test_http_get();
-	// test_report();
+	//test_httpd();
+	//test_http_get();
+	test_report();
 
 	delete module;
 

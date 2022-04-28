@@ -28,7 +28,7 @@
 
 	namespace HTTP {
 
-		class UDJAT_PRIVATE Report : public Udjat::Report {
+		class UDJAT_API Report : public Udjat::Report {
 		private:
 
 			/// @brief Report format.
@@ -41,7 +41,8 @@
 			void to_html(std::stringstream &ss) const;
 
 		 public:
-			Report(const std::string &uri, const MimeType mimetype);
+		 	Report();
+			Report(const char *uri, const MimeType mimetype);
 			virtual ~Report();
 
 			std::string to_string() const;

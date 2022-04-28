@@ -33,7 +33,7 @@
 			throw HTTP::Exception(405, uri.c_str(), "Method Not Allowed");
 		}
 
-		HTTP::Report response{uri, mimetype};
+		HTTP::Report response{uri.c_str(), mimetype};
 
 		// Run report.
 		Abstract::Agent::root()->find(uri.c_str())->get(Request(""),response);

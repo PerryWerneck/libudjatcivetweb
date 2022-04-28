@@ -30,10 +30,13 @@
 
 	namespace HTTP {
 
-		Report::Report(const string &uri, const MimeType m) : Udjat::Report(), mimetype(m) {
+		Report::Report() : mimetype(MimeType::json) {
+		}
+
+		Report::Report(const char *uri, const MimeType m) : Udjat::Report(), mimetype(m) {
 
 			if(mimetype != MimeType::json && mimetype != MimeType::html ) {
-				throw HTTP::Exception(501, uri.c_str(), "Mimetype Not Supported");
+				throw HTTP::Exception(501, uri, "Mimetype Not Supported");
 			}
 
 		}
