@@ -41,10 +41,11 @@
 				path += theme;
 				path += "/scalable/";
 
-				if(access((path + name + ".svg").c_str(),F_OK) == 0) {
-					this->filepath = path + name + ".svg";
+				string fpath = path+name + ".svg";
+				if(access(fpath.c_str(),F_OK) == 0) {
+					assign(fpath);
 #ifdef DEBUG
-					cout << "Found '" << this->filepath << "'" << endl;
+					cout << "Found '" << *this << "'" << endl;
 #endif // DEBUG
 					return;
 				}
@@ -61,7 +62,7 @@
 
 						string fpath = path + entry->d_name + "/" + name + ".svg";
 						if(access(fpath.c_str(),F_OK) == 0) {
-							this->filepath = fpath;
+							assign(fpath);
 							break;
 						}
 
@@ -69,9 +70,9 @@
 
 					closedir(directory);
 
-					if(!this->filepath.empty()) {
+					if(!empty()) {
 #ifdef DEBUG
-						cout << "Found '" << this->filepath << "'" << endl;
+						cout << "Found '" << *this << "'" << endl;
 #endif // DEBUG
 						return;
 					}

@@ -26,13 +26,10 @@
 
 	namespace HTTP {
 
-		class UDJAT_API Icon {
+		class UDJAT_API Icon : public std::string {
 		private:
 			class Controller;
 			friend class Controller;
-
-			/// @brief Path to the icon file.
-			std::string filepath;
 
 		public:
 
