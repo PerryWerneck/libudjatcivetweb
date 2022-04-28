@@ -22,6 +22,13 @@
  #include <map>
  #include <mutex>
 
+#ifndef _WIN32
+	#include <unistd.h>
+#endif // _WIN32
+
+ #include <dirent.h>
+ #include <iostream>
+
  using namespace std;
 
  namespace Udjat {
@@ -57,6 +64,52 @@
 			static Controller controller;
 			return controller.find(name);
 
+		}
+
+		bool Icon::find(const string &path, const char *name, const char *ext) {
+
+			string filename;
+
+			// First check file.
+			filename = path + "/" + name + ext;
+
+			if(access(filename.c_str(),F_OK) == 0) {
+				assign(filename);
+#ifdef DEBUG
+				cout << "Found '" << *this << "'" << endl;
+#endif // DEBUG
+				return true;
+			}
+#ifdef DEBUG
+			else {
+				cout << "Not Found '" << filename << "'" << endl;
+			}
+#endif // DEBUG
+
+			DIR *directory = opendir(path.c_str());
+			if(directory) {
+
+				struct dirent *entry;
+				while((entry=readdir(directory)) != NULL && empty()) {
+
+					if(entry->d_name[0] == '.') {
+						continue;
+					}
+
+					string fpath = path + entry->d_name;
+					if(entry->d_type & DT_DIR) {
+						find(path + "/" + entry->d_name, name, ext);
+						continue;
+					}
+
+
+				}
+
+				closedir(directory);
+				return !empty();
+			}
+
+			return false;
 		}
 
 

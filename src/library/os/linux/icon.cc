@@ -21,8 +21,6 @@
  #include <udjat/tools/http/icons.h>
  #include <udjat/tools/configuration.h>
  #include <udjat/tools/string.h>
- #include <unistd.h>
- #include<dirent.h>
 
  using namespace std;
 
@@ -32,50 +30,13 @@
 
 		Icon::Icon(const char *name) {
 
-			static String themelist{Config::Value<string>("theme","icon","Adwaita,gnome,hicolor").c_str()};
+			static String themelist{Config::Value<string>("theme","icon","Adwaita,gnome,hicolor,HighContrast").c_str()};
 			auto themes = themelist.split(",");
 
 			for(auto theme : themes) {
 
-				string path{"/usr/share/icons/"};
-				path += theme;
-				path += "/scalable/";
-
-				string fpath = path+name + ".svg";
-				if(access(fpath.c_str(),F_OK) == 0) {
-					assign(fpath);
-#ifdef DEBUG
-					cout << "Found '" << *this << "'" << endl;
-#endif // DEBUG
+				if(find(string{"/usr/share/icons/"} + theme + "/scalable", name)) {
 					return;
-				}
-
-				DIR *directory = opendir(path.c_str());
-				if(directory) {
-
-					struct dirent *entry;
-					while((entry=readdir(directory)) != NULL) {
-
-						if(!(entry->d_type & DT_DIR)) {
-							continue;
-						}
-
-						string fpath = path + entry->d_name + "/" + name + ".svg";
-						if(access(fpath.c_str(),F_OK) == 0) {
-							assign(fpath);
-							break;
-						}
-
-					}
-
-					closedir(directory);
-
-					if(!empty()) {
-#ifdef DEBUG
-						cout << "Found '" << *this << "'" << endl;
-#endif // DEBUG
-						return;
-					}
 				}
 
 			}

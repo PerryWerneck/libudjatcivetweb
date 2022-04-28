@@ -30,6 +30,8 @@
  #include <udjat/tools/http/icons.h>
  #include <udjat/tools/http/exception.h>
  #include <udjat/tools/http/mimetype.h>
+ #include <udjat/tools/http/timestamp.h>
+ #include <udjat/tools/configuration.h>
  #include <sys/types.h>
  #include <sys/stat.h>
 
@@ -54,8 +56,6 @@
 			path = ptr+1;
 		}
 
-		cout << "********************** " << path << endl;
-
 		Udjat::HTTP::Icon icon = Udjat::HTTP::Icon::getInstance(path);
 
 		mg_response_header_start(conn, 200);
@@ -65,7 +65,16 @@
 			throw system_error(errno,system_category(),icon.c_str());
 		}
 
-		// mg_response_header_add(conn, "Last-Modified", lm, -1);
+		//
+		// Send file.
+		//
+		unsigned int maxage = Config::Value<unsigned int>("theme","icon-max-age",604800);
+		if(maxage) {
+			mg_response_header_add(conn, "Cache-Control", (string{"public,max-age="} + std::to_string(maxage) + ",immutable").c_str(), -1);
+			mg_response_header_add(conn, "Expires", HTTP::TimeStamp(time(0)+maxage).to_string().c_str(), -1);
+		}
+
+		mg_response_header_add(conn, "Last-Modified", HTTP::TimeStamp(st.st_mtime).to_string().c_str(), -1);
 		mg_response_header_add(conn, "Content-Length", std::to_string(st.st_size).c_str(), -1);
 		mg_response_header_add(conn, "Content-Type", "image/svg+xml", -1);
 

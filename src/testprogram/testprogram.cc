@@ -160,10 +160,11 @@ int main(int argc, char **argv) {
 	*/
 
 	test_httpd();
-	//test_http_get();
+	// test_http_get();
 	// test_report();
 
-	//HTTP::Icon("zoom-out-symbolic");
+	// cout << HTTP::Icon("dialog-password-symbolic") << endl;
+	// cout << HTTP::Icon("image-missing") << endl;
 
 	delete module;
 
