@@ -21,10 +21,8 @@
  #include <udjat/tools/http/icons.h>
  #include <udjat/tools/configuration.h>
  #include <udjat/tools/string.h>
-
- #ifndef _WIN32
-	#include <unistd.h>
- #endif // _WIN32
+ #include <unistd.h>
+ #include <dirent.h>
 
  using namespace std;
 
@@ -75,6 +73,52 @@
 			}
 
 			throw system_error(ENOENT,system_category(),string{"Can't find icon '"} + name + "'");
+		}
+
+		bool Icon::find(const string &path, const char *name, const char *ext) {
+
+			string filename;
+
+			// First check file.
+			filename = path + "/" + name + ext;
+
+			if(access(filename.c_str(),F_OK) == 0) {
+				assign(filename);
+#ifdef DEBUG
+				cout << "Found '" << *this << "'" << endl;
+#endif // DEBUG
+				return true;
+			}
+#ifdef DEBUG
+			else {
+				cout << "Not Found '" << filename << "'" << endl;
+			}
+#endif // DEBUG
+
+			DIR *directory = opendir(path.c_str());
+			if(directory) {
+
+				struct dirent *entry;
+				while((entry=readdir(directory)) != NULL && empty()) {
+
+					if(entry->d_name[0] == '.') {
+						continue;
+					}
+
+					string fpath = path + entry->d_name;
+					if(entry->d_type & DT_DIR) {
+						find(path + "/" + entry->d_name, name, ext);
+						continue;
+					}
+
+
+				}
+
+				closedir(directory);
+				return !empty();
+			}
+
+			return false;
 		}
 
 	}
