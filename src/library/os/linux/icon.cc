@@ -22,6 +22,10 @@
  #include <udjat/tools/configuration.h>
  #include <udjat/tools/string.h>
 
+ #ifndef _WIN32
+	#include <unistd.h>
+ #endif // _WIN32
+
  using namespace std;
 
  namespace Udjat {
@@ -30,18 +34,39 @@
 
 		Icon::Icon(const char *name) {
 
-			if(find(string{"/usr/share/icons/" STRINGIZE_VALUE_OF(PRODUCT_NAME)}, name)) {
-				return;
+			{
+				static const char * paths[] = {
+					"/usr/share/icons/" STRINGIZE_VALUE_OF(PRODUCT_NAME) "/",
+					"/usr/share/icons/"
+				};
+
+				for(size_t ix = 0; ix < (sizeof(paths)/sizeof(paths[0]));ix++) {
+
+					string filename{paths[ix]};
+					filename += name;
+					filename += ".svg";
+
+					if(access(filename.c_str(),F_OK) == 0) {
+						assign(filename);
+#ifdef DEBUG
+						cout << "Found '" << *this << "'" << endl;
+#endif // DEBUG
+						return;
+					}
+#ifdef DEBUG
+					else {
+						cout << "Not Found '" << filename << "'" << endl;
+					}
+#endif // DEBUG
+
+				}
 			}
 
-			if(find(string{"/usr/share/icons"}, name)) {
-				return;
-			}
-
-			static String themelist{Config::Value<string>("theme","icon","Adwaita,gnome,hicolor,HighContrast").c_str()};
-			auto themes = themelist.split(",");
+			Config::Value<std::vector<string>> themes("theme","icon","Adwaita,gnome,hicolor,HighContrast");
 
 			for(auto theme : themes) {
+
+				cout << "----------------- " << theme << " -------------------------------------" << endl;
 
 				if(find(string{"/usr/share/icons/"} + theme + "/scalable", name)) {
 					return;

@@ -41,6 +41,7 @@
 
 		public:
 			Icon find(const char *name) {
+
 				static mutex guard;
 				lock_guard<mutex> lock(guard);
 
