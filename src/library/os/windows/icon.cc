@@ -32,70 +32,14 @@
 
 		Icon::Icon(const char *name) {
 
-			if(find(Application::DataDir{"icons"},name,"svg")) {
+			Application::DataDir file{"icons"};
+
+			if(file.find((string{name} + ".svg").c_str(),true)) {
+				assign(file);
 				return;
 			}
 
 			throw system_error(ENOENT,system_category(),string{"Can't find icon '"} + name + "'");
-
-		}
-
-		bool Icon::find(const string &dirname, const char *name, const char *ext) {
-
-			// Cleanup path.
-			string path{dirname};
-			for(char *ptr = (char *) path.c_str();*ptr;ptr++) {
-				if(*ptr == '/') {
-					*ptr = '\\';
-				}
-			}
-
-			if(path[path.size()-1] == '\\') {
-				path.resize(path.size()-1);
-			}
-
-			// First check file.
-			string filename = path + "\\" + name + "." + ext;
-			if(access(filename.c_str(),F_OK) == 0) {
-				assign(filename);
-#ifdef DEBUG
-				cout << "Found " << filename << endl;
-#endif // DEBUG
-				return true;
-			}
-#ifdef DEBUG
-			else {
-				cout << "Not found " << filename << endl;
-			}
-#endif // DEBUG
-
-			// Not found, scan path.
-			WIN32_FIND_DATA FindFileData;
-
-			HANDLE hFind = FindFirstFile((path + "\\*").c_str(), &FindFileData);
-			do {
-
-				if(FindFileData.cFileName[0] == '.') {
-					continue;
-				}
-
-				string filename = path + "\\" + FindFileData.cFileName;
-
-				DWORD attr = GetFileAttributes(filename.c_str());
-				if(attr == INVALID_FILE_ATTRIBUTES) {
-					cerr << "civetweb\tCant get attributes for '" << filename.c_str() << "' ignoring it" << endl;
-					continue;
-				}
-
-				if(attr & FILE_ATTRIBUTE_DIRECTORY) {
-					find(filename + "\\",name,ext);
-				}
-
-			} while(empty() && FindNextFile(hFind, &FindFileData) != 0);
-
-			FindClose(hFind);
-
-			return !empty();
 
 		}
 
