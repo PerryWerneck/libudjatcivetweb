@@ -31,8 +31,6 @@
 			class Controller;
 			friend class Controller;
 
-			bool find(const std::string &path, const char *name, const char *ext = ".svg");
-
 		public:
 
 			/// @param name Icon name.
