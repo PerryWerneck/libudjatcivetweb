@@ -169,7 +169,7 @@
 			return response;
 		}
 
-		bool Worker::save(const char *filename, const std::function<bool(double current, double total)> &progress) {
+		bool Worker::save(const char *filename, const std::function<bool(double current, double total)> &progress, bool replace) {
 
 			progress(0,0);
 
@@ -217,11 +217,8 @@
 						}
 					}
 					status = true;
-#ifdef _WIN32
-					response.save(filename);
-#else
-					response.link(filename);
-#endif // _WIN32
+
+					response.save(filename,replace);
 
 					// Set filetimestamp
 					utimbuf ub;
