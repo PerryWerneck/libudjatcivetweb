@@ -23,6 +23,7 @@
  #include <udjat/tools/value.h>
  #include <udjat/tools/http/connection.h>
  #include <udjat/tools/http/mimetype.h>
+ #include <udjat/tools/http/request.h>
  #include <map>
 
  namespace Udjat {
@@ -39,6 +40,10 @@
 		public:
 
 			class UDJAT_API Handler {
+			private:
+				friend class Server;
+				const Server *server = nullptr;
+
 			public:
 				/// @brief Create a new httpd handler.
 				/// @param uri The URI to hook the handler on.
@@ -47,9 +52,18 @@
 				virtual ~Handler();
 
 				/// @brief Handle request.
-				virtual void handle(const Connection &conn, const char *path, const char *method, const MimeType mimetype) = 0;
+				virtual void handle(const Connection &conn, const HTTP::Request &request, const MimeType mimetype) = 0;
 
 			};
+
+			/// @brief Add request handler.
+			/// @param uri the URI for the handler.
+			/// @param handler The request handler.
+			// virtual void push_back(const char *uri, const Handler &handler) = 0;
+
+			/// @brief Remove request handler.
+			/// @param uri the URI for the handler.
+			// virtual void remove(const char *uri = 0;
 
 			/// @brief Get active HTTP server.
 			static Server & getInstance();

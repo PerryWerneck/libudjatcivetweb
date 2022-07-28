@@ -192,6 +192,11 @@ install-linux: \
 		$(BINRLS)/$(SONAME) \
 		$(DESTDIR)$(libdir)/$(SONAME)
 		
+	@$(MKDIR) $(DESTDIR)$(sysconfdir)/udjat.conf.d
+	@$(INSTALL_DATA) \
+		conf.d/50-civetweb.conf \
+		$(DESTDIR)$(sysconfdir)/udjat.conf.d		
+		
 install-windows: \
 	$(BINRLS)/@SONAME@
 
