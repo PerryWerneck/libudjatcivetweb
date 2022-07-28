@@ -48,6 +48,7 @@
 		<Unit filename="src/include/udjat/tools/http/icons.h" />
 		<Unit filename="src/include/udjat/tools/http/report.h" />
 		<Unit filename="src/include/udjat/tools/http/request.h" />
+		<Unit filename="src/include/udjat/tools/http/server.h" />
 		<Unit filename="src/include/udjat/tools/http/value.h" />
 		<Unit filename="src/library/icon.cc" />
 		<Unit filename="src/library/layout/json.cc" />
