@@ -52,6 +52,7 @@
 		<Unit filename="src/include/udjat/tools/http/server.h" />
 		<Unit filename="src/include/udjat/tools/http/value.h" />
 		<Unit filename="src/library/connection.cc" />
+		<Unit filename="src/library/handler.cc" />
 		<Unit filename="src/library/icon.cc" />
 		<Unit filename="src/library/layout/json.cc" />
 		<Unit filename="src/library/layout/xml.cc" />
@@ -64,6 +65,7 @@
 		<Unit filename="src/library/value.cc" />
 		<Unit filename="src/module/api.cc" />
 		<Unit filename="src/module/connection.cc" />
+		<Unit filename="src/module/custom.cc" />
 		<Unit filename="src/module/handler.cc" />
 		<Unit filename="src/module/icons.cc" />
 		<Unit filename="src/module/init.cc" />

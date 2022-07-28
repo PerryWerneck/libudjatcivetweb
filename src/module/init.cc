@@ -247,6 +247,14 @@
 		// mg_check_feature()
 	}
 
+	void push_back(const Handler *handler) override {
+		mg_set_request_handler(ctx, handler->c_str(), customWebHandler, &handler);
+	}
+
+	void remove(const Handler *handler) override {
+		mg_set_request_handler(ctx, handler->c_str(), NULL, NULL);
+	}
+
  };
 
  /// @brief Register udjat module.

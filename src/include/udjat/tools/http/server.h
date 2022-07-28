@@ -40,30 +40,36 @@
 		public:
 
 			class UDJAT_API Handler {
-			private:
+			protected:
 				friend class Server;
-				const Server *server = nullptr;
+				const char * uri;
+				Server *server;
+
+				/// @brief Create a new httpd handler, insert it to server.
+				/// @param server The server to receive the new handler.
+				/// @param uri the URI for the handler.
+				Handler(const char *uri, Server *server);
 
 			public:
-				/// @brief Create a new httpd handler.
-				/// @param uri The URI to hook the handler on.
-				Handler(const char *uri);
-
 				virtual ~Handler();
 
+				inline const char * c_str() const noexcept {
+					return uri;
+				}
+
 				/// @brief Handle request.
-				virtual void handle(const Connection &conn, const HTTP::Request &request, const MimeType mimetype) = 0;
+				virtual int handle(const Connection &conn, const HTTP::Request &request, const MimeType mimetype) = 0;
 
 			};
 
 			/// @brief Add request handler.
 			/// @param uri the URI for the handler.
 			/// @param handler The request handler.
-			// virtual void push_back(const char *uri, const Handler &handler) = 0;
+			virtual void push_back(const Handler *handler);
 
 			/// @brief Remove request handler.
 			/// @param uri the URI for the handler.
-			// virtual void remove(const char *uri = 0;
+			virtual void remove(const Handler *handler);
 
 			/// @brief Get active HTTP server.
 			static Server & getInstance();

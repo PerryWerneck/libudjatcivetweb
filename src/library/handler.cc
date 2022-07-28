@@ -26,42 +26,12 @@
 
  namespace Udjat {
 
-	HTTP::Server * HTTP::Server::instance = nullptr;
-
-	HTTP::Server & HTTP::Server::getInstance() {
-		if(instance) {
-			return *instance;
-		}
-
-		throw runtime_error("The HTTP service is unavailable");
+	HTTP::Server::Handler::Handler(const char *u, Server *s) : server(s), uri(u) {
+		server->push_back(this);
 	}
 
-	HTTP::Server::Server() {
-
-		// Check for secondary instance.
-		if(instance) {
-			clog << "httpd\tCreating a new HTTP server instance" << endl;
-		} else {
-			instance = this;
-		}
-	}
-
-	HTTP::Server::~Server() {
-		if(instance == this) {
-			instance = nullptr;
-		} else {
-			clog << "httpd\tDeleting non default HTTP server instance" << endl;
-		}
-	}
-
-	void HTTP::Server::push_back(const Server::Handler UDJAT_UNUSED(*handler)) {
-		throw system_error(ENOTSUP,system_category(),"Active HTTP server doesnt support custom handlers");
-	}
-
-	/// @brief Remove request handler.
-	/// @param uri the URI for the handler.
-	void HTTP::Server::remove(const Server::Handler UDJAT_UNUSED(*handler)) {
+	HTTP::Server::Handler::~Handler() {
+		server->remove(this);
 	}
 
  }
-
