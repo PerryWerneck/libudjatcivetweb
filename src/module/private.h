@@ -52,6 +52,7 @@
 
 			int success(const char *mime_type, const char *response, size_t length) const noexcept override;
 			int failed(int code, const char *message) const noexcept override;
+			int send(const char *filename, const char *mime_type, unsigned int max_age) const override;
 
 			inline struct mg_connection * connection() {
 				return conn;
@@ -65,6 +66,7 @@
 				return mg_get_request_info(conn)->request_uri;
 			}
 		};
+
 		class Header : public Udjat::Protocol::Header {
 		public:
 			Header(const char *name) : Protocol::Header(name) {

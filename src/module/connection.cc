@@ -18,6 +18,9 @@
  */
 
  #include "private.h"
+ #include <sys/types.h>
+ #include <sys/stat.h>
+ #include <udjat/tools/http/timestamp.h>
 
  using namespace std;
 
@@ -32,6 +35,37 @@
 	int CivetWeb::Connection::failed(int code, const char *message) const noexcept {
 		mg_send_http_error(conn, code, message);
 		return code;
+	}
+
+	int CivetWeb::Connection::send(const char *filename, const char *mime_type, unsigned int maxage) const {
+
+		struct stat st;
+		if(stat(filename, &st) < 0) {
+			throw system_error(errno,system_category(),filename);
+		}
+
+		mg_response_header_start(conn, 200);
+
+		//
+		// Send file.
+		//
+		if(maxage) {
+			mg_response_header_add(conn, "Cache-Control", (string{"public,max-age="} + std::to_string(maxage) + ",immutable").c_str(), -1);
+			mg_response_header_add(conn, "Expires", HTTP::TimeStamp(time(0)+maxage).to_string().c_str(), -1);
+		}
+
+		mg_response_header_add(conn, "Last-Modified", HTTP::TimeStamp(st.st_mtime).to_string().c_str(), -1);
+		mg_response_header_add(conn, "Content-Length", std::to_string(st.st_size).c_str(), -1);
+
+		if(mime_type && *mime_type) {
+			mg_response_header_add(conn, "Content-Type", mime_type, -1);
+		}
+
+		mg_response_header_send(conn);
+
+		mg_send_file_body(conn,filename);
+
+		return 200;
 	}
 
  }

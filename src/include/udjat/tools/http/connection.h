@@ -41,6 +41,9 @@
 			/// @return Fixed value '200'.
 			virtual int success(const char *mime_type, const char *response, size_t length) const noexcept = 0;
 
+			/// @brief Send file.
+			virtual int send(const char *filename, const char *mime_type = nullptr, unsigned int max_age = 0) const = 0;
+
 			int success(const char *mime_type, const std::string &response) const {
 				return success(mime_type,response.c_str(),response.size());
 			}
