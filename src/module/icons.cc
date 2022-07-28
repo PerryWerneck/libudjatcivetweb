@@ -50,8 +50,6 @@
 
 		const char *ptr = strchr(path,'/');
 
-		cout << "********************** " << ptr << endl;
-
 		if(ptr) {
 			path = ptr+1;
 		}

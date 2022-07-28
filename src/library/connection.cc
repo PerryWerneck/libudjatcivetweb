@@ -17,46 +17,31 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
- #pragma once
+ #include <config.h>
+ #include <stdexcept>
+ #include <udjat/tools/http/server.h>
 
- #include <udjat/defs.h>
- #include <udjat/tools/value.h>
- #include <udjat/tools/http/connection.h>
- #include <udjat/tools/http/mimetype.h>
- #include <map>
+ using namespace std;
 
  namespace Udjat {
 
-	namespace HTTP {
+	HTTP::Connection::Connection() {
+	}
 
-		class UDJAT_API Server {
-		private:
-			static Server *instance;
+	HTTP::Connection::~Connection() {
+	}
 
-		protected:
-			Server();
+	int HTTP::Connection::response(const HTTP::Exception &error) const noexcept {
+		return failed(error.codes().http, error.what());
+	}
 
-		public:
+	int HTTP::Connection::response(const system_error &error) const noexcept {
+		return failed(HTTP::Exception::translate(error), error.what());
+	}
 
-			class UDJAT_API Handler {
-			public:
-				/// @brief Create a new httpd handler.
-				/// @param uri The URI to hook the handler on.
-				Handler(const char *uri);
-
-				virtual ~Handler();
-
-				/// @brief Handle request.
-				virtual void handle(const Connection &conn, const char *path, const char *method, const MimeType mimetype) = 0;
-
-			};
-
-			/// @brief Get active HTTP server.
-			static Server & getInstance();
-			virtual ~Server();
-
-		};
-
+	int HTTP::Connection::response(const std::exception &e) const noexcept {
+		return failed(500,e.what());
 	}
 
  }
+

@@ -17,46 +17,42 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
- #pragma once
+ #include <config.h>
+ #include <stdexcept>
+ #include <udjat/tools/http/server.h>
+ #include <iostream>
 
- #include <udjat/defs.h>
- #include <udjat/tools/value.h>
- #include <udjat/tools/http/connection.h>
- #include <udjat/tools/http/mimetype.h>
- #include <map>
+ using namespace std;
 
  namespace Udjat {
 
-	namespace HTTP {
+	HTTP::Server * HTTP::Server::instance = nullptr;
 
-		class UDJAT_API Server {
-		private:
-			static Server *instance;
+	HTTP::Server & HTTP::Server::getInstance() {
+		if(instance) {
+			return *instance;
+		}
 
-		protected:
-			Server();
+		throw runtime_error("The HTTP service is unavailable");
+	}
 
-		public:
+	HTTP::Server::Server() {
 
-			class UDJAT_API Handler {
-			public:
-				/// @brief Create a new httpd handler.
-				/// @param uri The URI to hook the handler on.
-				Handler(const char *uri);
+		// Check for secondary instance.
+		if(instance) {
+			clog << "httpd\tCreating a new HTTP server instance" << endl;
+		} else {
+			instance = this;
+		}
+	}
 
-				virtual ~Handler();
-
-				/// @brief Handle request.
-				virtual void handle(const Connection &conn, const char *path, const char *method, const MimeType mimetype) = 0;
-
-			};
-
-			/// @brief Get active HTTP server.
-			static Server & getInstance();
-			virtual ~Server();
-
-		};
-
+	HTTP::Server::~Server() {
+		if(instance == this) {
+			instance = nullptr;
+		} else {
+			clog << "httpd\tDeleting non default HTTP server instance" << endl;
+		}
 	}
 
  }
+

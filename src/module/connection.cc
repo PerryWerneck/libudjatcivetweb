@@ -17,46 +17,22 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
- #pragma once
+ #include "private.h"
 
- #include <udjat/defs.h>
- #include <udjat/tools/value.h>
- #include <udjat/tools/http/connection.h>
- #include <udjat/tools/http/mimetype.h>
- #include <map>
+ using namespace std;
 
  namespace Udjat {
 
-	namespace HTTP {
+	int CivetWeb::Connection::success(const char *mime_type, const char *response, size_t length) const noexcept {
+		mg_send_http_ok(conn, mime_type, length);
+		mg_write(conn, response, length);
+		return 200;
+	}
 
-		class UDJAT_API Server {
-		private:
-			static Server *instance;
-
-		protected:
-			Server();
-
-		public:
-
-			class UDJAT_API Handler {
-			public:
-				/// @brief Create a new httpd handler.
-				/// @param uri The URI to hook the handler on.
-				Handler(const char *uri);
-
-				virtual ~Handler();
-
-				/// @brief Handle request.
-				virtual void handle(const Connection &conn, const char *path, const char *method, const MimeType mimetype) = 0;
-
-			};
-
-			/// @brief Get active HTTP server.
-			static Server & getInstance();
-			virtual ~Server();
-
-		};
-
+	int CivetWeb::Connection::failed(int code, const char *message) const noexcept {
+		mg_send_http_error(conn, code, message);
+		return code;
 	}
 
  }
+

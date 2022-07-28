@@ -28,6 +28,7 @@
  #include <udjat/tools/application.h>
  #include <udjat/tools/file.h>
  #include <udjat/tools/expander.h>
+ #include <udjat/tools/http/server.h>
  #include <unistd.h>
 
  using namespace Udjat;
@@ -60,7 +61,7 @@
 
  };
 
- class Module : public Udjat::Module, public MainLoop::Service {
+ class Module : public Udjat::Module, public MainLoop::Service, public HTTP::Server {
  private:
 	struct mg_context *ctx = nullptr;
 
@@ -245,14 +246,6 @@
 
 		// mg_check_feature()
 	}
-
-	/*
-	void stop() noexcept override {
-#ifdef DEBUG
-		cout << "civetweb\t*** Stopping" << endl;
-#endif // DEBUG
-	}
-	*/
 
  };
 

@@ -25,11 +25,11 @@
  #include <udjat/tools/http/report.h>
  #include <udjat/tools/http/request.h>
 
- static std::string report(const struct mg_connection *conn, const char *path, const char *method, const MimeType mimetype) {
+ static std::string report(const CivetWeb::Connection &connection, const char *path, const char *method, const MimeType mimetype) {
 
 	// It's a report
 	if(strcasecmp(method,"get")) {
-		throw HTTP::Exception(405, mg_get_request_info(conn)->request_uri, "Method Not Allowed");
+		throw HTTP::Exception(405, connection.request_uri(), "Method Not Allowed");
 	}
 
 	HTTP::Report  response{path, mimetype};
@@ -37,7 +37,7 @@
 
 	// Run report.
 	if(!Worker::work(request.getMethod(),request,response)) {
-		throw HTTP::Exception(405, mg_get_request_info(conn)->request_uri, "Method Not Allowed");
+		throw HTTP::Exception(405, connection.request_uri(), "Method Not Allowed");
 	}
 
 	return response.to_string();
@@ -46,7 +46,7 @@
 
  int apiWebHandler(struct mg_connection *conn, void UDJAT_UNUSED(*cbdata)) {
 
-	return webHandler(conn,[](const struct mg_connection *conn, const char *path, const char *method, const MimeType mimetype){
+	return webHandler(CivetWeb::Connection(conn),[](const CivetWeb::Connection &connection, const char *path, const char *method, const MimeType mimetype){
 
 #ifdef DEBUG
 		cout << "*** path='" << path << "'" << endl;
@@ -54,11 +54,11 @@
 
 		if(mimetype == MimeType::csv) {
 
-			return report(conn,path,method,mimetype);
+			return report(connection,path,method,mimetype);
 
 		} else if(!strncasecmp(path,"report/",7)) {
 
-			return report(conn,path+7,method,mimetype);
+			return report(connection,path+7,method,mimetype);
 
 		} else {
 
@@ -67,7 +67,7 @@
 			HTTP::Request request(path,method);
 
 			if(!Worker::work(request.getMethod(),request,response)) {
-				throw HTTP::Exception(405, mg_get_request_info(conn)->request_uri, "Method Not Allowed");
+				throw HTTP::Exception(405, connection.request_uri(), "Method Not Allowed");
 			}
 
 			return response.to_string();

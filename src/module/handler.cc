@@ -22,9 +22,9 @@
  #include <udjat/tools/http/exception.h>
  #include <cstring>
 
- int webHandler(struct mg_connection *conn, function<string (const struct mg_connection *conn, const char *path, const char *method, const MimeType mimetype)> worker) noexcept {
+ int webHandler(const CivetWeb::Connection &connection, function<string (const CivetWeb::Connection &connection, const char *path, const char *method, const MimeType mimetype)> worker) noexcept {
 
-	const struct mg_request_info *ri = mg_get_request_info(conn);
+	const struct mg_request_info *ri = connection.request_info();
 	MimeType mimetype{MimeType::json};
 	string rsp;
 
@@ -58,27 +58,23 @@
 			}
 		}
 
-		rsp = worker(conn,uri.c_str(),ri->request_method,mimetype);
+		rsp = worker(connection,uri.c_str(),ri->request_method,mimetype);
 
 	} catch(const HTTP::Exception &error) {
 
-		mg_send_http_error(conn, error.codes().http, error.what());
-		return error.codes().http;
+		return connection.response(error);
 
-	} catch(const system_error &e) {
+	} catch(const system_error &error) {
 
-		int code = HTTP::Exception::translate(e);
-		mg_send_http_error(conn, code, e.what());
-		return code;
+		return connection.response(error);
 
-	} catch(const exception &e) {
+	} catch(const exception &error) {
 
-		mg_send_http_error(conn, 500, e.what());
-		return 500;
+		return connection.response(error);
 
 	} catch(...) {
 
-		mg_send_http_error(conn, 500, "Unexpected error");
+		connection.failed(500, "Unexpected error");
 		return 500;
 
 	}
@@ -87,9 +83,6 @@
 	cout << "Response:" << endl << rsp << endl;
 #endif // DEBUG
 
-	mg_send_http_ok(conn, to_string(mimetype), rsp.size());
-	mg_write(conn, rsp.c_str(), rsp.size());
-
-	return 200;
+	return connection.success(to_string(mimetype),rsp.c_str(),rsp.size());
 
  }
