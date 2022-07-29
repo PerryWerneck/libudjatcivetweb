@@ -115,7 +115,7 @@ static void test_httpd() {
 
 	class HTest : public Udjat::HTTP::Handler {
 	public:
-		HTest() : Handler("test") {
+		HTest() : Handler("/test/") {
 		}
 
 		int handle(const Udjat::HTTP::Connection &conn, const Udjat::HTTP::Request &request, const Udjat::MimeType mimetype) override {
@@ -124,7 +124,9 @@ static void test_httpd() {
 	};
 
 	HTest test;
-	HTTP::Server::getInstance().push_back(&test);
+	if(HTTP::Server::getInstance().push_back(&test)) {
+		cout << "http://localhost:8989/test/test.xml" << endl;
+	}
 
 	Udjat::MainLoop::getInstance().run();
 

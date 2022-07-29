@@ -248,14 +248,22 @@
 		// mg_check_feature()
 	}
 
-	void push_back(HTTP::Handler *handler) override {
-		HTTP::Server::push_back(handler);
-		mg_set_request_handler(ctx, handler->c_str(), customWebHandler, &handler);
+	bool push_back(HTTP::Handler *handler) override {
+		if(HTTP::Server::push_back(handler)) {
+			cout << "civetweb\tAdding new http handle '" << handler->c_str() << "'" << endl;
+			mg_set_request_handler(ctx, handler->c_str(), customWebHandler, handler);
+			return true;
+		}
+		return false;
 	}
 
-	void remove(HTTP::Handler *handler) override {
-		HTTP::Server::remove(handler);
-		mg_set_request_handler(ctx, handler->c_str(), NULL, NULL);
+	bool remove(HTTP::Handler *handler) override {
+		if(HTTP::Server::remove(handler)) {
+			cout << "civetweb\tRemoving http handle '" << handler->c_str() << "'" << endl;
+			mg_set_request_handler(ctx, handler->c_str(), NULL, NULL);
+			return true;
+		}
+		return false;
 	}
 
  };

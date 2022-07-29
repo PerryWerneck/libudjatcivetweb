@@ -22,15 +22,36 @@
  #include <udjat/tools/http/handler.h>
  #include <udjat/tools/http/server.h>
  #include <iostream>
+ #include <udjat/tools/quark.h>
 
  using namespace std;
 
  namespace Udjat {
 
+	HTTP::Handler::Handler(const char *u) : uri(u) {
+
+		cout << ">>>> [" << uri << "]" << endl;
+
+		if(!(u && *u)) {
+			throw system_error(EINVAL,system_category(),"http-handler attribute is required");
+		}
+
+		if(u[0] != '/') {
+			throw system_error(EINVAL,system_category(),"http-handler should start with '/'");
+		}
+
+		if(u[strlen(u)-1] != '/') {
+			throw system_error(EINVAL,system_category(),"http-handler should end with '/'");
+		}
+
+	}
+
+	HTTP::Handler::Handler(const pugi::xml_node &node, const char *tagname) : HTTP::Handler(Quark(node,tagname,"").c_str()) {
+	}
+
 	HTTP::Handler::~Handler() {
 		if(server) {
 			server->remove(this);
-			server = nullptr;
 		}
 	}
 

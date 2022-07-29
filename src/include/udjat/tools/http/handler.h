@@ -41,11 +41,19 @@
 
 			/// @brief Create a new httpd handler, insert it to default server.
 			/// @param uri the URI for the handler.
-			constexpr Handler(const char *u) : uri(u) {
-			}
+			Handler(const char *u);
+			Handler(const pugi::xml_node &node, const char *tagname = "http-handler");
 
 		public:
 			virtual ~Handler();
+
+			inline operator bool() const noexcept {
+				return (uri && *uri);
+			}
+
+			inline bool active() const noexcept {
+				return (bool) server;
+			}
 
 			inline const char * c_str() const noexcept {
 				return uri;
