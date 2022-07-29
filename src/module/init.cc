@@ -29,6 +29,7 @@
  #include <udjat/tools/file.h>
  #include <udjat/tools/expander.h>
  #include <udjat/tools/http/server.h>
+ #include <udjat/tools/http/handler.h>
  #include <unistd.h>
 
  using namespace Udjat;
@@ -247,11 +248,13 @@
 		// mg_check_feature()
 	}
 
-	void push_back(const Handler *handler) override {
+	void push_back(HTTP::Handler *handler) override {
+		HTTP::Server::push_back(handler);
 		mg_set_request_handler(ctx, handler->c_str(), customWebHandler, &handler);
 	}
 
-	void remove(const Handler *handler) override {
+	void remove(HTTP::Handler *handler) override {
+		HTTP::Server::remove(handler);
 		mg_set_request_handler(ctx, handler->c_str(), NULL, NULL);
 	}
 

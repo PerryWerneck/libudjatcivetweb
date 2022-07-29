@@ -46,6 +46,7 @@
 		<Unit filename="src/include/config.h" />
 		<Unit filename="src/include/udjat/civetweb.h" />
 		<Unit filename="src/include/udjat/tools/http/connection.h" />
+		<Unit filename="src/include/udjat/tools/http/handler.h" />
 		<Unit filename="src/include/udjat/tools/http/icons.h" />
 		<Unit filename="src/include/udjat/tools/http/report.h" />
 		<Unit filename="src/include/udjat/tools/http/request.h" />

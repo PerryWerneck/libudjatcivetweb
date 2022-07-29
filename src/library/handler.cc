@@ -19,6 +19,7 @@
 
  #include <config.h>
  #include <stdexcept>
+ #include <udjat/tools/http/handler.h>
  #include <udjat/tools/http/server.h>
  #include <iostream>
 
@@ -26,12 +27,11 @@
 
  namespace Udjat {
 
-	HTTP::Server::Handler::Handler(const char *u, Server *s) : server(s), uri(u) {
-		server->push_back(this);
-	}
-
-	HTTP::Server::Handler::~Handler() {
-		server->remove(this);
+	HTTP::Handler::~Handler() {
+		if(server) {
+			server->remove(this);
+			server = nullptr;
+		}
 	}
 
  }

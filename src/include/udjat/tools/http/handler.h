@@ -30,29 +30,29 @@
 
 	namespace HTTP {
 
-		class Handler;
+		class Connection;
+		class Server;
 
-		class UDJAT_API Server {
-		private:
-			static Server *instance;
-
+		class UDJAT_API Handler {
 		protected:
-			Server();
+			friend class Server;
+			const char * uri;
+			Server *server = nullptr;
+
+			/// @brief Create a new httpd handler, insert it to default server.
+			/// @param uri the URI for the handler.
+			constexpr Handler(const char *u) : uri(u) {
+			}
 
 		public:
+			virtual ~Handler();
 
-			/// @brief Add request handler.
-			/// @param uri the URI for the handler.
-			/// @param handler The request handler.
-			virtual void push_back(Handler *handler);
+			inline const char * c_str() const noexcept {
+				return uri;
+			}
 
-			/// @brief Remove request handler.
-			/// @param uri the URI for the handler.
-			virtual void remove(Handler *handler);
-
-			/// @brief Get active HTTP server.
-			static Server & getInstance();
-			virtual ~Server();
+			/// @brief Handle request.
+			virtual int handle(const Udjat::HTTP::Connection &conn, const Udjat::HTTP::Request &request, const Udjat::MimeType mimetype) = 0;
 
 		};
 

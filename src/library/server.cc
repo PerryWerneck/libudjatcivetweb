@@ -20,6 +20,7 @@
  #include <config.h>
  #include <stdexcept>
  #include <udjat/tools/http/server.h>
+ #include <udjat/tools/http/handler.h>
  #include <iostream>
 
  using namespace std;
@@ -54,13 +55,20 @@
 		}
 	}
 
-	void HTTP::Server::push_back(const Server::Handler UDJAT_UNUSED(*handler)) {
-		throw system_error(ENOTSUP,system_category(),"Active HTTP server doesnt support custom handlers");
+	void HTTP::Server::push_back(HTTP::Handler *handler) {
+		if(handler->server) {
+			handler->server->remove(handler);
+		}
+		handler->server = this;
 	}
 
 	/// @brief Remove request handler.
 	/// @param uri the URI for the handler.
-	void HTTP::Server::remove(const Server::Handler UDJAT_UNUSED(*handler)) {
+	void HTTP::Server::remove(HTTP::Handler *handler) {
+		if(handler->server && handler->server != this) {
+			throw runtime_error("Handler is for another server");
+		}
+		handler->server = nullptr;
 	}
 
  }

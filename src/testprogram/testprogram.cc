@@ -30,6 +30,9 @@
  #include <udjat/tools/threadpool.h>
  #include <udjat/tools/mainloop.h>
  #include <udjat/tools/http/icons.h>
+ #include <udjat/tools/http/handler.h>
+ #include <udjat/tools/http/connection.h>
+ #include <udjat/tools/http/server.h>
 
  using namespace std;
  using namespace Udjat;
@@ -109,6 +112,19 @@ static void test_httpd() {
 		cout << "http://localhost:8989/api/1.0/agent/" << agent->name() << ".xml" << endl;
 		cout << "http://localhost:8989/api/1.0/report/agent/" << agent->name() << ".xml" << endl;
 	}
+
+	class HTest : public Udjat::HTTP::Handler {
+	public:
+		HTest() : Handler("test") {
+		}
+
+		int handle(const Udjat::HTTP::Connection &conn, const Udjat::HTTP::Request &request, const Udjat::MimeType mimetype) override {
+			return conn.failed(404,"Test is ok but there's no data");
+		}
+	};
+
+	HTest test;
+	HTTP::Server::getInstance().push_back(&test);
 
 	Udjat::MainLoop::getInstance().run();
 
