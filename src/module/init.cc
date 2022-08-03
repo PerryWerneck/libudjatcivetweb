@@ -56,8 +56,12 @@
 	{ "cache",			MG_FEATURES_CACHE,				true	},
 	{ "stats",			MG_FEATURES_STATS,				false	},
 	{ "compression",	MG_FEATURES_COMPRESSION,		true	},
+#ifdef MG_FEATURES_HTTP2
 	{ "http2",			MG_FEATURES_HTTP2,				false	},
+#endif // MG_FEATURES_HTTP2
+#ifdef MG_FEATURES_X_DOMAIN_SOCKET
 	{ "domain",			MG_FEATURES_X_DOMAIN_SOCKET,	false	},
+#endif // MG_FEATURES_X_DOMAIN_SOCKET
 	{ "all",			MG_FEATURES_ALL,				false	},
 
  };
