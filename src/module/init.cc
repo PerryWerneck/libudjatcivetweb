@@ -88,10 +88,22 @@
 		callbacks.http_error = http_error;
 	}
 
-	void initialize(const std::vector<string> &optionlist) {
+	void initialize(std::vector<string> &optionlist) {
 
 		struct mg_callbacks callbacks;
 		setCallbacks(callbacks);
+
+		if(optionlist.empty()) {
+
+			Config::for_each("civetweb-options",[&optionlist](const char *key, const char *value){
+				optionlist.emplace_back(key);
+				optionlist.emplace_back(value);
+				return true;
+			});
+
+		}
+
+		// https://github.com/civetweb/civetweb/blob/master/docs/api/mg_start.md
 
 		if(optionlist.empty()) {
 
@@ -143,7 +155,15 @@
 		{
 			string info{"civetweb\tFeatures:"};
 			for(size_t ix = 0; ix < (sizeof(features)/sizeof(features[0]));ix++) {
-				if(node.attribute(features[ix].name).as_bool(features[ix].def)) {
+
+				pugi::xml_attribute attr = node.attribute(features[ix].name);
+				if(attr) {
+					if(attr.as_bool(features[ix].def)) {
+						init |= features[ix].flag;
+						info += " ";
+						info += features[ix].name;
+					}
+				} else if(Config::Value<bool>("civetweb-features",features[ix].name,features[ix].def)) {
 					init |= features[ix].flag;
 					info += " ";
 					info += features[ix].name;
@@ -162,26 +182,6 @@
 			optionlist.emplace_back(value);
 		});
 
-		if(optionlist.empty()) {
-
-			clog << "civetweb\tUsing default settings" << endl;
-
-			static const char *default_options[] = {
-				"listening_ports",			"8989",
-				"request_timeout_ms",		"10000",
-				"enable_auth_domain_check",	"no"
-			};
-
-			for(size_t ix = 0; ix < (sizeof(default_options)/sizeof(default_options[0])); ix++) {
-				optionlist.emplace_back(default_options[ix]);
-			}
-
-		} else {
-
-			cout << "civetweb\tUsing settings from XML definition" << endl;
-
-		}
-
 		initialize(optionlist);
 
  	}
@@ -189,8 +189,6 @@
  	Module() : Udjat::Module("httpd",moduleinfo), MainLoop::Service(moduleinfo), ctx(NULL) {
 
  		unsigned int init = 0;
-
-		cout << "civetweb\tUsing settings from configuration file" << endl;
 
 		{
 			string info{"civetweb\tFeatures:"};
@@ -206,15 +204,7 @@
 
 		mg_init_library(init);
 
-		// https://github.com/civetweb/civetweb/blob/master/docs/api/mg_start.md
 		std::vector<string> optionlist;
-
-		Config::for_each("civetweb-options",[&optionlist](const char *key, const char *value){
-			optionlist.emplace_back(key);
-			optionlist.emplace_back(value);
-			return true;
-		});
-
 		initialize(optionlist);
 
 	};
