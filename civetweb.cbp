@@ -73,6 +73,7 @@
 		<Unit filename="src/module/private.h" />
 		<Unit filename="src/module/protocol.cc" />
 		<Unit filename="src/module/report.cc" />
+		<Unit filename="src/module/send.cc" />
 		<Unit filename="src/module/swagger.cc" />
 		<Unit filename="src/module/worker.cc" />
 		<Unit filename="src/testprogram/testprogram.cc" />

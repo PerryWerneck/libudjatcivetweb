@@ -119,7 +119,12 @@ static void test_httpd() {
 		}
 
 		int handle(const Udjat::HTTP::Connection &conn, const Udjat::HTTP::Request &request, const Udjat::MimeType mimetype) override {
-			return conn.failed(404,"Test is ok but there's no data");
+			// return conn.failed(404,"Test is ok but there's no data");
+			const char *ptr = strchr(request.getPath(),'/');
+			if(!ptr) {
+				throw runtime_error("Invalid");
+			}
+			return conn.send(ptr+1);
 		}
 	};
 
