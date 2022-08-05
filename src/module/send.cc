@@ -107,13 +107,21 @@
 
 			stringstream response;
 
+			const char * basename = strrchr(name,'/');
+			if(basename) {
+				basename = strrchr(name,'/');
+			}
+			if(basename) {
+				basename++;
+			}
+
 			response	<< "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 3.2 Final//EN\"><html><head><title>Index of "
-						<< filename
+						<< basename
 						<< "</title></head><body><h1>Index of "
-						<< filename
+						<< basename
 						<< "</h1><hr /><pre>";
 
-			File::Path::for_each(filename.c_str(),[&response](const char *name, bool is_dir) {
+			File::Path::for_each(filename.c_str(),[&response](const char *name, const File::Stat &st) {
 
 				name = strrchr(name,'/');
 				if(!name) {
@@ -126,8 +134,8 @@
 				}
 
 				response << "<a href=\"" << name;
-				if(is_dir) {
-					response << "/";
+				if((st.st_mode & S_IFMT) == S_IFDIR) {
+					response << '/';
 				}
 				response	<< "\">"
 							<< name
