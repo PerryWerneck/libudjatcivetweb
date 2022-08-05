@@ -55,6 +55,7 @@
 
 		CivetWeb::Connection(conn).send(
 			icon.c_str(),
+			false,
 			"image/svg+xml",
 			Config::Value<unsigned int>("theme","icon-max-age",604800)
 		);

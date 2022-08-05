@@ -28,25 +28,20 @@
 
  namespace Udjat {
 
-	int CivetWeb::Connection::send(const char *filename, const char *mime_type, unsigned int maxage) const {
+	int CivetWeb::Connection::send(const char *name, bool allow_index, const char *mime_type, unsigned int maxage) const {
 
-		if(!(filename && *filename)) {
+		if(!(name && *name)) {
 			throw system_error(ENOENT,system_category(),"Empty file path");
 		}
 
+		string filename{name};
+		if(filename[filename.size()-1] == '/') {
+			filename.resize(filename.size()-1);
+		}
+
 		struct stat st;
-
-		if(filename[strlen(filename)-1] == '/') {
-
-			string dirname{filename,strlen(filename) -1};
-			if(stat(dirname.c_str(), &st) < 0) {
-				throw system_error(errno,system_category(),filename);
-			}
-
-		} else if(stat(filename, &st) < 0) {
-
+		if(stat(filename.c_str(), &st) < 0) {
 			throw system_error(errno,system_category(),filename);
-
 		}
 
 		if(S_ISREG(st.st_mode)) {
@@ -69,11 +64,38 @@
 
 			mg_response_header_send(conn);
 
-			mg_send_file_body(conn,filename);
+			mg_send_file_body(conn,filename.c_str());
 
-		} else if(S_ISDIR(st.st_mode)) {
+		} else if(S_ISDIR(st.st_mode) && allow_index) {
 			//
-			// It's a directory, send index.
+			// It's a directory
+			//
+
+			if(name[strlen(name)-1] != '/') {
+				//
+				// It's a directory but the URL is requesting a file.
+				//
+				cerr << "civetweb\tClient has requested directory '" << filename << "' without an ending '/'" << endl;
+
+				/*
+				//
+				// Redirect to correct url.
+				//
+				mg_response_header_start(conn, 301);
+				mg_response_header_add(conn, "Location", (string{name} + '/').c_str(), -1);
+				mg_response_header_send(conn);
+
+				return 301;
+				*/
+
+				mg_response_header_start(conn, 400);
+				mg_response_header_send(conn);
+
+				return 400;
+			}
+
+			//
+			// Send index
 			//
 			mg_response_header_start(conn, 200);
 
@@ -91,7 +113,7 @@
 						<< filename
 						<< "</h1><hr /><pre>";
 
-			File::Path::for_each(filename,[&response](const char *name, bool is_dir) {
+			File::Path::for_each(filename.c_str(),[&response](const char *name, bool is_dir) {
 
 				name = strrchr(name,'/');
 				if(!name) {
@@ -127,9 +149,8 @@
 			//
 			// Invalid file type.
 			//
-			cerr << "civetweb\t'" << filename << "' is invalid" << endl;
-
-			throw runtime_error("Invalid path");
+			cerr << "civetweb\t'" << filename << "' is not allowed" << endl;
+			throw system_error(ENOENT,system_category(),filename);
 
 		}
 
