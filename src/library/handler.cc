@@ -30,8 +30,6 @@
 
 	HTTP::Handler::Handler(const char *u) : uri(u) {
 
-		cout << ">>>> [" << uri << "]" << endl;
-
 		if(!(u && *u)) {
 			throw system_error(EINVAL,system_category(),"http-handler attribute is required");
 		}

@@ -21,6 +21,8 @@
  #include <sys/types.h>
  #include <sys/stat.h>
  #include <udjat/tools/http/timestamp.h>
+ #include <udjat/tools/file.h>
+ #include <sstream>
 
  using namespace std;
 
@@ -33,8 +35,18 @@
 		}
 
 		struct stat st;
-		if(stat(filename, &st) < 0) {
+
+		if(filename[strlen(filename)-1] == '/') {
+
+			string dirname{filename,strlen(filename) -1};
+			if(stat(dirname.c_str(), &st) < 0) {
+				throw system_error(errno,system_category(),filename);
+			}
+
+		} else if(stat(filename, &st) < 0) {
+
 			throw system_error(errno,system_category(),filename);
+
 		}
 
 		if(S_ISREG(st.st_mode)) {
@@ -63,7 +75,53 @@
 			//
 			// It's a directory, send index.
 			//
-			throw system_error(ENOENT,system_category(),"Index is not implemented");
+			mg_response_header_start(conn, 200);
+
+			if(maxage) {
+				mg_response_header_add(conn, "Cache-Control", (string{"public,max-age="} + std::to_string(maxage) + ",immutable").c_str(), -1);
+				mg_response_header_add(conn, "Expires", HTTP::TimeStamp(time(0)+maxage).to_string().c_str(), -1);
+			}
+			mg_response_header_add(conn, "Content-Type", std::to_string(MimeType::html), -1);
+
+			stringstream response;
+
+			response	<< "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 3.2 Final//EN\"><html><head><title>Index of "
+						<< filename
+						<< "</title></head><body><h1>Index of "
+						<< filename
+						<< "</h1><hr /><pre>";
+
+			File::Path::for_each(filename,[&response](const char *name, bool is_dir) {
+
+				name = strrchr(name,'/');
+				if(!name) {
+					return true;
+				}
+				name++;
+
+				if(name[0] == '.') {
+					return true;
+				}
+
+				response << "<a href=\"" << name;
+				if(is_dir) {
+					response << "/";
+				}
+				response	<< "\">"
+							<< name
+							<< "</a>" << endl;
+
+				return true;
+			});
+
+			response << "</pre><hr /></body></html>";
+
+			string str{response.str()};
+
+			mg_response_header_add(conn, "Content-Length", std::to_string(str.size()).c_str(), -1);
+			mg_response_header_send(conn);
+
+			mg_write(conn, str.c_str(), str.size());
 
 		} else {
 			//
@@ -74,7 +132,6 @@
 			throw runtime_error("Invalid path");
 
 		}
-
 
 		return 200;
 	}
