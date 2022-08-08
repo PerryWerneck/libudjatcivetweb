@@ -54,6 +54,7 @@
 		Udjat::HTTP::Icon icon = Udjat::HTTP::Icon::getInstance(path);
 
 		CivetWeb::Connection(conn).send(
+			HTTP::Get,
 			icon.c_str(),
 			false,
 			"image/svg+xml",

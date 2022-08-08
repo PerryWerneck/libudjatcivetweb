@@ -22,6 +22,7 @@
  #include <udjat/defs.h>
  #include <udjat/tools/value.h>
  #include <udjat/tools/http/exception.h>
+ #include <udjat/tools/http/request.h>
  #include <stdexcept>
  #include <system_error>
  #include <map>
@@ -42,12 +43,13 @@
 			virtual int success(const char *mime_type, const char *response, size_t length) const noexcept = 0;
 
 			/// @brief Send file.
+			/// @param Method The HTTP method from client.
 			/// @param filename The filename to send.
 			/// @param allow_index If true and filename is a directory, send a simple html index.
 			/// @param mime_type The mime type for file (will be replaced with html if the filename is a directory)
 			/// @param max_age File cache time, in seconds.
 			/// @return HTML response code.
-			virtual int send(const char *filename, bool allow_index = false, const char *mime_type = nullptr, unsigned int max_age = 0) const = 0;
+			virtual int send(const HTTP::Method method, const char *filename, bool allow_index = false, const char *mime_type = nullptr, unsigned int max_age = 0) const = 0;
 
 			int success(const char *mime_type, const std::string &response) const {
 				return success(mime_type,response.c_str(),response.size());

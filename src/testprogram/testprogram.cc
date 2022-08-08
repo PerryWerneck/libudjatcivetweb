@@ -124,7 +124,7 @@ static void test_httpd() {
 			if(!ptr) {
 				throw runtime_error("Invalid");
 			}
-			return conn.send(ptr+1,true);
+			return conn.send(request.as_type(),ptr+1,true);
 		}
 	};
 

@@ -28,7 +28,12 @@
 
  namespace Udjat {
 
-	int CivetWeb::Connection::send(const char *name, bool allow_index, const char *mime_type, unsigned int maxage) const {
+	int CivetWeb::Connection::send(const HTTP::Method method, const char *name, bool allow_index, const char *mime_type, unsigned int maxage) const {
+
+		// Only GET and Head shoud be sent.
+		if(method != HTTP::Get && method != HTTP::Head) {
+			throw runtime_error(string{"Invalid HTTP request: '"} + to_string(method) + "'");
+		}
 
 		if(!(name && *name)) {
 			throw system_error(ENOENT,system_category(),"Empty file path");
@@ -56,7 +61,10 @@
 			}
 
 			mg_response_header_add(conn, "Last-Modified", HTTP::TimeStamp(st.st_mtime).to_string().c_str(), -1);
-			mg_response_header_add(conn, "Content-Length", std::to_string(st.st_size).c_str(), -1);
+
+			if(method == HTTP::Get) {
+				mg_response_header_add(conn, "Content-Length", std::to_string(st.st_size).c_str(), -1);
+			}
 
 			if(mime_type && *mime_type) {
 				mg_response_header_add(conn, "Content-Type", mime_type, -1);
@@ -64,7 +72,9 @@
 
 			mg_response_header_send(conn);
 
-			mg_send_file_body(conn,filename.c_str());
+			if(method == HTTP::Get) {
+				mg_send_file_body(conn,filename.c_str());
+			}
 
 		} else if(S_ISDIR(st.st_mode) && allow_index) {
 			//
