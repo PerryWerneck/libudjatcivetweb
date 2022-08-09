@@ -18,47 +18,40 @@
  */
 
  #include "private.h"
+ #include <udjat/worker.h>
+ #include <udjat/civetweb.h>
  #include <udjat/tools/protocol.h>
- #include <udjat/tools/http/exception.h>
- #include <cstring>
+ #include <udjat/tools/http/server.h>
+ #include <udjat/tools/http/handler.h>
+ #include <udjat/tools/http/request.h>
+ #include <udjat/tools/http/mimetype.h>
 
- int webHandler(const CivetWeb::Connection &connection, function<string (const CivetWeb::Connection &connection, const char *path, const char *method, const MimeType mimetype)> worker) noexcept {
+ int customWebHandler(struct mg_connection *conn, void *cbdata) {
+
+	CivetWeb::Connection connection(conn);
+
+	HTTP::Handler *handler = (HTTP::Handler *) cbdata;
 
 	const struct mg_request_info *ri = connection.request_info();
-	MimeType mimetype{MimeType::json};
+	MimeType mimetype{MimeType::custom};
 	string rsp;
 
 	try {
 
-		const char *local_uri = ri->local_uri;
-
-		// Extract 'API' prefix.
-		if(strncasecmp(local_uri,"/api/",5) == 0) {
-			local_uri += 5;
-		} else {
-			throw HTTP::Exception( 400, ri->local_uri, "Request must be in the format /api/version/worker/path");
-		}
-
-		// Extract version prefix.
-		{
-			const char *ptr = strchr(local_uri,'/');
-			if(!ptr) {
-				throw HTTP::Exception( 400, ri->local_uri, "Request must be in the format /api/version/worker/path");
-			}
-			local_uri = ptr+1;
-		}
-
 		// Extract mimetype
-		string uri = local_uri;
+		string uri = ri->local_uri;
 		{
 			auto ext = uri.find_last_of('.');
 			if(ext != string::npos && ext > 1) {
 				mimetype = MimeTypeFactory(uri.c_str()+ext+1);
-				uri.resize(ext);
 			}
 		}
 
-		rsp = worker(connection,uri.c_str(),ri->request_method,mimetype);
+		return handler->handle(
+			connection,
+			HTTP::Request(uri.c_str(),ri->request_method),
+			mimetype
+		);
 
 	} catch(const HTTP::Exception &error) {
 
@@ -79,10 +72,8 @@
 
 	}
 
-#ifdef DEBUG
-	cout << "Response:" << endl << rsp << endl;
-#endif // DEBUG
-
-	return connection.success(to_string(mimetype),rsp.c_str(),rsp.size());
+	return 500;
 
  }
+
+

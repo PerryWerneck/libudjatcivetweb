@@ -22,6 +22,7 @@
  #include <cstdarg>
  #include <iostream>
  #include <sstream>
+ #include <udjat/tools/http/exception.h>
 
  using namespace std;
 
@@ -29,7 +30,15 @@
 
 	namespace HTTP {
 
-		Report::Report() : Udjat::Report() {
+		Report::Report() : mimetype(MimeType::json) {
+		}
+
+		Report::Report(const char *uri, const MimeType m) : Udjat::Report(), mimetype(m) {
+
+			if(mimetype != MimeType::json && mimetype != MimeType::html ) {
+				throw HTTP::Exception(501, uri, "Mimetype Not Supported");
+			}
+
 		}
 
 		Report::~Report() {
@@ -37,11 +46,16 @@
 
 		std::string Report::to_string() const {
 			std::stringstream ss;
-			this->json(ss);
+
+			if(mimetype == MimeType::html) {
+				this->to_html(ss);
+			} else {
+				this->to_json(ss);
+			}
 			return ss.str();
 		}
 
-		void Report::json(std::stringstream &ss) const {
+		void Report::to_json(std::stringstream &ss) const {
 
 			bool sep = false;
 			auto column = columns.names.begin();
@@ -69,6 +83,33 @@
 
 			ss << "}]";
 
+		}
+
+		void Report::to_html(std::stringstream &ss) const {
+
+			ss << "<table><thead>";
+
+			// ss << "<caption>" << this->title << "</caption>"
+
+			ss << "<tr>";
+
+			for(auto column : columns.names) {
+				ss << "<th>" << column << "</th>";
+			}
+
+			ss << "</tr></thead><tbody><tr>";
+
+			auto column = columns.names.begin();
+			for(auto value : values) {
+				if(column == columns.names.end()) {
+					ss << "</tr><tr>";
+					column = columns.names.begin();
+				}
+				ss << "<td>" << value.to_string() << "</td>";
+				column++;
+			}
+
+			ss << "</tr></tbody></table>";
 		}
 
 		Udjat::Report & Report::push_back(const char *value) {

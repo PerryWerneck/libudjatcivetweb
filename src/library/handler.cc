@@ -18,39 +18,39 @@
  */
 
  #include <config.h>
- #include <udjat/civetweb.h>
- #include <udjat/request.h>
- #include <udjat/tools/http/request.h>
+ #include <stdexcept>
+ #include <udjat/tools/http/handler.h>
+ #include <udjat/tools/http/server.h>
+ #include <iostream>
+ #include <udjat/tools/quark.h>
 
  using namespace std;
 
  namespace Udjat {
 
-	HTTP::Request::Request(const string &u, const char *t)
-		: Udjat::Request(t) {
+	HTTP::Handler::Handler(const char *u) : uri(u) {
 
-		this->path = u;
-		this->method = pop();
+		if(!(u && *u)) {
+			throw system_error(EINVAL,system_category(),"http-handler attribute is required");
+		}
+
+		if(u[0] != '/') {
+			throw system_error(EINVAL,system_category(),"http-handler should start with '/'");
+		}
+
+		if(u[strlen(u)-1] != '/') {
+			throw system_error(EINVAL,system_category(),"http-handler should end with '/'");
+		}
 
 	}
 
-	std::string HTTP::Request::pop() {
+	HTTP::Handler::Handler(const pugi::xml_node &node, const char *tagname) : HTTP::Handler(Quark(node,tagname,"").c_str()) {
+	}
 
-		if(path.empty()) {
-			throw system_error(ENODATA,system_category(),"Not enough arguments");
+	HTTP::Handler::~Handler() {
+		if(server) {
+			server->remove(this);
 		}
-
-		size_t pos = path.find('/');
-		if(pos == string::npos) {
-			string rc = path;
-			path.clear();
-			return rc;
-		}
-
-		string rc{path.c_str(),pos};
-		path.erase(0,pos+1);
-
-		return rc;
 	}
 
  }

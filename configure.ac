@@ -56,17 +56,25 @@ CFLAGS="$CFLAGS -I$ac_pwd/src/include"
 case "$host" in
 	*-mingw32)
 		LDFLAGS="$LDFLAGS -pthread"
+		DLL_LDFLAGS="-shared -Wl,--output-def,\$(@D)/udjathttpd.def"
 		AC_SUBST(LIBEXT,.dll)
 		AC_SUBST(EXEEXT,.exe)
 		AC_SUBST(OSNAME,windows)
+		AC_SUBST(SONAME,udjathttpd.dll)
+		AC_CONFIG_FILES(sdk/windows/dynamic.pc)
+		AC_CONFIG_FILES(sdk/windows/static.pc)
 		;;
 
  	*)
 		CFLAGS="$CFLAGS -pthread"
 		LDFLAGS="$LDFLAGS -pthread"
+		DLL_LDFLAGS="-shared"
 		AC_SUBST(LIBEXT,.so)
 		AC_SUBST(EXEEXT)
 		AC_SUBST(OSNAME,linux)
+		AC_SUBST(SONAME,libudjathttpd.so.$app_vrs_major.$app_vrs_minor)
+		AC_CONFIG_FILES(sdk/linux/dynamic.pc)
+		AC_CONFIG_FILES(sdk/linux/static.pc)
 
 esac
 
@@ -75,6 +83,8 @@ dnl Check for tools
 dnl ---------------------------------------------------------------------------
 
 AC_PATH_TOOL([VALGRIND], [valgrind], [no])
+AC_PATH_TOOL([AR], [ar], [no])
+AC_PATH_TOOL([DLLTOOL], [dlltool], [true])
 
 dnl ---------------------------------------------------------------------------
 dnl Check for C++ 2017 support
@@ -194,6 +204,7 @@ dnl ---------------------------------------------------------------------------
 dnl Output config
 dnl ---------------------------------------------------------------------------
 
+AC_SUBST(DLL_LDFLAGS)
 AC_SUBST(BASEDIR,$ac_pwd)
 AC_CONFIG_FILES(Makefile)
 

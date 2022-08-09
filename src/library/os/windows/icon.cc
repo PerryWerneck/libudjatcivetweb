@@ -18,39 +18,31 @@
  */
 
  #include <config.h>
- #include <udjat/civetweb.h>
- #include <udjat/request.h>
- #include <udjat/tools/http/request.h>
+ #include <udjat/tools/http/icons.h>
+ #include <udjat/tools/configuration.h>
+ #include <udjat/tools/string.h>
+ #include <udjat/tools/application.h>
+ #include <fcntl.h>
 
  using namespace std;
 
  namespace Udjat {
 
-	HTTP::Request::Request(const string &u, const char *t)
-		: Udjat::Request(t) {
+	namespace HTTP {
 
-		this->path = u;
-		this->method = pop();
+		Icon::Icon(const char *name) {
 
-	}
+			Application::DataDir file{"icons"};
 
-	std::string HTTP::Request::pop() {
+			if(file.find((string{name} + ".svg").c_str(),true)) {
+				assign(file);
+				return;
+			}
 
-		if(path.empty()) {
-			throw system_error(ENODATA,system_category(),"Not enough arguments");
+			throw system_error(ENOENT,system_category(),string{"Can't find icon '"} + name + "'");
+
 		}
 
-		size_t pos = path.find('/');
-		if(pos == string::npos) {
-			string rc = path;
-			path.clear();
-			return rc;
-		}
-
-		string rc{path.c_str(),pos};
-		path.erase(0,pos+1);
-
-		return rc;
 	}
 
  }

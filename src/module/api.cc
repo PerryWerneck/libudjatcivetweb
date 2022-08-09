@@ -22,19 +22,57 @@
  #include <udjat/civetweb.h>
  #include <udjat/tools/protocol.h>
  #include <udjat/tools/http/exception.h>
+ #include <udjat/tools/http/report.h>
+ #include <udjat/tools/http/request.h>
+
+ static std::string report(const CivetWeb::Connection &connection, const char *path, const char *method, const MimeType mimetype) {
+
+	// It's a report
+	if(strcasecmp(method,"get")) {
+		throw HTTP::Exception(405, connection.request_uri(), "Method Not Allowed");
+	}
+
+	HTTP::Report  response{path, mimetype};
+	HTTP::Request request(path,method);
+
+	// Run report.
+	if(!Worker::work(request.getMethod(),request,response)) {
+		throw HTTP::Exception(405, connection.request_uri(), "Method Not Allowed");
+	}
+
+	return response.to_string();
+
+ }
 
  int apiWebHandler(struct mg_connection *conn, void UDJAT_UNUSED(*cbdata)) {
 
-	return webHandler(conn,[](const string &url, const char *method, const MimeType mimetype){
+	return webHandler(CivetWeb::Connection(conn),[](const CivetWeb::Connection &connection, const char *path, const char *method, const MimeType mimetype){
 
-		HTTP::Response response(mimetype);
-		HTTP::Request request(url.c_str(),method);
+#ifdef DEBUG
+		cout << "*** path='" << path << "'" << endl;
+#endif // DEBUG
 
-		if(!Worker::work(request.getMethod(),request,response)) {
-			throw HTTP::Exception(405, url.c_str(), "Method Not Allowed");
+		if(mimetype == MimeType::csv) {
+
+			return report(connection,path,method,mimetype);
+
+		} else if(!strncasecmp(path,"report/",7)) {
+
+			return report(connection,path+7,method,mimetype);
+
+		} else {
+
+			// It's a 'normal' API request.
+			HTTP::Response response(mimetype);
+			HTTP::Request request(path,method);
+
+			if(!Worker::work(request.getMethod(),request,response)) {
+				throw HTTP::Exception(405, connection.request_uri(), "Method Not Allowed");
+			}
+
+			return response.to_string();
+
 		}
-
-		return response.to_string();
 
 	});
 

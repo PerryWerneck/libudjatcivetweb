@@ -17,40 +17,25 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
- #include <config.h>
- #include <udjat/civetweb.h>
- #include <udjat/request.h>
- #include <udjat/tools/http/request.h>
+ #include "private.h"
+ #include <sys/types.h>
+ #include <sys/stat.h>
+ #include <udjat/tools/http/timestamp.h>
 
  using namespace std;
 
  namespace Udjat {
 
-	HTTP::Request::Request(const string &u, const char *t)
-		: Udjat::Request(t) {
-
-		this->path = u;
-		this->method = pop();
-
+	int CivetWeb::Connection::success(const char *mime_type, const char *response, size_t length) const noexcept {
+		mg_send_http_ok(conn, mime_type, length);
+		mg_write(conn, response, length);
+		return 200;
 	}
 
-	std::string HTTP::Request::pop() {
-
-		if(path.empty()) {
-			throw system_error(ENODATA,system_category(),"Not enough arguments");
-		}
-
-		size_t pos = path.find('/');
-		if(pos == string::npos) {
-			string rc = path;
-			path.clear();
-			return rc;
-		}
-
-		string rc{path.c_str(),pos};
-		path.erase(0,pos+1);
-
-		return rc;
+	int CivetWeb::Connection::failed(int code, const char *message) const noexcept {
+		mg_send_http_error(conn, code, message);
+		return code;
 	}
 
  }
+

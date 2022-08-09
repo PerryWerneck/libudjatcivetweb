@@ -2,11 +2,15 @@
 #---[ Library configuration ]------------------------------------------------------------
 
 PACKAGE_NAME=@PACKAGE_NAME@
+SONAME=@SONAME@
 
-MAIN_SOURCES= \
+LIBRARY_SOURCES= \
 	$(wildcard src/library/*.cc) \
-	$(wildcard src/module/*.cc) \
+	$(wildcard src/library/os/@OSNAME@/*.cc) \
 	$(wildcard src/library/layout/*.cc)
+
+MODULE_SOURCES= \
+	$(wildcard src/module/*.cc)
 
 TEST_SOURCES= \
 	$(wildcard src/testprogram/*.cc)
@@ -41,6 +45,7 @@ docdir=@docdir@
 sysconfdir=/etc
 
 BASEDIR=@BASEDIR@
+DLL_LDFLAGS=@DLL_LDFLAGS@
 
 OBJDIR=.obj
 OBJDBG=$(OBJDIR)/Debug
@@ -129,19 +134,41 @@ $(OBJRLS)/%.o: \
 #---[ Release Targets ]------------------------------------------------------------------
 
 all: \
+	$(BINRLS)/$(SONAME) \
 	$(BINRLS)/$(PACKAGE_NAME)@LIBEXT@
 
 Release: \
+	$(BINRLS)/$(SONAME) \
 	$(BINRLS)/$(PACKAGE_NAME)@LIBEXT@
 
+$(BINRLS)/$(SONAME): \
+	$(foreach SRC, $(basename $(LIBRARY_SOURCES)), $(OBJRLS)/$(SRC).o)
+
+	@$(MKDIR) $(@D)
+	@echo $< ...
+	@$(LD) \
+		$(DLL_LDFLAGS) \
+		-Wl,-soname,$(@F) \
+		-o $@ \
+		$(LDFLAGS) \
+		$^ \
+		$(LIBS)
+
+$(BINRLS)/libudjathttpd.a: \
+	$(foreach SRC, $(basename $(LIBRARY_SOURCES)), $(OBJRLS)/$(SRC).o)
+
+	@$(MKDIR) $(@D)
+	@echo $< ...
+	@$(AR) rcs $@ $^
+
 $(BINRLS)/$(PACKAGE_NAME)@LIBEXT@: \
-	$(foreach SRC, $(basename $(MAIN_SOURCES)), $(OBJRLS)/$(SRC).o)
+	$(BINRLS)/$(SONAME) \
+	$(foreach SRC, $(basename $(MODULE_SOURCES)), $(OBJRLS)/$(SRC).o)
 
 	@$(MKDIR) $(@D)
 	@echo $< ...
 	@$(LD) \
 		-shared \
-		-Wl,-soname,$(@F) \
 		-o $@ \
 		$(LDFLAGS) \
 		$^ \
@@ -151,10 +178,36 @@ $(BINRLS)/$(PACKAGE_NAME)@LIBEXT@: \
 #---[ Install Targets ]------------------------------------------------------------------
 
 install: \
-	install-@OSNAME@-module \
-	install-conf
+	install-@OSNAME@ \
+	install-module \
+	install-dev
 
-install-linux-module: \
+install-linux: \
+	$(BINRLS)/$(SONAME)
+
+	# Install library
+	@$(MKDIR) $(DESTDIR)$(libdir)
+
+	@$(INSTALL_PROGRAM) \
+		$(BINRLS)/$(SONAME) \
+		$(DESTDIR)$(libdir)/$(SONAME)
+		
+	@$(MKDIR) $(DESTDIR)$(sysconfdir)/udjat.conf.d
+	@$(INSTALL_DATA) \
+		conf.d/50-civetweb.conf \
+		$(DESTDIR)$(sysconfdir)/udjat.conf.d		
+		
+install-windows: \
+	$(BINRLS)/@SONAME@
+
+	@$(MKDIR) \
+		$(DESTDIR)$(bindir)
+
+	@$(INSTALL_PROGRAM) \
+		$(BINRLS)/@SONAME@ \
+		$(DESTDIR)$(bindir)/@SONAME@
+		
+install-module: \
 	$(BINRLS)/$(PACKAGE_NAME)@LIBEXT@
 
 	@$(MKDIR) \
@@ -163,41 +216,91 @@ install-linux-module: \
 	@$(INSTALL_PROGRAM) \
 		$(BINRLS)/$(PACKAGE_NAME)@LIBEXT@ \
 		$(DESTDIR)@MODULE_PATH@/$(PACKAGE_NAME)@LIBEXT@
-		
-		
-install-conf:
+
+install-dev: \
+	install-@OSNAME@-dev \
+	install-@OSNAME@-static 
+	
+	@$(MKDIR) \
+		$(DESTDIR)$(includedir)/udjat/tools/http
+
+	@$(INSTALL_DATA) \
+		src/include/udjat/tools/http/*.h \
+		$(DESTDIR)$(includedir)/udjat/tools/http
+
+	# Install PKG-CONFIG files
+	@$(MKDIR) \
+		$(DESTDIR)$(libdir)/pkgconfig
+
+	@$(INSTALL_DATA) \
+		sdk/@OSNAME@/dynamic.pc \
+		$(DESTDIR)$(libdir)/pkgconfig/udjat-httpd.pc
+
+	@$(INSTALL_DATA) \
+		sdk/@OSNAME@/static.pc \
+		$(DESTDIR)$(libdir)/pkgconfig/udjat-httpd-static.pc
+
+install-linux-static: \
+	$(BINRLS)/libudjathttpd.a
+
+	# Install static library
+	@$(MKDIR) $(DESTDIR)$(libdir)
+	@$(INSTALL_DATA) \
+		$(BINRLS)/libudjathttpd.a \
+		$(DESTDIR)$(libdir)/libudjathttpd.static.a
+
+install-windows-static: \
+	$(BINRLS)/libudjathttpd.a
 
 	@$(MKDIR) \
-		$(DESTDIR)$(sysconfdir)/udjat.conf.d
+		$(DESTDIR)$(libdir)
+
+	@$(INSTALL_PROGRAM) \
+		$(BINRLS)/libudjathttpd.a \
+		$(DESTDIR)$(libdir)/libudjathttpd.a
+
+install-linux-dev:
+
+	# Install linux SDK
+	@$(MKDIR) \
+		$(DESTDIR)$(libdir)
+
+	@$(LN_S) \
+		$(SONAME) \
+		$(DESTDIR)$(libdir)/libudjathttpd.so
+
+install-windows-dev:
+
+	@$(MKDIR) \
+		$(DESTDIR)$(libdir)
+
+	@$(DLLTOOL) \
+		--input-def $(BINRLS)/udjathttpd.def \
+		--dllname @SONAME@ \
+		--output-lib $(DESTDIR)$(libdir)/libudjathttpd.dll.a
 		
-	@$(INSTALL_DATA) \
-		conf.d/50-civetweb.conf \
-		$(DESTDIR)$(sysconfdir)/udjat.conf.d		
-			
+	
 #---[ Uninstall Targets ]----------------------------------------------------------------
 
 uninstall: \
-	uninstall-@OSNAME@-lib
-	uninstall-conf
+	uninstall-@OSNAME@
 
-uninstall-linux-lib:
+uninstall-linux:
 
 	@rm -f \
 		$(DESTDIR)@MODULE_PATH@/$(PACKAGE_NAME)@LIBEXT@
 
-uninstall-conf:
-
-	@rm -f \
-		$(DESTDIR)$(sysconfdir)/udjat.conf.d 50-civetweb.conf
-
 #---[ Debug Targets ]--------------------------------------------------------------------
 
 Debug: \
+	$(BINDBG)/$(SONAME) \
+	$(BINDBG)/$(PACKAGE_NAME)@LIBEXT@ \
 	$(BINDBG)/udjat@EXEEXT@
 
 $(BINDBG)/udjat@EXEEXT@: \
-	$(foreach SRC, $(basename $(TEST_SOURCES)), $(OBJDBG)/$(SRC).o) \
-	$(BINDBG)/$(PACKAGE_NAME)@LIBEXT@
+	$(BINDBG)/$(SONAME) \
+	$(BINDBG)/$(PACKAGE_NAME)@LIBEXT@ \
+	$(foreach SRC, $(basename $(TEST_SOURCES)), $(OBJDBG)/$(SRC).o)
 
 	@$(MKDIR) $(@D)
 	@echo $< ...
@@ -210,14 +313,28 @@ $(BINDBG)/udjat@EXEEXT@: \
 		$(LIBS)
 
 
+$(BINDBG)/$(SONAME): \
+	$(foreach SRC, $(basename $(LIBRARY_SOURCES)), $(OBJDBG)/$(SRC).o)
+
+	@$(MKDIR) $(@D)
+	@echo $< ...
+	@$(LD) \
+		$(DLL_LDFLAGS) \
+		-Wl,-soname,$(@F) \
+		-o $@ \
+		$(LDFLAGS) \
+		$^ \
+		$(LIBS)
+
 $(BINDBG)/$(PACKAGE_NAME)@LIBEXT@: \
-	$(foreach SRC, $(basename $(MAIN_SOURCES)), $(OBJDBG)/$(SRC).o)
+	$(BINDBG)/$(SONAME) \
+	$(foreach SRC, $(basename $(MODULE_SOURCES)), $(OBJDBG)/$(SRC).o)
 
 	@$(MKDIR) $(@D)
 	@echo $< ...
 	@$(LD) \
 		-shared \
-		-Wl,-soname,$(@F) \
+		-Wl,-rpath,$(BINDBG) \
 		-o $@ \
 		$(LDFLAGS) \
 		$^ \
@@ -230,14 +347,14 @@ run: \
 ifeq ($(VALGRIND),no)
 
 	@LD_LIBRARY_PATH=$(BINDBG) \
-		$(BINDBG)/udjat@EXEEXT@
+		$(BINDBG)/udjat@EXEEXT@ -f
 
 else
 	@touch valgrind.suppression
 
 	@LD_LIBRARY_PATH=$(BINDBG) \
 		$(VALGRIND) --leak-check=full --track-origins=yes --gen-suppressions=all --suppressions=valgrind.suppression \
-		$(BINDBG)/udjat@EXEEXT@
+		$(BINDBG)/udjat@EXEEXT@ -f
 endif
 
 #---[ Clean Targets ]--------------------------------------------------------------------
@@ -261,7 +378,7 @@ clean: \
 	cleanRelease
 
 
--include $(foreach SRC, $(basename $(MAIN_SOURCES)), $(OBJDBG)/$(SRC).d)
--include $(foreach SRC, $(basename $(MAIN_SOURCES)), $(OBJRLS)/$(SRC).d)
+-include $(foreach SRC, $(basename $(LIBRARY_SOURCES)), $(OBJDBG)/$(SRC).d)
+-include $(foreach SRC, $(basename $(LIBRARY_SOURCES)), $(OBJRLS)/$(SRC).d)
 
 

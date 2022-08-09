@@ -24,43 +24,85 @@
  #include <udjat/tools/url.h>
  #include <udjat/tools/protocol.h>
  #include <udjat/tools/http/mimetype.h>
+ #include <udjat/tools/http/connection.h>
+ #include <udjat/tools/string.h>
  #include <cstring>
  #include <string>
  #include <stdexcept>
  #include <civetweb.h>
  #include <udjat/civetweb.h>
  #include <iostream>
+ #include <list>
+ #include <cstring>
 
  using namespace Udjat;
  using namespace std;
-
- /// @brief Web handler.
- int webHandler(struct mg_connection *conn, function<string (const string &uri, const char *method, const MimeType mimetype)> worker) noexcept;
-
- /// @brief Handler for API requests.
- int apiWebHandler(struct mg_connection *conn, void *cbdata);
-
- /// @brief Handler for report requests.
- int reportWebHandler(struct mg_connection *conn, void *cbdata);
-
- /// @brief Handler for swagger request.
- int swaggerWebHandler(struct mg_connection *conn, void *cbdata);
 
  namespace Udjat {
 
 	namespace CivetWeb {
 
-		/// @brief Base class for HTTP Protocol
-		class Protocol : public Udjat::Protocol {
-		protected:
-			int use_ssl;
+		class UDJAT_PRIVATE Connection : public Udjat::HTTP::Connection {
+		private:
+			struct mg_connection *conn;
 
 		public:
-			Protocol(const char *name, const ModuleInfo &info, int use_ssl);
+			Connection(struct mg_connection *c) : Udjat::HTTP::Connection(), conn(c) {
+			}
+
+			int success(const char *mime_type, const char *response, size_t length) const noexcept override;
+			int failed(int code, const char *message) const noexcept override;
+			int send(const HTTP::Method method, const char *filename, bool allow_index, const char *mime_type, unsigned int max_age) const override;
+
+			inline struct mg_connection * connection() {
+				return conn;
+			}
+
+			inline const struct mg_request_info * request_info() const noexcept {
+				return mg_get_request_info(conn);
+			}
+
+			inline const char * request_uri() const noexcept {
+				return mg_get_request_info(conn)->request_uri;
+			}
+		};
+
+		class Header : public Udjat::Protocol::Header {
+		public:
+			Header(const char *name) : Protocol::Header(name) {
+			}
+
+			Protocol::Header & assign(const Udjat::TimeStamp &value) override;
+
+		};
+
+		/// @brief CivetWeb protocol worker.
+		class Worker : public Udjat::Protocol::Worker {
+		private:
+
+			/// @brief Request headers.
+			std::list<Header> headers;
+
+			/// @brief Connect to server, send request.
+			struct mg_connection * connect();
+
+		public:
+			Worker(const char *url = "", const HTTP::Method method = HTTP::Get, const char *payload = "");
+
+			Udjat::String get(const std::function<bool(double current, double total)> &progress) override;
+			bool save(const char *filename, const std::function<bool(double current, double total)> &progress, bool replace) override;
+
+			Protocol::Header & header(const char *name) override;
+
+		};
+
+		/// @brief Base class for HTTP Protocol
+		class Protocol : public Udjat::Protocol {
+		public:
+			Protocol(const char *name, const ModuleInfo &info);
 			virtual ~Protocol();
 
-			std::string call(const URL &url, const HTTP::Method method, const char *payload = "") const override;
-			bool get(const URL &url, const char *filename) const override;
+			std::shared_ptr<Worker> WorkerFactory() const override;
 
 		};
 
@@ -68,3 +110,20 @@
 
  }
 
+ /// @brief Web handler.
+ int webHandler(const CivetWeb::Connection &connection, function<string (const CivetWeb::Connection &connection, const char *path, const char *method, const MimeType mimetype)> worker) noexcept;
+
+ /// @brief Handler for API requests.
+ int apiWebHandler(struct mg_connection *conn, void *cbdata);
+
+ /// @brief Handler for API requests.
+ int iconWebHandler(struct mg_connection *conn, void *cbdata);
+
+ /// @brief Handler for report requests.
+ //int reportWebHandler(struct mg_connection *conn, void *cbdata);
+
+ /// @brief Handler for swagger request.
+ int swaggerWebHandler(struct mg_connection *conn, void *cbdata);
+
+ /// @brief Handler for custom requests.
+ int customWebHandler(struct mg_connection *conn, void *cbdata);

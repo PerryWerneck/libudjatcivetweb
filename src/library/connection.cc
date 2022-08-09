@@ -18,39 +18,30 @@
  */
 
  #include <config.h>
- #include <udjat/civetweb.h>
- #include <udjat/request.h>
- #include <udjat/tools/http/request.h>
+ #include <stdexcept>
+ #include <udjat/tools/http/server.h>
 
  using namespace std;
 
  namespace Udjat {
 
-	HTTP::Request::Request(const string &u, const char *t)
-		: Udjat::Request(t) {
-
-		this->path = u;
-		this->method = pop();
-
+	HTTP::Connection::Connection() {
 	}
 
-	std::string HTTP::Request::pop() {
+	HTTP::Connection::~Connection() {
+	}
 
-		if(path.empty()) {
-			throw system_error(ENODATA,system_category(),"Not enough arguments");
-		}
+	int HTTP::Connection::response(const HTTP::Exception &error) const noexcept {
+		return failed(error.codes().http, error.what());
+	}
 
-		size_t pos = path.find('/');
-		if(pos == string::npos) {
-			string rc = path;
-			path.clear();
-			return rc;
-		}
+	int HTTP::Connection::response(const system_error &error) const noexcept {
+		return failed(HTTP::Exception::translate(error), error.what());
+	}
 
-		string rc{path.c_str(),pos};
-		path.erase(0,pos+1);
-
-		return rc;
+	int HTTP::Connection::response(const std::exception &e) const noexcept {
+		return failed(500,e.what());
 	}
 
  }
+

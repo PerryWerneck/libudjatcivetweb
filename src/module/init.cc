@@ -28,6 +28,8 @@
  #include <udjat/tools/application.h>
  #include <udjat/tools/file.h>
  #include <udjat/tools/expander.h>
+ #include <udjat/tools/http/server.h>
+ #include <udjat/tools/http/handler.h>
  #include <unistd.h>
 
  using namespace Udjat;
@@ -36,89 +38,178 @@
  static int log_message(const struct mg_connection *conn, const char *message);
  static int http_error( struct mg_connection *conn, int status, const char *msg );
 
- static const Udjat::ModuleInfo moduleinfo{"CivetWEB " CIVETWEB_VERSION " HTTP module for " STRINGIZE_VALUE_OF(PRODUCT_NAME) };
+ static const Udjat::ModuleInfo moduleinfo{ "CivetWEB " CIVETWEB_VERSION " HTTP module for " STRINGIZE_VALUE_OF(PRODUCT_NAME) };
 
- class Module : public Udjat::Module, public MainLoop::Service {
+ static const struct {
+	const char *name;
+	unsigned int flag;
+	bool def;
+ } features[] = {
+
+	{ "files",			MG_FEATURES_FILES,				false	},
+	{ "tls", 			MG_FEATURES_TLS,				true	},
+	{ "cgi", 			MG_FEATURES_CGI,				false	},
+	{ "ipv6", 			MG_FEATURES_IPV6,				true	},
+	{ "websocket",		MG_FEATURES_WEBSOCKET,			false	},
+	{ "lua",			MG_FEATURES_LUA,				false	},
+	{ "ssjs",			MG_FEATURES_SSJS,				false	},
+	{ "cache",			MG_FEATURES_CACHE,				true	},
+	{ "stats",			MG_FEATURES_STATS,				false	},
+	{ "compression",	MG_FEATURES_COMPRESSION,		true	},
+#ifdef MG_FEATURES_HTTP2
+	{ "http2",			MG_FEATURES_HTTP2,				false	},
+#endif // MG_FEATURES_HTTP2
+#ifdef MG_FEATURES_X_DOMAIN_SOCKET
+	{ "domain",			MG_FEATURES_X_DOMAIN_SOCKET,	false	},
+#endif // MG_FEATURES_X_DOMAIN_SOCKET
+	{ "all",			MG_FEATURES_ALL,				false	},
+
+ };
+
+ class Module : public Udjat::Module, public MainLoop::Service, public HTTP::Server {
  private:
-	struct mg_context *ctx;
+	struct mg_context *ctx = nullptr;
 
 	struct {
-		CivetWeb::Protocol http{"http",moduleinfo,0};
-		CivetWeb::Protocol https{"https",moduleinfo,1};
+		CivetWeb::Protocol http{"http",moduleinfo};
+		CivetWeb::Protocol https{"https",moduleinfo};
 	} protocols;
 
- public:
+	void setHandlers() noexcept {
+		mg_set_request_handler(ctx, "/api/", apiWebHandler, 0);
+		mg_set_request_handler(ctx, "/icon/", iconWebHandler, 0);
+//		mg_set_request_handler(ctx, "/report/", reportWebHandler, 0);
+		mg_set_request_handler(ctx, "/swagger.json", swaggerWebHandler, 0);
+	}
 
- 	Module() : Udjat::Module("httpd",moduleinfo), MainLoop::Service(moduleinfo), ctx(NULL) {
+	void setCallbacks(struct mg_callbacks &callbacks) noexcept {
+		memset(&callbacks,0,sizeof(callbacks));
+		callbacks.log_message = log_message;
+		callbacks.http_error = http_error;
+	}
 
-		mg_init_library(0);
+	void initialize(std::vector<string> &optionlist) {
 
- 	};
+		struct mg_callbacks callbacks;
+		setCallbacks(callbacks);
 
- 	virtual ~Module() {
+		if(optionlist.empty()) {
 
-		mg_exit_library();
-
- 	}
-
-	void start() noexcept override {
-
-		cout << "civetweb\tStarting service" << endl;
-
-		if(!ctx) {
-
-			// Start
-			// https://github.com/civetweb/civetweb/blob/master/docs/api/mg_start.md
-			{
-				std::vector<string> optionlist;
-
-				Config::for_each("civetweb-options",[&optionlist](const char *key, const char *value){
-					optionlist.emplace_back(key);
-					optionlist.emplace_back(value);
-#ifdef DEBUG
-					cout << "civetweb\t" << key << "= '" << value << "'" << endl;
-#endif // DEBUG
-					return true;
-				});
-
-				if(optionlist.empty()) {
-					cerr << "civetweb\tNo civetweb configuration" << endl;
-					return;
-				}
-
-				const char **options = new const char *[optionlist.size()+1];
-				size_t ix = 0;
-				for(string & option : optionlist) {
-					options[ix++] = option.c_str();
-				}
-				options[ix] = NULL;
-
-				struct mg_callbacks callbacks;
-				memset(&callbacks,0,sizeof(callbacks));
-				callbacks.log_message = log_message;
-				callbacks.http_error = http_error;
-
-				ctx = mg_start(&callbacks, this, options);
-
-				delete[] options;
-
-				if (ctx == NULL) {
-					cerr << "civetweb\tCannot start: mg_start failed." << endl;
-					return;
-				}
-			}
-
-			mg_set_request_handler(ctx, "/api/", apiWebHandler, 0);
-			mg_set_request_handler(ctx, "/report/", reportWebHandler, 0);
-			mg_set_request_handler(ctx, "/swagger.json", swaggerWebHandler, 0);
-
-			// cout << "civetweb\tListening on port " << options[1] << endl;
+			Config::for_each("civetweb-options",[&optionlist](const char *key, const char *value){
+				optionlist.emplace_back(key);
+				optionlist.emplace_back(value);
+				return true;
+			});
 
 		}
 
+		// https://github.com/civetweb/civetweb/blob/master/docs/api/mg_start.md
+
+		if(optionlist.empty()) {
+
+			// Use default options
+			cerr << "civetweb\tNo civetweb configuration, using defaults" << endl;
+
+			static const char *options[] = {
+				"listening_ports","localhost:8989",
+				"request_timeout_ms","10000",
+				"enable_auth_domain_check","no",
+				NULL
+			};
+
+			ctx = mg_start(&callbacks, this, options);
+
+		} else {
+
+			// Use configured options.
+			cerr << "civetweb\tFound civetweb configuration, using it" << endl;
+
+			const char **options = new const char *[optionlist.size()+1];
+			size_t ix = 0;
+			for(const string & option : optionlist) {
+				options[ix++] = option.c_str();
+			}
+			options[ix] = NULL;
+
+			ctx = mg_start(&callbacks, this, options);
+			delete[] options;
+
+
+		}
+
+		if (ctx == NULL) {
+			cerr << "civetweb\tCannot start: mg_start failed." << endl;
+			return;
+		}
+
+		setHandlers();
+
 	}
 
-	void stop() noexcept override {
+ public:
+
+ 	Module(const pugi::xml_node &node) : Udjat::Module("httpd",moduleinfo), MainLoop::Service(moduleinfo), ctx(NULL) {
+
+		unsigned int init = 0;
+
+		{
+			string info{"civetweb\tFeatures:"};
+			for(size_t ix = 0; ix < (sizeof(features)/sizeof(features[0]));ix++) {
+
+				pugi::xml_attribute attr = node.attribute(features[ix].name);
+				if(attr) {
+					if(attr.as_bool(features[ix].def)) {
+						init |= features[ix].flag;
+						info += " ";
+						info += features[ix].name;
+					}
+				} else if(Config::Value<bool>("civetweb-features",features[ix].name,features[ix].def)) {
+					init |= features[ix].flag;
+					info += " ";
+					info += features[ix].name;
+				}
+			}
+			cout << info << endl;
+		}
+
+ 		mg_init_library(init);
+
+		// https://github.com/civetweb/civetweb/blob/master/docs/api/mg_start.md
+		std::vector<string> optionlist;
+
+		options(node, [&optionlist](const char *name, const char *value){
+			optionlist.emplace_back(name);
+			optionlist.emplace_back(value);
+		});
+
+		initialize(optionlist);
+
+ 	}
+
+ 	Module() : Udjat::Module("httpd",moduleinfo), MainLoop::Service(moduleinfo), ctx(NULL) {
+
+ 		unsigned int init = 0;
+
+		{
+			string info{"civetweb\tFeatures:"};
+			for(size_t ix = 0; ix < (sizeof(features)/sizeof(features[0]));ix++) {
+				if(Config::Value<bool>("civetweb-features",features[ix].name,features[ix].def)) {
+					init |= features[ix].flag;
+					info += " ";
+					info += features[ix].name;
+				}
+			}
+			cout << info << endl;
+		}
+
+		mg_init_library(init);
+
+		std::vector<string> optionlist;
+		initialize(optionlist);
+
+	};
+
+ 	virtual ~Module() {
 
 		cout << "civetweb\tStopping service" << endl;
 
@@ -126,18 +217,58 @@
 			mg_stop(ctx);
 		}
 
-		ctx = NULL;
+		mg_exit_library();
+
+ 	}
+
+	void start() noexcept override {
+
+		struct mg_server_port ports[10];
+
+		int count = mg_get_server_ports(ctx,10,ports);
+
+		if(count) {
+			cout << "civetweb\tListening on";
+			for(int ix = 0; ix < count;ix++) {
+				cout << " " << ports[ix].port;
+				if(ports[ix].is_ssl) {
+					cout << " (ssl)";
+				}
+			}
+			cout << endl;
+		}
+
+
+		// mg_check_feature()
+	}
+
+	bool push_back(HTTP::Handler *handler) override {
+		if(HTTP::Server::push_back(handler)) {
+			cout << "civetweb\tAdding new http handle '" << handler->c_str() << "'" << endl;
+			mg_set_request_handler(ctx, handler->c_str(), customWebHandler, handler);
+			return true;
+		}
+		return false;
+	}
+
+	bool remove(HTTP::Handler *handler) override {
+		if(HTTP::Server::remove(handler)) {
+			cout << "civetweb\tRemoving http handle '" << handler->c_str() << "'" << endl;
+			mg_set_request_handler(ctx, handler->c_str(), NULL, NULL);
+			return true;
+		}
+		return false;
 	}
 
  };
 
  /// @brief Register udjat module.
  Udjat::Module * udjat_module_init() {
-	return new ::Module();
+ 	return new ::Module();
  }
 
- bool udjat_module_deinit() {
-	return true;
+ Udjat::Module * udjat_module_init_from_xml(const pugi::xml_node &node) {
+	return new ::Module(node);
  }
 
  #pragma GCC diagnostic push
@@ -173,62 +304,66 @@
 
 	clog << "civetweb\t" << request_info->remote_addr << " " << status << " " << message << " (" << mimetype << ")" << endl;
 
-	try {
+	if(Config::Value<bool>("httpd","error-templates",true)) {
 
-		string response;
+		try {
 
-#ifdef DEBUG
-		string page = "templates/error.";
-		page +=  + to_string(mimetype,true);
-#else
-		string page = Application::DataDir("www/templates") + "error." + to_string(mimetype,true);
-#endif // DEBUG
+			string response;
 
-		if(!access(page.c_str(),R_OK)) {
-			response = File::Text(page.c_str()).c_str();
-		} else if(mimetype == Udjat::json) {
-			response = "{\"error\":{\"application\":\"${application}\",\"code\":${code},\"message\":\"${message}\"}}";
-		} else {
-			cout << "civetweb\tNo access to '" << page << "' using default response" << endl;
+	#ifdef DEBUG
+			string page = "templates/error.";
+			page +=  + to_string(mimetype,true);
+	#else
+			string page = Application::DataDir("www/templates") + "error." + to_string(mimetype,true);
+	#endif // DEBUG
+
+			if(!access(page.c_str(),R_OK)) {
+				response = File::Text(page.c_str()).c_str();
+			} else if(mimetype == Udjat::json) {
+				response = "{\"error\":{\"application\":\"${application}\",\"code\":${code},\"message\":\"${message}\"}}";
+			} else {
+				cout << "civetweb\tNo access to '" << page << "' using default response" << endl;
+			}
+
+			if(!response.empty()) {
+
+				Udjat::expand(response,[&status,&message](const char *key, std::string &value){
+
+					if(!strcasecmp(key,"code")) {
+						value = to_string(status);
+					} else if(!strcasecmp(key,"message")) {
+						value = message;
+					} else if(!strcasecmp(key,"application")) {
+						value = Application::Name();
+					} else {
+						value.clear();
+					}
+
+					return true;
+				});
+
+				mg_printf(
+					conn,
+					"HTTP/1.1 %d %s\r\n"
+					"Content-Type: %s\r\n"
+					"Content-Length: %u\r\n"
+					"\r\n"
+					"%s",
+					status,message,
+					std::to_string(mimetype),
+					(unsigned int) response.size(),
+					response.c_str()
+				);
+				return 0;
+
+			}
+
+		} catch(const std::exception &e) {
+			cerr << "civetweb\tError '" << e.what() << "' processing error page using default" << endl;
+		} catch(...) {
+			cerr << "civetweb\tUnexpected error processing error page using default" << endl;
 		}
 
-		if(!response.empty()) {
-
-			Udjat::expand(response,[&status,&message](const char *key, std::string &value){
-
-				if(!strcasecmp(key,"code")) {
-					value = to_string(status);
-				} else if(!strcasecmp(key,"message")) {
-					value = message;
-				} else if(!strcasecmp(key,"application")) {
-					value = Application::Name();
-				} else {
-					value.clear();
-				}
-
-				return true;
-			});
-
-			mg_printf(
-				conn,
-				"HTTP/1.1 %d %s\r\n"
-				"Content-Type: %s\r\n"
-				"Content-Length: %u\r\n"
-				"\r\n"
-				"%s",
-				status,message,
-				std::to_string(mimetype),
-				(unsigned int) response.size(),
-				response.c_str()
-			);
-			return 0;
-
-		}
-
-	} catch(const std::exception &e) {
-		cerr << "civetweb\tError '" << e.what() << "' processing error page using default" << endl;
-	} catch(...) {
-		cerr << "civetweb\tUnexpected error processing error page using default" << endl;
 	}
 
 	return 1;

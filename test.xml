@@ -7,6 +7,9 @@
 	<agent name='intvalue' type='integer' value='0'>
 
 	</agent>
+	
+	<random name='random' />
+
 
 </config>
 

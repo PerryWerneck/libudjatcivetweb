@@ -17,40 +17,45 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
- #include <config.h>
- #include <udjat/civetweb.h>
- #include <udjat/request.h>
- #include <udjat/tools/http/request.h>
+ #pragma once
 
- using namespace std;
+ #include <udjat/defs.h>
+ #include <udjat/tools/value.h>
+ #include <udjat/tools/http/connection.h>
+ #include <udjat/tools/http/mimetype.h>
+ #include <udjat/tools/http/request.h>
+ #include <map>
 
  namespace Udjat {
 
-	HTTP::Request::Request(const string &u, const char *t)
-		: Udjat::Request(t) {
+	namespace HTTP {
 
-		this->path = u;
-		this->method = pop();
+		class Handler;
 
-	}
+		class UDJAT_API Server {
+		private:
+			static Server *instance;
 
-	std::string HTTP::Request::pop() {
+		protected:
+			Server();
 
-		if(path.empty()) {
-			throw system_error(ENODATA,system_category(),"Not enough arguments");
-		}
+		public:
 
-		size_t pos = path.find('/');
-		if(pos == string::npos) {
-			string rc = path;
-			path.clear();
-			return rc;
-		}
+			/// @brief Add request handler.
+			/// @param uri the URI for the handler.
+			/// @param handler The request handler.
+			virtual bool push_back(Handler *handler);
 
-		string rc{path.c_str(),pos};
-		path.erase(0,pos+1);
+			/// @brief Remove request handler.
+			/// @param uri the URI for the handler.
+			virtual bool remove(Handler *handler);
 
-		return rc;
+			/// @brief Get active HTTP server.
+			static Server & getInstance();
+			virtual ~Server();
+
+		};
+
 	}
 
  }

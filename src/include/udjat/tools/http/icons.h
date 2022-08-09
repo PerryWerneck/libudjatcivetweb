@@ -17,40 +17,29 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
- #include <config.h>
- #include <udjat/civetweb.h>
- #include <udjat/request.h>
- #include <udjat/tools/http/request.h>
+ #pragma once
 
- using namespace std;
+ #include <udjat/defs.h>
+ #include <string>
 
  namespace Udjat {
 
-	HTTP::Request::Request(const string &u, const char *t)
-		: Udjat::Request(t) {
+	namespace HTTP {
 
-		this->path = u;
-		this->method = pop();
+		class UDJAT_API Icon : public std::string {
+		private:
+			class Controller;
+			friend class Controller;
 
-	}
+		public:
 
-	std::string HTTP::Request::pop() {
+			/// @param name Icon name.
+			Icon(const char *name);
 
-		if(path.empty()) {
-			throw system_error(ENODATA,system_category(),"Not enough arguments");
-		}
+			/// @brief Get cached icon instance, load it if necessary.
+			static Icon getInstance(const char *name);
 
-		size_t pos = path.find('/');
-		if(pos == string::npos) {
-			string rc = path;
-			path.clear();
-			return rc;
-		}
-
-		string rc{path.c_str(),pos};
-		path.erase(0,pos+1);
-
-		return rc;
+		};
 	}
 
  }

@@ -20,9 +20,6 @@
  #pragma once
 
  #include <udjat/defs.h>
- #include <udjat/tools/http/value.h>
- #include <udjat/tools/http/request.h>
- #include <udjat/tools/http/report.h>
 
  namespace Udjat {
 

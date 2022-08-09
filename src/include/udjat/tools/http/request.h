@@ -21,6 +21,7 @@
 
  #include <udjat/defs.h>
  #include <udjat/request.h>
+ #include <udjat/tools/http/value.h>
 
  namespace Udjat {
 

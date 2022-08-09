@@ -23,7 +23,9 @@
  #include <udjat/tools/http/mimetype.h>
  #include <udjat/tools/protocol.h>
  #include <udjat/tools/http/exception.h>
+ #include <udjat/tools/http/report.h>
 
+ /*
  int reportWebHandler(struct mg_connection *conn, void UDJAT_UNUSED(*cbdata)) {
 
 	return webHandler(conn,[](const string &uri, const char *method, const MimeType mimetype){
@@ -32,11 +34,7 @@
 			throw HTTP::Exception(405, uri.c_str(), "Method Not Allowed");
 		}
 
-		if(mimetype != MimeType::json) {
-			throw HTTP::Exception(501, uri.c_str(), "Mimetype Not Supported");
-		}
-
-		HTTP::Report response;
+		HTTP::Report response{uri.c_str(), mimetype};
 
 		// Run report.
 		Abstract::Agent::root()->find(uri.c_str())->get(Request(""),response);
@@ -47,4 +45,5 @@
 
  }
 
+	*/
 
