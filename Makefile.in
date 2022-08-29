@@ -134,11 +134,9 @@ $(OBJRLS)/%.o: \
 #---[ Release Targets ]------------------------------------------------------------------
 
 all: \
-	$(BINRLS)/$(SONAME) \
 	$(BINRLS)/$(PACKAGE_NAME)@LIBEXT@
 
 Release: \
-	$(BINRLS)/$(SONAME) \
 	$(BINRLS)/$(PACKAGE_NAME)@LIBEXT@
 
 $(BINRLS)/$(SONAME): \
@@ -162,8 +160,8 @@ $(BINRLS)/libudjathttpd.a: \
 	@$(AR) rcs $@ $^
 
 $(BINRLS)/$(PACKAGE_NAME)@LIBEXT@: \
-	$(BINRLS)/$(SONAME) \
-	$(foreach SRC, $(basename $(MODULE_SOURCES)), $(OBJRLS)/$(SRC).o)
+	$(foreach SRC, $(basename $(MODULE_SOURCES)), $(OBJRLS)/$(SRC).o) \
+	$(BINRLS)/$(SONAME)
 
 	@$(MKDIR) $(@D)
 	@echo $< ...
@@ -293,12 +291,9 @@ uninstall-linux:
 #---[ Debug Targets ]--------------------------------------------------------------------
 
 Debug: \
-	$(BINDBG)/$(SONAME) \
-	$(BINDBG)/$(PACKAGE_NAME)@LIBEXT@ \
 	$(BINDBG)/udjat@EXEEXT@
 
 $(BINDBG)/udjat@EXEEXT@: \
-	$(BINDBG)/$(SONAME) \
 	$(BINDBG)/$(PACKAGE_NAME)@LIBEXT@ \
 	$(foreach SRC, $(basename $(TEST_SOURCES)), $(OBJDBG)/$(SRC).o)
 
@@ -327,8 +322,8 @@ $(BINDBG)/$(SONAME): \
 		$(LIBS)
 
 $(BINDBG)/$(PACKAGE_NAME)@LIBEXT@: \
-	$(BINDBG)/$(SONAME) \
-	$(foreach SRC, $(basename $(MODULE_SOURCES)), $(OBJDBG)/$(SRC).o)
+	$(foreach SRC, $(basename $(MODULE_SOURCES)), $(OBJDBG)/$(SRC).o) \
+	$(BINDBG)/$(SONAME)
 
 	@$(MKDIR) $(@D)
 	@echo $< ...
