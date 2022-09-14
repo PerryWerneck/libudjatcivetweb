@@ -40,13 +40,40 @@
 
  const Udjat::ModuleInfo udjat_module_info{ "CivetWEB " CIVETWEB_VERSION " HTTP module for " STRINGIZE_VALUE_OF(PRODUCT_NAME) };
 
+ static const struct {
+	const char *name;
+	unsigned int flag;
+	bool def;
+ } features[] = {
+
+	{ "files",			MG_FEATURES_FILES,				false	},
+	{ "tls", 			MG_FEATURES_TLS,				true	},
+	{ "cgi", 			MG_FEATURES_CGI,				false	},
+	{ "ipv6", 			MG_FEATURES_IPV6,				true	},
+	{ "websocket",		MG_FEATURES_WEBSOCKET,			false	},
+	{ "lua",			MG_FEATURES_LUA,				false	},
+	{ "ssjs",			MG_FEATURES_SSJS,				false	},
+	{ "cache",			MG_FEATURES_CACHE,				true	},
+	{ "stats",			MG_FEATURES_STATS,				false	},
+	{ "compression",	MG_FEATURES_COMPRESSION,		true	},
+#ifdef MG_FEATURES_HTTP2
+	{ "http2",			MG_FEATURES_HTTP2,				false	},
+#endif // MG_FEATURES_HTTP2
+#ifdef MG_FEATURES_X_DOMAIN_SOCKET
+	{ "domain",			MG_FEATURES_X_DOMAIN_SOCKET,	false	},
+#endif // MG_FEATURES_X_DOMAIN_SOCKET
+	{ "all",			MG_FEATURES_ALL,				false	},
+
+ };
+
+
  class Module : public Udjat::Module, public MainLoop::Service, public HTTP::Server {
  private:
 	struct mg_context *ctx = nullptr;
 
 	struct {
-		CivetWeb::Protocol http{"http",moduleinfo};
-		CivetWeb::Protocol https{"https",moduleinfo};
+		CivetWeb::Protocol http{"http",udjat_module_info};
+		CivetWeb::Protocol https{"https",udjat_module_info};
 	} protocols;
 
 	void setHandlers() noexcept {
@@ -127,32 +154,6 @@
 		unsigned int init = 0;
 
 		{
-			 static const struct {
-				const char *name;
-				unsigned int flag;
-				bool def;
-			 } features[] = {
-
-				{ "files",			MG_FEATURES_FILES,				false	},
-				{ "tls", 			MG_FEATURES_TLS,				true	},
-				{ "cgi", 			MG_FEATURES_CGI,				false	},
-				{ "ipv6", 			MG_FEATURES_IPV6,				true	},
-				{ "websocket",		MG_FEATURES_WEBSOCKET,			false	},
-				{ "lua",			MG_FEATURES_LUA,				false	},
-				{ "ssjs",			MG_FEATURES_SSJS,				false	},
-				{ "cache",			MG_FEATURES_CACHE,				true	},
-				{ "stats",			MG_FEATURES_STATS,				false	},
-				{ "compression",	MG_FEATURES_COMPRESSION,		true	},
-#ifdef MG_FEATURES_HTTP2
-				{ "http2",			MG_FEATURES_HTTP2,				false	},
-#endif // MG_FEATURES_HTTP2
-#ifdef MG_FEATURES_X_DOMAIN_SOCKET
-				{ "domain",			MG_FEATURES_X_DOMAIN_SOCKET,	false	},
-#endif // MG_FEATURES_X_DOMAIN_SOCKET
-				{ "all",			MG_FEATURES_ALL,				false	},
-
-			};
-
 			string info{"civetweb\tFeatures:"};
 			for(size_t ix = 0; ix < (sizeof(features)/sizeof(features[0]));ix++) {
 
@@ -186,7 +187,7 @@
 
  	}
 
- 	Module() : Udjat::Module("httpd",moduleinfo), MainLoop::Service(moduleinfo), ctx(NULL) {
+ 	Module() : Udjat::Module("httpd",udjat_module_info), MainLoop::Service(udjat_module_info), ctx(NULL) {
 
  		unsigned int init = 0;
 

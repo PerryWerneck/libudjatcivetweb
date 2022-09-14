@@ -62,7 +62,6 @@ static void test_httpd() {
 			public:
 				RandomAgent(const pugi::xml_node &node) : Agent<unsigned int>(node) {
 					cout << "Creating random Agent" << endl;
-					load(node);
 				}
 
 				bool refresh() override {
