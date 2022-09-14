@@ -32,7 +32,11 @@
 		Worker::Worker(const char *url, const HTTP::Method method, const char *payload) : Udjat::Protocol::Worker(url,method,payload) {
 
 			header("Connection") = "close";
-			header("User-Agent") = "civetweb/" CIVETWEB_VERSION " (linux) " PACKAGE_NAME "/" PACKAGE_VERSION;
+#ifdef _WIN32
+			header("User-Agent") = "civetweb/" CIVETWEB_VERSION " (windows) " STRINGIZE_VALUE_OF(PRODUCT_NAME) "/" PACKAGE_VERSION;
+#else
+			header("User-Agent") = "civetweb/" CIVETWEB_VERSION " (linux) " STRINGIZE_VALUE_OF(PRODUCT_NAME) "/" PACKAGE_VERSION;
+#endif // _WIN32
 
 		}
 

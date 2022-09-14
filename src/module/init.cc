@@ -38,33 +38,7 @@
  static int log_message(const struct mg_connection *conn, const char *message);
  static int http_error( struct mg_connection *conn, int status, const char *msg );
 
- static const Udjat::ModuleInfo moduleinfo{ "CivetWEB " CIVETWEB_VERSION " HTTP module for " STRINGIZE_VALUE_OF(PRODUCT_NAME) };
-
- static const struct {
-	const char *name;
-	unsigned int flag;
-	bool def;
- } features[] = {
-
-	{ "files",			MG_FEATURES_FILES,				false	},
-	{ "tls", 			MG_FEATURES_TLS,				true	},
-	{ "cgi", 			MG_FEATURES_CGI,				false	},
-	{ "ipv6", 			MG_FEATURES_IPV6,				true	},
-	{ "websocket",		MG_FEATURES_WEBSOCKET,			false	},
-	{ "lua",			MG_FEATURES_LUA,				false	},
-	{ "ssjs",			MG_FEATURES_SSJS,				false	},
-	{ "cache",			MG_FEATURES_CACHE,				true	},
-	{ "stats",			MG_FEATURES_STATS,				false	},
-	{ "compression",	MG_FEATURES_COMPRESSION,		true	},
-#ifdef MG_FEATURES_HTTP2
-	{ "http2",			MG_FEATURES_HTTP2,				false	},
-#endif // MG_FEATURES_HTTP2
-#ifdef MG_FEATURES_X_DOMAIN_SOCKET
-	{ "domain",			MG_FEATURES_X_DOMAIN_SOCKET,	false	},
-#endif // MG_FEATURES_X_DOMAIN_SOCKET
-	{ "all",			MG_FEATURES_ALL,				false	},
-
- };
+ const Udjat::ModuleInfo udjat_module_info{ "CivetWEB " CIVETWEB_VERSION " HTTP module for " STRINGIZE_VALUE_OF(PRODUCT_NAME) };
 
  class Module : public Udjat::Module, public MainLoop::Service, public HTTP::Server {
  private:
@@ -148,11 +122,37 @@
 
  public:
 
- 	Module(const pugi::xml_node &node) : Udjat::Module("httpd",moduleinfo), MainLoop::Service(moduleinfo), ctx(NULL) {
+ 	Module(const pugi::xml_node &node) : Udjat::Module("httpd",udjat_module_info), MainLoop::Service(udjat_module_info), ctx(NULL) {
 
 		unsigned int init = 0;
 
 		{
+			 static const struct {
+				const char *name;
+				unsigned int flag;
+				bool def;
+			 } features[] = {
+
+				{ "files",			MG_FEATURES_FILES,				false	},
+				{ "tls", 			MG_FEATURES_TLS,				true	},
+				{ "cgi", 			MG_FEATURES_CGI,				false	},
+				{ "ipv6", 			MG_FEATURES_IPV6,				true	},
+				{ "websocket",		MG_FEATURES_WEBSOCKET,			false	},
+				{ "lua",			MG_FEATURES_LUA,				false	},
+				{ "ssjs",			MG_FEATURES_SSJS,				false	},
+				{ "cache",			MG_FEATURES_CACHE,				true	},
+				{ "stats",			MG_FEATURES_STATS,				false	},
+				{ "compression",	MG_FEATURES_COMPRESSION,		true	},
+#ifdef MG_FEATURES_HTTP2
+				{ "http2",			MG_FEATURES_HTTP2,				false	},
+#endif // MG_FEATURES_HTTP2
+#ifdef MG_FEATURES_X_DOMAIN_SOCKET
+				{ "domain",			MG_FEATURES_X_DOMAIN_SOCKET,	false	},
+#endif // MG_FEATURES_X_DOMAIN_SOCKET
+				{ "all",			MG_FEATURES_ALL,				false	},
+
+			};
+
 			string info{"civetweb\tFeatures:"};
 			for(size_t ix = 0; ix < (sizeof(features)/sizeof(features[0]));ix++) {
 
