@@ -122,7 +122,7 @@
 		} else {
 
 			// Use configured options.
-			cerr << "civetweb\tFound civetweb configuration, using it" << endl;
+			clog << "civetweb\tFound civetweb configuration, using it" << endl;
 
 			const char **options = new const char *[optionlist.size()+1];
 			size_t ix = 0;

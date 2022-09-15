@@ -128,10 +128,12 @@ static void test_httpd() {
 		}
 	};
 
+	/*
 	HTest test;
 	if(HTTP::Server::getInstance().push_back(&test)) {
 		cout << "http://localhost:8989/test/test.xml" << endl;
 	}
+	*/
 
 	Udjat::MainLoop::getInstance().run();
 
