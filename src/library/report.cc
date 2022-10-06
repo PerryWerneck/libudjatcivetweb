@@ -35,7 +35,7 @@
 
 		Report::Report(const char *uri, const MimeType m) : Udjat::Report(), mimetype(m) {
 
-			if(mimetype != MimeType::json && mimetype != MimeType::html ) {
+			if(mimetype != MimeType::json && mimetype != MimeType::html && mimetype != MimeType::xml) {
 				throw HTTP::Exception(501, uri, "Mimetype Not Supported");
 			}
 
@@ -49,8 +49,10 @@
 
 			if(mimetype == MimeType::html) {
 				this->to_html(ss);
-			} else {
+			} else if(mimetype == MimeType::json) {
 				this->to_json(ss);
+			} else if(mimetype == MimeType::xml) {
+				this->to_xml(ss);
 			}
 			return ss.str();
 		}
@@ -110,6 +112,31 @@
 			}
 
 			ss << "</tr></tbody></table>";
+		}
+
+		void Report::to_xml(std::stringstream &ss) const {
+
+			ss << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
+
+			if(values.empty()) {
+				ss << "</report>";
+			} else {
+
+				ss << "<report><item>";
+
+				auto column = columns.names.begin();
+				for(auto value : values) {
+					if(column == columns.names.end()) {
+						ss << "</item><item>";
+						column = columns.names.begin();
+					}
+					ss << "<" << *column << ">" << value.to_string() << "</" << *column << ">";
+					column++;
+				}
+
+				ss << "</item></report>";
+			}
+
 		}
 
 		Udjat::Report & Report::push_back(const char *value) {

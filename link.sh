@@ -13,7 +13,7 @@ if [ "$?" != "0" ]; then
 fi
 
 mkdir -p ${MODULEDIR}
-sudo ln -sf $(readlink -f .bin/Debug/udjat-module-civetweb.so) ${MODULEDIR}
+sudo ln -sf $(readlink -f .bin/Debug/udjat-module-*.so) ${MODULEDIR}
 if [ "$?" != "0" ]; then
 	exit -1
 fi
