@@ -35,14 +35,14 @@
 			{
 				ss << "<ul>";
 				for(auto &child : children) {
-					ss << "<li><label>" << child.first << ":</label>&nbsp;";
+					ss << "<li><label>" << child.first << ":&nbsp;";
 					if(child.second->type == Udjat::Value::Object || child.second->type == Udjat::Value::Array ) {
 						child.second->html(ss);
 					} else {
-						ss << child.second->value;
+						ss << "<strong>" << child.second->value << "</strong>";
 					}
 
-					ss << "</li>";
+					ss << "</label></li>";
 				}
 				ss << "</ul>";
 			}

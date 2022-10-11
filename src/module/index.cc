@@ -56,9 +56,11 @@
 				"<head>"
 				"<meta charset=\"utf-8\">";
 
-		// page << "<title>" << Application::name() << "</title>";
+		page << "<title>" << Application::Name() << "</title>";
 
 		page <<	"</head><body>";
+
+		page << "<h1>" << Application::Name() << "</h1>";
 
 		// Agent information
 		{
@@ -66,7 +68,7 @@
 			if(root) {
 
 				page	<< "<h2>" << _("Agent info") << "</h2><ul>"
-						<< "<li><a href=\"/api/1.0/agent.html\">" << _("Service agent (Application state)") << "</a></li>";
+						<< "<li><a href=\"/api/1.0/agent.html\">" << _("Service information") << "</a></li>";
 
 				for(auto agent : *root) {
 
