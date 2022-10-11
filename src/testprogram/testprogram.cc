@@ -100,16 +100,16 @@ static void test_httpd() {
 	auto agent = Abstract::Agent::root();
 
 	if(Module::find("information")) {
-		cout << "http://localhost:8989/api/1.0/info/modules.xml" << endl;
-		cout << "http://localhost:8989/api/1.0/info/workers.xml" << endl;
-		cout << "http://localhost:8989/api/1.0/info/factories.xml" << endl;
+		trace("http://localhost:8989/api/1.0/info/modules.xml");
+		trace("http://localhost:8989/api/1.0/info/workers.xml");
+		trace("http://localhost:8989/api/1.0/info/factories.xml");
 	}
 
-	cout << "http://localhost:8989/icon/user-info-symbolic" << endl;
+	trace("http://localhost:8989/icon/user-info-symbolic");
 
 	for(auto agent : *agent) {
-		cout << "http://localhost:8989/api/1.0/agent/" << agent->name() << ".xml" << endl;
-		cout << "http://localhost:8989/api/1.0/report/agent/" << agent->name() << ".xml" << endl;
+		trace("http://localhost:8989/api/1.0/agent/", agent->name(), ".xml");
+		trace("http://localhost:8989/api/1.0/report/agent/", agent->name(), ".xml");
 	}
 
 	class HTest : public Udjat::HTTP::Handler {

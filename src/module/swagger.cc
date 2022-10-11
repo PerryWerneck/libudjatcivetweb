@@ -30,10 +30,11 @@
  #include <udjat/worker.h>
  #include <udjat/module.h>
  #include <udjat/factory.h>
+ #include <udjat/tools/intl.h>
 
  int swaggerWebHandler(struct mg_connection *conn, void UDJAT_UNUSED(*cbdata)) {
 
-	mg_send_http_error(conn, 404, "Not implemented");
+	mg_send_http_error(conn, 404, _( "Not implemented" ));
 	return 404;
 
  }

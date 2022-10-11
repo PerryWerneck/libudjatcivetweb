@@ -22,6 +22,7 @@
  #include <udjat/tools/configuration.h>
  #include <udjat/tools/string.h>
  #include <udjat/tools/file.h>
+ #include <udjat/tools/logger.h>
  #include <unistd.h>
  #include <dirent.h>
 
@@ -47,14 +48,12 @@
 
 					if(access(filename.c_str(),F_OK) == 0) {
 						assign(filename);
-#ifdef DEBUG
-						cout << "Found '" << *this << "'" << endl;
-#endif // DEBUG
+						debug("Found '",c_str(),"'");
 						return;
 					}
 #ifdef DEBUG
 					else {
-						cout << "Not Found '" << filename << "'" << endl;
+						debug("Not Found '",filename.c_str(),"'");
 					}
 #endif // DEBUG
 
@@ -75,9 +74,7 @@
 					path = "/usr/share/icons/";
 					path += theme;
 
-#ifdef DEBUG
-					cout << "Searching '" << path << "'" << endl;
-#endif // DEBUG
+					debug("Searching '",path.c_str(),"'");
 
 					if(path.find(filename.c_str(),true)) {
 #ifdef DEBUG

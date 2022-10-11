@@ -65,6 +65,11 @@
 			inline const char * request_uri() const noexcept {
 				return mg_get_request_info(conn)->request_uri;
 			}
+
+			inline const char * local_uri() const noexcept {
+				return mg_get_request_info(conn)->local_uri;
+			}
+
 		};
 
 		class Header : public Udjat::Protocol::Header {
@@ -125,5 +130,11 @@
  /// @brief Handler for swagger request.
  int swaggerWebHandler(struct mg_connection *conn, void *cbdata);
 
+ /// @brief Handler for swagger request.
+ int rootWebHandler(struct mg_connection *conn, void *cbdata);
+
  /// @brief Handler for custom requests.
  int customWebHandler(struct mg_connection *conn, void *cbdata);
+
+ /// @brief Send error page.
+ int http_error( struct mg_connection *conn, int status, const char *msg );

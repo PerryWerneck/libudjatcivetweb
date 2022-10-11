@@ -23,6 +23,7 @@
  #include <udjat/tools/file.h>
  #include <sys/types.h>
  #include <utime.h>
+ #include <udjat/tools/logger.h>
  #include <udjat/tools/http/timestamp.h>
 
  namespace Udjat {
@@ -231,9 +232,7 @@
 
 					for(int header = 0; header < info->num_headers; header++) {
 
-#ifdef DEBUG
-						cout << info->http_headers[header].name << "= '" << info->http_headers[header].value << "'" << endl;
-#endif // DEBUG
+						debug(info->http_headers[header].name,"= '",info->http_headers[header].value,"'");
 
 						if(!strcasecmp(info->http_headers[header].name,"Last-Modified")) {
 							ub.modtime = (time_t) HTTP::TimeStamp(info->http_headers[header].value);

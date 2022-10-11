@@ -37,7 +37,6 @@
  using namespace std;
 
  static int log_message(const struct mg_connection *conn, const char *message);
- static int http_error( struct mg_connection *conn, int status, const char *msg );
 
  const Udjat::ModuleInfo udjat_module_info{ "CivetWEB " CIVETWEB_VERSION " HTTP module for " STRINGIZE_VALUE_OF(PRODUCT_NAME) };
 
@@ -82,6 +81,12 @@
 		mg_set_request_handler(ctx, "/icon/", iconWebHandler, 0);
 //		mg_set_request_handler(ctx, "/report/", reportWebHandler, 0);
 		mg_set_request_handler(ctx, "/swagger.json", swaggerWebHandler, 0);
+
+		{
+			mg_set_request_handler(ctx, "/", rootWebHandler, 0);
+
+		}
+
 	}
 
 	void setCallbacks(struct mg_callbacks &callbacks) noexcept {
@@ -281,103 +286,4 @@
  }
  #pragma GCC diagnostic pop
 
- int http_error( struct mg_connection *conn, int status, const char *message ) {
-
-	Udjat::MimeType mimetype = (Udjat::MimeType) 0;
-
-	const struct mg_request_info *request_info = mg_get_request_info(conn);
-
-	//
-	// Search for mime-type on request headers.
-	//
-	for(int ix=0;ix<request_info->num_headers;ix++) {
-		cout << request_info->http_headers[ix].name << "=" << request_info->http_headers[ix].value << endl;
-	}
-
-	if(!mimetype && request_info->local_uri_raw && *request_info->local_uri_raw) {
-		//
-		// Not found on headers, try by the path
-		//
-		const char *ptr = strrchr(request_info->local_uri_raw,'.');
-		if(ptr) {
-			mimetype = MimeTypeFactory(ptr+1);
-		}
-	}
-
-	clog << "civetweb\t" << request_info->remote_addr << " " << status << " " << message << " (" << mimetype << ")" << endl;
-
-	if(Config::Value<bool>("httpd","error-templates",true)) {
-
-		try {
-
-			string response;
-
-			Application::DataDir page;
-			page += "templates/www/error-";
-			page += to_string(mimetype,true);
-			page += ".html";
-
-			trace("Searching for error page in '",page.c_str(),"'");
-
-			/*
-#ifdef DEBUG
-			string page = "templates/error.";
-			page +=  + to_string(mimetype,true);
-#else
-			string page = Application::DataDir("www/templates") + "error." + to_string(mimetype,true);
-#endif // DEBUG
-			*/
-
-			if(!access(page.c_str(),R_OK)) {
-				response = File::Text(page.c_str()).c_str();
-			} else if(mimetype == Udjat::json) {
-				response = "{\"error\":{\"application\":\"${application}\",\"code\":${code},\"message\":\"${message}\"}}";
-			} else {
-				cout << "civetweb\tNo access to '" << page << "' using default response" << endl;
-			}
-
-			if(!response.empty()) {
-
-				Udjat::expand(response,[&status,&message](const char *key, std::string &value){
-
-					if(!strcasecmp(key,"code")) {
-						value = to_string(status);
-					} else if(!strcasecmp(key,"message")) {
-						value = message;
-					} else if(!strcasecmp(key,"application")) {
-						value = Application::Name();
-					} else {
-						value.clear();
-					}
-
-					return true;
-				});
-
-				mg_printf(
-					conn,
-					"HTTP/1.1 %d %s\r\n"
-					"Content-Type: %s\r\n"
-					"Content-Length: %u\r\n"
-					"\r\n"
-					"%s",
-					status,message,
-					std::to_string(mimetype),
-					(unsigned int) response.size(),
-					response.c_str()
-				);
-				return 0;
-
-			}
-
-		} catch(const std::exception &e) {
-			clog << "civetweb\tError '" << e.what() << "' processing error page, using default" << endl;
-		} catch(...) {
-			clog << "civetweb\tUnexpected error processing error page, using default" << endl;
-		}
-
-	}
-
-	return 1;
-
- }
 
