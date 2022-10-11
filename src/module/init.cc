@@ -30,6 +30,7 @@
  #include <udjat/tools/expander.h>
  #include <udjat/tools/http/server.h>
  #include <udjat/tools/http/handler.h>
+ #include <udjat/tools/logger.h>
  #include <unistd.h>
 
  using namespace Udjat;
@@ -311,12 +312,21 @@
 
 			string response;
 
-	#ifdef DEBUG
+			Application::DataDir page;
+			page += "templates/www/error-";
+			page += to_string(mimetype,true);
+			page += ".html";
+
+			trace("Searching for error page in '",page.c_str(),"'");
+
+			/*
+#ifdef DEBUG
 			string page = "templates/error.";
 			page +=  + to_string(mimetype,true);
-	#else
+#else
 			string page = Application::DataDir("www/templates") + "error." + to_string(mimetype,true);
-	#endif // DEBUG
+#endif // DEBUG
+			*/
 
 			if(!access(page.c_str(),R_OK)) {
 				response = File::Text(page.c_str()).c_str();
@@ -360,9 +370,9 @@
 			}
 
 		} catch(const std::exception &e) {
-			cerr << "civetweb\tError '" << e.what() << "' processing error page using default" << endl;
+			clog << "civetweb\tError '" << e.what() << "' processing error page, using default" << endl;
 		} catch(...) {
-			cerr << "civetweb\tUnexpected error processing error page using default" << endl;
+			clog << "civetweb\tUnexpected error processing error page, using default" << endl;
 		}
 
 	}
