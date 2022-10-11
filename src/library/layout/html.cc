@@ -39,7 +39,7 @@
 					if(child.second->type == Udjat::Value::Object || child.second->type == Udjat::Value::Array ) {
 						child.second->html(ss);
 					} else {
-						ss << "<strong>" << child.second->value << "</strong>";
+						ss << "<strong>" << child.second->to_string() << "</strong>";
 					}
 
 					ss << "</label></li>";
@@ -77,7 +77,7 @@
 								auto value = row.second->children.find(colname.c_str());
 								ss << "<td>";
 								if(value != row.second->children.end()) {
-									ss << value->second->value;
+									ss << value->second->to_string();
 								}
 								ss << "</td>";
 							}
