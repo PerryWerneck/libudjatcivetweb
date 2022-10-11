@@ -46,6 +46,7 @@
 
 			void json(std::stringstream &ss) const;
 			void xml(std::stringstream &ss) const;
+			void html(std::stringstream &ss) const;
 
 			std::string to_string() const;
 

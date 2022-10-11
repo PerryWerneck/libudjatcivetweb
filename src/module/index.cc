@@ -66,7 +66,7 @@
 			if(root) {
 
 				page	<< "<h2>" << _("Agent info") << "</h2><ul>"
-						<< "<li><a href=\"/api/1.0/agent.xml\">" << _("Service agent (Application state)") << "</a></li>";
+						<< "<li><a href=\"/api/1.0/agent.html\">" << _("Service agent (Application state)") << "</a></li>";
 
 				for(auto agent : *root) {
 
@@ -76,7 +76,7 @@
 						summary = agent->name();
 					}
 
-					page 	<< "<li><a href=\"/api/1.0/agent/" << agent->name() << ".xml\">"
+					page 	<< "<li><a href=\"/api/1.0/agent/" << agent->name() << ".html\">"
 							<< summary
 							<< "</a></li>";
 				}
@@ -100,7 +100,7 @@
 			for(size_t ix = 0; ix < sizeof(infopages)/sizeof(infopages[0]);ix++) {
 				page 	<< "<li><a href=\"" << "/api/1.0/info/"
 						<< infopages[ix]
-						<< ".xml\">"
+						<< ".html\">"
 						<< infopages[ix]
 						<< "</a></li>";
 

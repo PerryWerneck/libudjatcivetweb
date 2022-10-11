@@ -44,6 +44,31 @@
 
 		std::stringstream ss;
 
+		switch(type) {
+		case Udjat::MimeType::xml:
+			// Format as XML
+			ss << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
+			ss << "<response>";
+			this->value->xml(ss);
+			ss << "</response>";
+			break;
+
+		case Udjat::MimeType::json:
+			// Format as JSON
+			this->value->json(ss);
+			break;
+
+		case Udjat::MimeType::html:
+			// Format as HTML.
+			this->value->html(ss);
+			break;
+
+		default:
+			throw runtime_error("Invalid mymetype");
+
+		}
+
+		/*
 		if(type == Udjat::MimeType::xml) {
 
 			// Format as XML
@@ -58,6 +83,7 @@
 			this->value->json(ss);
 
 		}
+		*/
 
 		return ss.str();
 	}
