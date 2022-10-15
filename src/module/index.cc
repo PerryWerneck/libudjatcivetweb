@@ -89,26 +89,31 @@
 		}
 
 		// Application information
-		if(Module::find("information")) {
+		{
+			auto module = Module::find("information");
+			if(module) {
 
-			page << "<h2>" << _("Application info") << "</h2><ul>";
+				page << "<h2>" << _("Application info") << "</h2><ul>";
 
-			static const char * infopages[] = {
-				"modules",
-				"workers",
-				"factories"
-			};
+				static const char * infopages[] = {
+					"modules",
+					"workers",
+					"factories",
+					"services"
+				};
 
-			for(size_t ix = 0; ix < sizeof(infopages)/sizeof(infopages[0]);ix++) {
-				page 	<< "<li><a href=\"" << "/api/1.0/info/"
-						<< infopages[ix]
-						<< ".html\">"
-						<< infopages[ix]
-						<< "</a></li>";
+				for(size_t ix = 0; ix < sizeof(infopages)/sizeof(infopages[0]);ix++) {
+					page 	<< "<li><a href=\"" << "/api/1.0/info/"
+							<< infopages[ix]
+							<< ".html\">"
+							<< infopages[ix]
+							<< "</a></li>";
 
+				}
+
+				page << "</ul>";
 			}
 
-			page << "</ul>";
 		}
 
 		page << "</body></html>";
