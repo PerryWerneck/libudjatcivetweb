@@ -43,11 +43,11 @@
 
 	CivetWeb::Connection connection{conn};
 
-	trace("local_uri='",connection.local_uri(),"'");
+	debug("local_uri='",connection.local_uri(),"'");
 
 	if(!strcasecmp(connection.local_uri(),Config::Value<string>("http","appinfo","/"))) {
 
-		trace("Sending application info");
+		debug("Sending application info");
 
 		stringstream page;
 

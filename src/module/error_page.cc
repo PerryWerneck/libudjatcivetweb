@@ -79,7 +79,7 @@
 			page += "templates/www/error.";
 			page += to_string(mimetype,true);
 
-			trace("Searching for error page in '",page.c_str(),"'");
+			debug("Searching for error page in '",page.c_str(),"'");
 
 			if(!access(page.c_str(),R_OK)) {
 				response = File::Text(page.c_str()).c_str();
