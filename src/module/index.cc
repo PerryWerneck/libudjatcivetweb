@@ -34,6 +34,7 @@
  #include <udjat/tools/configuration.h>
  #include <udjat/tools/application.h>
  #include <udjat/tools/intl.h>
+ #include <udjat/tools/string.h>
  #include <sstream>
 
  using namespace std;
@@ -93,7 +94,27 @@
 			auto module = Module::find("information");
 			if(module) {
 
-				page << "<h2>" << _("Application info") << "</h2><ul>";
+				auto options = (*module)["options"];
+
+				if(!options.empty()) {
+
+					page << "<h2>" << ( (*module)["description"]) << "</h2><ul>";
+
+					for(auto option : String{options}.split(",")) {
+
+						page 	<< "<li><a href=\"" << "/api/1.0/info/"
+								<< option
+								<< ".html\">"
+								<< option
+								<< "</a></li>";
+
+					}
+
+					page << "</ul>";
+
+				}
+
+				/*
 
 				static const char * infopages[] = {
 					"modules",
@@ -111,13 +132,12 @@
 
 				}
 
-				page << "</ul>";
+				*/
 			}
 
 		}
 
 		page << "</body></html>";
-
 
 		return connection.success(
 						to_string(MimeType::html),
