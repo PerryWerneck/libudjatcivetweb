@@ -29,6 +29,7 @@
  #include "private.h"
  #include <udjat/tools/intl.h>
  #include <udjat/tools/logger.h>
+ #include <udjat/worker.h>
  #include <udjat/module.h>
  #include <cstring>
  #include <udjat/tools/configuration.h>
@@ -89,6 +90,22 @@
 
 		}
 
+		// Workers
+		{
+			page << "<h2>URL workers</h2><ul>";
+
+			Udjat::Worker::for_each([&page](const Worker &worker){
+
+				page 	<< "<li><a href=\"" << "/api/1.0/"
+						<< worker.c_str()
+						<< ".html\">"
+						<< worker.c_str()
+						<< "</a>";
+			});
+
+			page << "</ul>";
+		}
+
 		// Application information
 		{
 			auto module = Module::find("information");
@@ -114,25 +131,6 @@
 
 				}
 
-				/*
-
-				static const char * infopages[] = {
-					"modules",
-					"workers",
-					"factories",
-					"services"
-				};
-
-				for(size_t ix = 0; ix < sizeof(infopages)/sizeof(infopages[0]);ix++) {
-					page 	<< "<li><a href=\"" << "/api/1.0/info/"
-							<< infopages[ix]
-							<< ".html\">"
-							<< infopages[ix]
-							<< "</a></li>";
-
-				}
-
-				*/
 			}
 
 		}
