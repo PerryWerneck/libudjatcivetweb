@@ -19,6 +19,7 @@
 
  #include <config.h>
  #include <udjat/civetweb.h>
+ #include <udjat/tools/value.h>
  #include <udjat/tools/http/value.h>
  #include <iostream>
  #include <iomanip>
@@ -105,7 +106,7 @@
 		std::stringstream out;
 		out.imbue(std::locale("C"));
 		out << std::fixed << std::setprecision(2) << (fraction *100);
-		return Udjat::Value::set(out.str(),Value::Real);
+		return Udjat::Value::set(out.str(),Value::Fraction);
 	}
 
 	Value & HTTP::Value::set(const float value) {

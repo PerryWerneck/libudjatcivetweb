@@ -38,6 +38,8 @@
 					ss << "<li><label>" << child.first << ":&nbsp;";
 					if(child.second->type == Udjat::Value::Object || child.second->type == Udjat::Value::Array ) {
 						child.second->html(ss);
+					} else if(child.second->type == Udjat::Value::Fraction ) {
+						ss << "<strong>" << child.second->to_string() << "%</strong>";
 					} else {
 						ss << "<strong>" << child.second->to_string() << "</strong>";
 					}
