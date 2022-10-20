@@ -36,6 +36,13 @@
 			Connection();
 			virtual ~Connection();
 
+			/// @brief Send default HTML response.
+			/// @param path Local path from request.
+			/// @return Status code.
+			/// @retval 200 Index page was sent.
+			/// @retval 404 No index page.
+			int info(const char *path);
+
 			/// @brief Send response.
 			/// @param mime_type The content type to be sent.
 			/// @param length Length of the following body data.
