@@ -55,6 +55,8 @@ BINDIR=$(BASEDIR)/.bin
 BINDBG=$(BINDIR)/Debug
 BINRLS=$(BINDIR)/Release
 
+POTDIR=.pot
+
 #---[ Rules ]----------------------------------------------------------------------------
 
 DEPENDS= \
@@ -64,6 +66,7 @@ CFLAGS= \
 	@CXXFLAGS@ \
 	-Isrc/include \
 	-DBUILD_DATE=`date +%Y%m%d` \
+	-DLOCALEDIR=$(localedir) \
 	@UDJAT_CFLAGS@ \
 	@PUGIXML_CFLAGS@
 
@@ -131,13 +134,51 @@ $(OBJRLS)/%.o: \
 	@$(MKDIR) $(@D)
 	@$(WINDRES) $< -O coff -o $@
 
+$(POTDIR)/%.pot: \
+	%.cc
+
+	@echo $(notdir $@) ...
+	@$(MKDIR) $(dir $@)
+	@$(XGETTEXT) \
+		--from-code=UTF-8 \
+		--language=C \
+		--keyword=_ \
+		--keyword=N_ \
+		--keyword=MSG_:2 \
+		--output=$@ \
+		$<
+	@touch $@
+
+$(POTDIR)/%.pot: \
+	%.rc
+
+	@echo $< ...
+	@$(MKDIR) $(dir $@)
+	@touch $@
+
+install-%: \
+	%/Makefile
+
+	@$(MAKE) -C `dirname $<` DESTDIR=$(DESTDIR) install
+
 #---[ Release Targets ]------------------------------------------------------------------
 
 all: \
-	$(BINRLS)/$(PACKAGE_NAME)@LIBEXT@
+	$(BINRLS)/$(PACKAGE_NAME)@LIBEXT@ \
+	locale/$(PACKAGE_NAME).pot
 
 Release: \
 	$(BINRLS)/$(PACKAGE_NAME)@LIBEXT@
+
+locale/$(PACKAGE_NAME).pot: \
+	$(foreach SRC, $(basename $(LIBRARY_SOURCES) $(MODULE_SOURCES)), $(POTDIR)/$(SRC).pot)
+
+	@rm -f $@
+	@$(MKDIR) $(dir $@)
+	@$(MSGCAT) --sort-output $^ > $@
+
+locale: \
+	locale/$(PACKAGE_NAME).pot
 
 $(BINRLS)/$(SONAME): \
 	$(foreach SRC, $(basename $(LIBRARY_SOURCES)), $(OBJRLS)/$(SRC).o)
@@ -178,7 +219,8 @@ $(BINRLS)/$(PACKAGE_NAME)@LIBEXT@: \
 install: \
 	install-@OSNAME@ \
 	install-module \
-	install-dev
+	install-dev \
+	install-locale
 
 install-linux: \
 	$(BINRLS)/$(SONAME)

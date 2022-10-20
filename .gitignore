@@ -53,4 +53,5 @@ ABOUT-NLS
 intl
 po
 *.pc
+.pot
 

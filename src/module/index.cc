@@ -18,11 +18,7 @@
  */
 
  /**
-  * @brief Implements the swagger.json output.
-  *
-  * References:
-  *
-  * https://samanthaneilen.github.io/2018/12/08/Using-and-extending-swagger.json-for-API-documentation.html
+  * @brief Implements the default index page.
   *
   */
 
@@ -54,7 +50,7 @@
 		stringstream page;
 
 		page << "<!DOCTYPE html>"
-				"<html lang=\"en\">"
+				"<html lang=\"" << _("en") << "\">"
 				"<head>"
 				"<meta charset=\"utf-8\">";
 
@@ -92,7 +88,7 @@
 
 		// Workers
 		{
-			page << "<h2>URL workers</h2><ul>";
+			page << "<h2>" << _("URL workers") << "</h2><ul>";
 
 			Udjat::Worker::for_each([&page](const Worker &worker){
 
@@ -145,7 +141,7 @@
 
 	}
 
-
 	mg_send_http_error(conn, 404, strerror(ENOENT));
 	return 404;
+
  }

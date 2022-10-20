@@ -1,5 +1,8 @@
 /* src/include/config.h.in.  Generated from configure.ac by autoheader.  */
 
+/* The gettext package name. */
+#undef GETTEXT_PACKAGE
+
 /* do we have civetweb.h? */
 #undef HAVE_CIVETWEB
 
@@ -11,6 +14,9 @@
 
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
+
+/* Libintl is available */
+#undef HAVE_LIBINTL
 
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
