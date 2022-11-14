@@ -18,23 +18,26 @@
  */
 
  /**
-  * @brief Implements the swagger.json output.
-  *
-  * References:
-  *
-  * https://samanthaneilen.github.io/2018/12/08/Using-and-extending-swagger.json-for-API-documentation.html
+  * @brief Implements the default index page.
   *
   */
 
  #include "private.h"
+ #include <udjat/tools/intl.h>
+ #include <udjat/tools/logger.h>
  #include <udjat/worker.h>
  #include <udjat/module.h>
- #include <udjat/factory.h>
+ #include <cstring>
+ #include <udjat/tools/configuration.h>
+ #include <udjat/tools/application.h>
  #include <udjat/tools/intl.h>
+ #include <udjat/tools/string.h>
+ #include <sstream>
 
- int swaggerWebHandler(struct mg_connection *conn, void UDJAT_UNUSED(*cbdata)) {
+ using namespace std;
+ using namespace Udjat;
 
-	mg_send_http_error(conn, 404, _( "Not implemented" ));
-	return 404;
-
+ int rootWebHandler(struct mg_connection *conn, void UDJAT_UNUSED(*cbdata)) {
+ 	CivetWeb::Connection connection{conn};
+	return connection.info(connection.local_uri());
  }

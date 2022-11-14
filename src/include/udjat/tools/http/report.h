@@ -39,6 +39,7 @@
 
 			void to_json(std::stringstream &ss) const;
 			void to_html(std::stringstream &ss) const;
+			void to_xml(std::stringstream &ss) const;
 
 		 public:
 		 	Report();

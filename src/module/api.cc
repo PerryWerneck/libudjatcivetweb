@@ -24,6 +24,7 @@
  #include <udjat/tools/http/exception.h>
  #include <udjat/tools/http/report.h>
  #include <udjat/tools/http/request.h>
+ #include <udjat/tools/logger.h>
 
  static std::string report(const CivetWeb::Connection &connection, const char *path, const char *method, const MimeType mimetype) {
 
@@ -48,9 +49,7 @@
 
 	return webHandler(CivetWeb::Connection(conn),[](const CivetWeb::Connection &connection, const char *path, const char *method, const MimeType mimetype){
 
-#ifdef DEBUG
-		cout << "*** path='" << path << "'" << endl;
-#endif // DEBUG
+		debug("*** path='",path,"'");
 
 		if(mimetype == MimeType::csv) {
 

@@ -23,6 +23,7 @@
  #include <udjat/tools/file.h>
  #include <sys/types.h>
  #include <utime.h>
+ #include <udjat/tools/logger.h>
  #include <udjat/tools/http/timestamp.h>
 
  namespace Udjat {
@@ -32,7 +33,11 @@
 		Worker::Worker(const char *url, const HTTP::Method method, const char *payload) : Udjat::Protocol::Worker(url,method,payload) {
 
 			header("Connection") = "close";
-			header("User-Agent") = "civetweb/" CIVETWEB_VERSION " (linux) " PACKAGE_NAME "/" PACKAGE_VERSION;
+#ifdef _WIN32
+			header("User-Agent") = "civetweb/" CIVETWEB_VERSION " (windows) " STRINGIZE_VALUE_OF(PRODUCT_NAME) "/" PACKAGE_VERSION;
+#else
+			header("User-Agent") = "civetweb/" CIVETWEB_VERSION " (linux) " STRINGIZE_VALUE_OF(PRODUCT_NAME) "/" PACKAGE_VERSION;
+#endif // _WIN32
 
 		}
 
@@ -227,9 +232,7 @@
 
 					for(int header = 0; header < info->num_headers; header++) {
 
-#ifdef DEBUG
-						cout << info->http_headers[header].name << "= '" << info->http_headers[header].value << "'" << endl;
-#endif // DEBUG
+						debug(info->http_headers[header].name,"= '",info->http_headers[header].value,"'");
 
 						if(!strcasecmp(info->http_headers[header].name,"Last-Modified")) {
 							ub.modtime = (time_t) HTTP::TimeStamp(info->http_headers[header].value);

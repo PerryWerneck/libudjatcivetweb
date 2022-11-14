@@ -46,8 +46,9 @@
 
 			void json(std::stringstream &ss) const;
 			void xml(std::stringstream &ss) const;
+			void html(std::stringstream &ss) const;
 
-			std::string to_string() const;
+			const Udjat::Value & get(std::string &value) const override;
 
 			Udjat::Value & operator[](const char *name) override;
 

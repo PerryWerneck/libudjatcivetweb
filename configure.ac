@@ -113,6 +113,21 @@ dnl ---------------------------------------------------------------------------
 AC_DEFINE(HAVE_GNUC_VISIBILITY, 1, [supports GCC visibility attributes])
 
 dnl ---------------------------------------------------------------------------
+dnl Check for libintl
+dnl ---------------------------------------------------------------------------
+
+AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE,"libudjatsysinfo-$app_vrs_major.$app_vrs_minor",[The gettext package name.])
+AC_SUBST(GETTEXT_PACKAGE,"libudjathttpd-$app_vrs_major.$app_vrs_minor")
+
+AC_PATH_TOOL([XGETTEXT], [xgettext], [true])
+AC_PATH_TOOL([MSGCAT], [msgcat], [true])
+AC_PATH_TOOL([MSGINIT], [msginit], [true])
+AC_PATH_TOOL([MSGMERGE], [msgmerge], [true])
+AC_PATH_TOOL([MSGFMT], [msgfmt], [true])
+
+AC_CHECK_HEADER(libintl.h, [AC_DEFINE(HAVE_LIBINTL, 1, [Libintl is available])], [AC_MSG_ERROR([Can't find required file libintl.h])])
+
+dnl ---------------------------------------------------------------------------
 dnl Check for compiler visibility flag
 dnl ---------------------------------------------------------------------------
 AC_MSG_CHECKING(whether $CC accepts -fvisibility=hidden)
@@ -207,6 +222,7 @@ dnl ---------------------------------------------------------------------------
 AC_SUBST(DLL_LDFLAGS)
 AC_SUBST(BASEDIR,$ac_pwd)
 AC_CONFIG_FILES(Makefile)
+AC_CONFIG_FILES(locale/Makefile)
 
 dnl ---------------------------------------------------------------------------
 dnl Output the generated config.status script.

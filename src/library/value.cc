@@ -19,6 +19,7 @@
 
  #include <config.h>
  #include <udjat/civetweb.h>
+ #include <udjat/tools/value.h>
  #include <udjat/tools/http/value.h>
  #include <iostream>
  #include <iomanip>
@@ -105,7 +106,7 @@
 		std::stringstream out;
 		out.imbue(std::locale("C"));
 		out << std::fixed << std::setprecision(2) << (fraction *100);
-		return Udjat::Value::set(out.str(),Value::Real);
+		return Udjat::Value::set(out.str(),Value::Fraction);
 	}
 
 	Value & HTTP::Value::set(const float value) {
@@ -122,8 +123,33 @@
 		return Udjat::Value::set(out.str(),Value::Real);
 	}
 
-	std::string HTTP::Value::to_string() const {
-		return this->value;
+	const Udjat::Value & HTTP::Value::get(std::string &value) const {
+
+		if(!children.empty()) {
+
+			// Has children, check standard names.
+			static const char *names[] = {
+				"summary",
+				"value",
+				"name"
+			};
+
+			for(size_t ix = 0; ix < (sizeof(names)/sizeof(names[0]));ix++) {
+
+				auto child = children.find(names[ix]);
+				if(child != children.end()) {
+					child->second->get(value);
+					if(!value.empty()) {
+						return *this;
+					}
+				}
+
+			}
+
+		}
+
+		value = this->value;
+		return *this;
 	}
 
 

@@ -20,6 +20,7 @@
  #include "private.h"
  #include <udjat/tools/protocol.h>
  #include <udjat/tools/http/exception.h>
+ #include <udjat/tools/logger.h>
  #include <cstring>
 
  int webHandler(const CivetWeb::Connection &connection, function<string (const CivetWeb::Connection &connection, const char *path, const char *method, const MimeType mimetype)> worker) noexcept {
@@ -31,6 +32,8 @@
 	try {
 
 		const char *local_uri = ri->local_uri;
+
+		debug("local_uri='",local_uri,"'");
 
 		// Extract 'API' prefix.
 		if(strncasecmp(local_uri,"/api/",5) == 0) {
@@ -79,9 +82,7 @@
 
 	}
 
-#ifdef DEBUG
-	cout << "Response:" << endl << rsp << endl;
-#endif // DEBUG
+	debug("Response:\n",rsp);
 
 	return connection.success(to_string(mimetype),rsp.c_str(),rsp.size());
 

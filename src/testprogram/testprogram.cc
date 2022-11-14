@@ -62,7 +62,6 @@ static void test_httpd() {
 			public:
 				RandomAgent(const pugi::xml_node &node) : Agent<unsigned int>(node) {
 					cout << "Creating random Agent" << endl;
-					load(node);
 				}
 
 				bool refresh() override {
@@ -100,17 +99,19 @@ static void test_httpd() {
 	Udjat::reconfigure("./test.xml",true);
 	auto agent = Abstract::Agent::root();
 
+	debug("http://localhost:8989");
+
 	if(Module::find("information")) {
-		cout << "http://localhost:8989/api/1.0/info/modules.xml" << endl;
-		cout << "http://localhost:8989/api/1.0/info/workers.xml" << endl;
-		cout << "http://localhost:8989/api/1.0/info/factories.xml" << endl;
+		debug("http://localhost:8989/api/1.0/info/modules.xml");
+		debug("http://localhost:8989/api/1.0/info/workers.xml");
+		debug("http://localhost:8989/api/1.0/info/factories.xml");
 	}
 
-	cout << "http://localhost:8989/icon/user-info-symbolic" << endl;
+	debug("http://localhost:8989/icon/user-info-symbolic");
 
 	for(auto agent : *agent) {
-		cout << "http://localhost:8989/api/1.0/agent/" << agent->name() << ".xml" << endl;
-		cout << "http://localhost:8989/api/1.0/report/agent/" << agent->name() << ".xml" << endl;
+		debug("http://localhost:8989/api/1.0/agent/", agent->name(), ".xml");
+		debug("http://localhost:8989/api/1.0/report/agent/", agent->name(), ".xml");
 	}
 
 	class HTest : public Udjat::HTTP::Handler {
