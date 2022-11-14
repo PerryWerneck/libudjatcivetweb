@@ -78,13 +78,13 @@
 				throw runtime_error(error_buffer);
 			}
 
-				mg_set_user_connection_data(conn,this);
+			mg_set_user_connection_data(conn,this);
 
 			mg_printf(conn,"%s %s HTTP/1.0\r\n%s\r\n%s",
 				std::to_string(method()),
 				(components.path.empty() ? "/" : components.path.c_str()),
 				hdr.c_str(),
-				out.payload.c_str()
+				get_payload()
 			);
 
 			int ret = mg_get_response(
