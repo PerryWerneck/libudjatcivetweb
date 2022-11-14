@@ -20,6 +20,7 @@
  #include "private.h"
  #include <udjat/tools/configuration.h>
  #include <udjat/tools/http/exception.h>
+ #include <udjat/tools/protocol.h>
  #include <udjat/tools/file.h>
  #include <sys/types.h>
  #include <utime.h>
@@ -62,6 +63,70 @@
 				hdr += "\r\n";
 			}
 
+			char error_buffer[1024] = {0};
+			struct mg_connection *conn = NULL;
+
+			conn = mg_connect_client(
+				components.hostname.c_str(),
+				components.portnumber(),
+				strcasecmp(components.scheme.c_str(),"https") == 0,
+				error_buffer,
+				sizeof(error_buffer)
+			);
+
+			if(!conn) {
+				throw runtime_error(error_buffer);
+			}
+
+				mg_set_user_connection_data(conn,this);
+
+			mg_printf(conn,"%s %s HTTP/1.0\r\n%s\r\n%s",
+				std::to_string(method()),
+				(components.path.empty() ? "/" : components.path.c_str()),
+				hdr.c_str(),
+				out.payload.c_str()
+			);
+
+			int ret = mg_get_response(
+							conn,
+							error_buffer,
+							sizeof(error_buffer),
+							(Config::Value<time_t>("http","timeout",10) * 1000)
+					);
+
+			if (ret < 0) {
+				mg_close_connection(conn);
+				conn = NULL;
+				throw runtime_error(error_buffer);
+			}
+
+			/*
+			if(strcasecmp(components.scheme.c_str(),"https")) {
+
+				// HTTP
+
+			} else {
+
+				// HTTPs
+				struct mg_client_options opt = {0};
+				opt.host = components.hostname.c_str();
+				opt.host_name = opt.host;
+				opt.port = components.portnumber();
+				opt.client_cert = NULL;
+				opt.server_cert = NULL;
+
+				cli = mg_connect_client_secure(
+						&opt,
+						errbuf,
+						sizeof(errbuf)
+					);
+
+			}
+			*/
+
+			/*
+			// TODO: Replace this with mg_connect_client + (apply-socket-on-worker) + mg_printf + mg_get_response(?)
+
 			char error_buffer[256] = "";
 			struct mg_connection *conn =
 				mg_download(
@@ -80,6 +145,7 @@
 			if(!conn) {
 				throw runtime_error(error_buffer);
 			}
+			*/
 
 			return conn;
 
