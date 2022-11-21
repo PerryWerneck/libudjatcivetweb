@@ -126,10 +126,19 @@
 
 			ctx = mg_start(&callbacks, this, options);
 
+			Logger::String{"Listening on http://",options[1],"/"}.write(Logger::Debug,"civetweb");
+
 		} else {
 
 			// Use configured options.
 			clog << "civetweb\tFound civetweb configuration, using it" << endl;
+
+			for(size_t ix = 0; ix < optionlist.size(); ix++) {
+				if(!strcasecmp(optionlist[ix].c_str(),"listening_ports")) {
+					Logger::String{"Listening on http://localhost:",optionlist[ix+1],"/"}.write(Logger::Debug,"civetweb");
+					break;
+				}
+			}
 
 			const char **options = new const char *[optionlist.size()+1];
 			size_t ix = 0;
