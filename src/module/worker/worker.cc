@@ -17,9 +17,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
- #include "private.h"
+ #include <config.h>
+ #include "../private.h"
+ #include <udjat/version.h>
  #include <udjat/tools/configuration.h>
  #include <udjat/tools/http/exception.h>
+ #include <udjat/tools/application.h>
  #include <udjat/tools/protocol.h>
  #include <udjat/tools/file.h>
  #include <sys/types.h>
@@ -34,11 +37,24 @@
 		Worker::Worker(const char *url, const HTTP::Method method, const char *payload) : Udjat::Protocol::Worker(url,method,payload) {
 
 			header("Connection") = "close";
+
+			{
 #ifdef _WIN32
-			header("User-Agent") = "civetweb/" CIVETWEB_VERSION " (windows) " STRINGIZE_VALUE_OF(PRODUCT_NAME) "/" PACKAGE_VERSION;
+				string useragent{"civetweb/" CIVETWEB_VERSION " (windows) " UDJAT_PRODUCT_NAME "/" UDJAT_VERSION " (" };
 #else
-			header("User-Agent") = "civetweb/" CIVETWEB_VERSION " (linux) " STRINGIZE_VALUE_OF(PRODUCT_NAME) "/" PACKAGE_VERSION;
+				string useragent{"civetweb/" CIVETWEB_VERSION " (linux) " UDJAT_PRODUCT_NAME "/" UDJAT_VERSION " (" };
 #endif // _WIN32
+
+				useragent += Application::Name{};
+				useragent += ";";
+				useragent += PACKAGE_VERSION;
+				useragent += ")";
+
+				debug("useragent=",useragent);
+
+				header("User-Agent") = useragent.c_str();
+
+			}
 
 		}
 
@@ -100,53 +116,6 @@
 				throw runtime_error(error_buffer);
 			}
 
-			/*
-			if(strcasecmp(components.scheme.c_str(),"https")) {
-
-				// HTTP
-
-			} else {
-
-				// HTTPs
-				struct mg_client_options opt = {0};
-				opt.host = components.hostname.c_str();
-				opt.host_name = opt.host;
-				opt.port = components.portnumber();
-				opt.client_cert = NULL;
-				opt.server_cert = NULL;
-
-				cli = mg_connect_client_secure(
-						&opt,
-						errbuf,
-						sizeof(errbuf)
-					);
-
-			}
-			*/
-
-			/*
-			// TODO: Replace this with mg_connect_client + (apply-socket-on-worker) + mg_printf + mg_get_response(?)
-
-			char error_buffer[256] = "";
-			struct mg_connection *conn =
-				mg_download(
-					components.hostname.c_str(),
-					components.portnumber(),
-					strcasecmp(components.scheme.c_str(),"https") == 0,
-					error_buffer,
-					sizeof(error_buffer),
-					"%s %s HTTP/1.0\r\n%s\r\n%s",
-					std::to_string(method()),
-					(components.path.empty() ? "/" : components.path.c_str()),
-					hdr.c_str(),
-					out.payload.c_str()
-				);
-
-			if(!conn) {
-				throw runtime_error(error_buffer);
-			}
-			*/
-
 			return conn;
 
 		}
@@ -165,79 +134,6 @@
 
 			headers.emplace_back(name);
 			return headers.back();
-		}
-
-		Udjat::String Worker::get(const std::function<bool(double current, double total)> &progress) {
-
-			progress(0,0);
-
-			struct mg_connection *conn = connect();
-
-			Udjat::String response;
-			try {
-
-				const struct mg_response_info *info = mg_get_response_info(conn);
-
-#ifdef DEBUG
-				cout << "civetweb\tServer response was '" << info->status_code << " " << info->status_code << "'" << endl;
-#endif // DEBUG
-
-				if(info->status_code < 200 || info->status_code > 299) {
-
-					throw HTTP::Exception(info->status_code, url().c_str(), info->status_text);
-
-				} else if((unsigned int) info->content_length >= response.max_size()) {
-
-					throw system_error(E2BIG,system_category(),"The response is too big for current implementation");
-
-				} else if(info->content_length > 0) {
-
-					progress((double) 0, (double) info->content_length);
-					char * buffer = new char [info->content_length + 1];
-					memset(buffer,0,info->content_length + 1);
-
-					long long loaded = 0;
-
-					try {
-						while(loaded < info->content_length) {
-
-							int szRead = mg_read(conn, (void *) (buffer+loaded), 1024);
-
-							if(szRead == 0) {
-								throw system_error(ENOTCONN,system_category(),"Connection closed while downloading file");
-							} else if(szRead < 0) {
-								throw runtime_error("Download error");
-							} else {
-								loaded += (size_t) szRead;
-								if(!progress((double) loaded, (double) info->content_length)) {
-									throw system_error(ECANCELED,system_category());
-								}
-							}
-
-						}
-
-					} catch(...) {
-						delete[] buffer;
-						throw;
-					}
-
-					buffer[info->content_length] = 0;
-					response = buffer;
-					delete[] buffer;
-
-					progress((double) info->content_length, (double) info->content_length);
-
-				}
-
-			} catch(...) {
-
-				mg_close_connection(conn);
-				throw;
-			}
-
-			mg_close_connection(conn);
-
-			return response;
 		}
 
 		bool Worker::save(const char *filename, const std::function<bool(double current, double total)> &progress, bool replace) {
