@@ -51,7 +51,9 @@
 			break;
 
 		case Udjat::Value::Array:
-			{
+
+			if(!children.empty()) {
+
 				ss << "<table>";
 
 				// Get column names.
