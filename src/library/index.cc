@@ -64,9 +64,32 @@
 			auto root = Udjat::Abstract::Agent::root();
 			if(root) {
 
-				page	<< "<h2>" << _("Agent info") << "</h2><ul>"
-						<< "<li><a href=\"/api/1.0/agent.html\">" << _("Application agent") << "</a></li>";
+				page	<< "<h2>" << _("Active agents") << "</h2><ul>"
+						<< "<li><a href=\"/api/1.0/agent.html\">" << _("Application") << "</a></li>";
 
+				root->for_each([&page,root](Abstract::Agent &agent){
+
+					if(&agent == root.get()) {
+						return;
+					}
+
+					const char *summary = agent.summary();
+
+					if(!(summary && *summary)) {
+						summary = agent.label();
+					}
+
+					if(!(summary && *summary)) {
+						summary = agent.name();
+					}
+
+					page 	<< "<li><a href=\"/api/1.0/agent" << agent.path() << ".html\">"
+							<< agent.name() << "&nbsp;<small>(" << summary << ")</small>"
+							<< "</a></li>";
+
+				});
+
+				/*
 				for(auto agent : *root) {
 
 					const char *summary = agent->summary();
@@ -83,6 +106,7 @@
 							<< summary
 							<< "</a></li>";
 				}
+				*/
 
 				page << "</ul>";
 			}
