@@ -75,6 +75,7 @@ case "$host" in
 		AC_SUBST(SONAME,libudjathttpd.so.$app_vrs_major.$app_vrs_minor)
 		AC_CONFIG_FILES(sdk/linux/dynamic.pc)
 		AC_CONFIG_FILES(sdk/linux/static.pc)
+		AC_DEFINE_UNQUOTED(HTTPDOCDIR, "/srv/www/htdocs", [The HTTP document root])
 
 esac
 

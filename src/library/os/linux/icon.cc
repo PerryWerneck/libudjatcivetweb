@@ -36,6 +36,7 @@
 
 			{
 				static const char * paths[] = {
+					HTTPDOCDIR "/" STRINGIZE_VALUE_OF(PRODUCT_NAME) "/icons/"
 					"/usr/share/icons/" STRINGIZE_VALUE_OF(PRODUCT_NAME) "/",
 					"/usr/share/icons/"
 				};
@@ -46,7 +47,7 @@
 					filename += name;
 					filename += ".svg";
 
-					if(access(filename.c_str(),F_OK) == 0) {
+					if(access(filename.c_str(),R_OK) == 0) {
 						assign(filename);
 						debug("Found '",c_str(),"'");
 						return;
@@ -89,21 +90,6 @@
 
 
 			}
-
-
-			/*
-			Config::Value<std::vector<string>> themes("theme","icon","Adwaita,gnome,hicolor,HighContrast");
-			for(auto theme : themes) {
-
-
-				cout << "----------------- " << theme << " -------------------------------------" << endl;
-
-				if(find(string{"/usr/share/icons/"} + theme + "/scalable", name)) {
-					return;
-				}
-
-			}
-			*/
 
 			throw system_error(ENOENT,system_category(),string{"Can't find icon '"} + name + "'");
 		}
