@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udjat-module-httpd 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-10-19 21:07-0300\n"
-"PO-Revision-Date: 2022-10-19 21:17-0300\n"
+"POT-Creation-Date: 2022-11-30 12:19-0300\n"
+"PO-Revision-Date: 2022-11-30 12:19-0300\n"
 "Last-Translator: Perry Werneck <perry.werneck@gmail.com>\n"
 "Language-Team: Brazilian Portuguese <perry.werneck@gmail.com>\n"
 "Language: pt_BR\n"
@@ -22,9 +22,17 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n > 1)\n"
 "X-Generator: Gtranslator 3.38.0\n"
 
+#: src/library/index.cc:67
+msgid "Active agents"
+msgstr "Agentes ativos"
+
 #: src/module/index.cc:68
 msgid "Agent info"
 msgstr "Informações de agente"
+
+#: src/library/index.cc:68
+msgid "Application"
+msgstr "Aplicação"
 
 #: src/module/swagger.cc:37
 msgid "Not implemented"
@@ -38,6 +46,10 @@ msgstr "Informação de serviços"
 msgid "URL workers"
 msgstr "Processadores de URL"
 
-#: src/module/index.cc:53
+#: src/library/index.cc:118
+msgid "Workers"
+msgstr "Processadores"
+
+#: src/library/index.cc:52 src/module/index.cc:53
 msgid "en"
 msgstr "pt_BR"
