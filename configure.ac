@@ -117,7 +117,7 @@ dnl ---------------------------------------------------------------------------
 dnl Check for libintl
 dnl ---------------------------------------------------------------------------
 
-AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE,"libudjatsysinfo-$app_vrs_major.$app_vrs_minor",[The gettext package name.])
+AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE,"libudjathttpd-$app_vrs_major.$app_vrs_minor",[The gettext package name.])
 AC_SUBST(GETTEXT_PACKAGE,"libudjathttpd-$app_vrs_major.$app_vrs_minor")
 
 AC_PATH_TOOL([XGETTEXT], [xgettext], [true])

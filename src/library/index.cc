@@ -27,12 +27,14 @@
  #include <udjat/tools/intl.h>
  #include <udjat/tools/logger.h>
  #include <udjat/worker.h>
+ #include <udjat/agent/state.h>
  #include <udjat/module.h>
  #include <cstring>
  #include <udjat/tools/configuration.h>
  #include <udjat/tools/application.h>
  #include <udjat/tools/intl.h>
  #include <udjat/tools/string.h>
+ #include <udjat/tools/http/icons.h>
  #include <sstream>
 
  using namespace std;
@@ -65,7 +67,16 @@
 			if(root) {
 
 				page	<< "<h2>" << _("Active agents") << "</h2><ul>"
-						<< "<li><a href=\"/api/1.0/agent.html\">" << _("Application") << "</a></li>";
+						<< "<li><a href=\"/api/1.0/agent.html\">";
+
+				{
+					auto icon = std::to_string(Abstract::Agent::root()->state()->level());
+					if(HTTP::Icon{icon}) {
+						page << "<img src=\"icon/" << icon << ".svg\" height=\"18\" style=\"vertical-align:bottom\"/>&nbsp;";
+					}
+				}
+
+				page	<< _("Application") << "</a></li>";
 
 				root->for_each([&page,root](Abstract::Agent &agent){
 
@@ -83,30 +94,18 @@
 						summary = agent.name();
 					}
 
-					page 	<< "<li><a href=\"/api/1.0/agent" << agent.path() << ".html\">"
-							<< agent.name() << "&nbsp;<small>(" << summary << ")</small>"
-							<< "</a></li>";
+					page << "<li><a href=\"/api/1.0/agent" << agent.path() << ".html\">";
+
+					{
+						auto icon = std::to_string(agent.state()->level());
+						if(HTTP::Icon{icon}) {
+							page << "<img src=\"icon/" << icon << ".svg\" height=\"18\" style=\"vertical-align:bottom\"/>&nbsp;";
+						}
+					}
+
+					page << agent.name() << "&nbsp;<small>(" << summary << ")</small></a></li>";
 
 				});
-
-				/*
-				for(auto agent : *root) {
-
-					const char *summary = agent->summary();
-
-					if(!(summary && *summary)) {
-						summary = agent->label();
-					}
-
-					if(!(summary && *summary)) {
-						summary = agent->name();
-					}
-
-					page 	<< "<li><a href=\"/api/1.0/agent/" << agent->name() << ".html\">"
-							<< summary
-							<< "</a></li>";
-				}
-				*/
 
 				page << "</ul>";
 			}

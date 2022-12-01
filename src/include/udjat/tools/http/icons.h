@@ -36,6 +36,17 @@
 			/// @param name Icon name.
 			Icon(const char *name);
 
+			Icon(const std::string &name) : Icon(name.c_str()) {
+			}
+
+			template <typename T>
+			Icon(const T &name) : Icon(std::to_string(name)) {
+			}
+
+			inline operator bool() const {
+				return !empty();
+			}
+
 			/// @brief Get cached icon instance, load it if necessary.
 			static Icon getInstance(const char *name);
 

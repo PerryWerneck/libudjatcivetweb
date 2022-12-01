@@ -36,7 +36,7 @@
 
 			{
 				static const char * paths[] = {
-					HTTPDOCDIR "/" STRINGIZE_VALUE_OF(PRODUCT_NAME) "/icons/"
+					HTTPDOCDIR "/" STRINGIZE_VALUE_OF(PRODUCT_NAME) "/icons/",
 					"/usr/share/icons/" STRINGIZE_VALUE_OF(PRODUCT_NAME) "/",
 					"/usr/share/icons/"
 				};
@@ -45,7 +45,9 @@
 
 					string filename{paths[ix]};
 					filename += name;
-					filename += ".svg";
+					if(!strchr(name,'.')) {
+						filename += ".svg";
+					}
 
 					if(access(filename.c_str(),R_OK) == 0) {
 						assign(filename);
@@ -91,7 +93,8 @@
 
 			}
 
-			throw system_error(ENOENT,system_category(),string{"Can't find icon '"} + name + "'");
+			clear();
+
 		}
 
 
