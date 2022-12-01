@@ -70,7 +70,7 @@ Requires:	libudjathttpd%{_libvrs} = %{version}
 
 Development files for Udjat's HTTP server abstraction library.
 
-%lang_package
+%lang_package -n libudjathttpd%{_libvrs}
 
 #---[ Build & Install ]-----------------------------------------------------------------------------------------------
 
@@ -98,7 +98,7 @@ make all
 %defattr(-,root,root)
 %{_libdir}/libudjathttpd.so.%{MAJOR_VERSION}.%{MINOR_VERSION}
 
-%files lang -f langfiles
+%files -n libudjathttpd%{_libvrs}-lang -f langfiles
 
 %files -n udjat-httpd-devel
 %defattr(-,root,root)

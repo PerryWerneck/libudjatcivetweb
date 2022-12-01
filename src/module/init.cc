@@ -31,6 +31,7 @@
  #include <udjat/tools/http/server.h>
  #include <udjat/tools/http/handler.h>
  #include <udjat/tools/logger.h>
+ #include <udjat/tools/string.h>
  #include <unistd.h>
 
  using namespace Udjat;
@@ -126,8 +127,6 @@
 
 			ctx = mg_start(&callbacks, this, options);
 
-			Logger::String{"Listening on http://",options[1],"/"}.write(Logger::Debug,"civetweb");
-
 		} else {
 
 			// Use configured options.
@@ -135,7 +134,6 @@
 
 			for(size_t ix = 0; ix < optionlist.size(); ix++) {
 				if(!strcasecmp(optionlist[ix].c_str(),"listening_ports")) {
-					Logger::String{"Listening on http://localhost:",optionlist[ix+1],"/"}.write(Logger::Debug,"civetweb");
 					break;
 				}
 			}
@@ -154,7 +152,7 @@
 		}
 
 		if (ctx == NULL) {
-			cerr << "civetweb\tCannot start: mg_start failed." << endl;
+			error() << "Cannot start: mg_start failed." << endl;
 			return;
 		}
 
@@ -244,14 +242,47 @@
 		int count = mg_get_server_ports(ctx,10,ports);
 
 		if(count) {
-			cout << "civetweb\tListening on";
 			for(int ix = 0; ix < count;ix++) {
-				cout << " " << ports[ix].port;
-				if(ports[ix].is_ssl) {
-					cout << " (ssl)";
-				}
+				Logger::String(
+					"Listening on ",
+					(ports[ix].is_ssl ? "https" : "http"),
+					"://",
+					(ports[ix].protocol == 1 ? "127.0.0.1" : "localhost"),
+					":",
+					ports[ix].port
+				).write(Logger::Trace,"civetweb");
 			}
-			cout << endl;
+			if(Logger::enabled(Logger::Debug)) {
+
+				Logger::String(
+					"Application state available on ",
+					(ports[0].is_ssl ? "https" : "http"),
+					"://",
+					(ports[0].protocol == 1 ? "127.0.0.1" : "localhost"),
+					":",
+					ports[0].port,
+					"/api/1.0/agent.html"
+				).write(Logger::Debug,"civetweb");
+
+				auto module = Module::find("information");
+				String options;
+				if(module && module->getProperty("options",options)) {
+					for(const std::string &option : options.split(",")) {
+						Logger::String(
+							"Service info available on ",
+							(ports[0].is_ssl ? "https" : "http"),
+							"://",
+							(ports[0].protocol == 1 ? "127.0.0.1" : "localhost"),
+							":",
+							ports[0].port,
+							"/api/1.0/info/",
+							option.c_str(),
+							".html"
+						).write(Logger::Debug,"civetweb");
+					}
+				}
+
+			}
 		}
 
 

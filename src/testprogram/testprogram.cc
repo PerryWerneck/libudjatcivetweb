@@ -99,6 +99,7 @@ static void test_httpd() {
 	Udjat::reconfigure("./test.xml",true);
 	auto agent = Abstract::Agent::root();
 
+	/*
 	debug("http://localhost:8989");
 
 	if(Module::find("information")) {
@@ -113,6 +114,7 @@ static void test_httpd() {
 		debug("http://localhost:8989/api/1.0/agent/", agent->name(), ".xml");
 		debug("http://localhost:8989/api/1.0/report/agent/", agent->name(), ".xml");
 	}
+	*/
 
 	class HTest : public Udjat::HTTP::Handler {
 	public:
