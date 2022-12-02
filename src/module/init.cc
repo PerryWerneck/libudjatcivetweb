@@ -291,8 +291,19 @@
 
 	bool push_back(HTTP::Handler *handler) override {
 		if(HTTP::Server::push_back(handler)) {
-			cout << "civetweb\tAdding new http handle '" << handler->c_str() << "'" << endl;
-			mg_set_request_handler(ctx, handler->c_str(), customWebHandler, handler);
+
+			string uri{handler->c_str()};
+
+			if(uri[uri.size()-1] == '/') {
+				uri.resize(uri.size()-1);
+			}
+
+			mg_set_request_handler(ctx, uri.c_str(), customWebHandler, handler);
+
+			if(Logger::enabled(Logger::Debug)) {
+				Logger::String{"Request handler for '",uri,"' was activated"}.write(Logger::Debug,"civetweb");
+			}
+
 			return true;
 		}
 		return false;
