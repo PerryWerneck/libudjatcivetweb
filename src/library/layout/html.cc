@@ -30,6 +30,8 @@
 
 	void HTTP::Value::html(std::stringstream &ss) const {
 
+		#pragma GCC diagnostic push
+		#pragma GCC diagnostic ignored "-Wswitch"
 		switch(this->type) {
 		case Udjat::Value::Object:
 			{
@@ -73,6 +75,7 @@
 				}
 
 				// Get column contents.
+				ss << "<tbody>";
 				{
 					for(auto &row : children) {
 						if(!row.second->children.empty()) {
@@ -89,15 +92,12 @@
 						}
 					}
 				}
-
-				ss << "<tbody>";
-
-
 				ss << "</tbody></table>";
 			}
 			break;
 
 		}
+		#pragma GCC diagnostic pop
 
 	}
 

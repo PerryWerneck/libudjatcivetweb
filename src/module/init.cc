@@ -152,7 +152,7 @@
 		}
 
 		if (ctx == NULL) {
-			error() << "Cannot start: mg_start failed." << endl;
+			Udjat::Module::error() << "Cannot start: mg_start failed." << endl;
 			return;
 		}
 
