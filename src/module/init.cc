@@ -301,7 +301,24 @@
 			mg_set_request_handler(ctx, uri.c_str(), customWebHandler, handler);
 
 			if(Logger::enabled(Logger::Debug)) {
-				Logger::String{"Request handler for '",uri,"' was activated"}.write(Logger::Debug,"civetweb");
+
+				struct mg_server_port ports[10];
+				if(mg_get_server_ports(ctx,10,ports) > 0) {
+
+					Logger::String{
+						"New request handler was activated on ",
+						(ports[0].is_ssl ? "https" : "http"),
+						"://",
+						(ports[0].protocol == 1 ? "127.0.0.1" : "localhost"),
+						":",
+						ports[0].port,
+						uri
+					}.write(Logger::Debug,"civetweb");
+
+				} else {
+					Logger::String{"Request handler for '",uri,"' was activated"}.write(Logger::Debug,"civetweb");
+				}
+
 			}
 
 			return true;

@@ -99,23 +99,6 @@ static void test_httpd() {
 	Udjat::reconfigure("./test.xml",true);
 	auto agent = Abstract::Agent::root();
 
-	/*
-	debug("http://localhost:8989");
-
-	if(Module::find("information")) {
-		debug("http://localhost:8989/api/1.0/info/modules.xml");
-		debug("http://localhost:8989/api/1.0/info/workers.xml");
-		debug("http://localhost:8989/api/1.0/info/factories.xml");
-	}
-
-	debug("http://localhost:8989/icon/user-info-symbolic");
-
-	for(auto agent : *agent) {
-		debug("http://localhost:8989/api/1.0/agent/", agent->name(), ".xml");
-		debug("http://localhost:8989/api/1.0/report/agent/", agent->name(), ".xml");
-	}
-	*/
-
 	class HTest : public Udjat::HTTP::Handler {
 	public:
 		HTest() : Handler("/test/") {
@@ -195,14 +178,14 @@ int main(int argc, char **argv) {
 	}
 	*/
 
-	test_httpd();
+	// test_httpd();
 	// test_http_get();
 	// test_http_test();
 	// test_report();
 
-	// cout << HTTP::Icon("document-send-symbolic") << endl;
-	// cout << HTTP::Icon("dialog-password-symbolic") << endl;
-	// cout << HTTP::Icon("image-missing") << endl;
+	cout << HTTP::Icon("document-send-symbolic") << endl;
+	cout << HTTP::Icon("dialog-password-symbolic") << endl;
+	cout << HTTP::Icon("image-missing") << endl;
 
 	delete module;
 

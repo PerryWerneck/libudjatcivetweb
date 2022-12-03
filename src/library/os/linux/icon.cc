@@ -25,6 +25,7 @@
  #include <udjat/tools/logger.h>
  #include <unistd.h>
  #include <dirent.h>
+ #include <udjat/tools/configuration.h>
 
  using namespace std;
 
@@ -32,7 +33,52 @@
 
 	namespace HTTP {
 
-		Icon::Icon(const char *name) {
+		Icon::Icon(const char *n) {
+
+			static const char * defpaths =
+					"/usr/share/icons/" STRINGIZE_VALUE_OF(PRODUCT_NAME) "/," \
+					"/usr/share/icons/Adwaita/," \
+					"/usr/share/icons/gnome/," \
+					"/usr/share/icons/hicolor/," \
+					"/usr/share/icons/HighContrast/";
+
+			Config::Value<std::vector<string>> paths("theme","iconpath",defpaths);
+
+			string name{n};
+			if(!strchr(n,'.')) {
+				name += ".svg";
+			}
+
+			// First search for filenames.
+			for(string &path : paths) {
+
+				string filename{path + name};
+
+				if(access(filename.c_str(),R_OK) == 0) {
+					assign(filename);
+					debug("Found '",c_str(),"'");
+					return;
+				}
+
+			}
+
+			// Then search paths
+			for(string &path : paths) {
+
+				try {
+					File::Path folder{path};
+					if(folder && folder.find(name.c_str(),true)) {
+						assign(folder);
+						debug("Found '",c_str(),"'");
+						return;
+					}
+				} catch(const std::exception &e) {
+					cout << "icon\t" << e.what() << endl;
+				}
+
+			}
+
+			/*
 
 			{
 				static const char * paths[] = {
@@ -92,6 +138,7 @@
 
 
 			}
+			*/
 
 			clear();
 
