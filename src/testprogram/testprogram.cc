@@ -178,14 +178,14 @@ int main(int argc, char **argv) {
 	}
 	*/
 
-	// test_httpd();
+	test_httpd();
 	// test_http_get();
 	// test_http_test();
 	// test_report();
 
-	cout << HTTP::Icon("document-send-symbolic") << endl;
-	cout << HTTP::Icon("dialog-password-symbolic") << endl;
-	cout << HTTP::Icon("image-missing") << endl;
+	// cout << HTTP::Icon("document-send-symbolic") << endl;
+	// cout << HTTP::Icon("dialog-password-symbolic") << endl;
+	// cout << HTTP::Icon("image-missing") << endl;
 
 	delete module;
 

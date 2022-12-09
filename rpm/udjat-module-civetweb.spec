@@ -16,7 +16,10 @@
 # Please submit bugfixes or comments via http://bugs.opensuse.org/
 #
 
-Summary:		CivetWEB HTTP exporter for UDJat 
+%define product_name %(pkg-config --variable=product_name libudjat)
+%define module_path %(pkg-config --variable=module_path libudjat)
+
+Summary:		CivetWEB HTTP exporter for %{product_name} 
 Name:			udjat-module-civetweb
 Version:		1.0
 Release:		0
@@ -49,15 +52,15 @@ Conflicts:		otherproviders(udjat-module-httpd)
 Provides:		udjat-module-http
 
 %description
-HTTP exporter module for libudjat based on CivetWEB library.
+HTTP exporter module for %{product_name} based on CivetWEB library.
 
 #---[ Library ]-------------------------------------------------------------------------------------------------------
 
 %package -n libudjathttpd%{_libvrs}
-Summary:	UDJat httpd library
+Summary:	%{product_name} httpd library
 
 %description -n libudjathttpd%{_libvrs}
-HTTP Server abstraction library for udjat
+HTTP Server abstraction library for %{product_name}
 
 #---[ Development ]---------------------------------------------------------------------------------------------------
 
@@ -68,7 +71,7 @@ Requires:	libudjathttpd%{_libvrs} = %{version}
 
 %description -n udjat-httpd-devel
 
-Development files for Udjat's HTTP server abstraction library.
+Development files for %{product_name}'s HTTP server abstraction library.
 
 %lang_package -n libudjathttpd%{_libvrs}
 
@@ -91,8 +94,8 @@ make all
 
 %files
 %defattr(-,root,root)
-%{_libdir}/udjat-modules/*/*.so
-%config %{_sysconfdir}/udjat.conf.d/*.conf
+%{module_path}/*.so
+%config %{_sysconfdir}/%{product_name}.conf.d/*.conf
 
 %files -n libudjathttpd%{_libvrs}
 %defattr(-,root,root)
