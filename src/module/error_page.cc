@@ -69,7 +69,10 @@
 
 	// clog << "civetweb\t" << request_info->remote_addr << " " << status << " " << message << " (" << mimetype << ")" << endl;
 	Logger::String{
-		request_info->remote_addr," ",status," ",message," (",mimetype,")"
+		request_info->remote_addr," ",
+		request_info->request_method," ",
+		request_info->local_uri," ",
+		status," ",message," (",mimetype,")"
 	}.write(Logger::Trace,"civetweb");
 
 	if(Config::Value<bool>("httpd","error-templates",true)) {
