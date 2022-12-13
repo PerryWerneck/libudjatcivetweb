@@ -78,68 +78,6 @@
 
 			}
 
-			/*
-
-			{
-				static const char * paths[] = {
-					HTTPDOCDIR "/" STRINGIZE_VALUE_OF(PRODUCT_NAME) "/icons/",
-					"/usr/share/icons/" STRINGIZE_VALUE_OF(PRODUCT_NAME) "/",
-					"/usr/share/icons/"
-				};
-
-				for(size_t ix = 0; ix < (sizeof(paths)/sizeof(paths[0]));ix++) {
-
-					string filename{paths[ix]};
-					filename += name;
-					if(!strchr(name,'.')) {
-						filename += ".svg";
-					}
-
-					if(access(filename.c_str(),R_OK) == 0) {
-						assign(filename);
-						debug("Found '",c_str(),"'");
-						return;
-					}
-#ifdef DEBUG
-					else {
-						debug("Not Found '",filename.c_str(),"'");
-					}
-#endif // DEBUG
-
-				}
-			}
-
-			{
-				File::Path path;
-				string filename{name};
-				filename += ".svg";
-
-#ifdef DEBUG
-				cout << "Searching for '" << filename << "'" << endl;
-#endif // DEBUG
-
-				for(auto theme : Config::Value<std::vector<string>>("theme","icon","Adwaita,gnome,hicolor,HighContrast")) {
-
-					path = "/usr/share/icons/";
-					path += theme;
-
-					debug("Searching '",path.c_str(),"'");
-
-					if(path.find(filename.c_str(),true)) {
-#ifdef DEBUG
-						cout << "Found '" << path << "'" << endl;
-#endif // DEBUG
-						assign(path);
-						return;
-					}
-
-
-				}
-
-
-			}
-			*/
-
 			clear();
 
 		}

@@ -63,18 +63,18 @@
 
 	} catch(const HTTP::Exception &error) {
 
-		mg_send_http_error(conn, error.codes().http, error.what());
+		mg_send_http_error(conn, error.codes().http, (const char *) error.what());
 		return error.codes().http;
 
 	} catch(const system_error &e) {
 
 		int code = HTTP::Exception::translate(e);
-		mg_send_http_error(conn, code, e.what());
+		mg_send_http_error(conn, code, (const char *) e.what());
 		return code;
 
 	} catch(const exception &e) {
 
-		mg_send_http_error(conn, 500, e.what());
+		mg_send_http_error(conn, 500, (const char *) e.what());
 		return 500;
 
 	} catch(...) {
