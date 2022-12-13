@@ -24,6 +24,7 @@
 
  #include <config.h>
  #include <udjat/tools/http/connection.h>
+ #include <udjat/tools/http/image.h>
  #include <udjat/tools/intl.h>
  #include <udjat/tools/logger.h>
  #include <udjat/worker.h>
@@ -34,7 +35,7 @@
  #include <udjat/tools/application.h>
  #include <udjat/tools/intl.h>
  #include <udjat/tools/string.h>
- #include <udjat/tools/http/icons.h>
+ #include <udjat/tools/http/icon.h>
  #include <sstream>
 
  using namespace std;
@@ -72,7 +73,7 @@
 				{
 					auto icon = std::to_string(Abstract::Agent::root()->state()->level());
 					if(HTTP::Icon{icon}) {
-						page << "<img src=\"icon/" << icon << ".svg\" height=\"18\" style=\"vertical-align:bottom\"/>&nbsp;";
+						page << "<img src=\"icon/" << icon << ".svg\" height=\"16\" style=\"vertical-align:bottom\"/>&nbsp;";
 					}
 				}
 
@@ -99,7 +100,7 @@
 					{
 						auto icon = std::to_string(agent.state()->level());
 						if(HTTP::Icon{icon}) {
-							page << "<img src=\"icon/" << icon << ".svg\" height=\"18\" style=\"vertical-align:bottom\"/>&nbsp;";
+							page << "<img src=\"icon/" << icon << ".svg\" height=\"16\" style=\"vertical-align:bottom\"/>&nbsp;";
 						}
 					}
 
@@ -164,6 +165,34 @@
 				page.str().c_str(),
 				page.str().size()
 			);
+
+	} else if(!strcasecmp(path,"/favicon.ico")) {
+
+		static const char *names[] = {
+			STRINGIZE_VALUE_OF(PRODUCT_NAME) ".ico",
+			"favicon.ico"
+		};
+
+		debug("Searching for favicon");
+
+		for(size_t ix = 0; ix < N_ELEMENTS(names);ix++) {
+
+			HTTP::Image image{names[ix]};
+			if(image) {
+
+				debug("Found '",image.c_str(),"'");
+
+				return send(
+						HTTP::Get,
+						image.c_str(),
+						false,
+						nullptr,
+						Config::Value<unsigned int>("theme","image-max-age",604800)
+					);
+
+			}
+
+		}
 
 	}
 

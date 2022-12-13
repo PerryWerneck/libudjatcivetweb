@@ -80,6 +80,7 @@
 	void setHandlers() noexcept {
 		mg_set_request_handler(ctx, "/api/", apiWebHandler, 0);
 		mg_set_request_handler(ctx, "/icon/", iconWebHandler, 0);
+		mg_set_request_handler(ctx, "/images/", imageWebHandler, 0);
 //		mg_set_request_handler(ctx, "/report/", reportWebHandler, 0);
 		mg_set_request_handler(ctx, "/swagger.json", swaggerWebHandler, 0);
 

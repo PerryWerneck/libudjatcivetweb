@@ -21,7 +21,9 @@
  #include <sys/types.h>
  #include <sys/stat.h>
  #include <udjat/tools/http/timestamp.h>
+ #include <udjat/tools/http/mimetype.h>
  #include <udjat/tools/file.h>
+ #include <udjat/tools/logger.h>
  #include <sstream>
 
  using namespace std;
@@ -68,6 +70,20 @@
 
 			if(mime_type && *mime_type) {
 				mg_response_header_add(conn, "Content-Type", mime_type, -1);
+			} else {
+
+				const char *ext = strrchr(name,'.');
+				if(ext) {
+					ext++;
+					auto mtype = MimeTypeFactory(ext);
+
+					debug("Detected mime-type is '",mtype,"'");
+					if(mtype != MimeType::custom) {
+						mg_response_header_add(conn, "Content-Type", std::to_string(mtype), -1);
+					}
+
+				}
+
 			}
 
 			mg_response_header_send(conn);

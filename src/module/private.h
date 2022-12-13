@@ -123,8 +123,11 @@
  /// @brief Handler for API requests.
  int apiWebHandler(struct mg_connection *conn, void *cbdata);
 
- /// @brief Handler for API requests.
+ /// @brief Handler for icon requests.
  int iconWebHandler(struct mg_connection *conn, void *cbdata);
+
+ /// @brief Handler for image requests.
+ int imageWebHandler(struct mg_connection *conn, void *cbdata);
 
  /// @brief Handler for report requests.
  //int reportWebHandler(struct mg_connection *conn, void *cbdata);

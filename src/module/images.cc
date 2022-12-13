@@ -27,16 +27,17 @@
   */
 
  #include "private.h"
- #include <udjat/tools/http/icon.h>
+ #include <udjat/tools/http/image.h>
  #include <udjat/tools/http/exception.h>
  #include <udjat/tools/http/mimetype.h>
  #include <udjat/tools/configuration.h>
+ #include <udjat/tools/http/connection.h>
 
 #ifndef _WIN32
 	#include <unistd.h>
 #endif // _WIN32
 
- int iconWebHandler(struct mg_connection *conn, void UDJAT_UNUSED(*cbdata)) {
+ int imageWebHandler(struct mg_connection *conn, void UDJAT_UNUSED(*cbdata)) {
 
 	try {
 
@@ -51,14 +52,14 @@
 			path = ptr+1;
 		}
 
-		Udjat::HTTP::Icon icon = Udjat::HTTP::Icon::getInstance(path);
+		Udjat::HTTP::Image image{path};
 
 		CivetWeb::Connection(conn).send(
 			HTTP::Get,
-			icon.c_str(),
+			image.c_str(),
 			false,
 			"image/svg+xml",
-			Config::Value<unsigned int>("theme","icon-max-age",604800)
+			Config::Value<unsigned int>("theme","image-max-age",604800)
 		);
 
 	} catch(const HTTP::Exception &error) {

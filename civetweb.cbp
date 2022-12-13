@@ -47,7 +47,8 @@
 		<Unit filename="src/include/udjat/civetweb.h" />
 		<Unit filename="src/include/udjat/tools/http/connection.h" />
 		<Unit filename="src/include/udjat/tools/http/handler.h" />
-		<Unit filename="src/include/udjat/tools/http/icons.h" />
+		<Unit filename="src/include/udjat/tools/http/icon.h" />
+		<Unit filename="src/include/udjat/tools/http/image.h" />
 		<Unit filename="src/include/udjat/tools/http/report.h" />
 		<Unit filename="src/include/udjat/tools/http/request.h" />
 		<Unit filename="src/include/udjat/tools/http/server.h" />
@@ -60,6 +61,7 @@
 		<Unit filename="src/library/layout/json.cc" />
 		<Unit filename="src/library/layout/xml.cc" />
 		<Unit filename="src/library/os/linux/icon.cc" />
+		<Unit filename="src/library/os/linux/image.cc" />
 		<Unit filename="src/library/os/windows/icon.cc" />
 		<Unit filename="src/library/report.cc" />
 		<Unit filename="src/library/request.cc" />
@@ -72,6 +74,7 @@
 		<Unit filename="src/module/error_page.cc" />
 		<Unit filename="src/module/handler.cc" />
 		<Unit filename="src/module/icons.cc" />
+		<Unit filename="src/module/images.cc" />
 		<Unit filename="src/module/index.cc" />
 		<Unit filename="src/module/init.cc" />
 		<Unit filename="src/module/private.h" />

@@ -18,7 +18,7 @@
  */
 
  #include <config.h>
- #include <udjat/tools/http/icons.h>
+ #include <udjat/tools/http/icon.h>
  #include <map>
  #include <mutex>
 

@@ -29,7 +29,7 @@
  #include <udjat/civetweb.h>
  #include <udjat/tools/threadpool.h>
  #include <udjat/tools/mainloop.h>
- #include <udjat/tools/http/icons.h>
+ #include <udjat/tools/http/icon.h>
  #include <udjat/tools/http/handler.h>
  #include <udjat/tools/http/connection.h>
  #include <udjat/tools/http/server.h>
