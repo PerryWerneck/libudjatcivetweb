@@ -33,6 +33,7 @@
  #include <udjat/tools/http/handler.h>
  #include <udjat/tools/http/connection.h>
  #include <udjat/tools/http/server.h>
+ #include <udjat/tools/application.h>
 
  using namespace std;
  using namespace Udjat;
@@ -96,7 +97,7 @@ static void test_httpd() {
 
 	static Factory factory;
 
-	Udjat::reconfigure("./test.xml",true);
+	Udjat::Application::setup("./test.xml",true);
 	auto agent = Abstract::Agent::root();
 
 	class HTest : public Udjat::HTTP::Handler {

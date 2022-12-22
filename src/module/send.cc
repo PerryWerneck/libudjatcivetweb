@@ -20,6 +20,7 @@
  #include "private.h"
  #include <sys/types.h>
  #include <sys/stat.h>
+ #include <udjat/version.h>
  #include <udjat/tools/http/timestamp.h>
  #include <udjat/tools/http/mimetype.h>
  #include <udjat/tools/file.h>
@@ -147,6 +148,7 @@
 						<< basename
 						<< "</h1><hr /><pre>";
 
+#if UDJAT_CORE_BUILD < 22122217
 			File::Path::for_each(filename.c_str(),[&response](const char *name, const File::Stat &st) {
 
 				name = strrchr(name,'/');
@@ -169,6 +171,26 @@
 
 				return true;
 			});
+#else
+			File::Path{filename}.for_each([&response](const File::Path &file) {
+
+				const char *name = strrchr(file.c_str(),'/');
+				if(!name) {
+					return true;
+				}
+				name++;
+
+				response << "<a href=\"" << name;
+				if(file.dir()) {
+					response << '/';
+				}
+				response	<< "\">"
+							<< name
+							<< "</a>" << endl;
+
+				return false;
+			});
+#endif // UDJAT_CORE_BUILD
 
 			response << "</pre><hr /></body></html>";
 
