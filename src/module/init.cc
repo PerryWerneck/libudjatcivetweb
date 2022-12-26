@@ -31,6 +31,7 @@
  #include <udjat/tools/http/server.h>
  #include <udjat/tools/http/handler.h>
  #include <udjat/tools/logger.h>
+ #include <udjat/tools/string.h>
  #include <unistd.h>
 
  using namespace Udjat;
@@ -79,6 +80,7 @@
 	void setHandlers() noexcept {
 		mg_set_request_handler(ctx, "/api/", apiWebHandler, 0);
 		mg_set_request_handler(ctx, "/icon/", iconWebHandler, 0);
+		mg_set_request_handler(ctx, "/images/", imageWebHandler, 0);
 //		mg_set_request_handler(ctx, "/report/", reportWebHandler, 0);
 		mg_set_request_handler(ctx, "/swagger.json", swaggerWebHandler, 0);
 
@@ -131,6 +133,12 @@
 			// Use configured options.
 			clog << "civetweb\tFound civetweb configuration, using it" << endl;
 
+			for(size_t ix = 0; ix < optionlist.size(); ix++) {
+				if(!strcasecmp(optionlist[ix].c_str(),"listening_ports")) {
+					break;
+				}
+			}
+
 			const char **options = new const char *[optionlist.size()+1];
 			size_t ix = 0;
 			for(const string & option : optionlist) {
@@ -145,7 +153,7 @@
 		}
 
 		if (ctx == NULL) {
-			cerr << "civetweb\tCannot start: mg_start failed." << endl;
+			Udjat::Module::error() << "Cannot start: mg_start failed." << endl;
 			return;
 		}
 
@@ -235,14 +243,47 @@
 		int count = mg_get_server_ports(ctx,10,ports);
 
 		if(count) {
-			cout << "civetweb\tListening on";
 			for(int ix = 0; ix < count;ix++) {
-				cout << " " << ports[ix].port;
-				if(ports[ix].is_ssl) {
-					cout << " (ssl)";
-				}
+				Logger::String(
+					"Listening on ",
+					(ports[ix].is_ssl ? "https" : "http"),
+					"://",
+					(ports[ix].protocol == 1 ? "127.0.0.1" : "localhost"),
+					":",
+					ports[ix].port
+				).write(Logger::Trace,"civetweb");
 			}
-			cout << endl;
+			if(Logger::enabled(Logger::Debug)) {
+
+				Logger::String(
+					"Application state available on ",
+					(ports[0].is_ssl ? "https" : "http"),
+					"://",
+					(ports[0].protocol == 1 ? "127.0.0.1" : "localhost"),
+					":",
+					ports[0].port,
+					"/api/1.0/agent.html"
+				).write(Logger::Debug,"civetweb");
+
+				auto module = Module::find("information");
+				String options;
+				if(module && module->getProperty("options",options)) {
+					for(const std::string &option : options.split(",")) {
+						Logger::String(
+							"Service info available on ",
+							(ports[0].is_ssl ? "https" : "http"),
+							"://",
+							(ports[0].protocol == 1 ? "127.0.0.1" : "localhost"),
+							":",
+							ports[0].port,
+							"/api/1.0/info/",
+							option.c_str(),
+							".html"
+						).write(Logger::Debug,"civetweb");
+					}
+				}
+
+			}
 		}
 
 
@@ -251,8 +292,36 @@
 
 	bool push_back(HTTP::Handler *handler) override {
 		if(HTTP::Server::push_back(handler)) {
-			cout << "civetweb\tAdding new http handle '" << handler->c_str() << "'" << endl;
-			mg_set_request_handler(ctx, handler->c_str(), customWebHandler, handler);
+
+			string uri{handler->c_str()};
+
+			if(uri[uri.size()-1] == '/') {
+				uri.resize(uri.size()-1);
+			}
+
+			mg_set_request_handler(ctx, uri.c_str(), customWebHandler, handler);
+
+			if(Logger::enabled(Logger::Debug)) {
+
+				struct mg_server_port ports[10];
+				if(mg_get_server_ports(ctx,10,ports) > 0) {
+
+					Logger::String{
+						"New request handler was activated on ",
+						(ports[0].is_ssl ? "https" : "http"),
+						"://",
+						(ports[0].protocol == 1 ? "127.0.0.1" : "localhost"),
+						":",
+						ports[0].port,
+						uri
+					}.write(Logger::Debug,"civetweb");
+
+				} else {
+					Logger::String{"Request handler for '",uri,"' was activated"}.write(Logger::Debug,"civetweb");
+				}
+
+			}
+
 			return true;
 		}
 		return false;

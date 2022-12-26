@@ -68,23 +68,6 @@
 
 		}
 
-		/*
-		if(type == Udjat::MimeType::xml) {
-
-			// Format as XML
-			ss << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
-			ss << "<response>";
-			this->value->xml(ss);
-			ss << "</response>";
-
-		} else {
-
-			// Default, format as JSON.
-			this->value->json(ss);
-
-		}
-		*/
-
 		return ss.str();
 	}
 

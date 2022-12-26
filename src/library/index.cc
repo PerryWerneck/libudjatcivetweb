@@ -24,15 +24,18 @@
 
  #include <config.h>
  #include <udjat/tools/http/connection.h>
+ #include <udjat/tools/http/image.h>
  #include <udjat/tools/intl.h>
  #include <udjat/tools/logger.h>
  #include <udjat/worker.h>
+ #include <udjat/agent/state.h>
  #include <udjat/module.h>
  #include <cstring>
  #include <udjat/tools/configuration.h>
  #include <udjat/tools/application.h>
  #include <udjat/tools/intl.h>
  #include <udjat/tools/string.h>
+ #include <udjat/tools/http/icon.h>
  #include <sstream>
 
  using namespace std;
@@ -64,25 +67,46 @@
 			auto root = Udjat::Abstract::Agent::root();
 			if(root) {
 
-				page	<< "<h2>" << _("Agent info") << "</h2><ul>"
-						<< "<li><a href=\"/api/1.0/agent.html\">" << _("Application agent") << "</a></li>";
+				page	<< "<h2>" << _("Active agents") << "</h2><ul>"
+						<< "<li><a href=\"/api/1.0/agent.html\">";
 
-				for(auto agent : *root) {
-
-					const char *summary = agent->summary();
-
-					if(!(summary && *summary)) {
-						summary = agent->label();
+				{
+					auto icon = std::to_string(Abstract::Agent::root()->state()->level());
+					if(HTTP::Icon{icon}) {
+						page << "<img src=\"icon/" << icon << ".svg\" height=\"16\" style=\"vertical-align:bottom\"/>&nbsp;";
 					}
-
-					if(!(summary && *summary)) {
-						summary = agent->name();
-					}
-
-					page 	<< "<li><a href=\"/api/1.0/agent/" << agent->name() << ".html\">"
-							<< summary
-							<< "</a></li>";
 				}
+
+				page	<< _("Application") << "</a></li>";
+
+				root->for_each([&page,root](Abstract::Agent &agent){
+
+					if(&agent == root.get()) {
+						return;
+					}
+
+					const char *summary = agent.summary();
+
+					if(!(summary && *summary)) {
+						summary = agent.label();
+					}
+
+					if(!(summary && *summary)) {
+						summary = agent.name();
+					}
+
+					page << "<li><a href=\"/api/1.0/agent" << agent.path() << ".html\">";
+
+					{
+						auto icon = std::to_string(agent.state()->level());
+						if(HTTP::Icon{icon}) {
+							page << "<img src=\"icon/" << icon << ".svg\" height=\"16\" style=\"vertical-align:bottom\"/>&nbsp;";
+						}
+					}
+
+					page << agent.name() << "&nbsp;<small>(" << summary << ")</small></a></li>";
+
+				});
 
 				page << "</ul>";
 			}
@@ -141,6 +165,34 @@
 				page.str().c_str(),
 				page.str().size()
 			);
+
+	} else if(!strcasecmp(path,"/favicon.ico")) {
+
+		static const char *names[] = {
+			STRINGIZE_VALUE_OF(PRODUCT_NAME) ".ico",
+			"favicon.ico"
+		};
+
+		debug("Searching for favicon");
+
+		for(size_t ix = 0; ix < N_ELEMENTS(names);ix++) {
+
+			HTTP::Image image{names[ix]};
+			if(image) {
+
+				debug("Found '",image.c_str(),"'");
+
+				return send(
+						HTTP::Get,
+						image.c_str(),
+						false,
+						nullptr,
+						Config::Value<unsigned int>("theme","image-max-age",604800)
+					);
+
+			}
+
+		}
 
 	}
 

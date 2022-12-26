@@ -95,6 +95,8 @@
 			Worker(const char *url = "", const HTTP::Method method = HTTP::Get, const char *payload = "");
 
 			Udjat::String get(const std::function<bool(double current, double total)> &progress) override;
+			int test(const std::function<bool(double current, double total)> &progress) noexcept override;
+
 			bool save(const char *filename, const std::function<bool(double current, double total)> &progress, bool replace) override;
 
 			Protocol::Header & header(const char *name) override;
@@ -121,8 +123,11 @@
  /// @brief Handler for API requests.
  int apiWebHandler(struct mg_connection *conn, void *cbdata);
 
- /// @brief Handler for API requests.
+ /// @brief Handler for icon requests.
  int iconWebHandler(struct mg_connection *conn, void *cbdata);
+
+ /// @brief Handler for image requests.
+ int imageWebHandler(struct mg_connection *conn, void *cbdata);
 
  /// @brief Handler for report requests.
  //int reportWebHandler(struct mg_connection *conn, void *cbdata);

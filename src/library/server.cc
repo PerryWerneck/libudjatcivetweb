@@ -21,6 +21,7 @@
  #include <stdexcept>
  #include <udjat/tools/http/server.h>
  #include <udjat/tools/http/handler.h>
+ #include <udjat/tools/logger.h>
  #include <iostream>
 
  using namespace std;
@@ -59,6 +60,11 @@
 		if(handler->server) {
 			handler->server->remove(handler);
 		}
+
+		if(Logger::enabled(Logger::Trace)) {
+			Logger::String{"Adding handler for '",handler->uri,"'"}.write(Logger::Trace,"civetweb");
+		}
+
 		handler->server = this;
 		return true;
 	}
@@ -70,6 +76,11 @@
 		if(handler->server && handler->server != this) {
 			throw runtime_error("Handler is for another server");
 		}
+
+		if(Logger::enabled(Logger::Trace)) {
+			Logger::String{"Removing handler for '",handler->uri,"'"}.write(Logger::Trace,"civetweb");
+		}
+
 		handler->server = nullptr;
 		return true;
 	}

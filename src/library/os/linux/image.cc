@@ -18,7 +18,7 @@
  */
 
  #include <config.h>
- #include <udjat/tools/http/icon.h>
+ #include <udjat/tools/http/image.h>	
  #include <udjat/tools/configuration.h>
  #include <udjat/tools/string.h>
  #include <udjat/tools/file.h>
@@ -33,16 +33,13 @@
 
 	namespace HTTP {
 
-		Icon::Icon(const char *n) {
+		Image::Image(const char *n) {
 
 			static const char * defpaths =
-					"/usr/share/icons/" STRINGIZE_VALUE_OF(PRODUCT_NAME) "/," \
-					"/usr/share/icons/Adwaita/," \
-					"/usr/share/icons/gnome/," \
-					"/usr/share/icons/hicolor/," \
-					"/usr/share/icons/HighContrast/";
+					"/usr/share/pixmaps/" STRINGIZE_VALUE_OF(PRODUCT_NAME) "/," \
+					"/usr/share/pixmaps/distribution-logos/";
 
-			Config::Value<std::vector<string>> paths("theme","iconpath",defpaths);
+			Config::Value<std::vector<string>> paths("theme","imgpath",defpaths);
 
 			string name{n};
 			if(!strchr(n,'.')) {
@@ -73,7 +70,7 @@
 						return;
 					}
 				} catch(const std::exception &e) {
-					cout << "icon\t" << e.what() << endl;
+					cout << "image\t" << e.what() << endl;
 				}
 
 			}

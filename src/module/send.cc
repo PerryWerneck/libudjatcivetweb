@@ -20,8 +20,11 @@
  #include "private.h"
  #include <sys/types.h>
  #include <sys/stat.h>
+ #include <udjat/version.h>
  #include <udjat/tools/http/timestamp.h>
+ #include <udjat/tools/http/mimetype.h>
  #include <udjat/tools/file.h>
+ #include <udjat/tools/logger.h>
  #include <sstream>
 
  using namespace std;
@@ -68,6 +71,20 @@
 
 			if(mime_type && *mime_type) {
 				mg_response_header_add(conn, "Content-Type", mime_type, -1);
+			} else {
+
+				const char *ext = strrchr(name,'.');
+				if(ext) {
+					ext++;
+					auto mtype = MimeTypeFactory(ext);
+
+					debug("Detected mime-type is '",mtype,"'");
+					if(mtype != MimeType::custom) {
+						mg_response_header_add(conn, "Content-Type", std::to_string(mtype), -1);
+					}
+
+				}
+
 			}
 
 			mg_response_header_send(conn);
@@ -131,6 +148,7 @@
 						<< basename
 						<< "</h1><hr /><pre>";
 
+#if UDJAT_CORE_BUILD < 22122217
 			File::Path::for_each(filename.c_str(),[&response](const char *name, const File::Stat &st) {
 
 				name = strrchr(name,'/');
@@ -153,6 +171,26 @@
 
 				return true;
 			});
+#else
+			File::Path{filename}.for_each([&response](const File::Path &file) {
+
+				const char *name = strrchr(file.c_str(),'/');
+				if(!name) {
+					return true;
+				}
+				name++;
+
+				response << "<a href=\"" << name;
+				if(file.dir()) {
+					response << '/';
+				}
+				response	<< "\">"
+							<< name
+							<< "</a>" << endl;
+
+				return false;
+			});
+#endif // UDJAT_CORE_BUILD
 
 			response << "</pre><hr /></body></html>";
 

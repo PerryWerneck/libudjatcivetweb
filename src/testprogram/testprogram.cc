@@ -29,10 +29,11 @@
  #include <udjat/civetweb.h>
  #include <udjat/tools/threadpool.h>
  #include <udjat/tools/mainloop.h>
- #include <udjat/tools/http/icons.h>
+ #include <udjat/tools/http/icon.h>
  #include <udjat/tools/http/handler.h>
  #include <udjat/tools/http/connection.h>
  #include <udjat/tools/http/server.h>
+ #include <udjat/tools/application.h>
 
  using namespace std;
  using namespace Udjat;
@@ -96,23 +97,8 @@ static void test_httpd() {
 
 	static Factory factory;
 
-	Udjat::reconfigure("./test.xml",true);
+	Udjat::Application::setup("./test.xml",true);
 	auto agent = Abstract::Agent::root();
-
-	debug("http://localhost:8989");
-
-	if(Module::find("information")) {
-		debug("http://localhost:8989/api/1.0/info/modules.xml");
-		debug("http://localhost:8989/api/1.0/info/workers.xml");
-		debug("http://localhost:8989/api/1.0/info/factories.xml");
-	}
-
-	debug("http://localhost:8989/icon/user-info-symbolic");
-
-	for(auto agent : *agent) {
-		debug("http://localhost:8989/api/1.0/agent/", agent->name(), ".xml");
-		debug("http://localhost:8989/api/1.0/report/agent/", agent->name(), ".xml");
-	}
 
 	class HTest : public Udjat::HTTP::Handler {
 	public:
@@ -155,6 +141,11 @@ void test_http_get() {
 
 	}
 
+}
+
+void test_http_test() {
+
+	cout << "HTTP Test result: " << URL("http://localhost").test() << endl;
 
 }
 
@@ -190,6 +181,7 @@ int main(int argc, char **argv) {
 
 	test_httpd();
 	// test_http_get();
+	// test_http_test();
 	// test_report();
 
 	// cout << HTTP::Icon("document-send-symbolic") << endl;

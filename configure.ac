@@ -75,6 +75,7 @@ case "$host" in
 		AC_SUBST(SONAME,libudjathttpd.so.$app_vrs_major.$app_vrs_minor)
 		AC_CONFIG_FILES(sdk/linux/dynamic.pc)
 		AC_CONFIG_FILES(sdk/linux/static.pc)
+		AC_DEFINE_UNQUOTED(HTTPDOCDIR, "/srv/www/htdocs", [The HTTP document root])
 
 esac
 
@@ -116,7 +117,7 @@ dnl ---------------------------------------------------------------------------
 dnl Check for libintl
 dnl ---------------------------------------------------------------------------
 
-AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE,"libudjatsysinfo-$app_vrs_major.$app_vrs_minor",[The gettext package name.])
+AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE,"libudjathttpd-$app_vrs_major.$app_vrs_minor",[The gettext package name.])
 AC_SUBST(GETTEXT_PACKAGE,"libudjathttpd-$app_vrs_major.$app_vrs_minor")
 
 AC_PATH_TOOL([XGETTEXT], [xgettext], [true])

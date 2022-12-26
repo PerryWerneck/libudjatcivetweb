@@ -25,6 +25,7 @@
  #include <udjat/tools/http/handler.h>
  #include <udjat/tools/http/request.h>
  #include <udjat/tools/http/mimetype.h>
+ #include <udjat/tools/logger.h>
 
  int customWebHandler(struct mg_connection *conn, void *cbdata) {
 
@@ -35,6 +36,8 @@
 	const struct mg_request_info *ri = connection.request_info();
 	MimeType mimetype{MimeType::custom};
 	string rsp;
+
+	debug("Using custom web handler for '",ri->local_uri,"' request");
 
 	try {
 
@@ -55,18 +58,22 @@
 
 	} catch(const HTTP::Exception &error) {
 
+		cerr << "civetweb\t" << error.what() << endl;
 		return connection.response(error);
 
 	} catch(const system_error &error) {
 
+		cerr << "civetweb\t" << error.what() << endl;
 		return connection.response(error);
 
 	} catch(const exception &error) {
 
+		cerr << "civetweb\t" << error.what() << endl;
 		return connection.response(error);
 
 	} catch(...) {
 
+		cerr << "civetweb\tUnexpected error" << endl;
 		connection.failed(500, "Unexpected error");
 		return 500;
 

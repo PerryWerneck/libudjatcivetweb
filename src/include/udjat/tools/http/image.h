@@ -26,18 +26,22 @@
 
 	namespace HTTP {
 
-		class UDJAT_API Icon : public std::string {
-		private:
-			class Controller;
-			friend class Controller;
-
+		class UDJAT_API Image : public std::string {
 		public:
 
 			/// @param name Icon name.
-			Icon(const char *name);
+			Image(const char *name);
 
-			/// @brief Get cached icon instance, load it if necessary.
-			static Icon getInstance(const char *name);
+			Image(const std::string &name) : Image(name.c_str()) {
+			}
+
+			template <typename T>
+			Image(const T &name) : Image(std::to_string(name)) {
+			}
+
+			inline operator bool() const {
+				return !empty();
+			}
 
 		};
 	}

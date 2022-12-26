@@ -2,6 +2,7 @@
 #---[ Library configuration ]------------------------------------------------------------
 
 PACKAGE_NAME=@PACKAGE_NAME@
+LIBRARY_NAME="httpd"
 SONAME=@SONAME@
 
 LIBRARY_SOURCES= \
@@ -10,7 +11,8 @@ LIBRARY_SOURCES= \
 	$(wildcard src/library/layout/*.cc)
 
 MODULE_SOURCES= \
-	$(wildcard src/module/*.cc)
+	$(wildcard src/module/*.cc) \
+	$(wildcard src/module/worker/*.cc)
 
 TEST_SOURCES= \
 	$(wildcard src/testprogram/*.cc)
@@ -193,7 +195,7 @@ $(BINRLS)/$(SONAME): \
 		$^ \
 		$(LIBS)
 
-$(BINRLS)/libudjathttpd.a: \
+$(BINRLS)/libudjat$(LIBRARY_NAME).a: \
 	$(foreach SRC, $(basename $(LIBRARY_SOURCES)), $(OBJRLS)/$(SRC).o)
 
 	@$(MKDIR) $(@D)
@@ -274,30 +276,30 @@ install-dev: \
 
 	@$(INSTALL_DATA) \
 		sdk/@OSNAME@/dynamic.pc \
-		$(DESTDIR)$(libdir)/pkgconfig/udjat-httpd.pc
+		$(DESTDIR)$(libdir)/pkgconfig/udjat-$(LIBRARY_NAME).pc
 
 	@$(INSTALL_DATA) \
 		sdk/@OSNAME@/static.pc \
-		$(DESTDIR)$(libdir)/pkgconfig/udjat-httpd-static.pc
+		$(DESTDIR)$(libdir)/pkgconfig/udjat-$(LIBRARY_NAME)-static.pc
 
 install-linux-static: \
-	$(BINRLS)/libudjathttpd.a
+	$(BINRLS)/libudjat$(LIBRARY_NAME).a
 
 	# Install static library
 	@$(MKDIR) $(DESTDIR)$(libdir)
 	@$(INSTALL_DATA) \
-		$(BINRLS)/libudjathttpd.a \
-		$(DESTDIR)$(libdir)/libudjathttpd.static.a
+		$(BINRLS)/libudjat$(LIBRARY_NAME).a \
+		$(DESTDIR)$(libdir)/libudjat$(LIBRARY_NAME).static.a
 
 install-windows-static: \
-	$(BINRLS)/libudjathttpd.a
+	$(BINRLS)/libudjat$(LIBRARY_NAME).a
 
 	@$(MKDIR) \
 		$(DESTDIR)$(libdir)
 
 	@$(INSTALL_PROGRAM) \
-		$(BINRLS)/libudjathttpd.a \
-		$(DESTDIR)$(libdir)/libudjathttpd.a
+		$(BINRLS)/libudjat$(LIBRARY_NAME).a \
+		$(DESTDIR)$(libdir)/libudjat$(LIBRARY_NAME).a
 
 install-linux-dev:
 
@@ -307,7 +309,7 @@ install-linux-dev:
 
 	@$(LN_S) \
 		$(SONAME) \
-		$(DESTDIR)$(libdir)/libudjathttpd.so
+		$(DESTDIR)$(libdir)/libudjat$(LIBRARY_NAME).so
 
 install-windows-dev:
 
@@ -315,9 +317,9 @@ install-windows-dev:
 		$(DESTDIR)$(libdir)
 
 	@$(DLLTOOL) \
-		--input-def $(BINRLS)/udjathttpd.def \
+		--input-def $(BINRLS)/udjat$(LIBRARY_NAME).def \
 		--dllname @SONAME@ \
-		--output-lib $(DESTDIR)$(libdir)/libudjathttpd.dll.a
+		--output-lib $(DESTDIR)$(libdir)/libudjat$(LIBRARY_NAME).dll.a
 		
 	
 #---[ Uninstall Targets ]----------------------------------------------------------------
@@ -337,6 +339,7 @@ Debug: \
 
 $(BINDBG)/udjat@EXEEXT@: \
 	$(BINDBG)/$(PACKAGE_NAME)@LIBEXT@ \
+	$(BINDBG)/$(SONAME) \
 	$(foreach SRC, $(basename $(TEST_SOURCES)), $(OBJDBG)/$(SRC).o)
 
 	@$(MKDIR) $(@D)
@@ -414,8 +417,7 @@ clean: \
 	cleanDebug \
 	cleanRelease
 
-
--include $(foreach SRC, $(basename $(LIBRARY_SOURCES)), $(OBJDBG)/$(SRC).d)
--include $(foreach SRC, $(basename $(LIBRARY_SOURCES)), $(OBJRLS)/$(SRC).d)
+-include $(foreach SRC, $(basename $(LIBRARY_SOURCES) $(MODULE_SOURCES) $(TEST_SOURCES)), $(OBJDBG)/$(SRC).d)
+-include $(foreach SRC, $(basename $(LIBRARY_SOURCES) $(MODULE_SOURCES) $(TEST_SOURCES)), $(OBJRLS)/$(SRC).d)
 
 

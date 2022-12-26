@@ -67,7 +67,13 @@
 		}
 	}
 
-	clog << "civetweb\t" << request_info->remote_addr << " " << status << " " << message << " (" << mimetype << ")" << endl;
+	// clog << "civetweb\t" << request_info->remote_addr << " " << status << " " << message << " (" << mimetype << ")" << endl;
+	Logger::String{
+		request_info->remote_addr," ",
+		request_info->request_method," ",
+		request_info->local_uri," ",
+		status," ",message," (",mimetype,")"
+	}.write(Logger::Trace,"civetweb");
 
 	if(Config::Value<bool>("httpd","error-templates",true)) {
 
@@ -86,7 +92,9 @@
 			} else if(mimetype == Udjat::json) {
 				response = "{\"error\":{\"application\":\"${application}\",\"code\":${code},\"message\":\"${message}\"}}";
 			} else {
-				cout << "civetweb\tNo access to '" << page << "', using default response" << endl;
+				Logger::String{
+					"No access to '",page.c_str(),"', using default response"
+				}.write(Logger::Debug,"civetweb");
 			}
 
 			if(!response.empty()) {
