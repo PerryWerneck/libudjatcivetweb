@@ -85,7 +85,7 @@
 					}
 
 					buffer[info->content_length] = 0;
-					response = buffer;
+					response.assign(buffer);
 					delete[] buffer;
 
 					progress((double) info->content_length, (double) info->content_length);
