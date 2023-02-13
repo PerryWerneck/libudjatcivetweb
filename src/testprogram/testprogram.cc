@@ -39,7 +39,7 @@
 		srand(time(NULL));
 	}
 
-	std::shared_ptr<Abstract::Agent> AgentFactory(const Abstract::Object &parent, const pugi::xml_node &node) const override {
+	std::shared_ptr<Abstract::Agent> AgentFactory(const Abstract::Object &, const pugi::xml_node &node) const override {
 
 		class RandomAgent : public Agent<unsigned int> {
 		private:
