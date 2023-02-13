@@ -134,7 +134,7 @@
 
 		// Application information
 		{
-			auto module = Module::find("information");
+			auto module = Udjat::Module::find("information");
 			if(module) {
 
 				auto options = (*module)["options"];
