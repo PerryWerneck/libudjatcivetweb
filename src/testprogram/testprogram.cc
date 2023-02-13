@@ -82,12 +82,10 @@
 
  int main(int argc, char **argv) {
 
-	Logger::verbosity(9);
+ 	Logger::verbosity(9);
 	Logger::redirect();
 
-	RandomFactory factory;
-
-	udjat_module_init();
+ 	udjat_module_init();
 	auto rc = Application{}.run(argc,argv,"./test.xml");
 
 	debug("Application exits with rc=",rc);

@@ -265,7 +265,7 @@
 					"/api/1.0/agent.html"
 				).write(Logger::Debug,"civetweb");
 
-				auto module = Module::find("information");
+				auto module = Udjat::Module::find("information");
 				String options;
 				if(module && module->getProperty("options",options)) {
 					for(const std::string &option : options.split(",")) {
