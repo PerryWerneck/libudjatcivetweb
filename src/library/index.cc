@@ -63,7 +63,8 @@
 		page << "<h1>" << Application::Name() << "</h1>";
 
 		// Agent information
-		{
+		try {
+
 			auto root = Udjat::Abstract::Agent::root();
 			if(root) {
 
@@ -110,6 +111,10 @@
 
 				page << "</ul>";
 			}
+
+		} catch(const std::exception &e) {
+
+			cerr << "civetweb\tCant get agent list: " << e.what() << endl;
 
 		}
 
