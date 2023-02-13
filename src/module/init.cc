@@ -68,7 +68,7 @@
  };
 
 
- class Module : public Udjat::Module, public MainLoop::Service, public HTTP::Server {
+ class Module : public Udjat::Module, public Service, public HTTP::Server {
  private:
 	struct mg_context *ctx = nullptr;
 
@@ -163,7 +163,7 @@
 
  public:
 
- 	Module(const pugi::xml_node &node) : Udjat::Module("httpd",udjat_module_info), MainLoop::Service(udjat_module_info), ctx(NULL) {
+ 	Module(const pugi::xml_node &node) : Udjat::Module("httpd",udjat_module_info), Service(udjat_module_info), ctx(NULL) {
 
 		unsigned int init = 0;
 
@@ -201,7 +201,7 @@
 
  	}
 
- 	Module() : Udjat::Module("httpd",udjat_module_info), MainLoop::Service(udjat_module_info), ctx(NULL) {
+ 	Module() : Udjat::Module("httpd",udjat_module_info), Service(udjat_module_info), ctx(NULL) {
 
  		unsigned int init = 0;
 

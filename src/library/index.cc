@@ -124,6 +124,9 @@
 						<< ".html\">"
 						<< worker.c_str()
 						<< "</a>";
+
+				return false;
+
 			});
 
 			page << "</ul>";
