@@ -63,7 +63,8 @@
 		page << "<h1>" << Application::Name() << "</h1>";
 
 		// Agent information
-		{
+		try {
+
 			auto root = Udjat::Abstract::Agent::root();
 			if(root) {
 
@@ -111,6 +112,10 @@
 				page << "</ul>";
 			}
 
+		} catch(const std::exception &e) {
+
+			cerr << "civetweb\tCant get agent list: " << e.what() << endl;
+
 		}
 
 		// Workers
@@ -124,6 +129,9 @@
 						<< ".html\">"
 						<< worker.c_str()
 						<< "</a>";
+
+				return false;
+
 			});
 
 			page << "</ul>";
@@ -131,7 +139,7 @@
 
 		// Application information
 		{
-			auto module = Module::find("information");
+			auto module = Udjat::Module::find("information");
 			if(module) {
 
 				auto options = (*module)["options"];

@@ -22,22 +22,46 @@
   *
   */
 
+ #include <config.h>
+ #include <udjat/defs.h>
  #include "private.h"
  #include <udjat/tools/intl.h>
  #include <udjat/tools/logger.h>
- #include <udjat/worker.h>
- #include <udjat/module.h>
- #include <cstring>
- #include <udjat/tools/configuration.h>
- #include <udjat/tools/application.h>
- #include <udjat/tools/intl.h>
- #include <udjat/tools/string.h>
- #include <sstream>
+ #include <udjat/tools/http/exception.h>
 
  using namespace std;
  using namespace Udjat;
 
  int rootWebHandler(struct mg_connection *conn, void UDJAT_UNUSED(*cbdata)) {
- 	CivetWeb::Connection connection{conn};
-	return connection.info(connection.local_uri());
+
+	CivetWeb::Connection connection{conn};
+
+ 	try {
+
+		return connection.info(connection.local_uri());
+
+	} catch(const HTTP::Exception &error) {
+
+		cerr << "civetweb\t" << error.what() << endl;
+		return connection.response(error);
+
+	} catch(const system_error &error) {
+
+		cerr << "civetweb\t" << error.what() << endl;
+		return connection.response(error);
+
+	} catch(const exception &error) {
+
+		cerr << "civetweb\t" << error.what() << endl;
+		return connection.response(error);
+
+	} catch(...) {
+
+		cerr << "civetweb\tUnexpected error" << endl;
+		connection.failed(500, "Unexpected error");
+		return 500;
+
+	}
+
+	return 500;
  }

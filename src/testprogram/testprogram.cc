@@ -17,180 +17,79 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+ #include <config.h>
+ #include <udjat/tools/logger.h>
+ #include <udjat/tools/application.h>
+ #include <udjat/moduleinfo.h>
  #include <udjat/module.h>
  #include <udjat/tools/logger.h>
- #include <udjat/tools/http/report.h>
- #include <udjat/worker.h>
- #include <udjat/tools/url.h>
  #include <udjat/factory.h>
- #include <pugixml.hpp>
- #include <unistd.h>
- #include <civetweb.h>
- #include <udjat/civetweb.h>
- #include <udjat/tools/threadpool.h>
- #include <udjat/tools/mainloop.h>
- #include <udjat/tools/http/icon.h>
- #include <udjat/tools/http/handler.h>
- #include <udjat/tools/http/connection.h>
- #include <udjat/tools/http/server.h>
- #include <udjat/tools/application.h>
 
  using namespace std;
  using namespace Udjat;
 
- #pragma GCC diagnostic ignored "-Wunused-parameter"
- #pragma GCC diagnostic ignored "-Wunused-function"
-
 //---[ Implement ]------------------------------------------------------------------------------------------
 
-static void test_httpd() {
+ static const ModuleInfo moduleinfo{"civetweb-tester"};
 
-	static const ModuleInfo moduleinfo{"civetweb-tester"};
+ class RandomFactory : public Udjat::Factory {
+ public:
+	RandomFactory() : Udjat::Factory("random",moduleinfo) {
+		cout << "random agent factory was created" << endl;
+		srand(time(NULL));
+	}
 
-	class Factory : public Udjat::Factory {
-	public:
-		Factory() : Udjat::Factory("random",moduleinfo) {
-			cout << "random agent factory was created" << endl;
-			srand(time(NULL));
-		}
+	std::shared_ptr<Abstract::Agent> AgentFactory(const Abstract::Object &, const pugi::xml_node &node) const override {
 
-		std::shared_ptr<Abstract::Agent> AgentFactory(const Abstract::Object &parent, const pugi::xml_node &node) const override {
+		class RandomAgent : public Agent<unsigned int> {
+		private:
+			unsigned int limit = 5;
 
-			class RandomAgent : public Agent<unsigned int> {
-			private:
-				unsigned int limit = 5;
-
-			public:
-				RandomAgent(const pugi::xml_node &node) : Agent<unsigned int>(node) {
-					cout << "Creating random Agent" << endl;
-				}
-
-				bool refresh() override {
-					set( ((unsigned int) rand()) % limit);
-					return true;
-				}
-
-				void get(const Request UDJAT_UNUSED(&request), Report &report) {
-
-					report.start("sample","row","a","b","c",nullptr);
-
-					for(size_t row = 0; row < 3; row++) {
-						string r{"r"};
-						r += std::to_string(row);
-
-						report << (string{"["} +r + "]");
-						for(size_t col = 0; col < 3;col++) {
-							report << (r + "." + std::to_string(col) + "." + std::to_string(((unsigned int) rand()) % limit));
-						}
-					}
-
-
-				}
-
-			};
-
-			return make_shared<RandomAgent>(node);
-
-		}
-
-	};
-
-	static Factory factory;
-
-	Udjat::Application::setup("./test.xml",true);
-	auto agent = Abstract::Agent::root();
-
-	class HTest : public Udjat::HTTP::Handler {
-	public:
-		HTest() : Handler("/test/") {
-		}
-
-		int handle(const Udjat::HTTP::Connection &conn, const Udjat::HTTP::Request &request, const Udjat::MimeType mimetype) override {
-			// return conn.failed(404,"Test is ok but there's no data");
-			const char *ptr = strchr(request.getPath(),'/');
-			if(!ptr) {
-				throw runtime_error("Invalid");
+		public:
+			RandomAgent(const pugi::xml_node &node) : Agent<unsigned int>(node) {
+				cout << "Creating random Agent" << endl;
 			}
-			return conn.send(request.as_type(),ptr+1,true);
-		}
-	};
 
-	/*
-	HTest test;
-	if(HTTP::Server::getInstance().push_back(&test)) {
-		cout << "http://localhost:8989/test/test.xml" << endl;
+			bool refresh() override {
+				set( ((unsigned int) rand()) % limit);
+				return true;
+			}
+
+			void get(const Request UDJAT_UNUSED(&request), Report &report) {
+
+				report.start("sample","row","a","b","c",nullptr);
+
+				for(size_t row = 0; row < 3; row++) {
+					string r{"r"};
+					r += std::to_string(row);
+
+					report << (string{"["} +r + "]");
+					for(size_t col = 0; col < 3;col++) {
+						report << (r + "." + std::to_string(col) + "." + std::to_string(((unsigned int) rand()) % limit));
+					}
+				}
+
+
+			}
+
+		};
+
+		return make_shared<RandomAgent>(node);
+
 	}
-	*/
 
-	Udjat::MainLoop::getInstance().run();
+ };
 
-	agent->deinit();
+ int main(int argc, char **argv) {
 
-}
-
-void test_http_get() {
-
-	try {
-
-		Udjat::URL url("http://localhost");
-		cout << "Response for " << url << ": " << endl << url.get() << endl;
-
-	} catch(const std::exception &e) {
-
-		cerr << "Exception: " << e.what() << endl;
-
-	}
-
-}
-
-void test_http_test() {
-
-	cout << "HTTP Test result: " << URL("http://localhost").test() << endl;
-
-}
-
-static void test_report() {
-
-	HTTP::Report report{"http://sample",MimeType::html};
-
-	report.start("sample","v1","v2","v3",nullptr);
-
-	report 	<< 1
-			<< 2
-			<< 3
-			<< "4"
-			<< "5"
-			<< "6";
-
-	cout << report.to_string() << endl;
-}
-
-int main(int argc, char **argv) {
-
+ 	Logger::verbosity(9);
 	Logger::redirect();
 
-	setlocale( LC_ALL, "" );
+ 	udjat_module_init();
+	auto rc = Application{}.run(argc,argv,"./test.xml");
 
-	Module * module = udjat_module_init();
+	debug("Application exits with rc=",rc);
 
-	/*
-	if(URL("http://127.0.0.1/~perry/test.xml").get("/tmp/localhost.html")) {
-		cout << endl << endl << "File was updated!" << endl << endl;
-	}
-	*/
+	return rc;
 
-	test_httpd();
-	// test_http_get();
-	// test_http_test();
-	// test_report();
-
-	// cout << HTTP::Icon("document-send-symbolic") << endl;
-	// cout << HTTP::Icon("dialog-password-symbolic") << endl;
-	// cout << HTTP::Icon("image-missing") << endl;
-
-	delete module;
-
-	Module::unload();
-
-	return 0;
-}
+ }

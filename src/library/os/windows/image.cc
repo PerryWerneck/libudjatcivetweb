@@ -18,11 +18,15 @@
  */
 
  #include <config.h>
- #include <udjat/tools/http/icon.h>
+ #include <udjat/tools/http/image.h>
  #include <udjat/tools/configuration.h>
  #include <udjat/tools/string.h>
+ #include <udjat/tools/file.h>
+ #include <udjat/tools/logger.h>
+ #include <unistd.h>
+ #include <dirent.h>
+ #include <udjat/tools/configuration.h>
  #include <udjat/tools/application.h>
- #include <fcntl.h>
 
  using namespace std;
 
@@ -30,18 +34,24 @@
 
 	namespace HTTP {
 
-		Icon::Icon(const char *name) {
+		Image::Image(const char *name) {
 
-			Application::DataDir file{"icons"};
+			Application::DataDir file{"images"};
 
 			if(file.find((string{name} + ".svg").c_str(),true)) {
 				assign(file);
 				return;
 			}
 
-			throw system_error(ENOENT,system_category(),string{"Can't find icon '"} + name + "'");
+			if(file.find((string{name} + ".png").c_str(),true)) {
+				assign(file);
+				return;
+			}
+
+			throw system_error(ENOENT,system_category(),string{"Can't find image '"} + name + "'");
 
 		}
+
 
 	}
 

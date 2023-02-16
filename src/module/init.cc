@@ -68,7 +68,7 @@
  };
 
 
- class Module : public Udjat::Module, public MainLoop::Service, public HTTP::Server {
+ class Module : public Udjat::Module, public Service, public HTTP::Server {
  private:
 	struct mg_context *ctx = nullptr;
 
@@ -81,6 +81,7 @@
 		mg_set_request_handler(ctx, "/api/", apiWebHandler, 0);
 		mg_set_request_handler(ctx, "/icon/", iconWebHandler, 0);
 		mg_set_request_handler(ctx, "/images/", imageWebHandler, 0);
+		mg_set_request_handler(ctx, "/state", stateWebHandler, 0);
 //		mg_set_request_handler(ctx, "/report/", reportWebHandler, 0);
 		mg_set_request_handler(ctx, "/swagger.json", swaggerWebHandler, 0);
 
@@ -163,7 +164,7 @@
 
  public:
 
- 	Module(const pugi::xml_node &node) : Udjat::Module("httpd",udjat_module_info), MainLoop::Service(udjat_module_info), ctx(NULL) {
+ 	Module(const pugi::xml_node &node) : Udjat::Module("httpd",udjat_module_info), Service(udjat_module_info), ctx(NULL) {
 
 		unsigned int init = 0;
 
@@ -201,7 +202,7 @@
 
  	}
 
- 	Module() : Udjat::Module("httpd",udjat_module_info), MainLoop::Service(udjat_module_info), ctx(NULL) {
+ 	Module() : Udjat::Module("httpd",udjat_module_info), Service(udjat_module_info), ctx(NULL) {
 
  		unsigned int init = 0;
 
@@ -265,7 +266,7 @@
 					"/api/1.0/agent.html"
 				).write(Logger::Debug,"civetweb");
 
-				auto module = Module::find("information");
+				auto module = Udjat::Module::find("information");
 				String options;
 				if(module && module->getProperty("options",options)) {
 					for(const std::string &option : options.split(",")) {
