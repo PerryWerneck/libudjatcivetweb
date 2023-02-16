@@ -129,6 +129,9 @@
  /// @brief Handler for image requests.
  int imageWebHandler(struct mg_connection *conn, void *cbdata);
 
+ /// @brief Handler for state requests.
+ int stateWebHandler(struct mg_connection *conn, void *cbdata);
+
  /// @brief Handler for report requests.
  //int reportWebHandler(struct mg_connection *conn, void *cbdata);
 

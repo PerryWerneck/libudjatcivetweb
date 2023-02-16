@@ -82,6 +82,7 @@
 		<Unit filename="src/module/protocol.cc" />
 		<Unit filename="src/module/report.cc" />
 		<Unit filename="src/module/send.cc" />
+		<Unit filename="src/module/states.cc" />
 		<Unit filename="src/module/swagger.cc" />
 		<Unit filename="src/module/worker/get.cc" />
 		<Unit filename="src/module/worker/test.cc" />
