@@ -60,7 +60,7 @@
 
 		HTTP::Response response{mimetype};
 		if(!Abstract::State::getProperties(uri.c_str(), response)) {
-			mg_send_http_error(conn, 404, strerror(ENOENT));
+			mg_send_http_error(conn, 404, "Not found");
 		}
 
 		string rsp{response.to_string()};
@@ -90,7 +90,7 @@
 
 	}
 
-	mg_send_http_error(conn, 404, strerror(ENOENT));
+	mg_send_http_error(conn, 404, "Not found");
 	return 404;
 
  }
