@@ -10,7 +10,7 @@ source=()
 #  git describe --long --tags --abbrev=7 | sed 's/\([^-]*-g\)/r\1/;s/-/./g'
 #}
 
-pkgver=1.1
+pkgver=1.0
 pkgrel=1
 pkgdesc="HTTP client module for udjat"
 url="https://github.com/PerryWerneck/${_realname}"
