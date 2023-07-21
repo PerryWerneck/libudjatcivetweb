@@ -85,8 +85,10 @@
 		class Worker : public Udjat::Protocol::Worker {
 		private:
 
-			/// @brief Request headers.
-			std::list<Header> headers;
+			struct {
+				std::list<Header> request;
+				std::list<Header> response;
+			} headers;
 
 			/// @brief Connect to server, send request.
 			struct mg_connection * connect();
@@ -99,7 +101,8 @@
 
 			bool save(const char *filename, const std::function<bool(double current, double total)> &progress, bool replace) override;
 
-			Protocol::Header & header(const char *name) override;
+			Protocol::Header & request(const char *name) override;
+			const Protocol::Header & response(const char *name) override;
 
 		};
 
