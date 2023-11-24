@@ -37,7 +37,7 @@
 	HTTP::Request request(path,method);
 
 	// Run report.
-	if(!Worker::work(request.getMethod(),request,response)) {
+	if(!Worker::work(path,request,response)) {
 		throw HTTP::Exception(405, connection.request_uri(), "Method Not Allowed");
 	}
 
