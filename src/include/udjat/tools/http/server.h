@@ -23,7 +23,6 @@
  #include <udjat/tools/value.h>
  #include <udjat/tools/http/connection.h>
  #include <udjat/tools/http/mimetype.h>
- #include <udjat/tools/http/request.h>
  #include <map>
 
  namespace Udjat {

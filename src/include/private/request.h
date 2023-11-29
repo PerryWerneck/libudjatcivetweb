@@ -21,44 +21,26 @@
 
  #include <udjat/defs.h>
  #include <udjat/tools/request.h>
- #include <udjat/tools/http/value.h>
+ #include <civetweb.h>
 
  namespace Udjat {
 
-	namespace HTTP {
+	namespace CivetWeb {
 
-		/*
-		class UDJAT_API Request : public Udjat::Request {
-		public:
-			Request(const char *method) = default;
-
-
-		};
-		*/
-
-		class UDJAT_API Response : public Udjat::Response {
+		class UDJAT_PRIVATE Request : public Udjat::Request {
 		private:
-			Udjat::HTTP::Value *value;
+			const struct mg_request_info *info;
 
 		public:
-			Response(Udjat::MimeType type);
-			virtual ~Response();
+			Request(const struct mg_request_info *i);
 
-			bool isNull() const override;
+			const char *c_str() const noexcept override;
 
-			std::string to_string() const;
+			String getProperty(const char *name, const char *def) const override;
 
-			Udjat::Value & operator[](const char *name) override;
-
-			Udjat::Value & append(const Type type) override;
-
-			Udjat::Value & reset(const Type type) override;
-
-			Udjat::Value & set(const Value &value) override;
-
-			Udjat::Value & set(const char *value, const Type type) override;
 
 		};
+
 
 	}
 

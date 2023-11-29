@@ -28,8 +28,9 @@
  #include <udjat/tools/intl.h>
  #include <udjat/tools/logger.h>
  #include <udjat/tools/http/exception.h>
- #include <udjat/tools/http/request.h>
+ #include <udjat/tools/http/response.h>
  #include <udjat/tools/configuration.h>
+ #include <private/request.h>
 
  using namespace std;
  using namespace Udjat;
@@ -38,66 +39,16 @@
 
 	CivetWeb::Connection connection{conn};
 
-	class Request : public Udjat::Request {
-	private:
-		const struct mg_request_info *info;
-	public:
-		Request(const struct mg_request_info *i) : Udjat::Request{i->request_method}, info{i} {
-
-			for(int header = 0; header < info->num_headers; header++) {
-				debug(info->http_headers[header].name,"=",info->http_headers[header].value);
-				if(!strcasecmp(info->http_headers[header].name,"Accept")) {
-
-					debug("Getting mime-type from header");
-
-					for(String &value : String{info->http_headers[header].value}.split(",")) {
-
-						auto mime = MimeTypeFactory(value.c_str(),this->type);
-						debug("mime: '",value.c_str(),"' (",MimeTypeFactory(value.c_str(),this->type),")");
-
-						if(mime != this->type) {
-							this->type = mime;
-							break;
-						}
-
-					}
-
-				}
-			}
-
-			rewind(Config::Value<bool>{"civetweb","require_versioned_path",false}.get());
-			debug("Local-path is '",c_str(),"'");
-		}
-
-  		const char *c_str() const noexcept override {
-			return info->local_uri;
-  		}
-
- 		String getProperty(const char *name, const char *def) const {
-
-			// TODO: Check parameters.
-
-			// Check for 'name' on http headers.
-			for(int header = 0; header < info->num_headers; header++) {
-				if(!strcasecmp(info->http_headers[header].name,name)) {
-					return info->http_headers[header].value;
-				}
-			}
-
-			return Udjat::Request::getProperty(name,def);
- 		}
-
-
-	};
-
 	debug("Request path is '",mg_get_request_info(conn)->local_uri,"'");
 
  	try {
 
-		Request request{mg_get_request_info(conn)};
+		//
+		// Execute API call
+		//
+		CivetWeb::Request request{mg_get_request_info(conn)};
 		HTTP::Response response{(MimeType) request};
 		request.exec(response);
-
 		string rsp{response.to_string()};
 		return connection.success(to_string((MimeType) request),rsp.c_str(),rsp.size());
 

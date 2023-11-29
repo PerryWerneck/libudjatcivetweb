@@ -258,7 +258,7 @@
 					(ports[0].protocol == 1 ? "127.0.0.1" : "localhost"),
 					":",
 					ports[0].port,
-					"/api/1.0/agent.html"
+					"/api/1.0/agent"
 				).write(Logger::Debug,"civetweb");
 
 				auto module = Udjat::Module::find("information");
@@ -273,8 +273,7 @@
 							":",
 							ports[0].port,
 							"/api/1.0/info/",
-							option.c_str(),
-							".html"
+							option.c_str()
 						).write(Logger::Debug,"civetweb");
 					}
 				}

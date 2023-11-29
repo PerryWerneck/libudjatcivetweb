@@ -20,9 +20,9 @@
  #pragma once
 
  #include <udjat/defs.h>
+ #include <udjat/tools/method.h>
  #include <udjat/tools/value.h>
  #include <udjat/tools/http/exception.h>
- #include <udjat/tools/http/request.h>
  #include <stdexcept>
  #include <system_error>
  #include <map>

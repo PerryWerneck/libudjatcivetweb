@@ -17,51 +17,41 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
- #include <config.h>
+ #pragma once
 
-		/*
- #include <udjat/civetweb.h>
- #include <udjat/tools/request.h>
- #include <udjat/tools/http/request.h>
- #include <udjat/tools/logger.h>
-
- using namespace std;
+ #include <udjat/defs.h>
+ #include <udjat/request.h>
+ #include <udjat/tools/http/value.h>
 
  namespace Udjat {
 
-	HTTP::Request::Request(const char *method)
-		: Udjat::Request(method) {
+	namespace HTTP {
 
-		// Check for standard API
-		const char *ptr = (const char *) (*this);
+		class UDJAT_API Response : public Udjat::Response {
+		private:
+			Udjat::HTTP::Value *value;
 
-		debug("Creating request for '",ptr,"'");
+		public:
+			Response(Udjat::MimeType type);
+			virtual ~Response();
 
+			bool isNull() const override;
 
-		debug("Efective request path is '",path(),"'");
+			std::string to_string() const;
 
-	}
-		*/
+			Udjat::Value & operator[](const char *name) override;
 
-	/*
-	std::string HTTP::Request::pop() {
+			Udjat::Value & append(const Type type) override;
 
-		if(path.empty()) {
-			throw system_error(ENODATA,system_category(),"Not enough arguments");
-		}
+			Udjat::Value & reset(const Type type) override;
 
-		size_t pos = path.find('/');
-		if(pos == string::npos) {
-			string rc = path;
-			path.clear();
-			return rc;
-		}
+			Udjat::Value & set(const Value &value) override;
 
-		string rc{path.c_str(),pos};
-		path.erase(0,pos+1);
+			Udjat::Value & set(const char *value, const Type type) override;
 
-		return rc;
+		};
+
 	}
 
  }
-	*/
+

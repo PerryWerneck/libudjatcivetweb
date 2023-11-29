@@ -29,6 +29,7 @@
  #include <config.h>
  #include <udjat/defs.h>
  #include <udjat/tools/logger.h>
+ #include <udjat/tools/http/response.h>
  #include <udjat/agent/state.h>
  #include <cstring>
 
