@@ -66,6 +66,11 @@
  	try {
 
 		Request request{mg_get_request_info(conn)};
+		HTTP::Response response{(MimeType) request};
+		request.exec(response);
+
+		string rsp{response.to_string()};
+		return connection.success(to_string((MimeType) request),rsp.c_str(),rsp.size());
 
 	} catch(const HTTP::Exception &error) {
 

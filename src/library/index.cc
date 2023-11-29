@@ -69,7 +69,7 @@
 			if(root) {
 
 				page	<< "<h2>" << _("Active agents") << "</h2><ul>"
-						<< "<li><a href=\"/api/1.0/agent.html\">";
+						<< "<li><a href=\"/api/1.0/htmlagent.html\">";
 
 				{
 					auto icon = std::to_string(Abstract::Agent::root()->state()->level());
