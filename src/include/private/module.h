@@ -66,6 +66,10 @@
 				return mg_get_request_info(conn)->request_uri;
 			}
 
+			inline const char * request_method() const noexcept {
+				return mg_get_request_info(conn)->request_method;
+			}
+
 			inline const char * local_uri() const noexcept {
 				return mg_get_request_info(conn)->local_uri;
 			}
@@ -121,31 +125,31 @@
  }
 
  /// @brief Web handler.
- int webHandler(const CivetWeb::Connection &connection, function<string (const CivetWeb::Connection &connection, const char *path, const char *method, const MimeType mimetype)> worker) noexcept;
+ //int webHandler(const CivetWeb::Connection &connection, function<string (const CivetWeb::Connection &connection, const char *path, const char *method, const MimeType mimetype)> worker) noexcept;
 
  /// @brief Handler for API requests.
- int apiWebHandler(struct mg_connection *conn, void *cbdata);
+ // int apiWebHandler(struct mg_connection *conn, void *cbdata);
 
  /// @brief Handler for icon requests.
- int iconWebHandler(struct mg_connection *conn, void *cbdata);
+ //int iconWebHandler(struct mg_connection *conn, void *cbdata);
 
  /// @brief Handler for image requests.
- int imageWebHandler(struct mg_connection *conn, void *cbdata);
+ //int imageWebHandler(struct mg_connection *conn, void *cbdata);
 
  /// @brief Handler for state requests.
- int stateWebHandler(struct mg_connection *conn, void *cbdata);
+ //int stateWebHandler(struct mg_connection *conn, void *cbdata);
 
  /// @brief Handler for report requests.
  //int reportWebHandler(struct mg_connection *conn, void *cbdata);
 
  /// @brief Handler for swagger request.
- int swaggerWebHandler(struct mg_connection *conn, void *cbdata);
+ //int swaggerWebHandler(struct mg_connection *conn, void *cbdata);
 
- /// @brief Handler for swagger request.
+ /// @brief Handler for '/' request.
  int rootWebHandler(struct mg_connection *conn, void *cbdata);
 
  /// @brief Handler for custom requests.
- int customWebHandler(struct mg_connection *conn, void *cbdata);
+ //int customWebHandler(struct mg_connection *conn, void *cbdata);
 
  /// @brief Send error page.
  int http_error( struct mg_connection *conn, int status, const char *msg );

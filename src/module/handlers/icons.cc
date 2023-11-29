@@ -26,6 +26,7 @@
   *
   */
 
+  /*
  #include "private.h"
  #include <udjat/tools/http/icon.h>
  #include <udjat/tools/http/exception.h>
@@ -88,3 +89,4 @@
 	return 404;
 
  }
+ */

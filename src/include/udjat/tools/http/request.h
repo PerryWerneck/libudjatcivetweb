@@ -20,20 +20,21 @@
  #pragma once
 
  #include <udjat/defs.h>
- #include <udjat/request.h>
+ #include <udjat/tools/request.h>
  #include <udjat/tools/http/value.h>
 
  namespace Udjat {
 
 	namespace HTTP {
 
+		/*
 		class UDJAT_API Request : public Udjat::Request {
 		public:
-			Request(const std::string &url, const char *type);
+			Request(const char *method) = default;
 
-			std::string pop() override;
 
 		};
+		*/
 
 		class UDJAT_API Response : public Udjat::Response {
 		private:

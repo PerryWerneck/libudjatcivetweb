@@ -17,7 +17,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
- #include "private.h"
+ #include <private/module.h>
  #include <udjat/defs.h>
  #include <udjat/module.h>
  #include <udjat/tools/quark.h>
@@ -41,21 +41,6 @@
 	Udjat::MimeType mimetype = (Udjat::MimeType) 0;
 
 	const struct mg_request_info *request_info = mg_get_request_info(conn);
-
-	/*
-	//
-	// Search request headers for mime-type.
-	//
-	for(int ix=0;ix<request_info->num_headers;ix++) {
-		debug(request_info->http_headers[ix].name,"=",request_info->http_headers[ix].value);
-
-		if(!strcasecmp(request_info->http_headers[ix].name,"Content-Type")) {
-			mimetype = MimeTypeFactory(request_info->http_headers[ix].value,false);
-		}
-
-
-	}
-	*/
 
 	if(!mimetype && request_info->local_uri_raw && *request_info->local_uri_raw) {
 		//

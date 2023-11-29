@@ -17,24 +17,33 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
- /**
-  * @brief Implements the swagger.json output.
-  *
-  * References:
-  *
-  * https://samanthaneilen.github.io/2018/12/08/Using-and-extending-swagger.json-for-API-documentation.html
-  *
-  */
-
- #include "private.h"
+ /*
+ #include <private/module.h>
  #include <udjat/worker.h>
- #include <udjat/module.h>
- #include <udjat/factory.h>
- #include <udjat/tools/intl.h>
+ #include <udjat/agent.h>
+ #include <udjat/tools/http/mimetype.h>
+ #include <udjat/tools/protocol.h>
+ #include <udjat/tools/http/exception.h>
+ #include <udjat/tools/http/report.h>
 
- int swaggerWebHandler(struct mg_connection *conn, void UDJAT_UNUSED(*cbdata)) {
+ int reportWebHandler(struct mg_connection *conn, void UDJAT_UNUSED(*cbdata)) {
 
-	mg_send_http_error(conn, 404, _( "Not implemented" ));
-	return 404;
+	return webHandler(conn,[](const string &uri, const char *method, const MimeType mimetype){
+
+		if(strcasecmp(method,"get")) {
+			throw HTTP::Exception(405, uri.c_str(), "Method Not Allowed");
+		}
+
+		HTTP::Report response{uri.c_str(), mimetype};
+
+		// Run report.
+		Abstract::Agent::root()->find(uri.c_str())->get(Request(""),response);
+
+		return response.to_string();
+
+	});
 
  }
+
+	*/
+

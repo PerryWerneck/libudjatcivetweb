@@ -33,6 +33,7 @@
 		class Connection;
 		class Server;
 
+		/*
 		class UDJAT_API Handler {
 		protected:
 			friend class Server;
@@ -63,6 +64,7 @@
 			virtual int handle(const Udjat::HTTP::Connection &conn, const Udjat::HTTP::Request &request, const Udjat::MimeType mimetype) = 0;
 
 		};
+		*/
 
 	}
 

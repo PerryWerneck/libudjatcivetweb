@@ -17,7 +17,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
- #include "private.h"
+ #include <private/module.h>
  #include <sys/types.h>
  #include <sys/stat.h>
  #include <udjat/version.h>
@@ -104,16 +104,13 @@
 				//
 				cerr << "civetweb\tClient has requested directory '" << filename << "' without an ending '/'" << endl;
 
-				/*
 				//
 				// Redirect to correct url.
 				//
-				mg_response_header_start(conn, 301);
-				mg_response_header_add(conn, "Location", (string{name} + '/').c_str(), -1);
-				mg_response_header_send(conn);
-
-				return 301;
-				*/
+				// mg_response_header_start(conn, 301);
+				// mg_response_header_add(conn, "Location", (string{name} + '/').c_str(), -1);
+				// mg_response_header_send(conn);
+				// return 301;
 
 				mg_response_header_start(conn, 400);
 				mg_response_header_send(conn);
@@ -214,4 +211,3 @@
 	}
 
  }
-

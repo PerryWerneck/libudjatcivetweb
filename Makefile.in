@@ -12,7 +12,8 @@ LIBRARY_SOURCES= \
 
 MODULE_SOURCES= \
 	$(wildcard src/module/*.cc) \
-	$(wildcard src/module/worker/*.cc)
+	$(wildcard src/module/worker/*.cc) \
+	$(wildcard src/module/handlers/*.cc)
 
 TEST_SOURCES= \
 	$(wildcard src/testprogram/*.cc)

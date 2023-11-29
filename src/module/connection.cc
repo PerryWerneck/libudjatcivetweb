@@ -17,7 +17,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
- #include "private.h"
+ #include <private/module.h>
  #include <sys/types.h>
  #include <sys/stat.h>
  #include <udjat/tools/http/timestamp.h>

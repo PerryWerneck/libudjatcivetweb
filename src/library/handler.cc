@@ -28,6 +28,7 @@
 
  namespace Udjat {
 
+	/*
 	HTTP::Handler::Handler(const char *u) : uri(u) {
 
 		if(!(u && *u)) {
@@ -52,5 +53,6 @@
 			server->remove(this);
 		}
 	}
+	*/
 
  }

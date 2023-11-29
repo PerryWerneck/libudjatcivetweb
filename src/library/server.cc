@@ -57,6 +57,7 @@
 	}
 
 	bool HTTP::Server::push_back(HTTP::Handler *handler) {
+		/*
 		if(handler->server) {
 			handler->server->remove(handler);
 		}
@@ -66,6 +67,7 @@
 		}
 
 		handler->server = this;
+		*/
 		return true;
 	}
 
@@ -73,6 +75,7 @@
 	/// @param uri the URI for the handler.
 	bool HTTP::Server::remove(HTTP::Handler *handler) {
 
+		/*
 		if(handler->server && handler->server != this) {
 			throw runtime_error("Handler is for another server");
 		}
@@ -82,6 +85,8 @@
 		}
 
 		handler->server = nullptr;
+		*/
+
 		return true;
 	}
 

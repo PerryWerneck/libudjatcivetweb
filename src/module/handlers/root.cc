@@ -24,10 +24,12 @@
 
  #include <config.h>
  #include <udjat/defs.h>
- #include "private.h"
+ #include <private/module.h>
  #include <udjat/tools/intl.h>
  #include <udjat/tools/logger.h>
  #include <udjat/tools/http/exception.h>
+ #include <udjat/tools/http/request.h>
+ #include <udjat/tools/configuration.h>
 
  using namespace std;
  using namespace Udjat;
@@ -36,9 +38,34 @@
 
 	CivetWeb::Connection connection{conn};
 
+	class Request : public Udjat::Request {
+	private:
+		const struct mg_request_info *info;
+	public:
+		Request(const struct mg_request_info *i) : Udjat::Request{i->request_method}, info{i} {
+			rewind(Config::Value<bool>{"civetweb","require_versioned_path",false}.get());
+			debug("Local-path is '",c_str(),"'");
+		}
+
+  		const char *c_str() const noexcept override {
+			return info->local_uri;
+  		}
+
+ 		String getProperty(const char *name, const char *def) const {
+
+			// TODO: Check headers and query_string.
+
+			return Udjat::Request::getProperty(name,def);
+ 		}
+
+
+	};
+
+	debug("Request path is '",mg_get_request_info(conn)->local_uri,"'");
+
  	try {
 
-		return connection.info(connection.local_uri());
+		Request request{mg_get_request_info(conn)};
 
 	} catch(const HTTP::Exception &error) {
 

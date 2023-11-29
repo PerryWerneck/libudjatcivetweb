@@ -17,7 +17,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
- #include "private.h"
  #include <udjat/defs.h>
  #include <udjat/module.h>
  #include <udjat/tools/quark.h>
@@ -33,6 +32,8 @@
  #include <udjat/tools/logger.h>
  #include <udjat/tools/string.h>
  #include <unistd.h>
+
+ #include <private/module.h>
 
  using namespace Udjat;
  using namespace std;
@@ -78,18 +79,12 @@
 	} protocols;
 
 	void setHandlers() noexcept {
-		mg_set_request_handler(ctx, "/api/", apiWebHandler, 0);
-		mg_set_request_handler(ctx, "/icon/", iconWebHandler, 0);
-		mg_set_request_handler(ctx, "/images/", imageWebHandler, 0);
-		mg_set_request_handler(ctx, "/state", stateWebHandler, 0);
+//		mg_set_request_handler(ctx, "/icon/", iconWebHandler, 0);
+//		mg_set_request_handler(ctx, "/images/", imageWebHandler, 0);
+//		mg_set_request_handler(ctx, "/state", stateWebHandler, 0);
 //		mg_set_request_handler(ctx, "/report/", reportWebHandler, 0);
-		mg_set_request_handler(ctx, "/swagger.json", swaggerWebHandler, 0);
-
-		{
-			mg_set_request_handler(ctx, "/", rootWebHandler, 0);
-
-		}
-
+//		mg_set_request_handler(ctx, "/swagger.json", swaggerWebHandler, 0);
+		mg_set_request_handler(ctx, "/", rootWebHandler, 0);
 	}
 
 	void setCallbacks(struct mg_callbacks &callbacks) noexcept {
@@ -292,6 +287,8 @@
 	}
 
 	bool push_back(HTTP::Handler *handler) override {
+
+		/*
 		if(HTTP::Server::push_back(handler)) {
 
 			string uri{handler->c_str()};
@@ -325,15 +322,19 @@
 
 			return true;
 		}
+		*/
 		return false;
 	}
 
 	bool remove(HTTP::Handler *handler) override {
+
+		/*
 		if(HTTP::Server::remove(handler)) {
 			cout << "civetweb\tRemoving http handle '" << handler->c_str() << "'" << endl;
 			mg_set_request_handler(ctx, handler->c_str(), NULL, NULL);
 			return true;
 		}
+		*/
 		return false;
 	}
 

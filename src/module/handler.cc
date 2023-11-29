@@ -17,7 +17,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
- #include "private.h"
+ /*
+ #include <private/module.h>
  #include <udjat/tools/protocol.h>
  #include <udjat/tools/http/exception.h>
  #include <udjat/tools/logger.h>
@@ -87,3 +88,4 @@
 	return connection.success(to_string(mimetype),rsp.c_str(),rsp.size());
 
  }
+ */

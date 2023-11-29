@@ -17,7 +17,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
- #include "private.h"
+ /*
+ #include <private/module.h>
  #include <udjat/worker.h>
  #include <udjat/civetweb.h>
  #include <udjat/tools/protocol.h>
@@ -27,6 +28,7 @@
  #include <udjat/tools/logger.h>
 
  static std::string report(const CivetWeb::Connection &connection, const char *path, const char *method, const MimeType mimetype) {
+
 
 	// It's a report
 	if(strcasecmp(method,"get")) {
@@ -76,5 +78,5 @@
 	});
 
  }
-
+ */
 

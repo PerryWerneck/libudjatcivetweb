@@ -19,21 +19,30 @@
 
  #include <config.h>
  #include <udjat/civetweb.h>
- #include <udjat/request.h>
+ #include <udjat/tools/request.h>
  #include <udjat/tools/http/request.h>
+ #include <udjat/tools/logger.h>
 
  using namespace std;
 
  namespace Udjat {
 
-	HTTP::Request::Request(const string &u, const char *t)
-		: Udjat::Request(t) {
+		/*
+	HTTP::Request::Request(const char *method)
+		: Udjat::Request(method) {
 
-		this->path = u;
-		this->method = pop();
+		// Check for standard API
+		const char *ptr = (const char *) (*this);
+
+		debug("Creating request for '",ptr,"'");
+
+
+		debug("Efective request path is '",path(),"'");
 
 	}
+		*/
 
+	/*
 	std::string HTTP::Request::pop() {
 
 		if(path.empty()) {
@@ -52,5 +61,6 @@
 
 		return rc;
 	}
+	*/
 
  }
