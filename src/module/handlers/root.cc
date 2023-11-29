@@ -43,6 +43,28 @@
 		const struct mg_request_info *info;
 	public:
 		Request(const struct mg_request_info *i) : Udjat::Request{i->request_method}, info{i} {
+
+			for(int header = 0; header < info->num_headers; header++) {
+				debug(info->http_headers[header].name,"=",info->http_headers[header].value);
+				if(!strcasecmp(info->http_headers[header].name,"Accept")) {
+
+					debug("Getting mime-type from header");
+
+					for(String &value : String{info->http_headers[header].value}.split(",")) {
+
+						auto mime = MimeTypeFactory(value.c_str(),this->type);
+						debug("mime: '",value.c_str(),"' (",MimeTypeFactory(value.c_str(),this->type),")");
+
+						if(mime != this->type) {
+							this->type = mime;
+							break;
+						}
+
+					}
+
+				}
+			}
+
 			rewind(Config::Value<bool>{"civetweb","require_versioned_path",false}.get());
 			debug("Local-path is '",c_str(),"'");
 		}
@@ -53,7 +75,14 @@
 
  		String getProperty(const char *name, const char *def) const {
 
-			// TODO: Check headers and query_string.
+			// TODO: Check parameters.
+
+			// Check for 'name' on http headers.
+			for(int header = 0; header < info->num_headers; header++) {
+				if(!strcasecmp(info->http_headers[header].name,name)) {
+					return info->http_headers[header].value;
+				}
+			}
 
 			return Udjat::Request::getProperty(name,def);
  		}
