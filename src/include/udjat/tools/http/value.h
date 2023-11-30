@@ -51,7 +51,7 @@
 			void xml(std::stringstream &ss) const;
 			void html(std::stringstream &ss) const;
 			// void shell(std::stringstream &ss) const;
-			void yaml(std::stringstream &ss,size_t level = 0) const;
+			void yaml(std::stringstream &ss,size_t left_margin = 0) const;
 
 			const Udjat::Value & get(std::string &value) const override;
 

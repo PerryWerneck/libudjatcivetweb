@@ -27,37 +27,33 @@
 
  namespace Udjat {
 
-	void HTTP::Value::yaml(std::stringstream &ss, size_t level) const {
+	void HTTP::Value::yaml(std::stringstream &ss, size_t left_margin) const {
 
 		switch(this->type) {
 		case Udjat::Value::Undefined:
 			break;
 
 		case Udjat::Value::Array:
-#ifdef DEBUG
-			if(level) {
+			if(left_margin) {
 				ss << endl;
 			}
 			for(const auto [key, value] : children)	{
 				std::string spaces;
-				spaces.resize(level*4,' ');
+				spaces.resize(left_margin,' ');
 				ss << spaces << "-";
-				value->yaml(ss,level+1);
+				value->yaml(ss,left_margin+2);
 			}
 			break;
-#else
-			throw system_error(ENOTSUP,system_category(),"Unable to export YAML");
-#endif // DEBUG
 
 		case Udjat::Value::Object:
-			if(level) {
+			if(left_margin) {
 				ss << endl;
 			}
 			for(const auto [key, value] : children)	{
 				std::string spaces;
-				spaces.resize(level*4,' ');
+				spaces.resize(left_margin,' ');
 				ss << spaces << key << ":";
-				value->yaml(ss,level+1);
+				value->yaml(ss,left_margin+4);
 			}
 			break;
 
