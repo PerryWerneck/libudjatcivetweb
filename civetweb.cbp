@@ -53,6 +53,7 @@
 		<Unit filename="src/include/udjat/tools/http/image.h" />
 		<Unit filename="src/include/udjat/tools/http/report.h" />
 		<Unit filename="src/include/udjat/tools/http/request.h" />
+		<Unit filename="src/include/udjat/tools/http/response.h" />
 		<Unit filename="src/include/udjat/tools/http/server.h" />
 		<Unit filename="src/include/udjat/tools/http/value.h" />
 		<Unit filename="src/library/connection.cc" />
@@ -62,6 +63,7 @@
 		<Unit filename="src/library/layout/html.cc" />
 		<Unit filename="src/library/layout/json.cc" />
 		<Unit filename="src/library/layout/xml.cc" />
+		<Unit filename="src/library/layout/yaml.cc" />
 		<Unit filename="src/library/os/linux/icon.cc" />
 		<Unit filename="src/library/os/linux/image.cc" />
 		<Unit filename="src/library/os/windows/icon.cc" />
@@ -81,6 +83,7 @@
 		<Unit filename="src/module/handlers/report.cc" />
 		<Unit filename="src/module/handlers/root.cc" />
 		<Unit filename="src/module/handlers/states.cc" />
+		<Unit filename="src/module/handlers/swagger.cc" />
 		<Unit filename="src/module/init.cc" />
 		<Unit filename="src/module/private.h" />
 		<Unit filename="src/module/protocol.cc" />

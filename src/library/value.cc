@@ -72,6 +72,11 @@
 			this->html(ss);
 			break;
 
+		case Udjat::MimeType::yaml:
+			// Format as yaml.
+			this->yaml(ss);
+			break;
+
 		case Udjat::MimeType::sh:
 			// Format as shell script (only first level)
 

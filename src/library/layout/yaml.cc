@@ -1,0 +1,76 @@
+/* SPDX-License-Identifier: LGPL-3.0-or-later */
+
+/*
+ * Copyright (C) 2023 Perry Werneck <perry.werneck@gmail.com>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+ #include <config.h>
+ #include <udjat/civetweb.h>
+ #include <udjat/tools/http/value.h>
+ #include <iostream>
+ #include <iomanip>
+
+ using namespace std;
+
+ namespace Udjat {
+
+	void HTTP::Value::yaml(std::stringstream &ss, size_t level) const {
+
+		switch(this->type) {
+		case Udjat::Value::Undefined:
+			break;
+
+		case Udjat::Value::Array:
+#ifdef DEBUG
+			if(level) {
+				ss << endl;
+			}
+			for(const auto [key, value] : children)	{
+				std::string spaces;
+				spaces.resize(level*4,' ');
+				ss << spaces << "-";
+				value->yaml(ss,level+1);
+			}
+			break;
+#else
+			throw system_error(ENOTSUP,system_category(),"Unable to export YAML");
+#endif // DEBUG
+
+		case Udjat::Value::Object:
+			if(level) {
+				ss << endl;
+			}
+			for(const auto [key, value] : children)	{
+				std::string spaces;
+				spaces.resize(level*4,' ');
+				ss << spaces << key << ":";
+				value->yaml(ss,level+1);
+			}
+			break;
+
+		case Udjat::Value::String:
+			ss << " \"" << this->value << "\"" << endl;
+			break;
+
+		default:
+			ss << " " << this->value << endl;
+		}
+
+	}
+
+ }
+
+
