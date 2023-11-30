@@ -45,10 +45,6 @@
 
 			bool for_each(const std::function<bool(const char *name, const Udjat::Value &value)> &call) const override;
 
-			//inline Udjat::Value::Type getType() const noexcept override {
-			//	return this->type;
-			//}
-
 			void dump(std::stringstream &ss, const MimeType mimetype = MimeType::json) const;
 
 			void json(std::stringstream &ss) const;

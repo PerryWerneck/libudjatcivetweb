@@ -19,6 +19,7 @@
 
  #include <config.h>
  #include <udjat/civetweb.h>
+ #include <udjat/tools/value.h>
  #include <udjat/tools/http/value.h>
  #include <iostream>
  #include <iomanip>
@@ -32,19 +33,18 @@
 			break;
 
 		case Udjat::Value::Array:
-			for(auto &child : children) {
-				ss << "<item>";
-				child.second->xml(ss);
+			for(const auto [key, value] : children)	{
+				ss << "<item name='" << key << "' type='" << std::to_string((Udjat::Value::Type) *value) << "'"<< ">";
+				value->xml(ss);
 				ss << "</item>";
 			}
 			break;
 
 		case Udjat::Value::Object:
-			
-			for(auto &child : children) {
-				ss << "<" << child.first << " type='" << std::to_string(child.second->getType()) << "'"<< ">";
-				child.second->xml(ss);
-				ss << "</" << child.first << ">";
+			for(const auto [key, value] : children)	{
+				ss << "<" << key << " type='" << std::to_string((Udjat::Value::Type) *value) << "'"<< ">";
+				value->xml(ss);
+				ss << "</" << key << ">";
 			}
 			break;
 

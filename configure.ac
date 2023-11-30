@@ -106,7 +106,7 @@ AS_IF([test x"AS_VAR_GET(CACHEVAR)" = xyes],
 AS_VAR_POPDEF([CACHEVAR])dnl
 ])dnl AX_CHECK_COMPILE_FLAGS
 
-AX_CHECK_COMPILE_FLAG([-std=c++1z], [CPPFLAGS="$CPPFLAGS -std=c++1z"], [AC_MSG_ERROR(["C++ 17 is required"])])
+AX_CHECK_COMPILE_FLAG([-std=c++1z], [CXXFLAGS="$CXXFLAGS -std=c++1z"], [AC_MSG_ERROR(["C++ 17 is required"])])
 
 dnl ---------------------------------------------------------------------------
 dnl Set the ELF symbol visibility support
@@ -223,11 +223,11 @@ AC_SUBST(MODULE_PATH,$app_cv_module_path)
 dnl ---------------------------------------------------------------------------
 dnl test for pugixml
 dnl ---------------------------------------------------------------------------
-
-PKG_CHECK_MODULES(PUGIXML, pugixml, AC_DEFINE(HAVE_PUGIXML,[],[Do we have PUGIXML?]),AC_MSG_ERROR(pugixml is required))
-
-AC_SUBST(PUGIXML_LIBS)
-AC_SUBST(PUGIXML_CFLAGS)
+dnl 
+dnl PKG_CHECK_MODULES(PUGIXML, pugixml, AC_DEFINE(HAVE_PUGIXML,[],[Do we have PUGIXML?]),AC_MSG_ERROR(pugixml is required))
+dnl 
+dnl AC_SUBST(PUGIXML_LIBS)
+dnl AC_SUBST(PUGIXML_CFLAGS)
 
 dnl ---------------------------------------------------------------------------
 dnl Test for jsoncpp
