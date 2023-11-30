@@ -78,23 +78,31 @@
 			break;
 
 		case Udjat::MimeType::sh:
+
 			// Format as shell script (only first level)
 
 			for_each([&ss](const char *key, const Udjat::Value &value){
 
-				if(value == Value::Undefined || value == Value::Array || value == Value::Object) {
-					return false;
+				switch((Value::Type) value) {
+				case Udjat::Value::Undefined:
+				case Udjat::Value::Array:
+					break;
+
+				case Udjat::Value::Object:
+					// TODO: Check for 'summary' ou 'value' objects.
+					break;
+
+				case Udjat::Value::Signed:
+				case Udjat::Value::Unsigned:
+				case Udjat::Value::Real:
+				case Udjat::Value::Boolean:
+				case Udjat::Value::Fraction:
+					ss << key << "=" << value << endl;
+					break;
+
+				default:
+					ss << key << "=\"" << value << "\"" << endl;
 				}
-
-				ss << key << "=";
-
-				if(value == Value::String || value == Value::Timestamp) {
-					ss << "\"" << value << "\"";
-				} else {
-					ss << value;
-				}
-
-				ss << endl;
 
 				return false;
 			});
