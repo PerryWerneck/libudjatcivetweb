@@ -67,14 +67,17 @@
 			}
 			break;
 
-		case Udjat::Value::String:
-
-			// TODO: Convert special chars.
-			ss << '"' << this->value << '"';
+		case Udjat::Value::Signed:
+		case Udjat::Value::Unsigned:
+		case Udjat::Value::Real:
+		case Udjat::Value::Boolean:
+		case Udjat::Value::Fraction:
+			ss << this->value;
 			break;
 
 		default:
-			ss << this->value;
+			// TODO: Convert special chars.
+			ss << '"' << this->value << '"';
 		}
 
 	}

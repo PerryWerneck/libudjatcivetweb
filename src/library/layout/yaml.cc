@@ -61,12 +61,17 @@
 			}
 			break;
 
-		case Udjat::Value::String:
-			ss << " \"" << this->value << "\"" << endl;
+		case Udjat::Value::Signed:
+		case Udjat::Value::Unsigned:
+		case Udjat::Value::Real:
+		case Udjat::Value::Boolean:
+		case Udjat::Value::Fraction:
+			ss << " " << this->value << endl;
 			break;
 
 		default:
-			ss << " " << this->value << endl;
+			ss << " \"" << this->value << "\"" << endl;
+
 		}
 
 	}
