@@ -245,6 +245,7 @@ AC_SUBST(DLL_LDFLAGS)
 AC_SUBST(BASEDIR,$ac_pwd)
 AC_CONFIG_FILES(Makefile)
 AC_CONFIG_FILES(locale/Makefile)
+AC_CONFIG_FILES(debian/shlibs)
 
 dnl ---------------------------------------------------------------------------
 dnl Output the generated config.status script.
