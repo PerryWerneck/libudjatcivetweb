@@ -21,6 +21,7 @@
  #include <udjat/civetweb.h>
  #include <udjat/tools/value.h>
  #include <udjat/tools/http/value.h>
+ #include <udjat/tools/logger.h>
  #include <iostream>
  #include <iomanip>
 
@@ -34,6 +35,65 @@
 	HTTP::Value::~Value() {
 		reset(Udjat::Value::Undefined);
 	}
+
+	void HTTP::Value::dump(std::stringstream &ss, const MimeType mimetype) const {
+
+		switch(mimetype) {
+		case Udjat::MimeType::xml:
+			// Format as XML
+			ss << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
+			ss << "<response>";
+			this->xml(ss);
+			ss << "</response>";
+			break;
+
+		case Udjat::MimeType::json:
+			// Format as JSON
+			this->json(ss);
+			break;
+
+		case Udjat::MimeType::html:
+			// Format as HTML.
+			this->html(ss);
+			break;
+
+		case Udjat::MimeType::sh:
+			// Format as shell script (only first level)
+
+			for_each([&ss](const char *key, const Udjat::Value &value){
+
+				if(value == Value::Undefined || value == Value::Array || value == Value::Object) {
+					return false;
+				}
+
+				ss << key << "=";
+
+				if(value == Value::String || value == Value::Timestamp) {
+					ss << "\"" << value << "\"";
+				} else {
+					ss << value;
+				}
+
+				ss << endl;
+
+				return false;
+			});
+
+			/*
+			for (const auto& [key, value] : children) {
+
+
+			}
+			*/
+			break;
+
+		default:
+			throw system_error(ENOTSUP,system_category(),Logger::String{"No exporter for ",mimetype});
+
+		}
+
+	}
+
 
 	Value & HTTP::Value::reset(const Udjat::Value::Type type) {
 

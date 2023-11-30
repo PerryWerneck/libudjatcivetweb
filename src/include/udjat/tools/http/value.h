@@ -21,6 +21,7 @@
 
  #include <udjat/defs.h>
  #include <udjat/tools/value.h>
+ #include <udjat/tools/http/mimetype.h>
  #include <map>
 
  namespace Udjat {
@@ -40,13 +41,21 @@
 
 			bool isNull() const override;
 
-			inline Udjat::Value::Type getType() const noexcept {
-				return this->type;
-			}
+			operator Type() const noexcept override;
+
+			bool for_each(const std::function<bool(const char *name, const Udjat::Value &value)> &call) const override;
+
+			//inline Udjat::Value::Type getType() const noexcept override {
+			//	return this->type;
+			//}
+
+			void dump(std::stringstream &ss, const MimeType mimetype = MimeType::json) const;
 
 			void json(std::stringstream &ss) const;
 			void xml(std::stringstream &ss) const;
 			void html(std::stringstream &ss) const;
+			void shell(std::stringstream &ss) const;
+			void yaml(std::stringstream &ss) const;
 
 			const Udjat::Value & get(std::string &value) const override;
 

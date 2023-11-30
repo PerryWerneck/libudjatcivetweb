@@ -20,6 +20,8 @@
  #include <config.h>
  #include <udjat/civetweb.h>
  #include <udjat/tools/http/response.h>
+ #include <udjat/tools/http/value.h>
+ #include <udjat/tools/http/value.h>
  #include <iostream>
  #include <sstream>
 
@@ -41,33 +43,8 @@
 	}
 
 	std::string HTTP::Response::to_string() const {
-
 		std::stringstream ss;
-
-		switch(type) {
-		case Udjat::MimeType::xml:
-			// Format as XML
-			ss << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
-			ss << "<response>";
-			this->value->xml(ss);
-			ss << "</response>";
-			break;
-
-		case Udjat::MimeType::json:
-			// Format as JSON
-			this->value->json(ss);
-			break;
-
-		case Udjat::MimeType::html:
-			// Format as HTML.
-			this->value->html(ss);
-			break;
-
-		default:
-			throw runtime_error("Invalid mymetype");
-
-		}
-
+		this->value->dump(ss,this->type);
 		return ss.str();
 	}
 

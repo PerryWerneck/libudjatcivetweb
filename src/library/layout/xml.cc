@@ -40,6 +40,7 @@
 			break;
 
 		case Udjat::Value::Object:
+			
 			for(auto &child : children) {
 				ss << "<" << child.first << " type='" << std::to_string(child.second->getType()) << "'"<< ">";
 				child.second->xml(ss);
