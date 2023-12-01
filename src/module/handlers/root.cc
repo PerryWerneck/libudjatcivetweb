@@ -50,6 +50,9 @@
 		HTTP::Response response{(MimeType) request};
 		request.exec(response);
 		string rsp{response.to_string()};
+
+		// TODO: Send customized header based on response properties.
+
 		return connection.success(to_string((MimeType) request),rsp.c_str(),rsp.size());
 
 	} catch(const HTTP::Exception &error) {

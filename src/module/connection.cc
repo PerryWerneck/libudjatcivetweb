@@ -23,6 +23,7 @@
  #include <udjat/tools/http/timestamp.h>
  #include <udjat/tools/logger.h>
  #include <udjat/tools/intl.h>
+ #include <udjat/tools/configuration.h>
 
  using namespace std;
 
@@ -45,7 +46,11 @@
 
 		if((status > 199) && (status != 204) && (status != 304)) {
 
-			// Has body.
+			// Has body
+
+			// TODO: Check for Configuration if we should change status to 200
+			//       and use 'rc=-1' to avoid failure on legacy applications.
+			// Config::Value<bool> legacy{"httpd","use_legacy_responses",false};
 
 			// TODO: Format body based on request mime-type.
 			Logger::Message body{
