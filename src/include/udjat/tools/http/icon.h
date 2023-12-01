@@ -20,13 +20,14 @@
  #pragma once
 
  #include <udjat/defs.h>
+ #include <udjat/ui/icon.h>
  #include <string>
 
  namespace Udjat {
 
 	namespace HTTP {
 
-		class UDJAT_API Icon : public std::string {
+		class UDJAT_API Icon : public Udjat::Icon {
 		private:
 			class Controller;
 			friend class Controller;

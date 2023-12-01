@@ -26,33 +26,42 @@
   *
   */
 
-  /*
- #include "private.h"
+ #include <config.h>
+ #include <udjat/defs.h>
+ #include <private/module.h>
  #include <udjat/tools/http/icon.h>
  #include <udjat/tools/http/exception.h>
  #include <udjat/tools/http/mimetype.h>
  #include <udjat/tools/configuration.h>
+ #include <udjat/tools/logger.h>
 
 #ifndef _WIN32
 	#include <unistd.h>
 #endif // _WIN32
 
+ using namespace Udjat;
+
  int iconWebHandler(struct mg_connection *conn, void UDJAT_UNUSED(*cbdata)) {
 
 	try {
 
-		const char *path = mg_get_request_info(conn)->local_uri;
-		while(*path && *path == '/') {
+		const char *path = strrchr(mg_get_request_info(conn)->local_uri,'/');
+		if(path) {
 			path++;
 		}
 
-		const char *ptr = strchr(path,'/');
-
-		if(ptr) {
-			path = ptr+1;
+		if(!(path && *path)) {
+			mg_send_http_error(conn, 400, "Unable to handle icon %s", mg_get_request_info(conn)->local_uri);
+			return 400;
 		}
 
+		debug("path='",path,"'");
 		Udjat::HTTP::Icon icon = Udjat::HTTP::Icon::getInstance(path);
+
+		if(icon.empty()) {
+			mg_send_http_error(conn, 404, "Cant find icon '%s'", path);
+			return 404;
+		}
 
 		CivetWeb::Connection(conn).send(
 			HTTP::Get,
@@ -89,4 +98,3 @@
 	return 404;
 
  }
- */

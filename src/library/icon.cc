@@ -21,6 +21,7 @@
  #include <udjat/tools/http/icon.h>
  #include <map>
  #include <mutex>
+ #include <udjat/tools/logger.h>
 
 #ifndef _WIN32
 	#include <unistd.h>
@@ -55,6 +56,7 @@
 				}
 
 				// Not found, create new icon.
+				debug("Appending icon '",name,"'");
 				auto inserted = cache.emplace(make_pair(std::string{name},Icon(name)));
 
 				cout << "icons\tCaching " << inserted.first->second << " as " << name << endl;

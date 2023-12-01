@@ -33,7 +33,9 @@
 
 	namespace HTTP {
 
-		Icon::Icon(const char *n) {
+		Icon::Icon(const char *n) : Udjat::Icon{n} {
+
+			debug("Building icon '",n,"'");
 
 			static const char * defpaths =
 					"/usr/share/icons/" STRINGIZE_VALUE_OF(PRODUCT_NAME) "/," \
@@ -78,10 +80,10 @@
 
 			}
 
+			debug("Cant find icon '",n,"'");
 			clear();
 
 		}
-
 
 	}
 
