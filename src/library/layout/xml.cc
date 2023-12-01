@@ -18,6 +18,18 @@
  */
 
  #include <config.h>
+ #include <udjat/defs.h>
+ #include <udjat/tools/value.h>
+ #include <udjat/tools/http/layouts.h>
+ #include <iostream>
+
+ namespace Udjat {
+
+	void HTTP::to_xml(std::ostream &output, const Udjat::Value &value) {
+
+	}
+
+	/*
  #include <udjat/civetweb.h>
  #include <udjat/tools/value.h>
  #include <udjat/tools/http/value.h>
@@ -53,5 +65,6 @@
 		}
 
 	}
+ */
 
  }

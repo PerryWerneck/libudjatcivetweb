@@ -18,6 +18,72 @@
  */
 
  #include <config.h>
+ #include <udjat/defs.h>
+ #include <udjat/tools/value.h>
+ #include <udjat/tools/http/layouts.h>
+ #include <iostream>
+
+ namespace Udjat {
+
+	void HTTP::to_json(std::ostream &output, const Udjat::Value &value) {
+
+		switch((Value::Type) value) {
+		case Udjat::Value::Undefined:
+			output << "null";
+			break;
+
+		case Udjat::Value::Array:
+			{
+				output << '[';
+				bool sep = false;
+				value.for_each([&output,&sep](const char *, const Value &value){
+					if(sep) {
+						output << ',';
+					}
+					sep = true;
+					to_json(output,value);
+					return false;
+				});
+				output << ']';
+			}
+			break;
+
+		case Udjat::Value::Object:
+			{
+				output << '{';
+				bool sep = false;
+				value.for_each([&output,&sep](const char *name, const Value &value){
+					if(sep) {
+						output << ',';
+					}
+					sep = true;
+					output << '"' << name << "\":";
+					to_json(output,value);
+					return false;
+				});
+				output << '}';
+			}
+			break;
+
+		case Udjat::Value::Signed:
+		case Udjat::Value::Unsigned:
+		case Udjat::Value::Real:
+		case Udjat::Value::Boolean:
+		case Udjat::Value::Fraction:
+			output << value;
+			break;
+
+		default:
+			// TODO: Convert special chars.
+			output << '"' << value << '"';
+
+		}
+
+	}
+
+ }
+
+ /*
  #include <udjat/civetweb.h>
  #include <udjat/tools/http/value.h>
  #include <iostream>
@@ -83,5 +149,6 @@
 	}
 
  }
+ */
 
 

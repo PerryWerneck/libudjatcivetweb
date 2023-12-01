@@ -22,6 +22,8 @@
  #include <udjat/tools/http/response.h>
  #include <udjat/tools/http/value.h>
  #include <udjat/tools/http/value.h>
+ #include <udjat/tools/http/layouts.h>
+ #include <udjat/tools/logger.h>
  #include <iostream>
  #include <sstream>
 
@@ -29,43 +31,95 @@
 
  namespace Udjat {
 
-	HTTP::Response::Response(Udjat::MimeType type) {
-		this->type = type;
-		this->value = new HTTP::Value();
+	HTTP::Response::Response(Udjat::MimeType mimetype) : Udjat::Response::Value{mimetype}{
 	}
 
 	HTTP::Response::~Response() {
-		delete this->value;
 	}
 
-	bool HTTP::Response::isNull() const {
-		return this->value->isNull();
-	}
+	bool HTTP::Response::for_each(const std::function<bool(const char *name, const Udjat::Value &value)> &call) const {
 
-	std::string HTTP::Response::to_string() const {
-		std::stringstream ss;
-		this->value->dump(ss,this->type);
-		return ss.str();
+		for(const auto& [name, value] : children)	{
+			if(call(name.c_str(),(Udjat::Value &) value)) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	Udjat::Value & HTTP::Response::operator[](const char *name) {
-		return (*this->value)[name];
+		return children[name];
 	}
 
-	Udjat::Value & HTTP::Response::append(const Type type) {
-		return this->value->append(type);
+	std::string HTTP::Response::to_string() const {
+		std::stringstream stream;
+		save(stream);
+		return stream.str();
 	}
 
-	Udjat::Value & HTTP::Response::reset(const Type type) {
-		return this->value->reset(type);
-	}
+	void HTTP::Response::save(std::ostream &stream) const {
 
-	Udjat::Value & HTTP::Response::set(const Value &value) {
-		return this->value->set(value);
-	}
+		switch((MimeType) *this) {
+		case Udjat::MimeType::xml:
+			// Format as XML
+			stream << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
+			stream << "<response>";
+			to_xml(stream,*this);
+			stream << "</response>";
+			break;
 
-	Udjat::Value & HTTP::Response::set(const char *value, const Type type) {
-		return this->value->set(value,type);
+		case Udjat::MimeType::json:
+			// Format as JSON
+			to_json(stream,*this);
+			break;
+
+		case Udjat::MimeType::html:
+			// Format as HTML.
+			to_html(stream,*this);
+			break;
+
+		case Udjat::MimeType::yaml:
+			// Format as yaml.
+			to_yaml(stream,*this);
+			break;
+
+		case Udjat::MimeType::sh:
+
+			// Format as shell script (only first level)
+			for_each([&stream](const char *key, const Udjat::Value &value){
+
+				switch((Value::Type) value) {
+				case Udjat::Value::Undefined:
+				case Udjat::Value::Array:
+					break;
+
+				case Udjat::Value::Object:
+					// TODO: Check for 'summary' or 'value' child.
+					break;
+
+				case Udjat::Value::Signed:
+				case Udjat::Value::Unsigned:
+				case Udjat::Value::Real:
+				case Udjat::Value::Boolean:
+				case Udjat::Value::Fraction:
+					stream << key << "=" << value << endl;
+					break;
+
+				default:
+					stream << key << "=\"" << value << "\"" << endl;
+				}
+
+				return false;
+			});
+
+			break;
+
+		default:
+			throw system_error(ENOTSUP,system_category(),Logger::String{"No exporter for ",((MimeType) *this)});
+
+		}
+
 	}
 
  }

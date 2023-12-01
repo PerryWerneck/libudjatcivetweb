@@ -23,6 +23,7 @@
  #include <udjat/tools/value.h>
  #include <udjat/tools/http/mimetype.h>
  #include <map>
+ #include <ostream>
 
  namespace Udjat {
 
@@ -45,13 +46,10 @@
 
 			bool for_each(const std::function<bool(const char *name, const Udjat::Value &value)> &call) const override;
 
-			void dump(std::stringstream &ss, const MimeType mimetype = MimeType::json) const;
-
-			void json(std::stringstream &ss) const;
-			void xml(std::stringstream &ss) const;
-			void html(std::stringstream &ss) const;
-			// void shell(std::stringstream &ss) const;
-			void yaml(std::stringstream &ss,size_t left_margin = 0) const;
+			void to_json(std::ostream &ss) const;
+			void to_xml(std::ostream &ss) const;
+			void to_html(std::ostream &ss) const;
+			void to_yaml(std::ostream &ss, size_t left_margin = 0) const;
 
 			const Udjat::Value & get(std::string &value) const override;
 

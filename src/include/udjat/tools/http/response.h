@@ -20,34 +20,27 @@
  #pragma once
 
  #include <udjat/defs.h>
- #include <udjat/tools/request.h>
+ #include <udjat/tools/response.h>
  #include <udjat/tools/http/value.h>
+ #include <ostream>
 
  namespace Udjat {
 
 	namespace HTTP {
 
-		class UDJAT_API Response : public Udjat::Response {
+		class UDJAT_API Response : public Udjat::Response::Value {
 		private:
-			Udjat::HTTP::Value *value;
+			std::map<std::string,HTTP::Value> children;
 
 		public:
-			Response(Udjat::MimeType type);
+			Response(Udjat::MimeType mimetype);
 			virtual ~Response();
 
-			bool isNull() const override;
-
-			std::string to_string() const;
-
+			bool for_each(const std::function<bool(const char *name, const Udjat::Value &value)> &call) const override;
 			Udjat::Value & operator[](const char *name) override;
 
-			Udjat::Value & append(const Type type) override;
-
-			Udjat::Value & reset(const Type type) override;
-
-			Udjat::Value & set(const Value &value) override;
-
-			Udjat::Value & set(const char *value, const Type type) override;
+			void save(std::ostream &stream) const;
+			std::string to_string() const;
 
 		};
 
@@ -55,3 +48,14 @@
 
  }
 
+ namespace std {
+
+	inline string to_string(const Udjat::HTTP::Response &response) noexcept {
+		return response.to_string();
+	}
+
+	inline ostream & operator<< (ostream& os, const Udjat::HTTP::Response &response) {
+		return os << response.to_string();
+	}
+
+ }

@@ -55,6 +55,7 @@
 				return true;
 			}
 
+			/*
 			void get(const Request UDJAT_UNUSED(&request), Report &report) {
 
 				report.start("sample","row","a","b","c",nullptr);
@@ -69,8 +70,8 @@
 					}
 				}
 
-
 			}
+			*/
 
 		};
 

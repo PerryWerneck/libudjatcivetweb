@@ -51,6 +51,19 @@
 		return false;
 	}
 
+	void HTTP::Value::to_json(std::ostream &ss) const {
+	}
+
+	void HTTP::Value::to_xml(std::ostream &ss) const {
+	}
+
+	void HTTP::Value::to_html(std::ostream &ss) const {
+	}
+
+	void HTTP::Value::to_yaml(std::ostream &ss, size_t left_margin) const {
+	}
+
+	/*
 	void HTTP::Value::dump(std::stringstream &ss, const MimeType mimetype) const {
 
 		switch(mimetype) {
@@ -107,12 +120,6 @@
 				return false;
 			});
 
-			/*
-			for (const auto& [key, value] : children) {
-
-
-			}
-			*/
 			break;
 
 		default:
@@ -121,7 +128,7 @@
 		}
 
 	}
-
+	*/
 
 	Value & HTTP::Value::reset(const Udjat::Value::Type type) {
 

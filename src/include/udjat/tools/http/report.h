@@ -20,7 +20,7 @@
  #pragma once
 
  #include <udjat/defs.h>
- #include <udjat/tools/request.h>
+ #include <udjat/tools/report.h>
  #include <udjat/tools/http/value.h>
  #include <list>
 
@@ -28,7 +28,8 @@
 
 	namespace HTTP {
 
-		class UDJAT_API Report : public Udjat::Report {
+		/*
+		class UDJAT_API Report : public Udjat::Response::Table {
 		private:
 
 			/// @brief Report format.
@@ -68,6 +69,7 @@
 			Udjat::Report & push_back(const double value) override;
 
 		};
+		*/
 
 	}
 

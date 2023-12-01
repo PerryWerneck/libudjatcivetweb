@@ -26,6 +26,7 @@
 
  using namespace std;
 
+ /*
  namespace Udjat {
 
 	namespace HTTP {
@@ -226,3 +227,4 @@
 	}
 
  }
+ */

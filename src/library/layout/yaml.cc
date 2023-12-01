@@ -18,15 +18,17 @@
  */
 
  #include <config.h>
- #include <udjat/civetweb.h>
- #include <udjat/tools/http/value.h>
+ #include <udjat/defs.h>
+ #include <udjat/tools/value.h>
+ #include <udjat/tools/http/layouts.h>
  #include <iostream>
- #include <iomanip>
-
- using namespace std;
 
  namespace Udjat {
 
+	void HTTP::to_yaml(std::ostream &output, const Udjat::Value &value, size_t left_margin) {
+	}
+
+	/*
 	void HTTP::Value::yaml(std::stringstream &ss, size_t left_margin) const {
 
 		switch(this->type) {
@@ -71,6 +73,7 @@
 		}
 
 	}
+	*/
 
  }
 
