@@ -21,13 +21,14 @@
 
  #include <udjat/defs.h>
  #include <udjat/tools/request.h>
+ #include <udjat/tools/http/request.h>
  #include <civetweb.h>
 
  namespace Udjat {
 
 	namespace CivetWeb {
 
-		class UDJAT_PRIVATE Request : public Udjat::Request {
+		class UDJAT_PRIVATE Request : public HTTP::Request {
 		private:
 			const struct mg_request_info *info;
 
@@ -35,9 +36,7 @@
 			Request(const struct mg_request_info *i);
 
 			const char *c_str() const noexcept override;
-
 			String getProperty(const char *name, const char *def) const override;
-
 
 		};
 

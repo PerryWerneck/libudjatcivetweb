@@ -23,6 +23,7 @@
  #include <udjat/tools/method.h>
  #include <udjat/tools/value.h>
  #include <udjat/tools/http/exception.h>
+ #include <udjat/tools/http/mimetype.h>
  #include <stdexcept>
  #include <system_error>
  #include <map>
@@ -35,6 +36,9 @@
 		public:
 			Connection();
 			virtual ~Connection();
+
+			/// @brief Get the active mimetype for this connection.
+			virtual operator MimeType() const = 0;
 
 			/// @brief Send default HTML response.
 			/// @param path Local path from request.

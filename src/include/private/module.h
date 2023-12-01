@@ -50,6 +50,8 @@
 			Connection(struct mg_connection *c) : Udjat::HTTP::Connection(), conn(c) {
 			}
 
+			operator MimeType() const override;
+
 			int success(const char *mime_type, const char *response, size_t length) const noexcept override;
 			int failed(int code, const char *message) const noexcept override;
 			int send(const HTTP::Method method, const char *filename, bool allow_index, const char *mime_type, unsigned int max_age) const override;

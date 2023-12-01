@@ -29,6 +29,49 @@
 
  namespace Udjat {
 
+	CivetWeb::Connection::operator MimeType() const {
+
+		const struct mg_request_info *info{mg_get_request_info(conn)};
+
+		if(strncasecmp(info->local_uri,"/api/",5) && Config::Value<bool>("httpd","allow-legacy-path",true)) {
+
+			// Path doesn't start with /api/ and the legacy mode is enabled. Do the path starts with mimetype?
+			const char * ptr = strchr(info->local_uri+1,'/');
+			if(ptr) {
+				string prefix{info->local_uri+1,((size_t)(ptr-info->local_uri))-1};
+				auto mime = MimeTypeFactory(prefix.c_str(),MimeType::custom);
+				if(mime != MimeType::custom) {
+					return mime;
+				}
+			}
+
+			Logger::String{"Rejecting request ",request_uri()," from ",info->remote_addr}.error("civetweb");
+			throw HTTP::Exception(400, request_uri(), _("Request path should be /api/[APIVER]/[REQUEST]"));
+		}
+
+		// Get mimetype from request header.
+		for(int header = 0; header < info->num_headers; header++) {
+
+			debug(info->http_headers[header].name,"=",info->http_headers[header].value);
+
+			if(!strcasecmp(info->http_headers[header].name,"Accept")) {
+				debug("Getting mime-type from header");
+				for(String &value : String{info->http_headers[header].value}.split(",")) {
+					auto mime = MimeTypeFactory(value.c_str(),MimeType::custom);
+					if(mime != MimeType::custom) {
+						return mime;
+					}
+				}
+			}
+		}
+
+		// Default is json.
+		Logger::String{"Unexpected mime-type on ",request_uri()," from ",info->remote_addr,", using JSON"}.info("civetweb");
+
+		return MimeType::json;
+	}
+
+
 	int CivetWeb::Connection::success(const char *mime_type, const char *response, size_t length) const noexcept {
 		mg_send_http_ok(conn, mime_type, length);
 		mg_write(conn, response, length);

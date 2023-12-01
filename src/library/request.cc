@@ -19,49 +19,72 @@
 
  #include <config.h>
 
-		/*
  #include <udjat/civetweb.h>
  #include <udjat/tools/request.h>
  #include <udjat/tools/http/request.h>
+ #include <udjat/tools/http/timestamp.h>
  #include <udjat/tools/logger.h>
+ #include <udjat/tools/configuration.h>
+ #include <udjat/tools/intl.h>
+
+ #include <stdexcept>
 
  using namespace std;
 
  namespace Udjat {
 
-	HTTP::Request::Request(const char *method)
-		: Udjat::Request(method) {
+	HTTP::Request::Request(const char *path, HTTP::Method method) : Udjat::Request{path, method} {
 
-		// Check for standard API
-		const char *ptr = (const char *) (*this);
+		if(reqpath && *reqpath) {
 
-		debug("Creating request for '",ptr,"'");
+			if(strncasecmp(reqpath,"/api/",5) && Config::Value<bool>("httpd","allow-legacy-path",true)) {
 
+				// Parse as legacy request
+				const char *next = strchr(reqpath+1,'/');
+				if(!next) {
+					throw runtime_error(_("Request path should be /api/[APIVER]/[REQUEST]"));
+				}
 
-		debug("Efective request path is '",path(),"'");
+				reqpath = next;
+
+				// TODO: Check if the first path element is the same as mimetype
+
+			} else {
+
+				// Is an standard API request, extract version.
+
+				reqpath += 5;
+
+				while(*reqpath && *reqpath != '/') {
+					if(isdigit(*reqpath)) {
+						apiver *= 10;
+						apiver += ('0' - *reqpath);
+					}
+					reqpath++;
+				}
+
+			}
+
+		}
 
 	}
-		*/
 
-	/*
-	std::string HTTP::Request::pop() {
+	const char * HTTP::Request::c_str() const noexcept {
+		if(reqpath && *reqpath) {
+			return reqpath;
+		}
+		return Udjat::Request::path();
+	}
 
-		if(path.empty()) {
-			throw system_error(ENODATA,system_category(),"Not enough arguments");
+	bool HTTP::Request::cached(const Udjat::TimeStamp &timestamp) const {
+
+		HTTP::TimeStamp	reqtime{getProperty("If-Modified-Since","").c_str()};
+
+		if(reqtime && ((time_t) reqtime) >= ((time_t) timestamp)) {
+			return true;
 		}
 
-		size_t pos = path.find('/');
-		if(pos == string::npos) {
-			string rc = path;
-			path.clear();
-			return rc;
-		}
-
-		string rc{path.c_str(),pos};
-		path.erase(0,pos+1);
-
-		return rc;
+		return Udjat::Request::cached(timestamp);
 	}
 
  }
-	*/

@@ -1,7 +1,7 @@
 /* SPDX-License-Identifier: LGPL-3.0-or-later */
 
 /*
- * Copyright (C) 2021 Perry Werneck <perry.werneck@gmail.com>
+ * Copyright (C) 2023 Perry Werneck <perry.werneck@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published
@@ -21,35 +21,28 @@
 
  #include <udjat/defs.h>
  #include <udjat/tools/request.h>
- #include <udjat/tools/http/value.h>
+ #include <udjat/tools/http/mimetype.h>
+ #include <udjat/tools/timestamp.h>
+ #include <civetweb.h>
 
  namespace Udjat {
 
 	namespace HTTP {
 
-		class UDJAT_API Response : public Udjat::Response {
-		private:
-			Udjat::HTTP::Value *value;
-
+		class UDJAT_API Request : public Udjat::Request {
 		public:
-			Response(Udjat::MimeType type);
-			virtual ~Response();
 
-			bool isNull() const override;
+			Request(const char *path = "", HTTP::Method m = HTTP::Get);
 
-			std::string to_string() const;
+			Request(const char *path, const char * method) : Request{path,HTTP::MethodFactory(method)} {
+			}
 
-			Udjat::Value & operator[](const char *name) override;
+			const char *c_str() const noexcept override;
+			bool cached(const Udjat::TimeStamp &timestamp) const override;
 
-			Udjat::Value & append(const Type type) override;
-
-			Udjat::Value & reset(const Type type) override;
-
-			Udjat::Value & set(const Value &value) override;
-
-			Udjat::Value & set(const char *value, const Type type) override;
 
 		};
+
 
 	}
 

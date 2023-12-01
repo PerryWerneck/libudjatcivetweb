@@ -35,25 +35,14 @@
  using namespace std;
  using namespace Udjat;
 
- int rootWebHandler(struct mg_connection *conn, void UDJAT_UNUSED(*cbdata)) {
+ int rootWebHandler(struct mg_connection *conn, void *) {
 
 	CivetWeb::Connection connection{conn};
 
-	debug("Request path is '",mg_get_request_info(conn)->local_uri,"'");
-
  	try {
 
-		//
-		// Execute API call
-		//
 		CivetWeb::Request request{mg_get_request_info(conn)};
-		HTTP::Response response{(MimeType) request};
-		request.exec(response);
-		string rsp{response.to_string()};
-
-		// TODO: Send customized header based on response properties.
-
-		return connection.success(to_string((MimeType) request),rsp.c_str(),rsp.size());
+		HTTP::Response response{(MimeType) (MimeType) connection};
 
 	} catch(const HTTP::Exception &error) {
 
@@ -77,6 +66,20 @@
 		return 500;
 
 	}
+
+	/*
+
+		//
+		// Execute API call
+		//
+		request.exec(response);
+		string rsp{response.to_string()};
+
+		// TODO: Send customized header based on response properties.
+
+		return connection.success(to_string((MimeType) request),rsp.c_str(),rsp.size());
+
+	*/
 
 	return 500;
  }

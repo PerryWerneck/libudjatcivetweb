@@ -24,10 +24,13 @@
  #include <config.h>
  #include <udjat/defs.h>
  #include <private/request.h>
+ #include <udjat/tools/http/request.h>
+ #include <udjat/tools/request.h>
  #include <udjat/tools/intl.h>
  #include <udjat/tools/logger.h>
  #include <udjat/tools/string.h>
  #include <udjat/tools/configuration.h>
+ #include <ctype.h>
 
  #include <civetweb.h>
 
@@ -35,33 +38,10 @@
 
 	namespace CivetWeb {
 
-		Request::Request(const struct mg_request_info *i) : Udjat::Request{i->request_method}, info{i} {
+		Request::Request(const struct mg_request_info *i) : HTTP::Request{i->local_uri,i->request_method}, info{i} {
 
-			for(int header = 0; header < info->num_headers; header++) {
+			debug("Request path set to '",path(),"'");
 
-				debug(info->http_headers[header].name,"=",info->http_headers[header].value);
-
-				if(!strcasecmp(info->http_headers[header].name,"Accept")) {
-
-					debug("Getting mime-type from header");
-
-					for(String &value : String{info->http_headers[header].value}.split(",")) {
-
-						auto mime = MimeTypeFactory(value.c_str(),this->type);
-						debug("mime: '",value.c_str(),"' (",MimeTypeFactory(value.c_str(),this->type),")");
-
-						if(mime != this->type) {
-							this->type = mime;
-							break;
-						}
-
-					}
-
-				}
-			}
-
-			rewind(Config::Value<bool>{"civetweb","require_versioned_path",false}.get());
-			debug("Local-path is '",c_str(),"'");
 		}
 
   		const char * Request::c_str() const noexcept {
