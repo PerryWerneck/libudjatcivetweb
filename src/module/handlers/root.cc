@@ -41,8 +41,17 @@
 
  	try {
 
+		MimeType mimetype{(MimeType) connection};
 		CivetWeb::Request request{mg_get_request_info(conn)};
-		HTTP::Response response{(MimeType) (MimeType) connection};
+		HTTP::Response response{mimetype};
+
+		request.exec(response);
+
+		string rsp{response.to_string()};
+
+		// TODO: Send customized header based on response properties.
+
+		return connection.success(to_string(mimetype),rsp.c_str(),rsp.size());
 
 	} catch(const HTTP::Exception &error) {
 
