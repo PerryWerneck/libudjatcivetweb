@@ -42,11 +42,7 @@
 				value.for_each([&ss](const char *name, const Value &value){
 
 					ss << "<li><label>" << name << ":&nbsp;";
-					if(value == Udjat::Value::Object || value == Udjat::Value::Array ) {
-						to_html(ss,value);
-					} else  {
-						ss << "<strong>" << value.to_string() << "</strong>";
-					}
+					to_html(ss,value);
 					ss << "</label></li>";
 					return false;
 
@@ -84,6 +80,28 @@
 				ss << "</tbody></table>";
 			}
 			break;
+
+		case Udjat::Value::Signed:
+		case Udjat::Value::Unsigned:
+		case Udjat::Value::Real:
+		case Udjat::Value::Fraction:
+			ss << "<strong class='numeric-value'>" << value.to_string() << "</strong>";
+			break;
+
+		case Udjat::Value::Boolean:
+			ss << "<strong class='" << (value.as_bool() ? "true-value" : "false-value") << "'>" << value.to_string() << "</strong>";
+			break;
+
+		case Udjat::Value::Url:
+			ss << "<strong class='string-value'>";
+			if(!value.empty()) {
+				ss << "<a href='" << value.to_string() << "'>" << value.to_string() << "</a>";
+			}
+			ss << "</strong>";
+			break;
+
+		default:
+			ss << "<strong class='string-value'>" << value.to_string() << "</strong>";
 
 		}
 		#pragma GCC diagnostic pop
