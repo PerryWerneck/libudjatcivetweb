@@ -36,6 +36,8 @@
 			Response(Udjat::MimeType mimetype);
 			virtual ~Response();
 
+			bool empty() const noexcept override;
+
 			bool for_each(const std::function<bool(const char *name, const Udjat::Value &value)> &call) const override;
 			Udjat::Value & operator[](const char *name) override;
 

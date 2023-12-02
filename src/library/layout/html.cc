@@ -21,11 +21,73 @@
  #include <udjat/defs.h>
  #include <udjat/tools/value.h>
  #include <udjat/tools/http/layouts.h>
+ #include <udjat/tools/logger.h>
  #include <iostream>
+ #include <vector>
+
+ using namespace std;
 
  namespace Udjat {
 
-	void HTTP::to_html(std::ostream &output, const Udjat::Value &value) {
+	void HTTP::to_html(std::ostream &ss, const Udjat::Value &value) {
+
+		#pragma GCC diagnostic push
+		#pragma GCC diagnostic ignored "-Wswitch"
+		switch((Value::Type) value) {
+		case Udjat::Value::Object:
+
+			if(!value.empty()) {
+
+				ss << "<ul>";
+				value.for_each([&ss](const char *name, const Value &value){
+
+					ss << "<li><label>" << name << ":&nbsp;";
+					if(value == Udjat::Value::Object || value == Udjat::Value::Array ) {
+						to_html(ss,value);
+					} else  {
+						ss << "<strong>" << value.to_string() << "</strong>";
+					}
+					ss << "</label></li>";
+					return false;
+
+				});
+				ss << "</ul>";
+			}
+			break;
+
+		case Udjat::Value::Array:
+
+			if(!value.empty()) {
+
+				vector<string> colnames;
+				ss << "<table><thead><tr>";
+				value.for_each([&ss,&colnames](const char *, const Value &row){
+					row.for_each([&ss,&colnames](const char *name, const Value &){
+						colnames.push_back(name);
+						ss << "<th>" << name << "</th>";
+						return false;
+					});
+					return true;
+				});
+				ss << "</tr></thead><tbody>";
+
+				value.for_each([&ss,&colnames](const char *, const Udjat::Value &row){
+					ss << "<tr>";
+
+					for(const string &name : colnames) {
+						ss << "<td>" << row[name.c_str()].to_string() << "</td>";
+					}
+					ss << "</tr>";
+					return false;
+				});
+
+				ss << "</tbody></table>";
+			}
+			break;
+
+		}
+		#pragma GCC diagnostic pop
+
 	}
 
 	/*

@@ -32,9 +32,16 @@
  namespace Udjat {
 
 	HTTP::Response::Response(Udjat::MimeType mimetype) : Udjat::Response::Value{mimetype}{
+
+		debug("Creating HTTP response for ",std::to_string(mimetype));
+
 	}
 
 	HTTP::Response::~Response() {
+	}
+
+	bool HTTP::Response::empty() const noexcept {
+		return children.empty();
 	}
 
 	bool HTTP::Response::for_each(const std::function<bool(const char *name, const Udjat::Value &value)> &call) const {

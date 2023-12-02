@@ -40,6 +40,7 @@
 			Value(Udjat::Value::Type t = Udjat::Value::Undefined);
 			virtual ~Value();
 
+			bool empty() const noexcept override;
 			bool isNull() const override;
 
 			operator Type() const noexcept override;

@@ -36,6 +36,10 @@
 		reset(Udjat::Value::Undefined);
 	}
 
+	bool HTTP::Value::empty() const noexcept {
+		return children.empty();
+	}
+
 	HTTP::Value::operator Value::Type() const noexcept {
 		return this->type;
 	}
