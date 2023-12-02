@@ -25,7 +25,33 @@
 
  namespace Udjat {
 
-	void HTTP::to_xml(std::ostream &output, const Udjat::Value &value) {
+	void HTTP::to_xml(std::ostream &ss, const Udjat::Value &value) {
+
+		switch((Value::Type) value) {
+		case Udjat::Value::Undefined:
+			break;
+
+		case Udjat::Value::Array:
+			value.for_each([&ss](const char *key, const Value &value){
+				ss << "<item name='" << key << "' type='" << std::to_string((Udjat::Value::Type) value) << "'"<< ">";
+				to_xml(ss,value);
+				ss << "</item>";
+				return false;
+			});
+			break;
+
+		case Udjat::Value::Object:
+			value.for_each([&ss](const char *key, const Value &value){
+				ss << "<" << key << " type='" << std::to_string((Udjat::Value::Type) value) << "'"<< ">";
+				to_xml(ss,value);
+				ss << "</" << key << ">";
+				return false;
+			});
+			break;
+
+		default:
+			ss << value.to_string();
+		}
 
 	}
 
