@@ -91,6 +91,16 @@
 			to_yaml(stream,*this);
 			break;
 
+		case Udjat::MimeType::csv:
+			for_each([&stream](const char *key, const Udjat::Value &value){
+				if(value == Value::Type::Array) {
+					to_csv(stream,value);
+					return true;
+				}
+				return false;
+			});
+			break;
+
 		case Udjat::MimeType::sh:
 
 			// Format as shell script (only first level)
