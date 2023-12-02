@@ -33,6 +33,7 @@
 		UDJAT_API void to_json(std::ostream &output, const Udjat::Value &value);
 		UDJAT_API void to_xml(std::ostream &output, const Udjat::Value &value);
 		UDJAT_API void to_yaml(std::ostream &output, const Udjat::Value &value, size_t left_margin = 0);
+		UDJAT_API void to_csv(std::ostream &ss, const Udjat::Value &value, const char delimiter = ',');
 
 	}
 

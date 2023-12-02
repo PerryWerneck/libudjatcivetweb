@@ -62,6 +62,7 @@
 		<Unit filename="src/library/handler.cc" />
 		<Unit filename="src/library/icon.cc" />
 		<Unit filename="src/library/index.cc" />
+		<Unit filename="src/library/layout/csv.cc" />
 		<Unit filename="src/library/layout/html.cc" />
 		<Unit filename="src/library/layout/json.cc" />
 		<Unit filename="src/library/layout/xml.cc" />
