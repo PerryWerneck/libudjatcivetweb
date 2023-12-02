@@ -23,9 +23,55 @@
  #include <udjat/tools/http/layouts.h>
  #include <iostream>
 
+ using namespace std;
+
  namespace Udjat {
 
-	void HTTP::to_yaml(std::ostream &output, const Udjat::Value &value, size_t left_margin) {
+	void HTTP::to_yaml(std::ostream &ss, const Udjat::Value &value, size_t left_margin) {
+
+		switch((Value::Type) value) {
+		case Udjat::Value::Undefined:
+			break;
+
+		case Udjat::Value::Array:
+			if(left_margin) {
+				ss << endl;
+			}
+			value.for_each([&ss,left_margin](const char *, const Value &value){
+				std::string spaces;
+				spaces.resize(left_margin,' ');
+				ss << spaces << "-";
+				to_yaml(ss,value,left_margin+2);
+				return false;
+			});
+			break;
+
+		case Udjat::Value::Object:
+			if(left_margin) {
+				ss << endl;
+			}
+			value.for_each([&ss,left_margin](const char *key, const Value &value){
+				std::string spaces;
+				spaces.resize(left_margin,' ');
+				ss << spaces << key << ":";
+				to_yaml(ss,value,left_margin+4);
+				return false;
+			});
+			break;
+
+		case Udjat::Value::Signed:
+		case Udjat::Value::Unsigned:
+		case Udjat::Value::Real:
+		case Udjat::Value::Boolean:
+		case Udjat::Value::Fraction:
+			ss << " " << value.to_string() << endl;
+			break;
+
+		default:
+			ss << " \"" << value.to_string() << "\"" << endl;
+
+		}
+
 	}
 
 	/*
