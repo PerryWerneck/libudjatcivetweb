@@ -39,8 +39,9 @@
 	#include <unistd.h>
 #endif // _WIN32
 
- int stateWebHandler(struct mg_connection *conn, void UDJAT_UNUSED(*cbdata)) {
+ int stateWebHandler(struct mg_connection *conn, void *) {
 
+	debug("Requesting state ",mg_get_request_info(conn)->local_uri);
 	try {
 
 		MimeType mimetype{MimeType::json};

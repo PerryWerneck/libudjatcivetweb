@@ -43,6 +43,8 @@
 
  int iconWebHandler(struct mg_connection *conn, void UDJAT_UNUSED(*cbdata)) {
 
+ 	debug("Searching for icon",mg_get_request_info(conn)->local_uri);
+
 	try {
 
 		const char *path = strrchr(mg_get_request_info(conn)->local_uri,'/');

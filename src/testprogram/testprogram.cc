@@ -47,7 +47,7 @@
 
 		public:
 			RandomAgent(const pugi::xml_node &node) : Agent<unsigned int>(node) {
-				cout << "Creating random Agent" << endl;
+				cout << "Building random Agent" << endl;
 			}
 
 			bool refresh() override {
@@ -55,8 +55,7 @@
 				return true;
 			}
 
-			/*
-			void get(const Request UDJAT_UNUSED(&request), Report &report) {
+			void get(const Request &, Response::Table &report) {
 
 				report.start("sample","row","a","b","c",nullptr);
 
@@ -71,7 +70,6 @@
 				}
 
 			}
-			*/
 
 		};
 

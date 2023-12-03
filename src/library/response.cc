@@ -33,7 +33,7 @@
 
 	HTTP::Response::Response(Udjat::MimeType mimetype) : Udjat::Response::Value{mimetype}{
 
-		debug("Creating HTTP response for ",std::to_string(mimetype));
+		debug("Building HTTP response for ",std::to_string(mimetype));
 
 	}
 
@@ -92,7 +92,7 @@
 			break;
 
 		case Udjat::MimeType::csv:
-			for_each([&stream](const char *key, const Udjat::Value &value){
+			for_each([&stream](const char *, const Udjat::Value &value){
 				if(value == Value::Type::Array) {
 					to_csv(stream,value);
 					return true;
@@ -112,7 +112,6 @@
 					break;
 
 				case Udjat::Value::Object:
-					// TODO: Check for 'summary' or 'value' child.
 					break;
 
 				case Udjat::Value::Signed:

@@ -59,7 +59,9 @@
 				debug("Appending icon '",name,"'");
 				auto inserted = cache.emplace(make_pair(std::string{name},Icon(name)));
 
-				cout << "icons\tCaching " << inserted.first->second << " as " << name << endl;
+				if(!inserted.first->second.empty()) {
+					cout << "civetweb\tCaching " << inserted.first->second << " as " << name << endl;
+				}
 				return inserted.first->second;
 
 			}

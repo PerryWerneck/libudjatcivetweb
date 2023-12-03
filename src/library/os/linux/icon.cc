@@ -38,6 +38,7 @@
 			debug("Building icon '",n,"'");
 
 			static const char * defpaths =
+					"/usr/share/icons/," \
 					"/usr/share/icons/" STRINGIZE_VALUE_OF(PRODUCT_NAME) "/," \
 					"/usr/share/icons/Adwaita/," \
 					"/usr/share/icons/gnome/," \
@@ -61,26 +62,39 @@
 					debug("Found '",c_str(),"'");
 					return;
 				}
+#ifdef DEBUG
+				else {
+					debug(filename.c_str()," is invalid");
+				}
+#endif // DEBUG
 
 			}
 
 			// Then search paths
+			string filter{"*/"};
+			filter += name;
+
 			for(string &path : paths) {
 
 				try {
 					File::Path folder{path};
-					if(folder && folder.find(name.c_str(),true)) {
+					if(folder && folder.find(filter.c_str(),true)) {
 						assign(folder);
-						debug("Found '",c_str(),"'");
+						debug("Found '",folder.c_str(),"'");
 						return;
 					}
+#ifdef DEBUG
+					else {
+						debug("Cant find ",name," at ",folder.c_str());
+					}
+#endif // DEBUG
 				} catch(const std::exception &e) {
-					cout << "icon\t" << e.what() << endl;
+					cerr << "icon\t" << e.what() << endl;
 				}
 
 			}
 
-			debug("Cant find icon '",n,"'");
+			clog << "civetweb\tCant find icon for '" << n << "'" << endl;
 			clear();
 
 		}

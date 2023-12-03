@@ -42,7 +42,7 @@
 
 		// Check for secondary instance.
 		if(instance) {
-			clog << "httpd\tCreating a new HTTP server instance" << endl;
+			clog << "httpd\tBuilding a new HTTP server instance" << endl;
 		} else {
 			instance = this;
 		}
