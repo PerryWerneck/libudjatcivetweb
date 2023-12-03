@@ -26,19 +26,22 @@
   *
   */
 
-  /*
- #include "private.h"
+ #include <config.h>
+ #include <udjat/defs.h>
  #include <udjat/tools/http/image.h>
  #include <udjat/tools/http/exception.h>
  #include <udjat/tools/http/mimetype.h>
  #include <udjat/tools/configuration.h>
  #include <udjat/tools/http/connection.h>
 
-#ifndef _WIN32
-	#include <unistd.h>
-#endif // _WIN32
+ #include <private/module.h>
+ #include <civetweb.h>
 
- int imageWebHandler(struct mg_connection *conn, void UDJAT_UNUSED(*cbdata)) {
+ #ifdef HAVE_UNISTD_H
+	#include <unistd.h>
+ #endif // HAVE_UNISTD_H
+
+ int imageWebHandler(struct mg_connection *conn, void *) {
 
 	try {
 
@@ -90,4 +93,3 @@
 	return 404;
 
  }
- */

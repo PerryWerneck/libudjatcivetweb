@@ -129,14 +129,11 @@
  /// @brief Web handler.
  //int webHandler(const CivetWeb::Connection &connection, function<string (const CivetWeb::Connection &connection, const char *path, const char *method, const MimeType mimetype)> worker) noexcept;
 
- /// @brief Handler for API requests.
- // int apiWebHandler(struct mg_connection *conn, void *cbdata);
-
  /// @brief Handler for icon requests.
  int iconWebHandler(struct mg_connection *conn, void *cbdata);
 
  /// @brief Handler for image requests.
- //int imageWebHandler(struct mg_connection *conn, void *cbdata);
+ int imageWebHandler(struct mg_connection *conn, void *cbdata);
 
  /// @brief Handler for state requests.
  int stateWebHandler(struct mg_connection *conn, void *cbdata);
