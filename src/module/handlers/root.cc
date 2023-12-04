@@ -27,6 +27,7 @@
  #include <private/module.h>
  #include <udjat/tools/intl.h>
  #include <udjat/tools/logger.h>
+ #include <udjat/tools/request.h>
  #include <udjat/tools/http/exception.h>
  #include <udjat/tools/http/response.h>
  #include <udjat/tools/configuration.h>
@@ -41,17 +42,33 @@
 
  	try {
 
-		MimeType mimetype{(MimeType) connection};
-		CivetWeb::Request request{mg_get_request_info(conn)};
-		HTTP::Response response{mimetype};
+		MimeType mimetype = (MimeType) connection;
+		string response = CivetWeb::Request{mg_get_request_info(conn)}.exec(mimetype);
 
-		request.exec(response);
+		if(response.empty()) {
 
-		string rsp{response.to_string()};
+			// TODO: Send 'empty response' status.
+			return connection.success(to_string(mimetype),response.c_str(),response.size());
 
-		// TODO: Send customized header based on response properties.
+		} else {
 
-		return connection.success(to_string(mimetype),rsp.c_str(),rsp.size());
+			return connection.success(to_string(mimetype),response.c_str(),response.size());
+
+		}
+
+		/*
+		// Check for standard method.
+		{
+			HTTP::Response response{mimetype};
+			if(request.exec(response)) {
+
+				string rsp{response.to_string()};
+				// TODO: Send customized header based on response properties.
+
+			}
+		}
+		*/
+
 
 	} catch(const HTTP::Exception &error) {
 

@@ -28,48 +28,21 @@
 
 	namespace HTTP {
 
-		/*
 		class UDJAT_API Report : public Udjat::Response::Table {
 		private:
-
-			/// @brief Report format.
-			const MimeType mimetype;
-
-			/// @brief Report contents
 			std::list<HTTP::Value> values;
 
-			void to_json(std::stringstream &ss) const;
-			void to_html(std::stringstream &ss) const;
-			void to_xml(std::stringstream &ss) const;
-
-		 public:
-		 	Report();
-			Report(const char *uri, const MimeType mimetype);
+		public:
+			Report(Udjat::MimeType mimetype);
 			virtual ~Report();
 
+			void save(std::ostream &stream) const;
 			std::string to_string() const;
 
-			Udjat::Report & push_back(const char *str) override;
-
-			Udjat::Report & push_back(const std::string &value) override;
-
-			Udjat::Report & push_back(const short value) override;
-			Udjat::Report & push_back(const unsigned short value) override;
-
-			Udjat::Report & push_back(const int value) override;
-			Udjat::Report & push_back(const unsigned int value) override;
-
-			Udjat::Report & push_back(const long value) override;
-			Udjat::Report & push_back(const unsigned long value) override;
-
-			Udjat::Report & push_back(const Udjat::TimeStamp value) override;
-			Udjat::Report & push_back(const bool value) override;
-
-			Udjat::Report & push_back(const float value) override;
-			Udjat::Report & push_back(const double value) override;
+			Udjat::Response::Table & push_back(const char *str, Udjat::Value::Type type) override;
 
 		};
-		*/
+
 
 	}
 

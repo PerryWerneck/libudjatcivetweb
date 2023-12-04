@@ -38,6 +38,8 @@
 		public:
 
 			Value(Udjat::Value::Type t = Udjat::Value::Undefined);
+			Value(const char *value, Udjat::Value::Type t = Udjat::Value::Undefined);
+
 			virtual ~Value();
 
 			bool empty() const noexcept override;

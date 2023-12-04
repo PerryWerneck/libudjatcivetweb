@@ -40,6 +40,7 @@
 			const char *c_str() const noexcept override;
 			bool cached(const Udjat::TimeStamp &timestamp) const override;
 
+			std::string exec(const MimeType mimetype);
 
 		};
 

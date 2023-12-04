@@ -29,7 +29,10 @@
 
  namespace Udjat {
 
-	HTTP::Value::Value(Udjat::Value::Type t) : type(t) {
+	HTTP::Value::Value(Udjat::Value::Type t) : type{t} {
+	}
+
+	HTTP::Value::Value(const char *v, Udjat::Value::Type t) : type{t}, value{v} {
 	}
 
 	HTTP::Value::~Value() {

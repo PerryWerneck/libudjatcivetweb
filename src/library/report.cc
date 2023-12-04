@@ -18,13 +18,40 @@
  */
 
  #include <config.h>
+ #include <udjat/defs.h>
+ #include <udjat/tools/report.h>
  #include <udjat/tools/http/report.h>
- #include <cstdarg>
- #include <iostream>
  #include <sstream>
- #include <udjat/tools/http/exception.h>
 
  using namespace std;
+
+ namespace Udjat {
+
+	namespace HTTP {
+
+		Report::Report(Udjat::MimeType mimetype) : Udjat::Response::Table{mimetype} {
+		}
+
+		Report::~Report() {
+		}
+
+		Udjat::Response::Table & Report::push_back(const char *str, Udjat::Value::Type type) {
+			values.emplace_back(str,type);
+			return *this;
+		}
+
+		void Report::save(std::ostream &stream) const {
+		}
+
+		std::string Report::to_string() const {
+			std::stringstream stream;
+			save(stream);
+			return stream.str();
+		}
+
+	}
+
+ }
 
  /*
  namespace Udjat {

@@ -48,6 +48,10 @@
 			return info->local_uri;
   		}
 
+		const char * Request::query(const char *) const {
+			return info->query_string;
+		}
+
  		String Request::getProperty(const char *name, const char *def) const {
 
 			// TODO: Check parameters.

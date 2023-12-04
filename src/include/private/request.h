@@ -37,6 +37,7 @@
 
 			const char *c_str() const noexcept override;
 			String getProperty(const char *name, const char *def) const override;
+			const char * query(const char *def) const override;
 
 		};
 
