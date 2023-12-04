@@ -21,6 +21,7 @@
  #include <udjat/defs.h>
  #include <udjat/tools/report.h>
  #include <udjat/tools/http/report.h>
+ #include <udjat/tools/logger.h>
  #include <sstream>
 
  using namespace std;
@@ -36,17 +37,58 @@
 		}
 
 		Udjat::Response::Table & Report::push_back(const char *str, Udjat::Value::Type type) {
+			debug("column(",columns.current->c_str(),")='",str,"'");
 			values.emplace_back(str,type);
+			next();
 			return *this;
-		}
-
-		void Report::save(std::ostream &stream) const {
 		}
 
 		std::string Report::to_string() const {
 			std::stringstream stream;
 			save(stream);
 			return stream.str();
+		}
+
+		void Report::save(std::ostream &ss) const {
+
+			if(values.empty()) {
+				return;
+			}
+
+			switch((MimeType) *this) {
+			case Udjat::MimeType::html:
+				{
+					ss << "<table><thead>";
+
+					if(!info.caption.empty()) {
+						ss << "<caption>" << info.caption << "</caption>";
+					}
+
+					ss << "<tr>";
+
+					for(auto column : columns.names) {
+						ss << "<th>" << column << "</th>";
+					}
+
+					ss << "</tr></thead><tbody><tr>";
+
+					auto column = columns.names.begin();
+					for(auto value : values) {
+						if(column == columns.names.end()) {
+							ss << "</tr><tr>";
+							column = columns.names.begin();
+						}
+						ss << "<td>" << value.to_string() << "</td>";
+						column++;
+					}
+
+					ss << "</tr></tbody></table>";
+				}
+				break;
+
+			default:
+				throw system_error(ENOTSUP,system_category(),Logger::String{"No exporter for ",((MimeType) *this)});
+			}
 		}
 
 	}

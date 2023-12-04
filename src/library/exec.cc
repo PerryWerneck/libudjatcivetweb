@@ -62,19 +62,20 @@
 			// Found an standard worker, check output-format argument
 			// https://softwareengineering.stackexchange.com/questions/431218/rest-api-endpoint-returning-detailed-or-summary-data
 			size_t output_format = getArgument("output-format","detailed").select("detailed","list","combined",nullptr);
-
-			debug("output-format='",getArgument("output-format","detailed"),"'");
+			debug("output-format='",getArgument("output-format","detailed"),"' value=",output_format);
 
 			if(output_format == 1 || mimetype == MimeType::csv) {
 
 				// List
 				HTTP::Report response{mimetype};
+				debug("Sending list response");
 				selected_worker->work(*this,response);
 				return response.to_string();
 
 			} else {
 
 				HTTP::Response response{mimetype};
+				debug("Sending detailed response");
 				selected_worker->work(*this,response);
 				return response.to_string();
 

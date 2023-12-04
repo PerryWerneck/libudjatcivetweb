@@ -56,19 +56,6 @@
 
 		}
 
-		/*
-		// Check for standard method.
-		{
-			HTTP::Response response{mimetype};
-			if(request.exec(response)) {
-
-				string rsp{response.to_string()};
-				// TODO: Send customized header based on response properties.
-
-			}
-		}
-		*/
-
 
 	} catch(const HTTP::Exception &error) {
 

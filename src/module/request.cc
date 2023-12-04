@@ -54,9 +54,6 @@
 
  		String Request::getProperty(const char *name, const char *def) const {
 
-			// TODO: Check parameters.
-
-			// Check for 'name' on http headers.
 			for(int header = 0; header < info->num_headers; header++) {
 				if(!strcasecmp(info->http_headers[header].name,name)) {
 					return info->http_headers[header].value;
