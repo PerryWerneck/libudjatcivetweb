@@ -23,6 +23,7 @@
  #include <udjat/tools/http/report.h>
  #include <udjat/tools/logger.h>
  #include <sstream>
+ #include <udjat/tools/http/layouts.h>
 
  using namespace std;
 
@@ -56,6 +57,36 @@
 			}
 
 			switch((MimeType) *this) {
+			case Udjat::MimeType::json:
+				{
+					bool sep = false;
+					auto column = columns.names.begin();
+
+					ss << "[{";
+					for(auto value : values) {
+
+						if(column == columns.names.end()) {
+							ss << "},{";
+							column = columns.names.begin();
+							sep = false;
+						}
+
+						if(sep) {
+							ss << ',';
+						}
+						sep = true;
+
+						ss << "\"" << column->c_str() << "\":";
+						to_json(ss,value);
+						column++;
+
+					}
+
+					ss << "}]";
+
+				}
+				break;
+
 			case Udjat::MimeType::html:
 				{
 					ss << "<table><thead>";
@@ -116,6 +147,44 @@
 				}
 
 				ss << "</response>";
+				break;
+
+			case Udjat::MimeType::csv:
+				{
+					bool sep{false};
+					for(auto column : columns.names) {
+						if(sep) {
+							ss << ",";
+						}
+						sep = true;
+						ss << column;
+					}
+					ss << endl;
+
+					sep = false;
+
+					auto column = columns.names.begin();
+					for(auto value : values) {
+						if(column == columns.names.end()) {
+							ss << endl;
+							sep = false;
+						}
+						if(sep) {
+							ss << ",";
+						}
+						sep = true;
+
+						if(value == Udjat::Value::Signed || value == Udjat::Value::Unsigned || value == Udjat::Value::Real || value == Udjat::Value::Boolean || value == Udjat::Value::Fraction) {
+							ss << value.to_string();
+						} else {
+							ss << "\"" << value.to_string() << "\"";
+						}
+
+						column++;
+					}
+
+					ss << endl;
+				}
 				break;
 
 			default:
