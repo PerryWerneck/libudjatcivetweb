@@ -57,6 +57,38 @@
 			}
 
 			switch((MimeType) *this) {
+			case Udjat::MimeType::xml:
+				ss << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
+				ss << "<response>";
+
+				if(!info.caption.empty()) {
+					ss << "<caption>" << info.caption << "</caption>";
+				}
+
+				if(values.empty()) {
+
+					ss << "<contents />";
+
+				} else {
+
+					ss << "<contents><item>";
+
+					auto column = columns.names.begin();
+					for(auto value : values) {
+						if(column == columns.names.end()) {
+							ss << "</item><item>";
+							column = columns.names.begin();
+						}
+						ss << "<" << *column << ">" << value.to_string() << "</" << *column << ">";
+						column++;
+					}
+
+					ss << "</item></contents>";
+				}
+
+				ss << "</response>";
+				break;
+
 			case Udjat::MimeType::json:
 				{
 					bool sep = false;
@@ -115,38 +147,6 @@
 
 					ss << "</tr></tbody></table>";
 				}
-				break;
-
-			case Udjat::MimeType::xml:
-				ss << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
-				ss << "<response>";
-
-				if(!info.caption.empty()) {
-					ss << "<caption>" << info.caption << "</caption>";
-				}
-
-				if(values.empty()) {
-
-					ss << "<contents />";
-
-				} else {
-
-					ss << "<contents><item>";
-
-					auto column = columns.names.begin();
-					for(auto value : values) {
-						if(column == columns.names.end()) {
-							ss << "</item><item>";
-							column = columns.names.begin();
-						}
-						ss << "<" << *column << ">" << value.to_string() << "</" << *column << ">";
-						column++;
-					}
-
-					ss << "</item></contents>";
-				}
-
-				ss << "</response>";
 				break;
 
 			case Udjat::MimeType::csv:
