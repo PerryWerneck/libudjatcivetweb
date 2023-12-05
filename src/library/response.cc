@@ -19,6 +19,7 @@
 
  #include <config.h>
  #include <udjat/civetweb.h>
+ #include <udjat/tools/response.h>
  #include <udjat/tools/http/response.h>
  #include <udjat/tools/http/value.h>
  #include <udjat/tools/http/value.h>
@@ -42,6 +43,22 @@
 
 	bool HTTP::Response::empty() const noexcept {
 		return children.empty();
+	}
+
+	HTTP::Response::operator Type() const noexcept {
+		return this->type;
+	}
+
+	Udjat::Value & HTTP::Response::reset(const Udjat::Value::Type type) {
+
+		if(type != Value::Array && type != Value::Object) {
+			throw runtime_error("Invalid response type");
+		}
+
+		this->type = type;
+		children.clear();
+
+		return *this;
 	}
 
 	bool HTTP::Response::for_each(const std::function<bool(const char *name, const Udjat::Value &value)> &call) const {

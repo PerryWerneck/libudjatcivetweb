@@ -30,16 +30,21 @@
 
 		class UDJAT_API Response : public Udjat::Response::Value {
 		private:
+			Value::Type type = Value::Object;
 			std::map<std::string,HTTP::Value> children;
 
 		public:
 			Response(Udjat::MimeType mimetype);
 			virtual ~Response();
 
+			operator Type() const noexcept override;
+
 			bool empty() const noexcept override;
 
 			bool for_each(const std::function<bool(const char *name, const Udjat::Value &value)> &call) const override;
 			Udjat::Value & operator[](const char *name) override;
+
+			Udjat::Value & reset(const Udjat::Value::Type type) override;
 
 			void save(std::ostream &stream) const;
 			std::string to_string() const;
