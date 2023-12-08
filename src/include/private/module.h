@@ -141,6 +141,9 @@
  /// @brief Handler for '/' request.
  int rootWebHandler(struct mg_connection *conn, void *cbdata);
 
+ /// @brief Handler for '/favicon.ico' request.
+ int faviconWebHandler(struct mg_connection *conn, void *cbdata);
+
  /// @brief Handler for custom requests.
  //int customWebHandler(struct mg_connection *conn, void *cbdata);
 

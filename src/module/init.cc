@@ -81,7 +81,7 @@
 	void setHandlers() noexcept {
 		mg_set_request_handler(ctx, "/icon/", iconWebHandler, 0);
 		mg_set_request_handler(ctx, "/image/", imageWebHandler, 0);
-//		mg_set_request_handler(ctx, "/state", stateWebHandler, 0);
+		mg_set_request_handler(ctx, "/favicon.ico", faviconWebHandler, 0);
 //		mg_set_request_handler(ctx, "/report/", reportWebHandler, 0);
 //		mg_set_request_handler(ctx, "/swagger.json", swaggerWebHandler, 0);
 		mg_set_request_handler(ctx, "/", rootWebHandler, 0);
