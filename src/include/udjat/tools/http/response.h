@@ -44,6 +44,7 @@
 			bool for_each(const std::function<bool(const char *name, const Udjat::Value &value)> &call) const override;
 			Udjat::Value & operator[](const char *name) override;
 
+			Udjat::Value & append(const Type type = Object) override;
 			Udjat::Value & reset(const Udjat::Value::Type type) override;
 
 			void save(std::ostream &stream) const;

@@ -49,14 +49,25 @@
 		return this->type;
 	}
 
+	Udjat::Value & HTTP::Response::append(const Type type) {
+
+		reset(Value::Array);
+		return children[std::to_string((int) children.size()).c_str()];
+
+	}
+
 	Udjat::Value & HTTP::Response::reset(const Udjat::Value::Type type) {
 
 		if(type != Value::Array && type != Value::Object) {
-			throw runtime_error("Invalid response type");
+			throw runtime_error(Logger::String{"Cant handle '",std::to_string(type),"' at this level"});
 		}
 
-		this->type = type;
-		children.clear();
+		if(type != this->type) {
+			debug("Response reset to '",std::to_string(type),"'");
+
+			this->type = type;
+			children.clear();
+		}
 
 		return *this;
 	}
