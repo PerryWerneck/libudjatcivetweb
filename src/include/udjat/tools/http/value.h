@@ -29,7 +29,7 @@
 
 	namespace HTTP {
 
-		class UDJAT_PRIVATE Value : public Udjat::Value {
+		class UDJAT_API Value : public Udjat::Value {
 		private:
 			Udjat::Value::Type type;
 			std::string value;

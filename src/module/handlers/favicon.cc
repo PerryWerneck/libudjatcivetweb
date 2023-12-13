@@ -31,6 +31,7 @@
  #include <udjat/tools/worker.h>
  #include <udjat/tools/configuration.h>
  #include <udjat/tools/http/icon.h>
+ #include <udjat/tools/http/value.h>
  #include <fcntl.h>
 
  #ifdef HAVE_UNISTD_H
@@ -43,7 +44,43 @@
 
 	try {
 
-		// TODO: Search workers for favicon.
+		Config::Value<unsigned int> max_age{"theme","icon-max-age",604800};
+
+		// Search workers for favicon.
+		{
+			HTTP::Value properties{Udjat::Value::Object};
+
+			if(Worker::for_each([&properties](const Worker &worker){
+				return worker.getProperty("favicon",properties);
+			})) {
+
+				// Got favicon from worker.
+				if(!properties["icon-name"].isNull()) {
+
+					Udjat::HTTP::Icon icon = Udjat::HTTP::Icon::getInstance(properties["icon-name"].to_string("favicon").c_str());
+					CivetWeb::Connection(conn).send(
+						HTTP::Get,
+						icon.c_str(),
+						false,
+						"image/x-icon",
+						max_age
+					);
+
+				} else if(!properties["filename"].isNull()) {
+
+					// It's a filename.
+					CivetWeb::Connection(conn).send(
+						HTTP::Get,
+						properties["filename"].to_string().c_str(),
+						false,
+						properties["mimetype"].to_string("image/x-icon").c_str(),
+						max_age
+					);
+
+				}
+
+			}
+		}
 
 		//
 		// Get default favicon
@@ -60,7 +97,7 @@
 				filename.c_str(),
 				false,
 				"image/x-icon",
-				Config::Value<unsigned int>("theme","icon-max-age",604800)
+				max_age
 			);
 		}
 
