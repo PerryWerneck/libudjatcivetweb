@@ -39,50 +39,26 @@
 
 	std::string HTTP::Request::exec(const MimeType mimetype) {
 
-		const Worker *selected_worker = nullptr;
+		// https://softwareengineering.stackexchange.com/questions/431218/rest-api-endpoint-returning-detailed-or-summary-data
+		size_t output_format = getArgument("output-format","detailed").select("detailed","list","combined",nullptr);
 
-		debug("Searching worker for '",reqpath,"'");
+		if(output_format == 1 || mimetype == MimeType::csv) {
 
-		if(Worker::for_each([this,&selected_worker](const Worker &worker){
+			// List
+			HTTP::Report response{mimetype};
+			debug("Sending list response");
+			Udjat::exec(*this,response);
+			return response.to_string();
 
-			const char *path{worker.check_path(reqpath)};
-			if(!path) {
-				return false;
-			}
+		} else {
 
-			debug("Worker '",worker.c_str(),"' selected path '",path,"'");
-
-			selected_worker = &worker;
-			reqpath = path;
-
-			return true;
-
-		})) {
-
-			// Found an standard worker, check output-format argument
-			// https://softwareengineering.stackexchange.com/questions/431218/rest-api-endpoint-returning-detailed-or-summary-data
-			size_t output_format = getArgument("output-format","detailed").select("detailed","list","combined",nullptr);
-			debug("output-format='",getArgument("output-format","detailed"),"' value=",output_format);
-
-			if(output_format == 1 || mimetype == MimeType::csv) {
-
-				// List
-				HTTP::Report response{mimetype};
-				debug("Sending list response");
-				selected_worker->work(*this,response);
-				return response.to_string();
-
-			} else {
-
-				HTTP::Response response{mimetype};
-				debug("Sending detailed response");
-				selected_worker->work(*this,response);
-				return response.to_string();
-
-			}
+			// Detailed
+			HTTP::Response response{mimetype};
+			debug("Sending detailed response");
+			Udjat::exec(*this,response);
+			return response.to_string();
 
 		}
-
 
 		throw system_error(ENOENT,system_category(),"Unknown path");
 

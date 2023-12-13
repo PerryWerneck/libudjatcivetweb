@@ -42,13 +42,20 @@
 
  	try {
 
+#ifdef DEBUG
+		{
+			auto info = mg_get_request_info(conn);
+			debug("local-uri='",info->local_uri,"'");
+		}
+#endif // DEBUG
+
 		MimeType mimetype = (MimeType) connection;
 		string response = CivetWeb::Request{mg_get_request_info(conn)}.exec(mimetype);
 
 		if(response.empty()) {
 
 			// TODO: Send 'empty response' status.
-			return connection.success(to_string(mimetype),response.c_str(),response.size());
+			connection.failed(204, "Empty response");
 
 		} else {
 
@@ -79,20 +86,6 @@
 		return 500;
 
 	}
-
-	/*
-
-		//
-		// Execute API call
-		//
-		request.exec(response);
-		string rsp{response.to_string()};
-
-		// TODO: Send customized header based on response properties.
-
-		return connection.success(to_string((MimeType) request),rsp.c_str(),rsp.size());
-
-	*/
 
 	return 500;
  }

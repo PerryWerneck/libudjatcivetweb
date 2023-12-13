@@ -30,42 +30,41 @@
  #include <udjat/tools/logger.h>
  #include <udjat/tools/worker.h>
  #include <udjat/tools/configuration.h>
+ #include <udjat/tools/http/icon.h>
+ #include <fcntl.h>
+
+ #ifdef HAVE_UNISTD_H
+	#include <unistd.h>
+ #endif // HAVE_UNISTD_H
 
  using namespace Udjat;
 
  int faviconWebHandler(struct mg_connection *conn, void *) {
 
- 	debug("Searching for favicon",mg_get_request_info(conn)->local_uri);
-
 	try {
 
-		const auto info{mg_get_request_info(conn)};
-		String icon_name;
+		// TODO: Search workers for favicon.
 
-		Worker::for_each([&icon_name,info](const Worker &worker) {
+		//
+		// Get default favicon
+		//
+#ifndef _WIN32
+		Config::Value<string> filename{"theme","favicon","/usr/share/pixmaps/distribution-logos/favicon.ico"};
+#else
+		Udjat::HTTP::Icon filename = Udjat::HTTP::Icon::getInstance("favicon");
+#endif // _WIN32
 
-			const char *converted = worker.check_path(info->local_uri);
-			if(!converted) {
-				icon_name = converted;
-				return true;
-			}
-
-			return false;
-		});
-
-		if(icon_name.empty()) {
-			icon_name = "favicon.ico";
+		if(!filename.empty() && access(filename.c_str(),R_OK) == 0) {
+			CivetWeb::Connection(conn).send(
+				HTTP::Get,
+				filename.c_str(),
+				false,
+				"image/x-icon",
+				Config::Value<unsigned int>("theme","icon-max-age",604800)
+			);
 		}
 
-		Udjat::HTTP::Image image{icon_name.c_str()};
-
-		CivetWeb::Connection(conn).send(
-			HTTP::Get,
-			image.c_str(),
-			false,
-			"image/svg+xml",
-			Config::Value<unsigned int>("theme","favicon-max-age",604800)
-		);
+		mg_send_http_error(conn, 404, "Cant find icon");
 
 	} catch(const HTTP::Exception &error) {
 
