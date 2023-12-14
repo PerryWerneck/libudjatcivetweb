@@ -27,6 +27,7 @@
  #include <private/module.h>
  #include <udjat/tools/http/exception.h>
  #include <udjat/tools/http/image.h>
+ #include <udjat/tools/intl.h>
  #include <udjat/tools/logger.h>
  #include <udjat/tools/worker.h>
  #include <udjat/tools/configuration.h>
@@ -54,7 +55,7 @@
 				return worker.getProperty("favicon",properties);
 			})) {
 
-				// Got favicon from worker.
+				// Got favicon from worker?
 				if(!properties["icon-name"].isNull()) {
 
 					Udjat::HTTP::Icon icon = Udjat::HTTP::Icon::getInstance(properties["icon-name"].to_string("favicon").c_str());
@@ -66,7 +67,7 @@
 						max_age
 					);
 
-				} else if(!properties["filename"].isNull()) {
+				} else if(!properties["icon-file"].isNull()) {	// Is the response a filename?
 
 					// It's a filename.
 					CivetWeb::Connection(conn).send(
@@ -101,7 +102,7 @@
 			);
 		}
 
-		mg_send_http_error(conn, 404, "Cant find icon");
+		mg_send_http_error(conn, 404, _("Cant find icon"));
 
 	} catch(const HTTP::Exception &error) {
 
@@ -121,12 +122,12 @@
 
 	} catch(...) {
 
-		mg_send_http_error(conn, 500, "%s", "Unexpected error");
+		mg_send_http_error(conn, 500, "%s", _("Unexpected error"));
 		return 500;
 
 	}
 
-	mg_send_http_error(conn, 404, "Not available");
+	mg_send_http_error(conn, 404, _("Not available"));
 	return 404;
 
  }
