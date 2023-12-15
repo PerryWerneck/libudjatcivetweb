@@ -82,6 +82,7 @@
 		mg_set_request_handler(ctx, "/icon/", iconWebHandler, 0);
 		mg_set_request_handler(ctx, "/image/", imageWebHandler, 0);
 		mg_set_request_handler(ctx, "/favicon.ico", faviconWebHandler, 0);
+		mg_set_request_handler(ctx, "/authkey.pem", keyWebHandler, 0);
 //		mg_set_request_handler(ctx, "/report/", reportWebHandler, 0);
 //		mg_set_request_handler(ctx, "/swagger.json", swaggerWebHandler, 0);
 		mg_set_request_handler(ctx, "/", rootWebHandler, 0);
@@ -277,6 +278,18 @@
 						).write(Logger::Debug,"civetweb");
 					}
 				}
+
+#ifdef HAVE_LIBSSL
+				Logger::String(
+					"Authentication key available on ",
+					(ports[0].is_ssl ? "https" : "http"),
+					"://",
+					(ports[0].protocol == 1 ? "127.0.0.1" : "localhost"),
+					":",
+					ports[0].port,
+					"/authkey.pem"
+				).write(Logger::Debug,"civetweb");
+#endif // HAVE_LIBSSL
 
 			}
 		}

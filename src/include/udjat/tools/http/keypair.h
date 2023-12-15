@@ -51,6 +51,9 @@
 			/// @return Base64 with the encrypted value.
 			String encrypt(const char *str);
 
+			/// @brief Get public key.
+			String to_string();
+
 		};
 
 

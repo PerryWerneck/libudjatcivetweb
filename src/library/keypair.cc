@@ -26,6 +26,7 @@
  #include <udjat/tools/http/keypair.h>
  #include <udjat/tools/logger.h>
  #include <udjat/tools/base64.h>
+ #include <udjat/tools/configuration.h>
  #include <stdexcept>
 
 #ifdef HAVE_LIBSSL
@@ -41,6 +42,11 @@
 
 		KeyPair::KeyPair() {
 			reset();
+		}
+
+		KeyPair & KeyPair::getInstance() {
+			static KeyPair instance;
+			return instance;
 		}
 
 #ifdef HAVE_LIBSSL
@@ -69,7 +75,7 @@
 					throw runtime_error(Logger::String{"Error creating RSA key pair: ",ERR_lib_error_string(ERR_get_error())});
 				}
 
-				if(RSA_generate_key_ex(key,1024,bne,nullptr) != 1) {
+				if(RSA_generate_key_ex(key,Config::Value<unsigned int>{"authenticator","key-length",1024},bne,nullptr) != 1) {
 					RSA_free(key);
 					throw runtime_error(Logger::String{"Error creating RSA key pair: ",ERR_lib_error_string(ERR_get_error())});
 				}
@@ -91,7 +97,7 @@
 
 			lock_guard<mutex> lock(guard);
 
-			if(!(str && key)) {
+			if(!(from && key)) {
 				throw runtime_error("Unable to encrypt data");
 			}
 
@@ -99,7 +105,7 @@
 			unsigned char to[szBuffer];
 			memset(to,0,szBuffer);
 
-			int szOut = RSA_private_encrypt(strlen(str), (unsigned char *) from, to, (RSA *) key, RSA_PKCS1_PADDING);
+			int szOut = RSA_private_encrypt(strlen(from), (unsigned char *) from, to, (RSA *) key, RSA_PKCS1_PADDING);
 			if(szOut < 1) {
 				throw runtime_error("Unable to encrypt data block");
 			}
@@ -108,12 +114,32 @@
 
 		}
 
+		String KeyPair::to_string() {
+
+			if(key) {
+				BIO *mem = BIO_new(BIO_s_mem());
+				PEM_write_bio_RSA_PUBKEY(mem, (RSA *) key);
+				size_t len = BIO_pending(mem);
+				char text[len+1];
+				BIO_read(mem, text, len);
+				text[len] = 0;
+				BIO_free(mem);
+				return text;
+			}
+
+			return "";
+		}
+
 #else
 
 		void KeyPair::reset() {
 		}
 
 		KeyPair::~KeyPair() {
+		}
+
+		String KeyPair::toString() {
+			return "";
 		}
 
 #endif // HAVE_LIBSSL
