@@ -70,7 +70,8 @@ CFLAGS= \
 	-Isrc/include \
 	-DBUILD_DATE=`date +%Y%m%d` \
 	-DLOCALEDIR=$(localedir) \
-	@UDJAT_CFLAGS@
+	@UDJAT_CFLAGS@ \
+	@LIBSSL_CFLAGS@
 
 LDFLAGS=\
 	@LDFLAGS@
@@ -78,6 +79,7 @@ LDFLAGS=\
 LIBS= \
 	@LIBS@ \
 	@UDJAT_LIBS@ \
+	@LIBSSL_LIBS@ \
 	@INTL_LIBS@ \
 	-lcivetweb
 

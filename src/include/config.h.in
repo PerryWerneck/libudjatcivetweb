@@ -18,6 +18,9 @@
 /* Libintl is available */
 #undef HAVE_LIBINTL
 
+/* Do we have libssl? */
+#undef HAVE_LIBSSL
+
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
 

@@ -51,6 +51,7 @@
 		<Unit filename="src/include/udjat/tools/http/handler.h" />
 		<Unit filename="src/include/udjat/tools/http/icon.h" />
 		<Unit filename="src/include/udjat/tools/http/image.h" />
+		<Unit filename="src/include/udjat/tools/http/keypair.h" />
 		<Unit filename="src/include/udjat/tools/http/layouts.h" />
 		<Unit filename="src/include/udjat/tools/http/report.h" />
 		<Unit filename="src/include/udjat/tools/http/request.h" />
@@ -62,6 +63,7 @@
 		<Unit filename="src/library/handler.cc" />
 		<Unit filename="src/library/icon.cc" />
 		<Unit filename="src/library/index.cc" />
+		<Unit filename="src/library/keypair.cc" />
 		<Unit filename="src/library/layout/csv.cc" />
 		<Unit filename="src/library/layout/html.cc" />
 		<Unit filename="src/library/layout/json.cc" />
