@@ -66,8 +66,11 @@
 
 			string response;
 
-			Application::DataDir page;
-			page += "templates/www/error.";
+#ifdef DEBUG
+			Application::DataFile page{"./templates/error."};
+#else
+			Application::DataFile page{"templates/www/error."};
+#endif // DEBUG
 			page += to_string(mimetype,true);
 
 			debug("Searching for error page in '",page.c_str(),"'");

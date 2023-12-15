@@ -33,12 +33,36 @@
  #include <stdexcept>
  #include <udjat/tools/logger.h>
  #include <private/request.h>
+ #include <udjat/tools/application.h>
 
  using namespace std;
 
  int oauthWebHandler(struct mg_connection *conn, void *) {
 
 #ifdef HAVE_LIBSSL
+
+	/// @brief Validate login arguments.
+	struct LoginValidator {
+		String client_id;
+		String redirect_uri;
+		String response_type;
+
+		LoginValidator(CivetWeb::Request &request)
+			: client_id{request.getArgument("client_id")},
+				redirect_uri{request.getArgument("redirect_uri")},
+				response_type{request.getArgument("response_type")} {
+
+			debug("client_id='",client_id,"'");
+			debug("redirect_uri='",redirect_uri,"'");
+			debug("response_type='",response_type,"'");
+		}
+
+		operator bool() {
+			return !(client_id.empty() || redirect_uri.empty() || response_type.empty());
+		}
+
+	};
+
 
 	try {
 
@@ -49,15 +73,7 @@
 		switch(request.select("authorize","login",nullptr)) {
 		case 0:	// Authorize
 			{
-				String client_id{request.getArgument("client_id")};
-				String redirect_uri{request.getArgument("redirect_uri")};
-				String response_type{request.getArgument("response_type")};
-
-				debug("client_id='",client_id,"'");
-				debug("redirect_uri='",redirect_uri,"'");
-				debug("response_type='",response_type,"'");
-
-				if(client_id.empty() || redirect_uri.empty() || response_type.empty()) {
+				if(!LoginValidator{request}) {
 					mg_send_http_error(conn, 400, "Invalid request");
 					return 400;
 				}
@@ -67,7 +83,7 @@
 				// TODO: Create session
 
 				// Redirect to login page.
-				String target{"/oauth2/login?",request.query()};
+				String target{"login?",request.query()};
 				mg_response_header_start(conn, 303);
 				mg_response_header_add(conn, "Location",target.c_str(),target.size());
 				mg_response_header_add(conn, "Content-Length", "0", -1);
@@ -82,6 +98,13 @@
 
 		case 1:	// Login
 			{
+#ifdef DEBUG
+				String text{Application::DataFile{"./templates/login.html"}.load()};
+#else
+				String text{Application::DataFile{"templates/www/login.html"}.load()};
+#endif // DEBUG
+
+				debug("----------------->",text.c_str());
 
 			}
 			break;
