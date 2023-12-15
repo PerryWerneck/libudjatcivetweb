@@ -86,6 +86,7 @@
 		<Unit filename="src/module/handlers/favicon.cc" />
 		<Unit filename="src/module/handlers/icons.cc" />
 		<Unit filename="src/module/handlers/images.cc" />
+		<Unit filename="src/module/handlers/oauth.cc" />
 		<Unit filename="src/module/handlers/pubkey.cc" />
 		<Unit filename="src/module/handlers/report.cc" />
 		<Unit filename="src/module/handlers/root.cc" />

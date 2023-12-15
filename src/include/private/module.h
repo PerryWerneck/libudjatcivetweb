@@ -135,6 +135,9 @@
  /// @brief Get pubkey.
  int keyWebHandler(struct mg_connection *conn, void *cbdata);
 
+ /// @brief Authentication handler.
+ int oauthWebHandler(struct mg_connection *conn, void *cbdata);
+
  /// @brief Handler for report requests.
  //int reportWebHandler(struct mg_connection *conn, void *cbdata);
 
