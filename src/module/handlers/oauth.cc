@@ -46,19 +46,49 @@
 
 		debug("Authentication path: '",request.path(),"'");
 
-		switch(request.select("authorize",nullptr)) {
+		switch(request.select("authorize","login",nullptr)) {
 		case 0:	// Authorize
 			{
-				debug("client_id='",request.getArgument("client_id"),"'");
-				debug("redirect_uri='",request.getArgument("redirect_uri"),"'");
-				debug("response_type='",request.getArgument("response_type"),"'");
+				String client_id{request.getArgument("client_id")};
+				String redirect_uri{request.getArgument("redirect_uri")};
+				String response_type{request.getArgument("response_type")};
+
+				debug("client_id='",client_id,"'");
+				debug("redirect_uri='",redirect_uri,"'");
+				debug("response_type='",response_type,"'");
+
+				if(client_id.empty() || redirect_uri.empty() || response_type.empty()) {
+					mg_send_http_error(conn, 400, "Invalid request");
+					return 400;
+				}
+
+				// TODO: Check client ID.
+
+				// TODO: Create session
+
+				// Redirect to login page.
+				String target{"/oauth2/login?",request.query()};
+				mg_response_header_start(conn, 303);
+				mg_response_header_add(conn, "Location",target.c_str(),target.size());
+				mg_response_header_add(conn, "Content-Length", "0", -1);
+				mg_response_header_add(conn, "Cache-Control","no-cache, no-store, must-revalidate, private, max-age=0",-1);
+				mg_response_header_add(conn, "Expires", "0", -1);
+
+				mg_response_header_send(conn);
+
+				return 303;
+			}
+			break;
+
+		case 1:	// Login
+			{
 
 			}
 			break;
 
 		default:
 			mg_send_http_error(conn, 400, "Invalid request: '%s'", request.path());
-			return 500;
+			return 400;
 		}
 
 
