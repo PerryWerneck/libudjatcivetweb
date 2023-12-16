@@ -30,6 +30,7 @@
 
 		class UDJAT_PRIVATE Request : public HTTP::Request {
 		private:
+			const struct mg_connection *conn;
 			const struct mg_request_info *info;
 
 		public:

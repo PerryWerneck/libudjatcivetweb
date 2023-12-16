@@ -40,11 +40,13 @@
 
 	namespace CivetWeb {
 
-
-		Request::Request(struct mg_connection *conn)
-			: HTTP::Request{mg_get_request_info(conn)->local_uri,mg_get_request_info(conn)->request_method}, info{mg_get_request_info(conn)} {
+		Request::Request(struct mg_connection *c)
+			: HTTP::Request{mg_get_request_info(c)->local_uri,mg_get_request_info(c)->request_method}, conn{c}, info{mg_get_request_info(c)} {
 
 			debug("Request path set to '",path(),"'");
+
+			// https://github.com/civetweb/civetweb/blob/master/examples/embedded_c/embedded_c.c
+
 
 		}
 

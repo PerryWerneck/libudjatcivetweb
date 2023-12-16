@@ -85,13 +85,13 @@
 
 #ifdef HAVE_LIBSSL
 		mg_set_request_handler(ctx, "/authkey.pem", keyWebHandler, 0);
-		if(Config::Value<bool>{"authentication","enable-oauth2",true}) {
+		if(Config::Value<bool>{"oauth2","enable-internal",false}) {
 			mg_set_request_handler(ctx, "/oauth2", oauthWebHandler, 0);
 		}
 #endif // HAVE_LIBSSL
 
 //		mg_set_request_handler(ctx, "/report/", reportWebHandler, 0);
-//		mg_set_request_handler(ctx, "/swagger.json", swaggerWebHandler, 0);
+//		mg_set_request_handler(ctx, "/instrospect", swaggerWebHandler, 0);
 		mg_set_request_handler(ctx, "/", rootWebHandler, 0);
 	}
 
@@ -297,7 +297,7 @@
 					"/authkey.pem"
 				).write(Logger::Debug,"civetweb");
 
-				if(Config::Value<bool>{"authentication","enable-oauth2",true}) {
+				if(Config::Value<bool>{"oauth2","enable-internal",false}) {
 					Logger::String(
 						"OAuth2 service available on ",
 						(ports[0].is_ssl ? "https" : "http"),
