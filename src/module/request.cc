@@ -46,13 +46,16 @@
 			debug("Request path set to '",path(),"', type set to ",to_string(((HTTP::Method) *this)));
 
 			// https://github.com/civetweb/civetweb/blob/master/examples/embedded_c/embedded_c.c
-			if( ((HTTP::Method) *this) == HTTP::Post ) {
+			if(!strcasecmp(getProperty("Content-Type").c_str(),"application/x-www-form-urlencoded")) {
 
 				// https://github.com/civetweb/civetweb/blob/master/examples/embedded_c/embedded_c.c#L466
 				struct InputParser {
 
-					static int field_found(const char *key,const char *,char *,size_t ,void *) {
+					string name;
+
+					static int field_found(const char *key,const char *,char *,size_t ,void *user_data) {
 						debug("Field name : '", key , "'");
+						((InputParser *) user_data)->name = key;
 						return MG_FORM_FIELD_STORAGE_GET;
 					}
 
@@ -69,7 +72,7 @@
 
 					struct mg_form_data_handler fdh;
 
-					constexpr InputParser() : fdh{field_found, field_get, field_stored, this} {
+					InputParser() : fdh{field_found, field_get, field_stored, this} {
 					}
 
 				};
