@@ -84,7 +84,7 @@
 		mg_set_request_handler(ctx, "/favicon.ico", faviconWebHandler, 0);
 
 #ifdef HAVE_LIBSSL
-		mg_set_request_handler(ctx, "/authkey.pem", keyWebHandler, 0);
+		mg_set_request_handler(ctx, "/pubkey.pem", keyWebHandler, 0);
 		if(Config::Value<bool>{"oauth2","enable-internal",false}) {
 			mg_set_request_handler(ctx, "/oauth2", oauthWebHandler, 0);
 		}
@@ -257,7 +257,7 @@
 					ports[ix].port
 				).write(Logger::Trace,"civetweb");
 			}
-			if(Logger::enabled(Logger::Debug)) {
+			if(Logger::enabled(Logger::Trace)) {
 
 				Logger::String(
 					"Application state available on ",
@@ -267,7 +267,7 @@
 					":",
 					ports[0].port,
 					"/api/1.0/agent"
-				).write(Logger::Debug,"civetweb");
+				).write(Logger::Trace,"civetweb");
 
 				auto module = Udjat::Module::find("information");
 				String options;
@@ -282,20 +282,20 @@
 							ports[0].port,
 							"/api/1.0/info/",
 							option.c_str()
-						).write(Logger::Debug,"civetweb");
+						).write(Logger::Trace,"civetweb");
 					}
 				}
 
 #ifdef HAVE_LIBSSL
 				Logger::String(
-					"Authentication key available on ",
+					"Public key available on ",
 					(ports[0].is_ssl ? "https" : "http"),
 					"://",
 					(ports[0].protocol == 1 ? "127.0.0.1" : "localhost"),
 					":",
 					ports[0].port,
-					"/authkey.pem"
-				).write(Logger::Debug,"civetweb");
+					"/pubkey.pem"
+				).write(Logger::Trace,"civetweb");
 
 				if(Config::Value<bool>{"oauth2","enable-internal",false}) {
 					Logger::String(
@@ -306,9 +306,8 @@
 						":",
 						ports[0].port,
 						"/oauth2"
-					).write(Logger::Debug,"civetweb");
+					).write(Logger::Trace,"civetweb");
 				}
-
 #endif // HAVE_LIBSSL
 
 			}
