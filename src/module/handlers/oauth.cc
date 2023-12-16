@@ -32,6 +32,7 @@
  #include <udjat/tools/intl.h>
  #include <stdexcept>
  #include <udjat/tools/logger.h>
+ #include <udjat/tools/string.h>
  #include <private/request.h>
  #include <udjat/tools/application.h>
 
@@ -104,8 +105,22 @@
 				String text{Application::DataFile{"templates/www/login.html"}.load()};
 #endif // DEBUG
 
-				debug("----------------->",text.c_str());
+				// TODO: Expand common values
 
+				// Last, expand request arguments.
+				text.expand([request](const char *key, std::string &value) {
+					value = request.getArgument(key);
+					return true;
+				});
+
+				mg_response_header_start(conn, 200);
+				mg_response_header_add(conn, "Content-Type",std::to_string(MimeType::html),-1);
+				mg_response_header_add(conn, "Content-Length", std::to_string(text.size()).c_str(), -1);
+
+				mg_response_header_send(conn);
+				mg_write(conn, text.c_str(), text.size());
+
+				return 200;
 			}
 			break;
 
