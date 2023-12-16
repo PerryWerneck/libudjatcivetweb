@@ -43,9 +43,43 @@
 		Request::Request(struct mg_connection *c)
 			: HTTP::Request{mg_get_request_info(c)->local_uri,mg_get_request_info(c)->request_method}, conn{c}, info{mg_get_request_info(c)} {
 
-			debug("Request path set to '",path(),"'");
+			debug("Request path set to '",path(),"', type set to ",to_string(((HTTP::Method) *this)));
 
 			// https://github.com/civetweb/civetweb/blob/master/examples/embedded_c/embedded_c.c
+			if( ((HTTP::Method) *this) == HTTP::Post ) {
+
+				// https://github.com/civetweb/civetweb/blob/master/examples/embedded_c/embedded_c.c#L466
+				struct InputParser {
+
+					static int field_found(const char *key,const char *,char *,size_t ,void *) {
+						debug("Field name : '", key , "'");
+						return MG_FORM_FIELD_STORAGE_GET;
+					}
+
+					static int field_get(const char *, const char *value, size_t valuelen, void *user_data) {
+						if(valuelen) {
+							debug("   [",string{value,valuelen},"]");
+						}
+						return MG_FORM_FIELD_HANDLE_GET;
+					}
+
+					static int field_stored(const char *path, long long file_size, void *user_data) {
+						return 0;
+					}
+
+					struct mg_form_data_handler fdh;
+
+					constexpr InputParser() : fdh{field_found, field_get, field_stored, this} {
+					}
+
+				};
+
+				InputParser input;
+
+				int ret = mg_handle_form_request(c, &input.fdh);
+
+
+			}
 
 
 		}
@@ -74,6 +108,9 @@
 			if( ((HTTP::Method) *this) == HTTP::Get ) {
 				return HTTP::Request::getArgument(name,def);
 			}
+
+			/*
+			*/
 
 			throw runtime_error("Incomplete");
 

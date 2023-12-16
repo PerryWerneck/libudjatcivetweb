@@ -67,6 +67,7 @@
 
 	try {
 
+		debug("--------------------------------------------");
 		CivetWeb::Request request{conn};
 
 		debug("Authentication path: '",request.path(),"'");
