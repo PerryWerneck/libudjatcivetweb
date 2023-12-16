@@ -34,11 +34,15 @@
 
  #include <civetweb.h>
 
+ using namespace std;
+
  namespace Udjat {
 
 	namespace CivetWeb {
 
-		Request::Request(const struct mg_request_info *i) : HTTP::Request{i->local_uri,i->request_method}, info{i} {
+
+		Request::Request(struct mg_connection *conn)
+			: HTTP::Request{mg_get_request_info(conn)->local_uri,mg_get_request_info(conn)->request_method}, info{mg_get_request_info(conn)} {
 
 			debug("Request path set to '",path(),"'");
 
@@ -63,6 +67,15 @@
 			return Udjat::Request::getProperty(name,def);
  		}
 
+		String Request::getArgument(const char *name, const char *def) const {
+
+			if( ((HTTP::Method) *this) == HTTP::Get ) {
+				return HTTP::Request::getArgument(name,def);
+			}
+
+			throw runtime_error("Incomplete");
+
+		}
 
 	}
 

@@ -67,11 +67,11 @@
 
 	try {
 
-		CivetWeb::Request request{mg_get_request_info(conn)};
+		CivetWeb::Request request{conn};
 
 		debug("Authentication path: '",request.path(),"'");
 
-		switch(request.select("authorize","login",nullptr)) {
+		switch(request.select("authorize","login","signin",nullptr)) {
 		case 0:	// Authorize
 			{
 				if(!LoginValidator{request}) {
@@ -99,6 +99,12 @@
 
 		case 1:	// Login
 			{
+
+				if(!LoginValidator{request}) {
+					mg_send_http_error(conn, 400, "Invalid request");
+					return 400;
+				}
+
 #ifdef DEBUG
 				String text{Application::DataFile{"./templates/login.html"}.load()};
 #else
@@ -116,11 +122,25 @@
 				mg_response_header_start(conn, 200);
 				mg_response_header_add(conn, "Content-Type",std::to_string(MimeType::html),-1);
 				mg_response_header_add(conn, "Content-Length", std::to_string(text.size()).c_str(), -1);
+				mg_response_header_add(conn, "Cache-Control","no-cache, no-store, must-revalidate, private, max-age=0",-1);
+				mg_response_header_add(conn, "Expires", "0", -1);
 
 				mg_response_header_send(conn);
 				mg_write(conn, text.c_str(), text.size());
 
 				return 200;
+			}
+			break;
+
+		case 2:	// signin
+			{
+				debug("Received signin response");
+
+				if(!LoginValidator{request}) {
+					mg_send_http_error(conn, 400, "Invalid request");
+					return 400;
+				}
+
 			}
 			break;
 
