@@ -370,7 +370,7 @@
 			memset(&token,0,sizeof(token));
 
 			// Authenticate
-			if(request == MimeType::html) {
+			if(request.mimetype() == MimeType::html) {
 
 				string message{_("Access Denied")};
 
@@ -427,6 +427,11 @@
 
 				// Authentication failed, send login again
 				return login_page(conn,request,token,message.c_str());
+
+			} else {
+
+				Logger::String{"Invalid request for signin: ",request.mimetype()}.error("oauth2");
+
 			}
 			break;
 

@@ -95,6 +95,18 @@
 			return info->query_string;
 		}
 
+		MimeType Request::mimetype() const noexcept {
+
+			for(String &value : getProperty("accept").split(",")) {
+				auto mime = MimeTypeFactory(value.c_str(),MimeType::custom);
+				if(mime != MimeType::custom) {
+					return mime;
+				}
+			}
+
+			return MimeType::custom;
+		}
+
  		String Request::getProperty(const char *name, const char *def) const {
 
 			for(int header = 0; header < info->num_headers; header++) {

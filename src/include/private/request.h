@@ -46,6 +46,8 @@
 			const char * query(const char *def = "") const override;
 			String getArgument(const char *name, const char *def = "") const override;
 
+			MimeType mimetype() const noexcept;
+
 			/// @brief The client address.
 			// String address() const override;
 
