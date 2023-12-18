@@ -52,6 +52,7 @@
  #else
 	#include <sys/types.h>
 	#include <pwd.h>
+	#include <arpa/inet.h>
  #endif // _WIN32
 
  using namespace std;
@@ -73,16 +74,13 @@
 #endif // _WIN32
 
 	/// @brief The authenticated user id.
-	unsigned int id = (unsigned int) -1;
+	unsigned int id = 0x00;
 
 	/// @brief Login expiration time.
 	time_t expiration_time = 0;
 
-	/// @brief Client IP Address
-	uint8_t iptype = 0;
-
 	union {
-		struct in_addr v4;
+		in_addr_t v4;
 		struct in6_addr v6;
 	} ip;
 
@@ -214,10 +212,33 @@
  static void header_send(struct mg_connection *conn, AuthenticationToken &token) {
 
 	// Reset timer.
-	token.expiration_time = time(0) + Config::Value<time_t>("oauth","max-age",86400);
+	unsigned int max_age =  Config::Value<time_t>("oauth","max-age",86400);
+	token.expiration_time = time(0) + max_age;
 
-	mg_response_header_add(conn, "Cache-Control","no-cache, no-store, must-revalidate, private, max-age=0",-1);
-	mg_response_header_add(conn, "Expires", "0", -1);
+	const struct mg_request_info *info = mg_get_request_info(conn);
+
+	// Setup source address
+	sockaddr_storage addr;
+	if(inet_pton(AF_INET,info->remote_addr,&((struct sockaddr_in *) &addr)->sin_addr) == 1) {
+		token.id = 0x14;
+		token.ip.v4 = ((struct sockaddr_in *) &addr)->sin_addr.s_addr;
+	} else if(inet_pton(AF_INET6,info->remote_addr,&((struct sockaddr_in6 *) &addr)->sin6_addr) == 1) {
+		token.id = 0x16;
+		token.ip.v6 = ((struct sockaddr_in6 *) &addr)->sin6_addr;
+	} else {
+		token.id = 0x10;
+		memset(&token.ip,0,sizeof(token.ip));
+		Logger::String{"Cant identify address '",info->remote_addr,"'"}.warning("oauth");
+	}
+
+	// https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
+	if(Config::Value<bool>("oauth","allow-cache",true) && max_age) {
+		mg_response_header_add(conn, "Cache-Control", String{"private, max-age=",max_age}.c_str(),-1);
+		mg_response_header_add(conn, "Expires", HTTP::TimeStamp{token.expiration_time}.to_string().c_str(), -1);
+	} else {
+		mg_response_header_add(conn, "Cache-Control","no-cache, no-store, must-revalidate, private, max-age=0",-1);
+		mg_response_header_add(conn, "Expires", "0", -1);
+	}
 
 	// Setup cookie
 	string cookie{"session-data="};
