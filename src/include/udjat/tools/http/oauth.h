@@ -42,15 +42,27 @@
 
 	namespace OAuth {
 
-		UDJAT_API int authorize(HTTP::Request &request, std::string &token);
+		struct Token {
+			std::string cookie;			///< @brief The authentication cookie.
+			std::string message;		///< @brief The Message for client.
+			time_t expiration_time;		///< @brief The expiration time.
+
+		};
+
+		UDJAT_API int authorize(HTTP::Request &request, Token &token);
 
 		/// @brief OAuth2 API client
 		class UDJAT_API Client {
 		private:
 
 			#pragma pack(1)
-			struct Token {
+			struct Cookie {
 				uint8_t type;
+				time_t expiration_time = 0;
+#ifdef _WIN32
+#else
+				uint32_t uid = (uint32_t) (-1);
+#endif // _WIN32
 				union {
 					in_addr_t v4;
 					struct in6_addr v6;
@@ -63,11 +75,14 @@
 			Client(HTTP::Request &request);
 			~Client();
 
+			/// @brief Get Token
+			void get(Token &token);
+
 			/// @brief Get authentication token for client.
-			String token();
+			String encript();
 
 			/// @brief Validate authentication token for client.
-			bool token(const char *str);
+			bool decript(const char *str);
 
 		};
 
@@ -78,6 +93,7 @@
 			#pragma pack(1)
 			struct Token {
 				uint8_t type;
+				time_t expiration_time = 0;
 #ifdef _WIN32
 
 #else
@@ -91,15 +107,21 @@
 			} data;
 			#pragma pack()
 
+			void set(HTTP::Request &request);
+
 		public:
+			User();
 			User(HTTP::Request &request);
 			~User();
 
-			/// @brief Get authentication token for client.
-			String token();
+			/// @brief Get Token
+			void get(OAuth::Token &token);
 
-			/// @brief Validate authentication token for client.
-			bool token(const char *str);
+			/// @brief Encript user authentication token.
+			String encript();
+
+			/// @brief Decript user authentication token.
+			bool decript(const char *str);
 
 		};
 

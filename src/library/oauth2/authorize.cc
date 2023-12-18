@@ -30,19 +30,29 @@
 
  namespace Udjat {
 
- 	int OAuth::authorize(HTTP::Request &request, std::string &token) {
+ 	int OAuth::authorize(HTTP::Request &request, Token &token) {
+
+		OAuth::Client client{request};
 
 		if(request["grant_type"] == "client_credentials") {
 
-			OAuth::Client client{request};
 			Logger::String{request.address().c_str()," is asking for client credentials"}.trace("oauth2");
 
 			// TODO: Identify client.
 
 
 			// Allow response
-			token = client.token();
+			client.get(token);
 			return 200;
+
+		} else if(request["response_type"] == "token" || request["response_type"] == "code") {
+
+			// OAuth 2.0 implicit flow
+			// https://www.oauth.com/playground/implicit.html
+			Logger::String{request.address().c_str()," is asking for implicit flow"}.trace("oauth2");
+			User{request}.get(token);
+			return 303;
+
 		}
 
 		return 500;

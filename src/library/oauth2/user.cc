@@ -18,7 +18,7 @@
  */
 
  /**
-  * @brief Implements OAuth2 client.
+  * @brief Implements OAuth2 user.
   */
 
  #include <config.h>
@@ -32,19 +32,26 @@
 
  namespace Udjat {
 
-	OAuth::Client::Client(HTTP::Request &request) {
+	OAuth::User::User() {
+		memset(&data,0,sizeof(data));
+		data.expiration_time = time(0) + Config::Value<time_t>("oauth2","expiration-time",86400);
+		data.type = 0x20;
+		data.uid = (unsigned int) -1;
+	}
+
+	OAuth::User::User(HTTP::Request &request) : User() {
 
 		// TODO: Validate client id and secret.
 //		string id{request["client-id"]};
 //		string secret{request["client-secret"]};
 
+		set(request);
 
+	}
+
+	void OAuth::User::set(HTTP::Request &request) {
 
 		// Setup token from request.
-		memset(&data,0,sizeof(data));
-		data.expiration_time = time(0) + Config::Value<time_t>("oauth2","expiration-time",86400);
-		data.type = 0x10;
-
 		String req_addr{request.address()};
 		sockaddr_storage addr;
 
@@ -61,40 +68,40 @@
 
 	}
 
-	OAuth::Client::~Client() {
+	OAuth::User::~User() {
 	}
 
-	String OAuth::Client::encript() {
+	String OAuth::User::encript() {
 		return HTTP::KeyPair::getInstance().encrypt(&data,sizeof(data));
 	}
 
-	void OAuth::Client::get(OAuth::Token &token) {
+	void OAuth::User::get(OAuth::Token &token) {
 		token.cookie = encript();
 		token.expiration_time = data.expiration_time;
 	}
 
-	bool OAuth::Client::decript(const char *str) {
+	bool OAuth::User::decript(const char *str) {
 
-		Cookie data;
+		User::Token data;
 
 		if(HTTP::KeyPair::getInstance().decrypt(str,&data,sizeof(data))) {
 
 			if(data.type != this->data.type) {
-				Logger::String{"Rejecting client token by type mismatch"}.trace("oauth2");
+				Logger::String{"Rejecting user token by type mismatch"}.trace("oauth2");
 				return false;
 			}
 
 			if(data.type == 0x14 && data.ip.v4 != this->data.ip.v4) {
-				Logger::String{"Rejecting client token by IPV4 mismatch"}.trace("oauth2");
+				Logger::String{"Rejecting user token by IPV4 mismatch"}.trace("oauth2");
 				return false;
 			}
 
 			if(data.type == 0x16 && memcmp(&data.ip.v6,&this->data.ip.v6,sizeof(this->data.ip.v6))) {
-				Logger::String{"Rejecting client token by IPV6 mismatch"}.trace("oauth2");
+				Logger::String{"Rejecting user token by IPV6 mismatch"}.trace("oauth2");
 				return false;
 			}
 
-			Logger::String{"Accepting valid client token"}.trace("oauth2");
+			Logger::String{"Accepting valid user token"}.trace("oauth2");
 			this->data = data;
 			return true;
 		}
