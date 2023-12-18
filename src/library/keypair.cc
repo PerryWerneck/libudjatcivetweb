@@ -93,6 +93,33 @@
 
 		}
 
+		bool KeyPair::decrypt(const char *str, void *data, size_t length) {
+
+			size_t szBuffer = RSA_size((RSA *) key);
+
+			debug("length: ", length, " szBuffer: ",szBuffer);
+
+			unsigned char from[szBuffer+2];
+			memset(from,0,szBuffer+2);
+
+			ssize_t szData = Base64::decode((unsigned char *) str,from,szBuffer+1);
+			if(szData < 1) {
+				Logger::String{"Error decoding Base64"}.error("oauth2");
+				return false;
+			}
+
+			unsigned char to[szBuffer+2];
+			memset(to,0,szBuffer+2);
+			if(RSA_public_decrypt(szData,from,to,(RSA *) key, RSA_PKCS1_PADDING) != (ssize_t) length) {
+				Logger::String{"Unable to decrypt received data"}.error("oauth2");
+				return false;
+			}
+
+			memcpy(data,to,length);
+			return true;
+
+		}
+
 		String KeyPair::encrypt(const void *from, size_t length) {
 
 			lock_guard<mutex> lock(guard);

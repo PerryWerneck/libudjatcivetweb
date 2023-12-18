@@ -44,6 +44,9 @@
 			: HTTP::Request{mg_get_request_info(c)->local_uri,mg_get_request_info(c)->request_method}, conn{c}, info{mg_get_request_info(c)} {
 
 			debug("Request path set to '",path(),"', type set to ",to_string(((HTTP::Method) *this)));
+			debug("Content-type: ",getProperty("Content-Type"));
+			debug("Accept: ",getProperty("Accept"));
+			debug("Authorization:",getProperty("Authorizatio"));
 
 			// https://github.com/civetweb/civetweb/blob/master/examples/embedded_c/embedded_c.c
 			if(!strcasecmp(getProperty("Content-Type").c_str(),"application/x-www-form-urlencoded")) {
@@ -93,6 +96,10 @@
 
 		const char * Request::query(const char *) const {
 			return info->query_string;
+		}
+
+		String Request::address() const {
+			return info->remote_addr;
 		}
 
 		MimeType Request::mimetype() const noexcept {

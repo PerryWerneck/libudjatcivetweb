@@ -49,7 +49,7 @@
 			MimeType mimetype() const noexcept;
 
 			/// @brief The client address.
-			// String address() const override;
+			String address() const override;
 
 		};
 
