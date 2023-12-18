@@ -33,14 +33,32 @@
  #include <stdexcept>
  #include <udjat/tools/logger.h>
  #include <udjat/tools/string.h>
+ #include <udjat/tools/http/keypair.h>
  #include <private/request.h>
  #include <udjat/tools/application.h>
+ #include <udjat/tools/configuration.h>
+ #include <udjat/tools/http/timestamp.h>
 
  using namespace std;
 
  int oauthWebHandler(struct mg_connection *conn, void *) {
 
 #ifdef HAVE_LIBSSL
+
+	/// @brief Authentication token
+	#pragma pack(1)
+	struct AuthenticationToken {
+
+		unsigned char type = 1;
+
+		/// @brief The authenticated user id.
+		unsigned int id = (unsigned int) -1;
+
+		/// @brief Login expiration time.
+		time_t expiration_time = 0;
+
+	};
+	#pragma pack()
 
 	/// @brief Validate login arguments.
 	struct LoginValidator {
@@ -80,9 +98,11 @@
 					return 400;
 				}
 
+				// TODO: Check if already authenticated.
+
 				// TODO: Check client ID.
 
-				// TODO: Create session
+				// TODO: Create session.
 
 				// Redirect to login page.
 				String target{"login?",request.query()};
@@ -91,6 +111,22 @@
 				mg_response_header_add(conn, "Content-Length", "0", -1);
 				mg_response_header_add(conn, "Cache-Control","no-cache, no-store, must-revalidate, private, max-age=0",-1);
 				mg_response_header_add(conn, "Expires", "0", -1);
+
+				// Create authentication token
+				{
+					AuthenticationToken token;
+					memset(&token,0,sizeof(token));
+					token.expiration_time = time(0) + Config::Value<time_t>("oauth","max-age",86400);
+
+					string cookie{"session-data="};
+					cookie += Udjat::HTTP::KeyPair::getInstance().encrypt(&token,sizeof(token));
+					cookie += "; path=/; Expires=";
+					cookie += HTTP::TimeStamp::to_string(token.expiration_time).c_str();
+
+					debug("Cookie='",cookie,"'");
+
+					mg_response_header_add(conn, "Set-Cookie", cookie.c_str(),-1);
+				}
 
 				mg_response_header_send(conn);
 

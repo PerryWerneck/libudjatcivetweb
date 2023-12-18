@@ -93,7 +93,7 @@
 
 		}
 
-		String KeyPair::encrypt(const char *from) {
+		String KeyPair::encrypt(const void *from, size_t length) {
 
 			lock_guard<mutex> lock(guard);
 
@@ -102,11 +102,21 @@
 			}
 
 			size_t szBuffer = RSA_size((RSA *) key);
+
+			debug("length: ", length, " szBuffer: ",szBuffer);
+
 			unsigned char to[szBuffer];
 			memset(to,0,szBuffer);
 
-			int szOut = RSA_private_encrypt(strlen(from), (unsigned char *) from, to, (RSA *) key, RSA_PKCS1_PADDING);
+			int szOut = RSA_private_encrypt(length, (unsigned char *) from, to, (RSA *) key, RSA_PKCS1_PADDING);
 			if(szOut < 1) {
+				int errcode = ERR_get_error();
+				while(errcode) {
+					cerr << "ssl\t" << ERR_lib_error_string(errcode) << endl;
+					cerr << "ssl\t" << ERR_func_error_string(errcode) << endl;
+					cerr << "ssl\t" << ERR_reason_error_string(errcode) << endl;
+					errcode = ERR_get_error();
+				}
 				throw runtime_error("Unable to encrypt data block");
 			}
 

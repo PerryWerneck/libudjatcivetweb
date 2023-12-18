@@ -52,6 +52,7 @@
 				struct InputParser {
 
 					string name;
+					std::map<std::string,std::string> &values;
 
 					static int field_found(const char *key,const char *,char *,size_t ,void *user_data) {
 						debug("Field name : '", key , "'");
@@ -62,28 +63,27 @@
 					static int field_get(const char *, const char *value, size_t valuelen, void *user_data) {
 						if(valuelen) {
 							debug("   [",string{value,valuelen},"]");
+							((InputParser *) user_data)->values[((InputParser *) user_data)->name] += string{value,valuelen};
 						}
 						return MG_FORM_FIELD_HANDLE_GET;
 					}
 
-					static int field_stored(const char *path, long long file_size, void *user_data) {
+					static int field_stored(const char *, long long, void *) {
 						return 0;
 					}
 
 					struct mg_form_data_handler fdh;
 
-					InputParser() : fdh{field_found, field_get, field_stored, this} {
+					InputParser(std::map<std::string,std::string> &v) : values{v}, fdh{field_found, field_get, field_stored, this} {
 					}
 
 				};
 
-				InputParser input;
+				InputParser input{values};
 
-				int ret = mg_handle_form_request(c, &input.fdh);
-
+				mg_handle_form_request(c, &input.fdh);
 
 			}
-
 
 		}
 
@@ -108,14 +108,13 @@
 
 		String Request::getArgument(const char *name, const char *def) const {
 
-			if( ((HTTP::Method) *this) == HTTP::Get ) {
-				return HTTP::Request::getArgument(name,def);
+			if(!values.empty()) {
+				auto it = values.find(name);
+				if(it != values.end()) {
+					return it->second;
+				}
 			}
-
-			/*
-			*/
-
-			throw runtime_error("Incomplete");
+			return HTTP::Request::getArgument(name,def);
 
 		}
 

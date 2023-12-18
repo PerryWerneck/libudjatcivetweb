@@ -42,6 +42,9 @@
 
 			std::string exec(const MimeType mimetype);
 
+			/// @brief The client address.
+			virtual String address() const;
+
 		};
 
 

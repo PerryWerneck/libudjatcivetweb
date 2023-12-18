@@ -23,6 +23,7 @@
  #include <udjat/tools/request.h>
  #include <udjat/tools/http/request.h>
  #include <civetweb.h>
+ #include <map>
 
  namespace Udjat {
 
@@ -33,6 +34,10 @@
 			const struct mg_connection *conn;
 			const struct mg_request_info *info;
 
+			/// @brief Values from form.
+			std::map<std::string,std::string> values;
+
+
 		public:
 			Request(struct mg_connection *conn);
 
@@ -40,6 +45,9 @@
 			String getProperty(const char *name, const char *def = "") const override;
 			const char * query(const char *def = "") const override;
 			String getArgument(const char *name, const char *def = "") const override;
+
+			/// @brief The client address.
+			// String address() const override;
 
 		};
 

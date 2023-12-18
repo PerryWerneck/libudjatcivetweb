@@ -64,4 +64,19 @@
 
 	}
 
+	String HTTP::Request::address() const {
+
+		String proxy{getProperty("X-Forwarded-For")};
+		if(!proxy.empty()) {
+			// Get proxy
+			auto separator = proxy.find(',');
+			if(separator != string::npos) {
+				proxy.resize(separator);
+			}
+			return proxy;
+		}
+
+		return "";
+	}
+
  }
