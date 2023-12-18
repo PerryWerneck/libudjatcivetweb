@@ -168,12 +168,14 @@
 		case 2:	// signin
 			debug("---> signin");
 			{
-				OAuth::User user;
+				OAuth::User user{request};
 				string message;
-				if(user.authenticate(request,message)) {
+				if(!user.authenticate(request,message)) {
+					Logger::String{request.address().c_str()," authentication failed: ",message.c_str()}.error("oauth2");
 					user.get(response);
 					return login_page(conn,request,response,message.c_str());
 				}
+				Logger::String{request.address().c_str()," authentication granted: ",message.c_str()}.info("oauth2");
 			}
 			break;
 

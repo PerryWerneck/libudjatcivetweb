@@ -274,8 +274,8 @@
 				return false;
 			}
 
-			message.clear();
 			data.uid = pwd.pw_uid;
+			message = String{"Username '",username.c_str(),"' (",data.uid,")"};
 
 			return true;
 
