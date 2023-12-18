@@ -26,9 +26,17 @@
  #include <udjat/tools/http/keypair.h>
  #include <udjat/tools/logger.h>
  #include <udjat/tools/configuration.h>
+ #include <udjat/tools/intl.h>
+ #include <cstring>
 
  #include <sys/socket.h>
  #include <netinet/in.h>
+
+ #if defined(HAVE_PAM)
+	#include <security/pam_appl.h>
+ #endif // HAVE_PAM
+
+ using namespace std;
 
  namespace Udjat {
 
@@ -109,5 +117,176 @@
 		return false;
 	}
 
+
+#ifdef HAVE_PAM
+	///
+	/// @brief Run PAM conversation request.
+	///
+	/// Reference: <https://www.freebsd.org/doc/en/articles/pam/pam-sample-conv.html>
+	///
+	///
+	static int pam_conversation(int num_msg, const struct pam_message **msg, struct pam_response **resp, void *pwd) {
+
+		debug(__FUNCTION__);
+
+		if (num_msg <= 0 || num_msg > PAM_MAX_NUM_MSG)
+			return (PAM_CONV_ERR);
+
+		*resp = (struct pam_response *) calloc(num_msg, sizeof *resp);
+
+		if(!*resp) {
+			return (PAM_BUF_ERR);
+		}
+
+		for(int f = 0; f < num_msg;f++) {
+
+			debug("style[",f,"=%",msg[f]->msg_style);
+
+			switch(msg[f]->msg_style) {
+			case PAM_PROMPT_ECHO_OFF:
+				resp[f]->resp = strdup((const char *) pwd);
+				break;
+
+			case PAM_PROMPT_ECHO_ON:
+				debug(msg[f]->msg);
+				break;
+
+			case PAM_ERROR_MSG:
+				Logger::String{msg[f]->msg}.error("pam");
+				break;
+
+			case PAM_TEXT_INFO:
+				Logger::String{msg[f]->msg}.info("pam");
+				break;
+
+			default:
+				Logger::String{"Invalid or unexpected conversation message style: ",msg[f]->msg_style}.warning("pam");
+
+			}
+
+
+		}
+
+		return (PAM_SUCCESS);
+
+	}
+
+	static int pam_exec(const char *username, const char *pwd, std::string &message){
+
+		int state = EINVAL;
+
+	    struct pam_conv local_conversation = {
+	    	pam_conversation,
+	    	(void *) pwd
+		};
+
+		int 			  retval		= 0;
+		pam_handle_t 	* local_auth_handle = NULL; // this gets set by pam_start
+
+#ifdef DEBUG
+		retval = pam_start("common-auth", username, &local_conversation, &local_auth_handle);
+#else
+		retval = pam_start(
+						Config::Value{"oauth2","service-name",Application::Name().c_str()}.c_str(),
+						username,
+						&local_conversation,
+						&local_auth_handle
+					);
+#endif // DEBUG
+
+		if(retval != PAM_SUCCESS) {
+			throw runtime_error(Logger::String{pam_strerror(local_auth_handle, retval), " (rc=", retval, ")"});
+		}
+
+		retval = pam_authenticate(local_auth_handle, 0);
+
+		switch(retval) {
+		case PAM_SUCCESS:
+			Logger::String{username," was authenticated"}.info("pam");
+			state = 0;
+
+			retval = pam_setcred(local_auth_handle,PAM_ESTABLISH_CRED);
+			if(retval != PAM_SUCCESS) {
+				Logger::String{"setcred: ", pam_strerror(local_auth_handle, retval), "(rc=",retval,")"}.error("pam");
+			}
+			break;
+
+		case PAM_AUTH_ERR:
+			Logger::String{username," was not authenticated"}.error("pam");
+			state = EPERM;
+			break;
+
+		case PAM_USER_UNKNOWN:
+			Logger::String{username, ": ", pam_strerror(local_auth_handle, retval), " (rc=",retval,")"}.error("pam");
+			state = ENOENT;
+			message = _("Invalid username");
+			break;
+
+		default:
+			Logger::String{username, ": ", pam_strerror(local_auth_handle, retval), " (rc=",retval,")"}.error("pam");
+			message = pam_strerror(local_auth_handle,retval);
+			state = EINVAL;
+		}
+
+		retval = pam_end(local_auth_handle, retval);
+
+		if (retval != PAM_SUCCESS) {
+			Logger::String{"pam_end(",username,") returned ",retval}.error("pam");
+		}
+
+		return state;
+
+	}
+
+#endif // HAVE_PAM
+
+	bool OAuth::User::authenticate(HTTP::Request &request, std::string &message) {
+
+		message = _("Access Denied");
+		data.uid = (unsigned int) -1;
+
+		String username{request["username"]};
+		if(username.empty()) {
+			message = _("Please, inform username");
+			return false;
+		}
+
+		String password{request["password"]};
+		if(password.empty()) {
+			message = _("Please, inform password");
+			return false;
+		}
+
+#if defined(HAVE_PAM)
+
+		// Use PAM
+		// https://www.freebsd.org/doc/en/articles/pam/pam-essentials.html
+
+		if(!pam_exec(username.c_str(),password.c_str(),message)) {
+
+			// User was authenticated
+			struct passwd pwd;
+			struct passwd *ppwd = NULL;
+			char buf[1024];
+
+			if (getpwnam_r(username.c_str(), &pwd, buf, sizeof buf, &ppwd)) {
+				message = strerror(errno);
+				return false;
+			}
+
+			message.clear();
+			data.uid = pwd.pw_uid;
+
+			return true;
+
+		}
+
+#else
+		// No authentication module
+		message = strerror(ENOTSUP);
+#endif
+
+		return false;
+	}
 
  }

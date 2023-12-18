@@ -167,6 +167,14 @@
 
 		case 2:	// signin
 			debug("---> signin");
+			{
+				OAuth::User user;
+				string message;
+				if(user.authenticate(request,message)) {
+					user.get(response);
+					return login_page(conn,request,response,message.c_str());
+				}
+			}
 			break;
 
 		default:

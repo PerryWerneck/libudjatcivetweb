@@ -114,6 +114,9 @@
 			User(HTTP::Request &request);
 			~User();
 
+			/// @brief Authenticate user.
+			bool authenticate(HTTP::Request &request, std::string &message);
+
 			/// @brief Get Token
 			void get(OAuth::Token &token);
 
