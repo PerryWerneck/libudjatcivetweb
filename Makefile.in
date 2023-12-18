@@ -81,6 +81,7 @@ LIBS= \
 	@UDJAT_LIBS@ \
 	@LIBSSL_LIBS@ \
 	@INTL_LIBS@ \
+	@PAM_LIBS@ \
 	-lcivetweb
 
 #---[ Debug Rules ]----------------------------------------------------------------------
