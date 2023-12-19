@@ -94,6 +94,7 @@
 			struct Token {
 				uint8_t type;
 				time_t expiration_time = 0;
+				uint16_t scope = 0x0001;
 #ifdef _WIN32
 
 #else
