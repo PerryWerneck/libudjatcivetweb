@@ -52,13 +52,7 @@
 	}
 
 	OAuth::User::User(HTTP::Request &request) : User() {
-
-		// TODO: Validate client id and secret.
-//		string id{request["client-id"]};
-//		string secret{request["client-secret"]};
-
 		set(request);
-
 	}
 
 	void OAuth::User::set(HTTP::Request &request) {
@@ -76,6 +70,11 @@
 		} else {
 			memset(&data.ip,0,sizeof(data.ip));
 			Logger::String{"Cant identify address '",req_addr.c_str(),"'"}.warning("oauth");
+		}
+
+		String token = request.cookie("oauth2-session");
+		if(!token.empty()) {
+			decrypt(token.c_str());
 		}
 
 	}
@@ -126,7 +125,8 @@
 				return false;
 			}
 
-			Logger::String{"Accepting valid user token"}.trace("oauth2");
+			Logger::String{"Accepting valid user token for uid ",data.uid}.trace("oauth2");
+
 			this->data = data;
 			return true;
 		}
@@ -156,8 +156,6 @@
 		}
 
 		for(int f = 0; f < num_msg;f++) {
-
-			debug("style[",f,"=%",msg[f]->msg_style);
 
 			switch(msg[f]->msg_style) {
 			case PAM_PROMPT_ECHO_OFF:
