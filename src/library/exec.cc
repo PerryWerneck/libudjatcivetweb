@@ -64,6 +64,10 @@
 
 	}
 
+	String HTTP::Request::cookie(const char *) const {
+		return "";
+	}
+
 	String HTTP::Request::address() const {
 
 		String proxy{getProperty("X-Forwarded-For")};

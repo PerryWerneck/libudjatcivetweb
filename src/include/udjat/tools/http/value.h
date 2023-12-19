@@ -54,6 +54,8 @@
 			void to_html(std::ostream &ss) const;
 			void to_yaml(std::ostream &ss, size_t left_margin = 0) const;
 
+			std::string to_json() const;
+
 			const Udjat::Value & get(std::string &value) const override;
 
 			Udjat::Value & operator[](const char *name) override;

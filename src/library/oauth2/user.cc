@@ -83,7 +83,7 @@
 	OAuth::User::~User() {
 	}
 
-	String OAuth::User::encript() {
+	String OAuth::User::encrypt() {
 		return HTTP::KeyPair::getInstance().encrypt(&data,sizeof(data));
 	}
 
@@ -91,29 +91,38 @@
 		return HTTP::KeyPair::getInstance().encrypt(&data,sizeof(data));
 	}
 
+	bool OAuth::User::code(const char *str) {
+		return decrypt(str);
+	}
+
 	void OAuth::User::get(OAuth::Context &context) {
-		context.token = encript();
+		context.token = encrypt();
 		context.expiration_time = data.expiration_time;
 	}
 
-	bool OAuth::User::decript(const char *str) {
+	bool OAuth::User::decrypt(const char *str) {
 
 		User::Token data;
 
 		if(HTTP::KeyPair::getInstance().decrypt(str,&data,sizeof(data))) {
 
 			if(data.type != this->data.type) {
-				Logger::String{"Rejecting user token by type mismatch"}.trace("oauth2");
+				Logger::String{"Rejecting user token by type mismatch"}.error("oauth2");
 				return false;
 			}
 
 			if(data.type == 0x14 && data.ip.v4 != this->data.ip.v4) {
-				Logger::String{"Rejecting user token by IPV4 mismatch"}.trace("oauth2");
+				Logger::String{"Rejecting user token by IPV4 mismatch"}.error("oauth2");
 				return false;
 			}
 
 			if(data.type == 0x16 && memcmp(&data.ip.v6,&this->data.ip.v6,sizeof(this->data.ip.v6))) {
-				Logger::String{"Rejecting user token by IPV6 mismatch"}.trace("oauth2");
+				Logger::String{"Rejecting user token by IPV6 mismatch"}.error("oauth2");
+				return false;
+			}
+
+			if(data.expiration_time < time(0)) {
+				Logger::String{"Rejecting expired user token"}.error("oauth2");
 				return false;
 			}
 

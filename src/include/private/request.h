@@ -51,6 +51,8 @@
 			/// @brief The client address.
 			String address() const override;
 
+			String cookie(const char *name) const override;
+
 		};
 
 

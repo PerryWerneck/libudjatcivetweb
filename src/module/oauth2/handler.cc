@@ -118,7 +118,7 @@
 		debug("--------------------------------------------");
 
 		// Check for operation.
-		switch(request.select("authorize","login","signin",nullptr)) {
+		switch(request.select("authorize","login","signin","access_token",nullptr)) {
 		case 0:	// Authorize
 			debug("---> authorize");
 			code = OAuth::authorize(request,context);
@@ -140,6 +140,26 @@
 				return login_page(conn,request,context);
 			}
 			return redirect(conn,context);
+
+		case 3: // access_token
+			debug("---> access_token");
+			{
+				HTTP::Value response;
+
+				if(!OAuth::access_token(request,context,response)) {
+					string text{response.to_json()};
+					mg_response_header_start(conn, 200);
+					mg_response_header_add(conn, "Content-Type",std::to_string(MimeType::json),-1);
+					mg_response_header_add(conn, "Content-Length", std::to_string(text.size()).c_str(), -1);
+					header_send(conn,context);
+					mg_write(conn, text.c_str(), text.size());
+					return 200;
+				}
+
+				return 400;
+
+			}
+			break;
 
 		default:
 			code = 400;

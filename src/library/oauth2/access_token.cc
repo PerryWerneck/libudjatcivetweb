@@ -17,41 +17,42 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
- #pragma once
+ /**
+  * @brief Implements OAuth::access_token.
+  */
 
+ #include <config.h>
  #include <udjat/defs.h>
- #include <udjat/tools/request.h>
- #include <udjat/tools/http/mimetype.h>
- #include <udjat/tools/timestamp.h>
- #include <civetweb.h>
+ #include <udjat/tools/intl.h>
+ #include <udjat/tools/http/request.h>
+ #include <udjat/tools/http/oauth.h>
+ #include <udjat/tools/logger.h>
+ #include <udjat/tools/http/value.h>
+ #include <stdexcept>
+
+ using namespace std;
 
  namespace Udjat {
 
-	namespace HTTP {
+ 	int OAuth::access_token(HTTP::Request &request, Context &context, HTTP::Value &response) {
 
-		class UDJAT_API Request : public Udjat::Request {
-		public:
+		OAuth::User user{request};
 
-			Request(const char *path = "", HTTP::Method m = HTTP::Get);
+		if(user.code(request["code"].c_str())) {
 
-			Request(const char *path, const char * method) : Request{path,HTTP::MethodFactory(method)} {
-			}
+			String token{user.encrypt()};
 
-			const char *c_str() const noexcept override;
-			bool cached(const Udjat::TimeStamp &timestamp) const override;
+			response["token_type"] = "Bearer";
+			response["expires_in"] = time(0) - context.expiration_time;
+			response["access_token"] = token.c_str();
+			response["scope"] = "*";
+			response["refresh_token"] = token.c_str();
 
-			std::string exec(const MimeType mimetype);
+			return 0;
+		}
 
-			/// @brief The client address.
-			virtual String address() const;
+		return EPERM;
 
-			/// @brief HTTP cookie.
-			virtual String cookie(const char *name) const;
-
-		};
-
-
-	}
+ 	}
 
  }
-

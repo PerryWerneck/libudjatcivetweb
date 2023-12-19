@@ -64,16 +64,16 @@
 	OAuth::Client::~Client() {
 	}
 
-	String OAuth::Client::encript() {
+	String OAuth::Client::encrypt() {
 		return HTTP::KeyPair::getInstance().encrypt(&data,sizeof(data));
 	}
 
 	void OAuth::Client::get(OAuth::Context &context) {
-		context.token = encript();
+		context.token = encrypt();
 		context.expiration_time = data.expiration_time;
 	}
 
-	bool OAuth::Client::decript(const char *str) {
+	bool OAuth::Client::decrypt(const char *str) {
 
 		Cookie data;
 
@@ -91,6 +91,11 @@
 
 			if(data.type == 0x16 && memcmp(&data.ip.v6,&this->data.ip.v6,sizeof(this->data.ip.v6))) {
 				Logger::String{"Rejecting client token by IPV6 mismatch"}.trace("oauth2");
+				return false;
+			}
+
+			if(data.expiration_time < time(0)) {
+				Logger::String{"Rejecting expired client token"}.trace("oauth2");
 				return false;
 			}
 

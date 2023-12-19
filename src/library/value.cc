@@ -61,6 +61,12 @@
 	void HTTP::Value::to_json(std::ostream &ss) const {
 	}
 
+	std::string HTTP::Value::to_json() const {
+		stringstream out;
+		to_json(out);
+		return out.str();
+	}
+
 	void HTTP::Value::to_xml(std::ostream &ss) const {
 	}
 

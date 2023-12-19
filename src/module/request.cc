@@ -103,6 +103,23 @@
 			return info->remote_addr;
 		}
 
+		String Request::cookie(const char *name) const {
+
+			const char *cookie = mg_get_header(conn, "Cookie");
+
+			if(cookie && *cookie) {
+				char buffer[4096];
+				int length = mg_get_cookie(cookie,name,buffer,4095);
+				if(length > 0) {
+					buffer[length] = 0;
+					return buffer;
+				}
+			}
+
+			// Return default response.
+			return HTTP::Request::cookie(name);
+		}
+
 		MimeType Request::mimetype() const noexcept {
 
 			for(String &value : getProperty("accept").split(",")) {
@@ -117,7 +134,7 @@
 
  		String Request::getProperty(const char *name, const char *def) const {
 
-			for(int header = 0; header < info->num_headers; header++) {
+ 			for(int header = 0; header < info->num_headers; header++) {
 				if(!strcasecmp(info->http_headers[header].name,name)) {
 					return info->http_headers[header].value;
 				}

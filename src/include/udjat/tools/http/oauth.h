@@ -26,6 +26,7 @@
  #include <udjat/defs.h>
  #include <udjat/tools/request.h>
  #include <udjat/tools/http/request.h>
+ #include <udjat/tools/http/value.h>
  #include <civetweb.h>
  #include <map>
  #include <string>
@@ -58,6 +59,14 @@
 		/// @retval EPERM Access denied.
 		UDJAT_API int signin(HTTP::Request &request, Context &context);
 
+		/// @brief Get access token.
+		/// @param request The request info
+		/// @param context The current context.
+		/// @param response The response data.
+		/// @return 0 if the response was set.
+		/// @retval EPERM The authentication code is invalid.
+		UDJAT_API int access_token(HTTP::Request &request, Context &context, HTTP::Value &response);
+
 		/// @brief OAuth2 API client
 		class UDJAT_API Client {
 		private:
@@ -86,10 +95,10 @@
 			void get(Context &context);
 
 			/// @brief Get authentication token for client.
-			String encript();
+			String encrypt();
 
 			/// @brief Validate authentication token for client.
-			bool decript(const char *str);
+			bool decrypt(const char *str);
 
 		};
 
@@ -125,17 +134,25 @@
 			/// @brief Authenticate user.
 			bool authenticate(HTTP::Request &request, std::string &message);
 
+			/// @brief Set user info from authentication code.
+			/// @param value The authentication code.
+			/// @return true if the code is valid and user was updated.
+			/// @retval true Got user information from authentcation code.
+			/// @retval false The authentication code is not valid.
+			bool code(const char *value);
+
 			/// @brief Get authentication code.
+			/// @return The authentication code for the user.
 			String code();
 
-			/// @brief Update context.
+			/// @brief Update context with user data
 			void get(OAuth::Context &context);
 
 			/// @brief Encript user authentication token.
-			String encript();
+			String encrypt();
 
 			/// @brief Decript user authentication token.
-			bool decript(const char *str);
+			bool decrypt(const char *str);
 
 		};
 
