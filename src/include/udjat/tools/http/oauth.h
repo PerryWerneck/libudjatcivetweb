@@ -42,14 +42,21 @@
 
 	namespace OAuth {
 
-		struct Token {
-			std::string cookie;			///< @brief The authentication cookie.
+		struct Context {
+			std::string token;			///< @brief The authentication token.
 			std::string message;		///< @brief The Message for client.
+			std::string location;		///< @brief The new location.
 			time_t expiration_time;		///< @brief The expiration time.
-
 		};
 
-		UDJAT_API int authorize(HTTP::Request &request, Token &token);
+		UDJAT_API int authorize(HTTP::Request &request, Context &context);
+
+		/// @brief Run 'signin'
+		/// @param request The request info
+		/// @param context The current context.
+		/// @return 0 if the user was authenticated.
+		/// @retval EPERM Access denied.
+		UDJAT_API int signin(HTTP::Request &request, Context &context);
 
 		/// @brief OAuth2 API client
 		class UDJAT_API Client {
@@ -75,8 +82,8 @@
 			Client(HTTP::Request &request);
 			~Client();
 
-			/// @brief Get Token
-			void get(Token &token);
+			/// @brief Update context.
+			void get(Context &context);
 
 			/// @brief Get authentication token for client.
 			String encript();
@@ -118,8 +125,11 @@
 			/// @brief Authenticate user.
 			bool authenticate(HTTP::Request &request, std::string &message);
 
-			/// @brief Get Token
-			void get(OAuth::Token &token);
+			/// @brief Get authentication code.
+			String code();
+
+			/// @brief Update context.
+			void get(OAuth::Context &context);
 
 			/// @brief Encript user authentication token.
 			String encript();

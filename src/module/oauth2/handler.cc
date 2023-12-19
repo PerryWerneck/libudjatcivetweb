@@ -41,57 +41,23 @@
 
 #ifdef HAVE_LIBSSL
 
- /*
- static int login_page(struct mg_connection *conn, CivetWeb::Request &request, AuthenticationToken token, const char *login_message) {
+ static void header_send(struct mg_connection *conn, const OAuth::Context &context) {
 
-#ifdef DEBUG
-	String text{Application::DataFile{"./templates/login.html"}.load()};
-#else
-	String text{Application::DataFile{"templates/www/login.html"}.load()};
-#endif // DEBUG
-
-	// TODO: Expand common values
-
-	// Last, expand request arguments.
-	text.expand([request,login_message](const char *key, std::string &value) {
-
-		if(!strcasecmp(key,"login_message")) {
-			value = login_message;
-		} else {
-			value = request.getArgument(key);
-		}
-		return true;
-	});
-
-	mg_response_header_start(conn, 200);
-	mg_response_header_add(conn, "Content-Type",std::to_string(MimeType::html),-1);
-	mg_response_header_add(conn, "Content-Length", std::to_string(text.size()).c_str(), -1);
-	header_send(conn,token);
-
-	mg_write(conn, text.c_str(), text.size());
-
-	return 200;
-
- }
- */
-
- static void header_send(struct mg_connection *conn, const OAuth::Token &token) {
-
-	int max_age = token.expiration_time - time(0);
+	int max_age = context.expiration_time - time(0);
 
 	if(Config::Value<bool>("oauth","allow-cache",true) && max_age > 0) {
 		mg_response_header_add(conn, "Cache-Control", String{"private, max-age=",max_age}.c_str(),-1);
-		mg_response_header_add(conn, "Expires", HTTP::TimeStamp{token.expiration_time}.to_string().c_str(), -1);
+		mg_response_header_add(conn, "Expires", HTTP::TimeStamp{context.expiration_time}.to_string().c_str(), -1);
 	} else {
 		mg_response_header_add(conn, "Cache-Control","no-cache, no-store, must-revalidate, private, max-age=0",-1);
 		mg_response_header_add(conn, "Expires", "0", -1);
 	}
 
 	// Setup cookie
-	string cookie{"session-data="};
-	cookie += token.cookie;
-	cookie += "; path=/; Expires=";
-	cookie += HTTP::TimeStamp::to_string(token.expiration_time).c_str();
+	string cookie{"oauth2-session="};
+	cookie += context.token;
+	cookie += "; path=/oauth2; Expires=";
+	cookie += HTTP::TimeStamp::to_string(context.expiration_time).c_str();
 
 	debug("Cookie='",cookie,"'");
 	mg_response_header_add(conn, "Set-Cookie", cookie.c_str(),-1);
@@ -100,7 +66,7 @@
 
  }
 
- static int login_page(struct mg_connection *conn, CivetWeb::Request &request, const OAuth::Token &token, const char *login_message) {
+ static int login_page(struct mg_connection *conn, CivetWeb::Request &request, const OAuth::Context &context) {
 
 #ifdef DEBUG
         String text{Application::DataFile{"./templates/login.html"}.load()};
@@ -111,10 +77,10 @@
         // TODO: Expand common values
 
         // Last, expand request arguments.
-        text.expand([request,login_message](const char *key, std::string &value) {
+        text.expand([request,context](const char *key, std::string &value) {
 
 			if(!strcasecmp(key,"login_message")) {
-				value = login_message;
+				value = context.message;
 			} else {
 				value = request.getArgument(key);
 			}
@@ -124,7 +90,7 @@
         mg_response_header_start(conn, 200);
         mg_response_header_add(conn, "Content-Type",std::to_string(MimeType::html),-1);
         mg_response_header_add(conn, "Content-Length", std::to_string(text.size()).c_str(), -1);
-        header_send(conn,token);
+        header_send(conn,context);
 
         mg_write(conn, text.c_str(), text.size());
 
@@ -132,13 +98,20 @@
 
  }
 
+ static int redirect(struct mg_connection *conn,const OAuth::Context &context) {
+	mg_response_header_start(conn, 303);
+	mg_response_header_add(conn, "Location",context.location.c_str(),context.location.size());
+	mg_response_header_add(conn, "Content-Length", "0", -1);
+	header_send(conn,context);
+	return 303;
+ }
 
  int oauthWebHandler(struct mg_connection *conn, void *) {
 
 	CivetWeb::Request request{conn};
 
 	int code = 500;				///< @brief The HTTP return code.
-	OAuth::Token response;		///< @brief The HTTP response string.
+	OAuth::Context context;		///< @brief The Current context.
 
 	try {
 
@@ -148,57 +121,46 @@
 		switch(request.select("authorize","login","signin",nullptr)) {
 		case 0:	// Authorize
 			debug("---> authorize");
-			code = OAuth::authorize(request,response);
+			code = OAuth::authorize(request,context);
 			if(code == 303) {
-				// Redirect to login page
-				String target{"login?",request.query()};
-				mg_response_header_start(conn, 303);
-				mg_response_header_add(conn, "Location",target.c_str(),target.size());
-				mg_response_header_add(conn, "Content-Length", "0", -1);
-				header_send(conn,response);
-				return 303;
+				return redirect(conn,context);
 			}
 			break;
 
 		case 1:	// Login
 			debug("---> login");
-			OAuth::User{request}.get(response);
-			return login_page(conn,request,response,"");
+			OAuth::User{request}.get(context);
+			context.message.clear();
+			return login_page(conn,request,context);
 
 		case 2:	// signin
 			debug("---> signin");
-			{
-				OAuth::User user{request};
-				string message;
-				if(!user.authenticate(request,message)) {
-					Logger::String{request.address().c_str()," authentication failed: ",message.c_str()}.error("oauth2");
-					user.get(response);
-					return login_page(conn,request,response,message.c_str());
-				}
-				Logger::String{request.address().c_str()," authentication granted: ",message.c_str()}.info("oauth2");
+			if(OAuth::signin(request,context)) {
+				// Signin failed.
+				return login_page(conn,request,context);
 			}
-			break;
+			return redirect(conn,context);
 
 		default:
 			code = 400;
 			Logger::String message{"Invalid request: '",request.path(),"'"};
 			message.error("oauth2");
-			response.message.assign(message);
+			context.message.assign(message);
 		}
 
 	} catch(const exception &e) {
 
 		code = 500;
-		response.message = e.what();
+		context.message = e.what();
 
 	} catch(...) {
 
 		code = 500;
-		response.message = _("Unexpected error");
+		context.message = _("Unexpected error");
 
 	}
 
-	mg_send_http_error(conn, code, response.message.c_str());
+	mg_send_http_error(conn, code, context.message.c_str());
 	return code;
 
  }

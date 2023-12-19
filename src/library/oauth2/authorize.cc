@@ -30,11 +30,14 @@
 
  namespace Udjat {
 
- 	int OAuth::authorize(HTTP::Request &request, Token &token) {
+ 	int OAuth::authorize(HTTP::Request &request, Context &context) {
 
 		OAuth::Client client{request};
 
 		if(request["grant_type"] == "client_credentials") {
+
+			// Reference:
+			// https://www.ory.sh/docs/oauth2-oidc/client-credentials
 
 			Logger::String{request.address().c_str()," is asking for client credentials"}.trace("oauth2");
 
@@ -42,7 +45,7 @@
 
 
 			// Allow response
-			client.get(token);
+			client.get(context);
 			return 200;
 
 		} else if(request["response_type"] == "token" || request["response_type"] == "code") {
@@ -50,7 +53,11 @@
 			// OAuth 2.0 implicit flow
 			// https://www.oauth.com/playground/implicit.html
 			Logger::String{request.address().c_str()," is asking for implicit flow"}.trace("oauth2");
-			User{request}.get(token);
+			User{request}.get(context);
+
+			context.location = "login?";
+			context.location += request.query();
+
 			return 303;
 
 		}

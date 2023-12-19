@@ -30,6 +30,7 @@
  #include <udjat/tools/logger.h>
  #include <udjat/tools/string.h>
  #include <udjat/tools/configuration.h>
+ #include <udjat/tools/url.h>
  #include <ctype.h>
 
  #include <civetweb.h>
@@ -66,7 +67,7 @@
 					static int field_get(const char *, const char *value, size_t valuelen, void *user_data) {
 						if(valuelen) {
 							debug("   [",string{value,valuelen},"]");
-							((InputParser *) user_data)->values[((InputParser *) user_data)->name] += string{value,valuelen};
+							((InputParser *) user_data)->values[((InputParser *) user_data)->name] += Udjat::String{value,valuelen}.unescape();
 						}
 						return MG_FORM_FIELD_HANDLE_GET;
 					}

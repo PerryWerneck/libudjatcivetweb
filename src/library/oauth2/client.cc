@@ -68,9 +68,9 @@
 		return HTTP::KeyPair::getInstance().encrypt(&data,sizeof(data));
 	}
 
-	void OAuth::Client::get(OAuth::Token &token) {
-		token.cookie = encript();
-		token.expiration_time = data.expiration_time;
+	void OAuth::Client::get(OAuth::Context &context) {
+		context.token = encript();
+		context.expiration_time = data.expiration_time;
 	}
 
 	bool OAuth::Client::decript(const char *str) {

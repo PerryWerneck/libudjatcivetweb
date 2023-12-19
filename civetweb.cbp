@@ -74,6 +74,7 @@
 		<Unit filename="src/library/layout/yaml.cc" />
 		<Unit filename="src/library/oauth2/authorize.cc" />
 		<Unit filename="src/library/oauth2/client.cc" />
+		<Unit filename="src/library/oauth2/signin.cc" />
 		<Unit filename="src/library/oauth2/user.cc" />
 		<Unit filename="src/library/os/linux/icon.cc" />
 		<Unit filename="src/library/os/linux/image.cc" />

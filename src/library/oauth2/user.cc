@@ -21,6 +21,10 @@
   * @brief Implements OAuth2 user.
   */
 
+ // References:
+ //
+ // https://www.freebsd.org/doc/en/articles/pam/pam-essentials.html
+
  #include <config.h>
  #include <udjat/tools/http/oauth.h>
  #include <udjat/tools/http/keypair.h>
@@ -83,9 +87,13 @@
 		return HTTP::KeyPair::getInstance().encrypt(&data,sizeof(data));
 	}
 
-	void OAuth::User::get(OAuth::Token &token) {
-		token.cookie = encript();
-		token.expiration_time = data.expiration_time;
+	String OAuth::User::code() {
+		return HTTP::KeyPair::getInstance().encrypt(&data,sizeof(data));
+	}
+
+	void OAuth::User::get(OAuth::Context &context) {
+		context.token = encript();
+		context.expiration_time = data.expiration_time;
 	}
 
 	bool OAuth::User::decript(const char *str) {
