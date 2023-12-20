@@ -186,8 +186,12 @@
 		KeyPair::~KeyPair() {
 		}
 
-		String KeyPair::toString() {
-			return "";
+		bool KeyPair::decrypt(const char *, void *, size_t) {
+			throw system_error(ENOTSUP,system_category(),"No support for encrypt/decrypt in this build");
+		}
+
+		String KeyPair::encrypt(const void *, size_t) {
+			throw system_error(ENOTSUP,system_category(),"No support for encrypt/decrypt in this build");
 		}
 
 #endif // HAVE_LIBSSL
