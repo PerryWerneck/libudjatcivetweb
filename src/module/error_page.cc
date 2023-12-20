@@ -37,6 +37,26 @@
  using namespace Udjat;
  using namespace std;
 
+ Udjat::MimeType MimeTypeFactory(struct mg_connection *conn, const Udjat::MimeType def) {
+
+	// Check 'accept' header.
+	const char *accept = mg_get_header(conn, "Accept");
+	if(accept && *accept) {
+		for(String &value : String{accept}.split(",")) {
+			auto mime = MimeTypeFactory(value.c_str(),MimeType::custom);
+			if(mime != MimeType::custom) {
+				return mime;
+			}
+		}
+	}
+
+	// Use default
+	const struct mg_request_info *info{mg_get_request_info(conn)};
+	Logger::String{info->remote_addr,": Unexpected mime-type on ",info->request_uri,", using ",std::to_string(def)}.warning("civetweb");
+	return def;
+
+ }
+
  int http_error(struct mg_connection *conn, const MimeType mimetype, int code, const char *title, const char *body) {
 
 	const struct mg_request_info *request_info = mg_get_request_info(conn);
@@ -75,8 +95,8 @@
 
 				text = File::Text(page.c_str()).c_str();
 
-				text.expand([&response,request_info](const char *key, std::string &value) {
-					value = response[key].to_string().c_str();
+				text.expand([&error,request_info](const char *key, std::string &value) {
+					value = error[key].to_string().c_str();
 					return !value.empty();
 				},true,true);
 			}
@@ -135,116 +155,7 @@
  }
 
  int http_error( struct mg_connection *conn, int status, const char *message ) {
-
-	MimeType mimetype = MimeType::html; // TODO: Get mimetype from header.
-	http_error(conn, mimetype, status, message);
+	http_error(conn, MimeTypeFactory(conn,Udjat::MimeType::html), status, message);
 	return 1;
-
  }
-
-/*
-	for(String &value : getProperty("accept").split(",")) {
-		auto mime = MimeTypeFactory(value.c_str(),MimeType::custom);
-		if(mime != MimeType::custom) {
-			mimetype = mime;
-			break;
-		}
-	}
-
- }
-
- int http_error( struct mg_connection *conn, int status, const char *message ) {
-
-	Udjat::MimeType mimetype = (Udjat::MimeType) 0;
-
-	const struct mg_request_info *request_info = mg_get_request_info(conn);
-
-	if(!mimetype && request_info->local_uri_raw && *request_info->local_uri_raw) {
-		//
-		// Not found on headers, try by the path
-		//
-		const char *ptr = strrchr(request_info->local_uri_raw,'.');
-		if(ptr) {
-			mimetype = MimeTypeFactory(ptr+1);
-		}
-	}
-
-	// clog << "civetweb\t" << request_info->remote_addr << " " << status << " " << message << " (" << mimetype << ")" << endl;
-	Logger::String{
-		request_info->remote_addr," ",
-		request_info->request_method," ",
-		request_info->local_uri," ",
-		status," ",message," (",mimetype,")"
-	}.write(Logger::Trace,"civetweb");
-
-	if(Config::Value<bool>("httpd","error-templates",true)) {
-
-		try {
-
-			string response;
-
-#ifdef DEBUG
-			Application::DataFile page{"./templates/error."};
-#else
-			Application::DataFile page{"templates/www/error."};
-#endif // DEBUG
-			page += to_string(mimetype,true);
-
-			debug("Searching for error page in '",page.c_str(),"'");
-
-			if(!access(page.c_str(),R_OK)) {
-				response = File::Text(page.c_str()).c_str();
-			} else if(mimetype == Udjat::json) {
-				response = "{\"error\":{\"application\":\"${application}\",\"code\":${code},\"message\":\"${message}\"}}";
-			} else {
-				Logger::String{
-					"No access to '",page.c_str(),"', using default response"
-				}.write(Logger::Debug,"civetweb");
-			}
-
-			if(!response.empty()) {
-
-				Udjat::expand(response,[&status,&message](const char *key, std::string &value){
-
-					if(!strcasecmp(key,"code")) {
-						value = to_string(status);
-					} else if(!strcasecmp(key,"message")) {
-						value = message;
-					} else if(!strcasecmp(key,"application")) {
-						value = Application::Name();
-					} else {
-						value.clear();
-					}
-
-					return true;
-				});
-
-				mg_printf(
-					conn,
-					"HTTP/1.1 %d %s\r\n"
-					"Content-Type: %s\r\n"
-					"Content-Length: %u\r\n"
-					"\r\n"
-					"%s",
-					status,message,
-					std::to_string(mimetype),
-					(unsigned int) response.size(),
-					response.c_str()
-				);
-				return 0;
-
-			}
-
-		} catch(const std::exception &e) {
-			clog << "civetweb\tError '" << e.what() << "' processing error page, using default" << endl;
-		} catch(...) {
-			clog << "civetweb\tUnexpected error processing error page, using default" << endl;
-		}
-
-	}
-
-	return 1;
-
- }
- */
 
