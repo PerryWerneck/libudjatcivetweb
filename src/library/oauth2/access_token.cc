@@ -57,9 +57,12 @@
 
 			response["token_type"] = "Bearer";
 			response["expires_in"] = expires_in;
-			response["access_token"] = context.token.c_str();
 			response["scope"] = "*";
 			response["refresh_token"] = context.token.c_str();
+
+			// Setup access token
+			HTTP::Request::Token token;
+			response["access_token"] = user.encrypt(token).c_str();
 
 			return 0;
 		}

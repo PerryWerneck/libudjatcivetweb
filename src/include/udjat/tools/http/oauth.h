@@ -117,6 +117,7 @@
 				uint8_t type;
 				time_t expiration_time = 0;
 				uint16_t scope = 0x000F;
+				char username[40] = "";
 #ifdef _WIN32
 
 #else
@@ -172,8 +173,13 @@
 				return data.expiration_time;
 			}
 
+			/// @brief Update request token with user data and encrypt it.
+			String encrypt(Udjat::HTTP::Request::Token &token);
+
 			/// @brief Get user info.
 			bool get(Udjat::Value &value);
+
+			static bool get(uint64_t uid, uint16_t scope, Udjat::Value &value);
 
 		};
 

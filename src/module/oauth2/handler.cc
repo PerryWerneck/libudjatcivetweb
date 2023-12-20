@@ -180,11 +180,9 @@
 		case 4:	// userinfo.
 			{
 				HTTP::Value response{Value::Object};
+				HTTP::Request::Token token;
 
-				debug("---- Getting user");
-				OAuth::User user{request};
-
-				if(!user) {
+				if(!request.get(token)) {
 
 					Logger::String message{"Access denied - Invalid user"};
 					message.error("oauth2");
@@ -193,9 +191,7 @@
 
 				} else {
 
-					// Get user login, name and e-mail
-					user.get(response);
-
+					OAuth::User::get(token.uid,token.scope,response);
 					if(response.empty()) {
 						Logger::String message{"Empty response from user backend"};
 						message.error("oauth2");

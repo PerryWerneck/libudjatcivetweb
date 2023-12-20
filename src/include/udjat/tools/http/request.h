@@ -23,7 +23,14 @@
  #include <udjat/tools/request.h>
  #include <udjat/tools/http/mimetype.h>
  #include <udjat/tools/timestamp.h>
- #include <civetweb.h>
+
+ #ifdef _WIN32
+	#include <windows.h>
+ #else
+	#include <sys/types.h>
+	#include <pwd.h>
+	#include <arpa/inet.h>
+ #endif // _WIN32
 
  namespace Udjat {
 
@@ -31,6 +38,26 @@
 
 		class UDJAT_API Request : public Udjat::Request {
 		public:
+
+			#pragma pack(1)
+			/// @brief Authentication token
+			struct Token {
+				uint8_t type = 0x10;
+				uint16_t scope = 0x000F;
+				time_t expiration_time = 0;
+				uint64_t uid = (uint64_t) -1;
+				char username[40] = "";	///< @brief The user name
+#ifdef _WIN32
+
+#else
+				union {
+					in_addr_t v4;
+					struct in6_addr v6;
+				} ip;
+#endif // _WIN32
+
+			};
+			#pragma pack()
 
 			Request(const char *path = "", HTTP::Method m = HTTP::Get);
 
@@ -41,6 +68,12 @@
 			bool cached(const Udjat::TimeStamp &timestamp) const override;
 
 			std::string exec(const MimeType mimetype);
+
+			/// @brief Get Authentication token.
+			/// @return true if the token has valid authentication.
+			bool get(Request::Token &token) const noexcept;
+
+			bool authenticated() const noexcept override;
 
 			/// @brief The client address.
 			virtual String address() const;

@@ -57,7 +57,7 @@
 	static const char * scope_names[] = {
 		"logon",	// 0x00000001
 		"name", 	// 0x00000002
-		"e-mail",	// 0x00000004
+		"email",	// 0x00000004
 	};
 
 	OAuth::User::User() {
@@ -116,6 +116,33 @@
 
 	String OAuth::User::encrypt() {
 		return HTTP::KeyPair::getInstance().encrypt(&data,sizeof(data));
+	}
+
+	String OAuth::User::encrypt(Udjat::HTTP::Request::Token &token) {
+
+		if(!*this) {
+			throw runtime_error("User is not authenticated in this context");
+		}
+
+		token.expiration_time = data.expiration_time;
+		token.scope = data.scope;
+		token.uid = data.uid;
+
+		memset(token.username,0,sizeof(token.username));
+		strncpy(token.username,data.username,sizeof(token.username)-1);
+
+		memset(&token.ip,0,sizeof(token.ip));
+		if((data.type & 0x0f) == 0x04) {
+			// IPV4
+			token.type |= 0x04;
+			token.ip.v4 = data.ip.v4;
+		} else if( (data.type & 0x0f) == 0x06) {
+			// IPV6
+			token.type |= 0x06;
+			token.ip.v6 = data.ip.v6;
+		}
+
+		return HTTP::KeyPair::getInstance().encrypt(&token,sizeof(token));
 	}
 
 	String OAuth::User::code() {
@@ -307,6 +334,9 @@
 			return false;
 		}
 
+		memset(data.username,0,sizeof(data.username));
+		strncpy(data.username,username.c_str(),sizeof(data.username)-1);
+
 		String password{request["password"]};
 		if(password.empty()) {
 			message = _("Please, inform password");
@@ -351,6 +381,12 @@
 			return false;
 		}
 
+		return get(data.uid,data.scope,value);
+
+	}
+
+	bool OAuth::User::get(uint64_t uid, uint16_t scope, Udjat::Value &value) {
+
 #ifdef _WIN32
 
 		// TODO
@@ -367,28 +403,28 @@
 		struct passwd pwbuf;
 		struct passwd *pw = NULL;
 
-		if(getpwuid_r(data.uid, &pwbuf, buffer, buflen, &pw) == 0 && pw != NULL) {
+		if(getpwuid_r((uid_t) uid, &pwbuf, buffer, buflen, &pw) == 0 && pw != NULL) {
 
 			debug("Got user '",(const char *) pw->pw_name,"'");
 
-			if(data.scope & 0x00000001) {
+			if(scope & 0x00000001) {
 				debug("addding '",scope_names[0],"'");
 				value[scope_names[0]] = (const char *) pw->pw_name;
 			}
 
-			if(data.scope & 0x00000002) {
+			if(scope & 0x00000002) {
 				debug("addding '",scope_names[1],"'");
 				value[scope_names[1]] = (const char *) pw->pw_gecos;
 			}
 
-			if(data.scope & 0x00000004) {
+			if(scope & 0x00000004) {
 				debug("addding '",scope_names[2],"'");
-				value[scope_names[2]] = "not_available@example.com";
+				value[scope_names[2]] = string{pw->pw_name} + "@not.available";
 			}
 
 		} else {
 
-			Logger::String{"Unable to get info for UID ",data.uid}.error("oauth2");
+			Logger::String{"Unable to get info for UID ",(uid_t) uid}.error("oauth2");
 
 		}
 
