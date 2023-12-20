@@ -36,6 +36,16 @@
  #include <sys/socket.h>
  #include <netinet/in.h>
 
+ #ifdef HAVE_UNISTD_H
+	#include <unistd.h>
+ #endif // HAVE_UNISTD_H
+
+ #ifdef _WIN32
+	#include <windows.h>
+ #else
+	#include <pwd.h>
+ #endif // _WIN32
+
  #if defined(HAVE_PAM)
 	#include <security/pam_appl.h>
  #endif // HAVE_PAM
@@ -44,10 +54,17 @@
 
  namespace Udjat {
 
+	static const char * scope_names[] = {
+		"logon",	// 0x00000001
+		"name", 	// 0x00000002
+		"e-mail",	// 0x00000004
+	};
+
 	OAuth::User::User() {
 		memset(&data,0,sizeof(data));
 		data.expiration_time = time(0) + Config::Value<time_t>("oauth2","expiration-time",86400);
 		data.type = 0x20;
+		data.scope = 7;	// Default scope.
 		data.uid = (unsigned int) -1;
 	}
 
@@ -327,5 +344,60 @@
 
 		return false;
 	}
+
+	bool OAuth::User::get(Udjat::Value &value) {
+
+		if(!*this) {
+			return false;
+		}
+
+#ifdef _WIN32
+
+		// TODO
+
+#else
+
+		// Get Linux passwd
+		long buflen = sysconf(_SC_GETPW_R_SIZE_MAX);
+		if(buflen < 1) {
+			buflen = 4096;
+		}
+
+		char buffer[buflen];
+		struct passwd pwbuf;
+		struct passwd *pw = NULL;
+
+		if(getpwuid_r(data.uid, &pwbuf, buffer, buflen, &pw) == 0 && pw != NULL) {
+
+			debug("Got user '",(const char *) pw->pw_name,"'");
+
+			if(data.scope & 0x00000001) {
+				debug("addding '",scope_names[0],"'");
+				value[scope_names[0]] = (const char *) pw->pw_name;
+			}
+
+			if(data.scope & 0x00000002) {
+				debug("addding '",scope_names[1],"'");
+				value[scope_names[1]] = (const char *) pw->pw_gecos;
+			}
+
+			if(data.scope & 0x00000004) {
+				debug("addding '",scope_names[2],"'");
+				value[scope_names[2]] = "not_available@example.com";
+			}
+
+		} else {
+
+			Logger::String{"Unable to get info for UID ",data.uid}.error("oauth2");
+
+		}
+
+
+#endif // _WIN32
+
+		return true;
+
+	}
+
 
  }

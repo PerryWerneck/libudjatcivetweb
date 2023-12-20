@@ -76,6 +76,7 @@
 			struct Cookie {
 				uint8_t type;
 				time_t expiration_time = 0;
+				uint32_t scopes = 7;
 #ifdef _WIN32
 #else
 				uint32_t uid = (uint32_t) (-1);
@@ -115,7 +116,7 @@
 			struct Token {
 				uint8_t type;
 				time_t expiration_time = 0;
-				uint16_t scope = 0x0001;
+				uint16_t scope = 0x000F;
 #ifdef _WIN32
 
 #else
@@ -140,7 +141,6 @@
 #ifdef _WIN32
 				return false;
 #else
-				debug("---------------> ",data.uid);
 				return data.uid != (unsigned int) -1;
 #endif // _WIN32
 			}
@@ -171,6 +171,9 @@
 			inline time_t expires() const noexcept {
 				return data.expiration_time;
 			}
+
+			/// @brief Get user info.
+			bool get(Udjat::Value &value);
 
 		};
 

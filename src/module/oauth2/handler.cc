@@ -113,6 +113,7 @@
 
 	int code = 500;				///< @brief The HTTP return code.
 	OAuth::Context context;		///< @brief The Current context.
+	context.expiration_time = time(0) + 86400;
 
 	try {
 
@@ -193,8 +194,7 @@
 				} else {
 
 					// Get user login, name and e-mail
-
-					debug("TODO");
+					user.get(response);
 
 					if(response.empty()) {
 						Logger::String message{"Empty response from user backend"};
@@ -203,6 +203,9 @@
 						context.message.assign(message);
 					} else {
 						string text{response.to_string(mimetype)};
+
+						debug("Response:\n",text.c_str());
+
 						mg_response_header_start(conn, 200);
 						mg_response_header_add(conn, "Content-Type",std::to_string(mimetype),-1);
 						mg_response_header_add(conn, "Content-Length", std::to_string(text.size()).c_str(), -1);
