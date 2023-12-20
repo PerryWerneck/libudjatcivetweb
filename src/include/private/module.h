@@ -155,3 +155,6 @@
 
  /// @brief Send error page.
  int http_error( struct mg_connection *conn, int status, const char *msg );
+
+ /// @brief Send error page.
+ int http_error( struct mg_connection *conn, const MimeType mimetype, int status, const char *title, const char *body = "");

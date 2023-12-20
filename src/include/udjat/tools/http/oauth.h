@@ -136,6 +136,14 @@
 			User(HTTP::Request &request);
 			~User();
 
+			inline operator bool() const noexcept {
+#ifdef _WIN32
+				return false;
+#else
+				return data.uid != (unsigned int) -1;
+#endif // _WIN32
+			}
+
 			/// @brief Authenticate user.
 			bool authenticate(HTTP::Request &request, std::string &message);
 

@@ -109,6 +109,7 @@
  int oauthWebHandler(struct mg_connection *conn, void *) {
 
 	CivetWeb::Request request{conn};
+	MimeType mimetype{request.mimetype()};
 
 	int code = 500;				///< @brief The HTTP return code.
 	OAuth::Context context;		///< @brief The Current context.
@@ -118,7 +119,7 @@
 		debug("--------------------------------------------");
 
 		// Check for operation.
-		switch(request.select("authorize","login","signin","access_token",nullptr)) {
+		switch(request.select("authorize","login","signin","access_token","userinfo",nullptr)) {
 		case 0:	// Authorize
 			debug("---> authorize");
 			code = OAuth::authorize(request,context);
@@ -148,10 +149,7 @@
 
 				if(!OAuth::access_token(request,context,response)) {
 
-					MimeType mimetype{request.mimetype()};
-
 					string text{response.to_string(mimetype)};
-
 					debug("Response:\n",text.c_str(),"\n");
 
 					if(!text.empty()) {
@@ -181,9 +179,46 @@
 			}
 			break;
 
+		case 4:	// userinfo.
+			{
+				HTTP::Value response{Value::Object};
+				OAuth::User user{request};
+
+				if(!user) {
+
+					Logger::String message{"Access denied"};
+					message.error("oauth2");
+					code = 401;
+					context.message.assign(message);
+
+				} else {
+
+					// Get user login, name and e-mail
+
+
+					if(response.empty()) {
+						Logger::String message{"Empty response: '",request.path(),"'"};
+						message.error("oauth2");
+						code = 503;
+						context.message.assign(message);
+					} else {
+						string text{response.to_string(mimetype)};
+						mg_response_header_start(conn, 200);
+						mg_response_header_add(conn, "Content-Type",std::to_string(mimetype),-1);
+						mg_response_header_add(conn, "Content-Length", std::to_string(text.size()).c_str(), -1);
+						header_send(conn,context);
+						mg_write(conn, text.c_str(), text.size());
+						return 200;
+					}
+
+				}
+
+			}
+			break;
+
 		default:
-			code = 400;
-			Logger::String message{"Invalid request: '",request.path(),"'"};
+			code = 404;
+			Logger::String message{"Unexpected request"};
 			message.error("oauth2");
 			context.message.assign(message);
 		}
@@ -200,8 +235,25 @@
 
 	}
 
-	mg_send_http_error(conn, code, context.message.c_str());
+	/*
+	{
+		HTTP::Value outmsg{Value::Object};
+		outmsg["code"] = code;
+		outmsg["message"] = context.message.c_str();
+
+		string text{outmsg.to_string(mimetype)};
+		mg_response_header_start(conn, code);
+		mg_response_header_add(conn, "Content-Type",std::to_string(mimetype),-1);
+		mg_response_header_add(conn, "Content-Length", std::to_string(text.size()).c_str(), -1);
+		header_send(conn,context);
+		mg_write(conn, text.c_str(), text.size());
+	}
+
 	return code;
+	*/
+
+	debug("OAuth handler exit with error ",code);
+	return http_error(conn,mimetype,code,context.message.c_str());
 
  }
 
