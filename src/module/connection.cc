@@ -50,27 +50,9 @@
 		}
 
 		// Get mimetype from request header.
-		for(int header = 0; header < info->num_headers; header++) {
+		return MimeTypeFactory(conn,MimeType::json);
 
-			debug(info->http_headers[header].name,"=",info->http_headers[header].value);
-
-			if(!strcasecmp(info->http_headers[header].name,"Accept")) {
-				debug("Getting mime-type from header");
-				for(String &value : String{info->http_headers[header].value}.split(",")) {
-					auto mime = MimeTypeFactory(value.c_str(),MimeType::custom);
-					if(mime != MimeType::custom) {
-						return mime;
-					}
-				}
-			}
-		}
-
-		// Default is json.
-		Logger::String{"Unexpected mime-type on ",request_uri()," from ",info->remote_addr,", using JSON"}.info("civetweb");
-
-		return MimeType::json;
 	}
-
 
 	int CivetWeb::Connection::success(const char *mime_type, const char *response, size_t length) const noexcept {
 		mg_send_http_ok(conn, mime_type, length);

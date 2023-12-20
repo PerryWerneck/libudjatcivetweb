@@ -23,6 +23,7 @@
  #include <udjat/tools/request.h>
  #include <udjat/tools/http/request.h>
  #include <civetweb.h>
+ #include <map>
 
  namespace Udjat {
 
@@ -30,14 +31,27 @@
 
 		class UDJAT_PRIVATE Request : public HTTP::Request {
 		private:
+			const struct mg_connection *conn;
 			const struct mg_request_info *info;
 
+			/// @brief Values from form.
+			std::map<std::string,std::string> values;
+
+
 		public:
-			Request(const struct mg_request_info *i);
+			Request(struct mg_connection *conn);
 
 			const char *c_str() const noexcept override;
-			String getProperty(const char *name, const char *def) const override;
-			const char * query(const char *def) const override;
+			String getProperty(const char *name, const char *def = "") const override;
+			const char * query(const char *def = "") const override;
+			String getArgument(const char *name, const char *def = "") const override;
+
+			MimeType mimetype() const noexcept;
+
+			/// @brief The client address.
+			String address() const override;
+
+			String cookie(const char *name) const override;
 
 		};
 

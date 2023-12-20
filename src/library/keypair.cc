@@ -93,7 +93,45 @@
 
 		}
 
-		String KeyPair::encrypt(const char *from) {
+		bool KeyPair::decrypt(const char *str, void *data, size_t length) {
+
+			size_t szBuffer = RSA_size((RSA *) key);
+
+			debug("length: ", length, " szBuffer: ",szBuffer);
+			debug(str);
+
+			unsigned char from[szBuffer+2];
+			memset(from,0,szBuffer+2);
+
+			ssize_t szData = Base64::decode((unsigned char *) str,from,szBuffer+1);
+			if(szData < 1) {
+				Logger::String{"Error decoding Base64"}.error("keypair");
+				Logger::String{str}.trace("keypair");
+				return false;
+			}
+
+			unsigned char to[szBuffer+2];
+			memset(to,0,szBuffer+2);
+			if(RSA_public_decrypt(szData,from,to,(RSA *) key, RSA_PKCS1_PADDING) != (ssize_t) length) {
+				int errcode = ERR_get_error();
+				while(errcode) {
+					cerr << "ssl\t" << ERR_lib_error_string(errcode) << endl;
+					cerr << "ssl\t" << ERR_func_error_string(errcode) << endl;
+					cerr << "ssl\t" << ERR_reason_error_string(errcode) << endl;
+					errcode = ERR_get_error();
+				}
+				Logger::String{"Unable to decrypt received data"}.error("keypair");
+				Logger::String{str}.error("keypair");
+				return false;
+			}
+
+			debug("Data block with ",length," bytes decripted");
+			memcpy(data,to,length);
+			return true;
+
+		}
+
+		String KeyPair::encrypt(const void *from, size_t length) {
 
 			lock_guard<mutex> lock(guard);
 
@@ -102,11 +140,21 @@
 			}
 
 			size_t szBuffer = RSA_size((RSA *) key);
+
+			debug("length: ", length, " szBuffer: ",szBuffer);
+
 			unsigned char to[szBuffer];
 			memset(to,0,szBuffer);
 
-			int szOut = RSA_private_encrypt(strlen(from), (unsigned char *) from, to, (RSA *) key, RSA_PKCS1_PADDING);
+			int szOut = RSA_private_encrypt(length, (unsigned char *) from, to, (RSA *) key, RSA_PKCS1_PADDING);
 			if(szOut < 1) {
+				int errcode = ERR_get_error();
+				while(errcode) {
+					cerr << "ssl\t" << ERR_lib_error_string(errcode) << endl;
+					cerr << "ssl\t" << ERR_func_error_string(errcode) << endl;
+					cerr << "ssl\t" << ERR_reason_error_string(errcode) << endl;
+					errcode = ERR_get_error();
+				}
 				throw runtime_error("Unable to encrypt data block");
 			}
 

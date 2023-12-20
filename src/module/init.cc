@@ -31,6 +31,7 @@
  #include <udjat/tools/http/handler.h>
  #include <udjat/tools/logger.h>
  #include <udjat/tools/string.h>
+ #include <udjat/tools/worker.h>
  #include <unistd.h>
 
  #include <private/module.h>
@@ -82,9 +83,18 @@
 		mg_set_request_handler(ctx, "/icon/", iconWebHandler, 0);
 		mg_set_request_handler(ctx, "/image/", imageWebHandler, 0);
 		mg_set_request_handler(ctx, "/favicon.ico", faviconWebHandler, 0);
-		mg_set_request_handler(ctx, "/authkey.pem", keyWebHandler, 0);
+
+#ifdef HAVE_LIBSSL
+		mg_set_request_handler(ctx, "/pubkey.pem", keyWebHandler, 0);
+		if(Config::Value<bool>{"oauth2","enable-internal",false}) {
+			mg_set_request_handler(ctx, "/oauth2", oauthWebHandler, 0);
+		}
+#endif // HAVE_LIBSSL
+
 //		mg_set_request_handler(ctx, "/report/", reportWebHandler, 0);
-//		mg_set_request_handler(ctx, "/swagger.json", swaggerWebHandler, 0);
+//		mg_set_request_handler(ctx, "/instrospect", swaggerWebHandler, 0);
+
+		// All other requests goes to rootwebhandler
 		mg_set_request_handler(ctx, "/", rootWebHandler, 0);
 	}
 
@@ -239,8 +249,16 @@
 
 		int count = mg_get_server_ports(ctx,10,ports);
 
-		if(count) {
+		debug("------------------------------->",count);
+
+		if(count > 0) {
+
 			for(int ix = 0; ix < count;ix++) {
+
+				if(ports[ix].port <= 0) {
+					continue;
+				}
+
 				Logger::String(
 					"Listening on ",
 					(ports[ix].is_ssl ? "https" : "http"),
@@ -249,49 +267,74 @@
 					":",
 					ports[ix].port
 				).write(Logger::Trace,"civetweb");
-			}
-			if(Logger::enabled(Logger::Debug)) {
 
-				Logger::String(
-					"Application state available on ",
-					(ports[0].is_ssl ? "https" : "http"),
-					"://",
-					(ports[0].protocol == 1 ? "127.0.0.1" : "localhost"),
-					":",
-					ports[0].port,
-					"/api/1.0/agent"
-				).write(Logger::Debug,"civetweb");
+				if(Logger::enabled(Logger::Debug)) {
 
-				auto module = Udjat::Module::find("information");
-				String options;
-				if(module && module->getProperty("options",options)) {
-					for(const std::string &option : options.split(",")) {
+					if(Udjat::Worker::find("agent")) {
 						Logger::String(
-							"Service info available on ",
-							(ports[0].is_ssl ? "https" : "http"),
+							"Application state available on ",
+							(ports[ix].is_ssl ? "https" : "http"),
 							"://",
-							(ports[0].protocol == 1 ? "127.0.0.1" : "localhost"),
+							(ports[ix].protocol == 1 ? "127.0.0.1" : "localhost"),
 							":",
-							ports[0].port,
-							"/api/1.0/info/",
-							option.c_str()
+							ports[ix].port,
+							"/api/1.0/agent"
 						).write(Logger::Debug,"civetweb");
 					}
+
 				}
 
+				if(Logger::enabled(Logger::Trace)) {
+
+					auto module = Udjat::Module::find("information");
+					String options;
+					if(module && module->getProperty("options",options)) {
+						for(const std::string &option : options.split(",")) {
+							Logger::String(
+								"Service info available on ",
+								(ports[ix].is_ssl ? "https" : "http"),
+								"://",
+								(ports[ix].protocol == 1 ? "127.0.0.1" : "localhost"),
+								":",
+								ports[ix].port,
+								"/api/1.0/info/",
+								option.c_str()
+							).write(Logger::Trace,"civetweb");
+						}
+					}
+
 #ifdef HAVE_LIBSSL
-				Logger::String(
-					"Authentication key available on ",
-					(ports[0].is_ssl ? "https" : "http"),
-					"://",
-					(ports[0].protocol == 1 ? "127.0.0.1" : "localhost"),
-					":",
-					ports[0].port,
-					"/authkey.pem"
-				).write(Logger::Debug,"civetweb");
+					Logger::String(
+						"Public key available on ",
+						(ports[ix].is_ssl ? "https" : "http"),
+						"://",
+						(ports[ix].protocol == 1 ? "127.0.0.1" : "localhost"),
+						":",
+						ports[ix].port,
+						"/pubkey.pem"
+					).write(Logger::Trace,"civetweb");
+
+					if(Config::Value<bool>{"oauth2","enable-internal",false}) {
+						Logger::String(
+							"OAuth2 service available on ",
+							(ports[ix].is_ssl ? "https" : "http"),
+							"://",
+							(ports[ix].protocol == 1 ? "127.0.0.1" : "localhost"),
+							":",
+							ports[ix].port,
+							"/oauth2"
+						).write(Logger::Trace,"civetweb");
+					}
 #endif // HAVE_LIBSSL
 
+				}
+
 			}
+
+		} else {
+
+			Logger::String{"No input ports (mg_get_server_ports has returned ",count,")"}.error("civetweb");
+
 		}
 
 

@@ -49,7 +49,14 @@
 
 			/// @brief Encrypt string.
 			/// @return Base64 with the encrypted value.
-			String encrypt(const char *str);
+			String encrypt(const void *data, size_t length);
+
+			/// @brief Decript data.
+			/// @param str Base64 with encripted data.
+			/// @param data destination data.
+			/// @param length data length.
+			/// @return true if the data is valid.
+			bool decrypt(const char *str, void *data, size_t length);
 
 			/// @brief Get public key.
 			String to_string();

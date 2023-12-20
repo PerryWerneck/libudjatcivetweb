@@ -58,18 +58,6 @@
 		return false;
 	}
 
-	void HTTP::Value::to_json(std::ostream &ss) const {
-	}
-
-	void HTTP::Value::to_xml(std::ostream &ss) const {
-	}
-
-	void HTTP::Value::to_html(std::ostream &ss) const {
-	}
-
-	void HTTP::Value::to_yaml(std::ostream &ss, size_t left_margin) const {
-	}
-
 	Value & HTTP::Value::reset(const Udjat::Value::Type type) {
 
 		if(type != this->type) {

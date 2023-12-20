@@ -153,13 +153,5 @@
  /// @brief Handler for custom requests.
  //int customWebHandler(struct mg_connection *conn, void *cbdata);
 
- /// @brief Get mime-type from 'Accept' or 'Content-Type' header.
- /// @param conn Civetweb connection data.
- /// @param def The mimetype to use if connection doesnt set one.
- Udjat::MimeType MimeTypeFactory(struct mg_connection *conn, const Udjat::MimeType def = Udjat::MimeType::json);
-
  /// @brief Send error page.
  int http_error( struct mg_connection *conn, int status, const char *msg );
-
- /// @brief Send error page.
- int http_error( struct mg_connection *conn, const MimeType mimetype, int status, const char *title, const char *body = "");

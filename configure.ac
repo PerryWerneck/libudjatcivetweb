@@ -230,6 +230,53 @@ AC_SUBST(LIBSSL_LIBS)
 AC_SUBST(LIBSSL_CFLAGS)
 
 dnl ---------------------------------------------------------------------------
+dnl Check for PAM
+dnl ---------------------------------------------------------------------------
+
+AC_ARG_ENABLE([pam],
+        AS_HELP_STRING([--disable-pam],[Disable optional PAM support]),
+                [case "${enableval}" in
+                        yes) have_pam=yes ;;
+                        no) have_pam=no ;;
+                        *) AC_MSG_ERROR(bad value ${enableval} for --disable-pam) ;;
+                esac],
+                [have_pam=auto])
+
+if test "x${have_pam}" != xno ; then
+        AC_CHECK_HEADERS(
+                [security/pam_modules.h security/pam_modutil.h security/pam_ext.h],
+                [have_pam=yes],
+                [if test "x$have_pam" = xyes ; then
+                        AC_MSG_ERROR([PAM headers not found.])
+                fi])
+
+        AC_CHECK_LIB(
+                [pam],
+                [pam_syslog],
+                [have_pam=yes],
+                [if test "x$have_pam" = xyes ; then
+                        AC_MSG_ERROR([libpam not found.])
+                fi])
+
+        if test "x$have_pam" = xyes ; then
+
+                PAM_LIBS="-lpam -lpam_misc"
+                AC_DEFINE(HAVE_PAM, 1, [PAM available])
+                M4_DEFINES="$M4_DEFINES -DHAVE_PAM"
+
+        else
+
+                have_pam=no
+
+        fi
+
+else
+        PAM_LIBS=
+fi
+
+AC_SUBST(PAM_LIBS)
+
+dnl ---------------------------------------------------------------------------
 dnl test for pugixml
 dnl ---------------------------------------------------------------------------
 dnl 

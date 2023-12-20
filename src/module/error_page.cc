@@ -30,100 +30,158 @@
  #include <udjat/tools/expander.h>
  #include <udjat/tools/http/server.h>
  #include <udjat/tools/http/handler.h>
+ #include <udjat/tools/http/value.h>
  #include <udjat/tools/logger.h>
  #include <unistd.h>
 
  using namespace Udjat;
  using namespace std;
 
- int http_error( struct mg_connection *conn, int status, const char *message ) {
+ Udjat::MimeType MimeTypeFactory(struct mg_connection *conn, const Udjat::MimeType def) {
 
-	Udjat::MimeType mimetype = (Udjat::MimeType) 0;
+	static const char *headers[] = { "Content-Type", "Accept" };
+
+	for(const char *header : headers) {
+
+		// Check 'accept' header.
+		const char *hdr = mg_get_header(conn, header);
+
+		if(hdr && *hdr) {
+
+			for(String &value : String{hdr}.split(",")) {
+
+				auto mime = MimeTypeFactory(value.c_str(),MimeType::custom);
+				if(mime != MimeType::custom) {
+					return mime;
+				}
+			}
+		}
+
+	}
+
+	// Use default
+	const struct mg_request_info *info{mg_get_request_info(conn)};
+	Logger::String{info->remote_addr,": Unexpected mime-type on ",info->request_uri,", using ",std::to_string(def)}.warning("civetweb");
+	return def;
+
+ }
+
+ /// @brief Application error handler.
+ int http_error(struct mg_connection *conn, const MimeType mimetype, int code, const char *title, const char *body) {
 
 	const struct mg_request_info *request_info = mg_get_request_info(conn);
 
-	if(!mimetype && request_info->local_uri_raw && *request_info->local_uri_raw) {
-		//
-		// Not found on headers, try by the path
-		//
-		const char *ptr = strrchr(request_info->local_uri_raw,'.');
-		if(ptr) {
-			mimetype = MimeTypeFactory(ptr+1);
-		}
-	}
+	// Format standard response.
+	HTTP::Value response{Udjat::Value::Object};
+	auto &error = response["error"];
+	error["code"] = code;
+	error["message"] = title;
+	error["body"] = body;
 
-	// clog << "civetweb\t" << request_info->remote_addr << " " << status << " " << message << " (" << mimetype << ")" << endl;
 	Logger::String{
 		request_info->remote_addr," ",
 		request_info->request_method," ",
 		request_info->local_uri," ",
-		status," ",message," (",mimetype,")"
-	}.write(Logger::Trace,"civetweb");
+		code," ",title," (",std::to_string(mimetype),")"
+	}.error("civetweb");
 
-	if(Config::Value<bool>("httpd","error-templates",true)) {
+	String text;
 
-		try {
+	try {
 
-			string response;
+		if(Config::Value<bool>("httpd","error-templates",true)) {
 
-			Application::DataDir page;
-			page += "templates/www/error.";
-			page += to_string(mimetype,true);
+			//
+			// If exist an error template for this mimetype use it.
+			//
 
-			debug("Searching for error page in '",page.c_str(),"'");
+#ifdef DEBUG
+			Application::DataFile page{"./templates/error."};
+#else
+			Application::DataFile page{"templates/www/error."};
+#endif // DEBUG
+			page += to_string(mimetype == MimeType::custom ? MimeType::html : mimetype,true);
 
 			if(!access(page.c_str(),R_OK)) {
-				response = File::Text(page.c_str()).c_str();
-			} else if(mimetype == Udjat::json) {
-				response = "{\"error\":{\"application\":\"${application}\",\"code\":${code},\"message\":\"${message}\"}}";
-			} else {
-				Logger::String{
-					"No access to '",page.c_str(),"', using default response"
-				}.write(Logger::Debug,"civetweb");
-			}
 
-			if(!response.empty()) {
+				Logger::String{"Loading error page from '",page.c_str(),"'"}.trace("civetweb");
 
-				Udjat::expand(response,[&status,&message](const char *key, std::string &value){
-
-					if(!strcasecmp(key,"code")) {
-						value = to_string(status);
-					} else if(!strcasecmp(key,"message")) {
-						value = message;
-					} else if(!strcasecmp(key,"application")) {
-						value = Application::Name();
-					} else {
-						value.clear();
-					}
-
-					return true;
-				});
-
-				mg_printf(
-					conn,
-					"HTTP/1.1 %d %s\r\n"
-					"Content-Type: %s\r\n"
-					"Content-Length: %u\r\n"
-					"\r\n"
-					"%s",
-					status,message,
-					std::to_string(mimetype),
-					(unsigned int) response.size(),
-					response.c_str()
-				);
-				return 0;
+				text = page.load().expand([&error,request_info](const char *key, std::string &value) {
+					value = error[key].to_string().c_str();
+					return !value.empty();
+				},true,true);
 
 			}
 
-		} catch(const std::exception &e) {
-			clog << "civetweb\tError '" << e.what() << "' processing error page, using default" << endl;
-		} catch(...) {
-			clog << "civetweb\tUnexpected error processing error page, using default" << endl;
 		}
+
+	} catch(const std::exception &e) {
+
+		Logger::String{e.what()}.error("civetweb");
+		text.clear();
+
+	} catch(...) {
+
+		Logger::String{"Unexpected error formatting error page"}.error("civetweb");
+		text.clear();
 
 	}
 
-	return 1;
+	if(text.empty()) {
 
+		//
+		// No template, format standard exit.
+		//
+
+		if(mimetype != MimeType::html) {
+
+			//
+			// Render response as 'mimetype' data.
+			//
+			try {
+
+				// Format from request.
+				text = response.to_string(mimetype);
+
+			} catch(const std::exception &e) {
+
+				// Failed, render as 'shell-script'.
+				Logger::String{e.what()}.error("civetweb");
+				text = response.to_string(MimeType::sh);
+
+			}
+
+		}
+		// TODO: else { format default html }
+
+	}
+
+	if(text.empty()) {
+
+		// No text, use civetweb standard response
+		mg_send_http_error(conn, code, title);
+
+	} else {
+
+		// Send formatted response.
+		mg_response_header_start(conn, code);
+
+		mg_response_header_add(conn, "Content-Type",std::to_string(mimetype),-1);
+		mg_response_header_add(conn, "Content-Length", std::to_string(text.size()).c_str(), -1);
+		mg_response_header_add(conn, "Cache-Control","no-cache, no-store, must-revalidate, private, max-age=0",-1);
+		mg_response_header_add(conn, "Expires", "0", -1);
+
+		mg_response_header_send(conn);
+
+		mg_write(conn, text.c_str(), text.size());
+	}
+
+	return code;
+ }
+
+ /// @brief CivetWeb error handler.
+ int http_error( struct mg_connection *conn, int status, const char *message ) {
+	http_error(conn, MimeTypeFactory(conn,Udjat::MimeType::html), status, message);
+	return 1;
  }
 

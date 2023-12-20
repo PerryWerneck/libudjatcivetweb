@@ -50,7 +50,7 @@
 #endif // DEBUG
 
 		MimeType mimetype = (MimeType) connection;
-		string response = CivetWeb::Request{mg_get_request_info(conn)}.exec(mimetype);
+		string response = CivetWeb::Request{conn}.exec(mimetype);
 
 		if(response.empty()) {
 

@@ -29,6 +29,7 @@
 
  namespace Udjat {
 
+	/*
 	void HTTP::to_csv(std::ostream &ss, const Udjat::Value &value, const char delimiter) {
 
 		if(value == Udjat::Value::Array && !value.empty()) {
@@ -72,6 +73,7 @@
 		}
 
 	}
+	*/
 
  }
 
