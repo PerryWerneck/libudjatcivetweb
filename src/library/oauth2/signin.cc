@@ -57,12 +57,12 @@
 		switch(request["response_type"].select("code","token",nullptr)) {
 		case 0:	// Code flow
 			context.location += "&code=";
-			context.location += user.code();
+			context.location += user.code().escape();
 			break;
 
 		case 1: // Implicit flow
 			context.location += "&access_token=";
-			context.location += context.token;
+			context.location += context.token.escape();
 			context.location += "token_type=Bearer&expires_in=";
 			context.location += context.expiration_time - time(0);
 			context.location += "&scope=";

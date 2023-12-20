@@ -40,17 +40,33 @@
 
 		if(user.code(request["code"].c_str())) {
 
-			String token{user.encrypt()};
+			// Update context
+			context.token = user.encrypt();
+			context.expiration_time = user.expires();
+			context.message.clear();
+			context.location.clear();
+
+			// Check expiration time
+			int expires_in = (context.expiration_time - time(0));
+			if(expires_in < 0) {
+				Logger::String message{"Token is already expired"};
+				context.message = message.c_str();
+				message.error("oauth2");
+				return EPERM;
+			}
 
 			response["token_type"] = "Bearer";
-			response["expires_in"] = time(0) - context.expiration_time;
-			response["access_token"] = token.c_str();
+			response["expires_in"] = expires_in;
+			response["access_token"] = context.token.c_str();
 			response["scope"] = "*";
-			response["refresh_token"] = token.c_str();
+			response["refresh_token"] = context.token.c_str();
 
 			return 0;
 		}
 
+		Logger::String message{"Error parsing access code"};
+		context.message = message.c_str();
+		message.error("oauth2");
 		return EPERM;
 
  	}

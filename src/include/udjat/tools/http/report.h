@@ -36,8 +36,9 @@
 			Report(Udjat::MimeType mimetype);
 			virtual ~Report();
 
-			void save(std::ostream &stream) const;
-			std::string to_string() const;
+			bool empty() const override;
+
+			void for_each(const std::function<void(const Value::Type type, const char *value)> &func) const override;
 
 			Udjat::Response::Table & push_back(const char *str, Udjat::Value::Type type) override;
 

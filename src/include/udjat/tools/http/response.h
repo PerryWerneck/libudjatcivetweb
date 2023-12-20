@@ -21,6 +21,7 @@
 
  #include <udjat/defs.h>
  #include <udjat/tools/response.h>
+ #include <udjat/tools/value.h>
  #include <udjat/tools/http/value.h>
  #include <ostream>
 
@@ -47,23 +48,9 @@
 			Udjat::Value & append(const Type type = Object) override;
 			Udjat::Value & reset(const Udjat::Value::Type type) override;
 
-			void save(std::ostream &stream) const;
-			std::string to_string() const;
-
 		};
 
 	}
 
  }
 
- namespace std {
-
-	inline string to_string(const Udjat::HTTP::Response &response) noexcept {
-		return response.to_string();
-	}
-
-	inline ostream & operator<< (ostream& os, const Udjat::HTTP::Response &response) {
-		return os << response.to_string();
-	}
-
- }

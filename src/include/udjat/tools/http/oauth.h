@@ -27,6 +27,7 @@
  #include <udjat/tools/request.h>
  #include <udjat/tools/http/request.h>
  #include <udjat/tools/http/value.h>
+ #include <udjat/tools/string.h>
  #include <civetweb.h>
  #include <map>
  #include <string>
@@ -44,9 +45,9 @@
 	namespace OAuth {
 
 		struct Context {
-			std::string token;			///< @brief The authentication token.
-			std::string message;		///< @brief The Message for client.
-			std::string location;		///< @brief The new location.
+			String token;				///< @brief The authentication token.
+			String message;				///< @brief The Message for client.
+			String location;			///< @brief The new location.
 			time_t expiration_time;		///< @brief The expiration time.
 		};
 
@@ -99,6 +100,10 @@
 
 			/// @brief Validate authentication token for client.
 			bool decrypt(const char *str);
+
+			inline time_t expires() const noexcept {
+				return data.expiration_time;
+			}
 
 		};
 
@@ -153,6 +158,10 @@
 
 			/// @brief Decript user authentication token.
 			bool decrypt(const char *str);
+
+			inline time_t expires() const noexcept {
+				return data.expiration_time;
+			}
 
 		};
 

@@ -144,19 +144,39 @@
 		case 3: // access_token
 			debug("---> access_token");
 			{
-				HTTP::Value response;
+				HTTP::Value response{Value::Object};
 
 				if(!OAuth::access_token(request,context,response)) {
-					string text{response.to_json()};
-					mg_response_header_start(conn, 200);
-					mg_response_header_add(conn, "Content-Type",std::to_string(MimeType::json),-1);
-					mg_response_header_add(conn, "Content-Length", std::to_string(text.size()).c_str(), -1);
-					header_send(conn,context);
-					mg_write(conn, text.c_str(), text.size());
-					return 200;
-				}
 
-				return 400;
+					MimeType mimetype{request.mimetype()};
+
+					string text{response.to_string(mimetype)};
+
+					debug("Response:\n",text.c_str(),"\n");
+
+					if(!text.empty()) {
+
+						mg_response_header_start(conn, 200);
+						mg_response_header_add(conn, "Content-Type",std::to_string(mimetype),-1);
+						mg_response_header_add(conn, "Content-Length", std::to_string(text.size()).c_str(), -1);
+						header_send(conn,context);
+						mg_write(conn, text.c_str(), text.size());
+						return 200;
+
+					} else {
+
+						Logger::String message{"Empty response: '",request.path(),"'"};
+						message.error("oauth2");
+						code = 503;
+						context.message.assign(message);
+
+					}
+				} else {
+
+					code = 400;
+					context.message.assign("Access denied");
+
+				}
 
 			}
 			break;
