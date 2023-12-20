@@ -53,8 +53,8 @@
 		request_info->remote_addr," ",
 		request_info->request_method," ",
 		request_info->local_uri," ",
-		code," ",title," (",mimetype,")"
-	}.write(Logger::Trace,"civetweb");
+		code," ",title," (",std::to_string(mimetype),")"
+	}.error("civetweb");
 
 	String text;
 
