@@ -28,7 +28,7 @@
  #include <udjat/tools/http/request.h>
  #include <udjat/tools/http/value.h>
  #include <udjat/tools/string.h>
- #include <civetweb.h>
+ #include <udjat/tools/logger.h>
  #include <map>
  #include <string>
 
@@ -140,6 +140,7 @@
 #ifdef _WIN32
 				return false;
 #else
+				debug("---------------> ",data.uid);
 				return data.uid != (unsigned int) -1;
 #endif // _WIN32
 			}

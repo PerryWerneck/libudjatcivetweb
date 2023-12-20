@@ -116,8 +116,6 @@
 
 	try {
 
-		debug("--------------------------------------------");
-
 		// Check for operation.
 		switch(request.select("authorize","login","signin","access_token","userinfo",nullptr)) {
 		case 0:	// Authorize
@@ -150,7 +148,6 @@
 				if(!OAuth::access_token(request,context,response)) {
 
 					string text{response.to_string(mimetype)};
-					debug("Response:\n",text.c_str(),"\n");
 
 					if(!text.empty()) {
 
@@ -182,11 +179,13 @@
 		case 4:	// userinfo.
 			{
 				HTTP::Value response{Value::Object};
+
+				debug("---- Getting user");
 				OAuth::User user{request};
 
 				if(!user) {
 
-					Logger::String message{"Access denied"};
+					Logger::String message{"Access denied - Invalid user"};
 					message.error("oauth2");
 					code = 401;
 					context.message.assign(message);
@@ -195,9 +194,10 @@
 
 					// Get user login, name and e-mail
 
+					debug("TODO");
 
 					if(response.empty()) {
-						Logger::String message{"Empty response: '",request.path(),"'"};
+						Logger::String message{"Empty response from user backend"};
 						message.error("oauth2");
 						code = 503;
 						context.message.assign(message);
@@ -234,23 +234,6 @@
 		context.message = _("Unexpected error");
 
 	}
-
-	/*
-	{
-		HTTP::Value outmsg{Value::Object};
-		outmsg["code"] = code;
-		outmsg["message"] = context.message.c_str();
-
-		string text{outmsg.to_string(mimetype)};
-		mg_response_header_start(conn, code);
-		mg_response_header_add(conn, "Content-Type",std::to_string(mimetype),-1);
-		mg_response_header_add(conn, "Content-Length", std::to_string(text.size()).c_str(), -1);
-		header_send(conn,context);
-		mg_write(conn, text.c_str(), text.size());
-	}
-
-	return code;
-	*/
 
 	debug("OAuth handler exit with error ",code);
 	return http_error(conn,mimetype,code,context.message.c_str());

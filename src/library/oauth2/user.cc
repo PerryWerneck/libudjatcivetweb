@@ -61,6 +61,8 @@
 		String req_addr{request.address()};
 		sockaddr_storage addr;
 
+		debug("Building user info from ",req_addr.c_str()," request");
+
 		if(inet_pton(AF_INET,req_addr.c_str(),&((struct sockaddr_in *) &addr)->sin_addr) == 1) {
 			data.type |= 0x04;
 			data.ip.v4 = ((struct sockaddr_in *) &addr)->sin_addr.s_addr;
@@ -72,9 +74,22 @@
 			Logger::String{"Cant identify address '",req_addr.c_str(),"'"}.warning("oauth");
 		}
 
-		String token = request.cookie("oauth2-session");
-		if(!token.empty()) {
-			decrypt(token.c_str());
+		// Check for authorization
+		{
+			String token = request.getProperty("Authorization");
+			if(!token.empty() && token.has_prefix("Bearer ",true) && decrypt(token.c_str()+7)) {
+				debug("Got user fron 'Authorization' header");
+				return;
+			}
+		}
+
+		// Check for cookie
+		{
+			String token = request.cookie("oauth2-session");
+			if(!token.empty() && decrypt(token.c_str())) {
+				debug("Got user from 'oauth2-session' cookie");
+				return;
+			}
 		}
 
 	}
@@ -103,6 +118,15 @@
 
 		User::Token data;
 
+		while(*str && isspace(*str)) {
+			str++;
+		}
+
+		if(!*str) {
+			Logger::String{"Rejecting empty user token"}.error("oauth2");
+			return false;
+		}
+
 		if(HTTP::KeyPair::getInstance().decrypt(str,&data,sizeof(data))) {
 
 			if(data.type != this->data.type) {
@@ -125,9 +149,9 @@
 				return false;
 			}
 
-			Logger::String{"Accepting valid user token for uid ",data.uid}.trace("oauth2");
-
 			this->data = data;
+			Logger::String{"Accepting valid user token for uid ",this->data.uid}.trace("oauth2");
+
 			return true;
 		}
 

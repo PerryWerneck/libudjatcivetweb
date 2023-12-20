@@ -39,15 +39,24 @@
 
  Udjat::MimeType MimeTypeFactory(struct mg_connection *conn, const Udjat::MimeType def) {
 
-	// Check 'accept' header.
-	const char *accept = mg_get_header(conn, "Accept");
-	if(accept && *accept) {
-		for(String &value : String{accept}.split(",")) {
-			auto mime = MimeTypeFactory(value.c_str(),MimeType::custom);
-			if(mime != MimeType::custom) {
-				return mime;
+	static const char *headers[] = { "Content-Type", "Accept" };
+
+	for(const char *header : headers) {
+
+		// Check 'accept' header.
+		const char *hdr = mg_get_header(conn, header);
+
+		if(hdr && *hdr) {
+
+			for(String &value : String{hdr}.split(",")) {
+
+				auto mime = MimeTypeFactory(value.c_str(),MimeType::custom);
+				if(mime != MimeType::custom) {
+					return mime;
+				}
 			}
 		}
+
 	}
 
 	// Use default
@@ -57,12 +66,12 @@
 
  }
 
+ /// @brief Application error handler.
  int http_error(struct mg_connection *conn, const MimeType mimetype, int code, const char *title, const char *body) {
 
 	const struct mg_request_info *request_info = mg_get_request_info(conn);
 
-	debug("----------------------------------------");
-
+	// Format standard response.
 	HTTP::Value response{Udjat::Value::Object};
 	auto &error = response["error"];
 	error["code"] = code;
@@ -82,23 +91,26 @@
 
 		if(Config::Value<bool>("httpd","error-templates",true)) {
 
-	#ifdef DEBUG
-			Application::DataFile page{"./templates/error."};
-	#else
-			Application::DataFile page{"templates/www/error."};
-	#endif // DEBUG
-			page += to_string(mimetype,true);
+			//
+			// If exist an error template for this mimetype use it.
+			//
 
-			debug("Searching for error page in '",page.c_str(),"'");
+#ifdef DEBUG
+			Application::DataFile page{"./templates/error."};
+#else
+			Application::DataFile page{"templates/www/error."};
+#endif // DEBUG
+			page += to_string(mimetype == MimeType::custom ? MimeType::html : mimetype,true);
 
 			if(!access(page.c_str(),R_OK)) {
 
-				text = File::Text(page.c_str()).c_str();
+				Logger::String{"Loading error page from '",page.c_str(),"'"}.trace("civetweb");
 
-				text.expand([&error,request_info](const char *key, std::string &value) {
+				text = page.load().expand([&error,request_info](const char *key, std::string &value) {
 					value = error[key].to_string().c_str();
 					return !value.empty();
 				},true,true);
+
 			}
 
 		}
@@ -110,15 +122,22 @@
 
 	} catch(...) {
 
-		Logger::String{"Unexpecte error formatting error page"}.error("civetweb");
+		Logger::String{"Unexpected error formatting error page"}.error("civetweb");
 		text.clear();
 
 	}
 
 	if(text.empty()) {
 
+		//
+		// No template, format standard exit.
+		//
+
 		if(mimetype != MimeType::html) {
 
+			//
+			// Render response as 'mimetype' data.
+			//
 			try {
 
 				// Format from request.
@@ -126,6 +145,7 @@
 
 			} catch(const std::exception &e) {
 
+				// Failed, render as 'shell-script'.
 				Logger::String{e.what()}.error("civetweb");
 				text = response.to_string(MimeType::sh);
 
@@ -137,8 +157,13 @@
 	}
 
 	if(text.empty()) {
+
+		// No text, use civetweb standard response
 		mg_send_http_error(conn, code, title);
+
 	} else {
+
+		// Send formatted response.
 		mg_response_header_start(conn, code);
 
 		mg_response_header_add(conn, "Content-Type",std::to_string(mimetype),-1);
@@ -154,6 +179,7 @@
 	return code;
  }
 
+ /// @brief CivetWeb error handler.
  int http_error( struct mg_connection *conn, int status, const char *message ) {
 	http_error(conn, MimeTypeFactory(conn,Udjat::MimeType::html), status, message);
 	return 1;
