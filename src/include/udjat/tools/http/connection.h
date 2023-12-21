@@ -72,9 +72,10 @@
 
 			/// @brief Send error.
 			/// @param code The HTTP status code (see HTTP standard).
-			/// @param message The error message.
+			/// @param title The error message.
+			/// @param body Text explaining the failure
 			/// @return Error code.
-			virtual int failed(int code, const char *message) const noexcept = 0;
+			virtual int failed(int code, const char *title, const char *body = "") const noexcept = 0;
 
 		};
 

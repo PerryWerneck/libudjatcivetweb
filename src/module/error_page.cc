@@ -71,6 +71,11 @@
 
 	const struct mg_request_info *request_info = mg_get_request_info(conn);
 
+	// TODO: Check for Configuration if we should change status to 200
+	//       and use 'rc' to avoid failure on legacy applications.
+	// Config::Value<bool>{"httpd","use_legacy_errors",false};
+
+
 	// Format standard response.
 	HTTP::Value response{Udjat::Value::Object};
 	auto &error = response["error"];

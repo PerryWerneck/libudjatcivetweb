@@ -55,16 +55,15 @@
  namespace Udjat {
 
 	static const char * scope_names[] = {
-		"logon",	// 0x00000001
-		"name", 	// 0x00000002
-		"email",	// 0x00000004
+		"username",		// 0x0001
+		"userinfo", 	// 0x0002
 	};
 
 	OAuth::User::User() {
 		memset(&data,0,sizeof(data));
 		data.expiration_time = time(0) + Config::Value<time_t>("oauth2","expiration-time",86400);
 		data.type = 0x20;
-		data.scope = 7;	// Default scope.
+		data.scope = 0x0f;	// Default scope.
 		data.uid = (unsigned int) -1;
 	}
 
@@ -415,11 +414,6 @@
 			if(scope & 0x00000002) {
 				debug("addding '",scope_names[1],"'");
 				value[scope_names[1]] = (const char *) pw->pw_gecos;
-			}
-
-			if(scope & 0x00000004) {
-				debug("addding '",scope_names[2],"'");
-				value[scope_names[2]] = string{pw->pw_name} + "@not.available";
 			}
 
 		} else {
