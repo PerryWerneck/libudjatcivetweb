@@ -87,7 +87,6 @@
 	}
 
 	Udjat::Value & HTTP::Response::operator[](const char *name) {
-		debug("-----------------------> [",name,"]");
 		return children[name];
 	}
 
