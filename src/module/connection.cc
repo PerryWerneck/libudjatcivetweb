@@ -72,14 +72,16 @@
 
 	static void response_add_cache_headers(struct mg_connection *conn, const Abstract::Response &response) {
 
+		time_t now = time(0);
+
 		time_t modtime = response.last_modified();
 		if(!modtime) {
-			modtime = time(0);
+			modtime = now;
 		}
 		mg_response_header_add(conn, "Last-Modified", HTTP::TimeStamp{modtime}.to_string().c_str(), -1);
 
 		time_t expires = response.expires();
-		if(expires) {
+		if(expires && expires >= now) {
 
 			mg_response_header_add(conn, "Expires", HTTP::TimeStamp{expires}.to_string().c_str(), -1);
 
