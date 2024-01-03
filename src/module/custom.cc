@@ -21,6 +21,7 @@
  #include <udjat/civetweb.h>
  #include <udjat/tools/http/handler.h>
  #include <udjat/tools/http/request.h>
+ #include <udjat/tools/intl.h>
  #include <private/module.h>
  #include <udjat/tools/logger.h>
 
@@ -47,24 +48,30 @@
 	} catch(const HTTP::Exception &error) {
 
 		cerr << "civetweb\t" << error.what() << endl;
-		return connection.response(error);
+		HTTP::Response response{(MimeType) connection};
+		response.failed(error);
+		return connection.send(response);
 
 	} catch(const system_error &error) {
 
 		cerr << "civetweb\t" << error.what() << endl;
-		return connection.response(error);
+		HTTP::Response response{(MimeType) connection};
+		response.failed(error);
+		return connection.send(response);
 
 	} catch(const exception &error) {
 
 		cerr << "civetweb\t" << error.what() << endl;
-		return connection.response(error);
+		HTTP::Response response{(MimeType) connection};
+		response.failed(error);
+		return connection.send(response);
 
 	} catch(...) {
 
 		cerr << "civetweb\tUnexpected error" << endl;
-		connection.failed(500, "Unexpected error");
-		return 500;
-
+		HTTP::Response response{(MimeType) connection};
+		response.failed(_("Unexpected error on http handler"),-1);
+		return connection.send(response);
 	}
 
 	return 500;

@@ -90,4 +90,14 @@
 		return children[name];
 	}
 
+	/*
+	void HTTP::Response::failed(const std::system_error &e) noexcept {
+		failed(e.what(),e.code().value());
+	}
+
+	void HTTP::Response::failed(const std::exception &e) noexcept {
+		failed(e.what());
+	}
+	*/
+
  }

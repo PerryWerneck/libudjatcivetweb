@@ -67,7 +67,7 @@
 			const char *c_str() const noexcept override;
 			bool cached(const Udjat::TimeStamp &timestamp) const override;
 
-			std::string exec(const MimeType mimetype);
+			// void exec(HTTP::Response &response) noexcept;
 
 			/// @brief Get Authentication token.
 			/// @return true if the token has valid authentication.

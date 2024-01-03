@@ -46,6 +46,8 @@
 		// Check 'accept' header.
 		const char *hdr = mg_get_header(conn, header);
 
+		debug("header[",header,"]='",hdr,"'");
+
 		if(hdr && *hdr) {
 
 			for(String &value : String{hdr}.split(",")) {

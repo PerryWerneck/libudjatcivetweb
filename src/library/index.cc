@@ -168,7 +168,7 @@
 
 		page << "</body></html>";
 
-		return success(
+		return send(
 				to_string(MimeType::html),
 				page.str().c_str(),
 				page.str().size()
@@ -204,6 +204,6 @@
 
 	}
 
-	return failed(404, strerror(ENOENT));
+	return send(ENOENT, strerror(ENOENT));
 
  }

@@ -20,6 +20,9 @@
  #include <config.h>
  #include <stdexcept>
  #include <udjat/tools/http/server.h>
+ #include <udjat/tools/http/connection.h>
+ #include <udjat/tools/http/exception.h>
+ #include <udjat/tools/http/response.h>
 
  using namespace std;
 
@@ -31,6 +34,7 @@
 	HTTP::Connection::~Connection() {
 	}
 
+	/*
 	int HTTP::Connection::response(const HTTP::Exception &error) const noexcept {
 		return failed(error.codes().http, error.what());
 	}
@@ -41,6 +45,25 @@
 
 	int HTTP::Connection::response(const std::exception &e) const noexcept {
 		return failed(500,e.what());
+	}
+	*/
+
+	int HTTP::Connection::send(int code, const char *title, const char *body) const noexcept {
+
+		HTTP::Response response{(MimeType) *this};
+		response.failed(title,code);
+
+		if(body && *body) {
+			response["body"] = body;
+		}
+
+		send(response);
+
+		if(code < 100) {
+			return HTTP::Exception::translate(code);
+		}
+
+		return code;
 	}
 
  }

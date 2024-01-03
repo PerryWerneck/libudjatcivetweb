@@ -29,8 +29,12 @@
  #include <udjat/tools/logger.h>
  #include <udjat/tools/request.h>
  #include <udjat/tools/http/exception.h>
+ #include <udjat/tools/http/connection.h>
  #include <udjat/tools/http/response.h>
+ #include <udjat/tools/http/report.h>
+ #include <udjat/tools/http/request.h>
  #include <udjat/tools/configuration.h>
+ #include <udjat/tools/worker.h>
  #include <private/request.h>
 
  using namespace std;
@@ -39,6 +43,46 @@
  int rootWebHandler(struct mg_connection *conn, void *) {
 
 	CivetWeb::Connection connection{conn};
+	CivetWeb::Request request{conn};
+
+	size_t output_format = request.getArgument("output-format","detailed").select("detailed","list","combined",nullptr);
+
+	if(output_format == 1 || connection ==  MimeType::csv) {
+
+		// List
+		HTTP::Report response{(MimeType) connection};
+		Udjat::exec(request,response);
+		return connection.send(response);
+
+	} else {
+
+		// Detailed or combined.
+		HTTP::Response response{(MimeType) connection};
+		Udjat::exec(request,response);
+
+		// TODO: If output_format == 2 append report on response.
+
+		return connection.send(response);
+
+	}
+
+
+	/*
+	if(response.empty()) {
+
+		const struct mg_request_info *request_info = mg_get_request_info(conn);
+
+		Logger::String{
+			request_info->remote_addr," ",
+			request_info->request_method," ",
+			request_info->local_uri," ",
+			" - Empty response"
+		}.warning("civetweb");
+
+	}
+	*/
+
+	/*
 
  	try {
 
@@ -88,4 +132,5 @@
 	}
 
 	return 500;
+	*/
  }

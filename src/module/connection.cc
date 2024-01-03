@@ -20,6 +20,9 @@
  #include <private/module.h>
  #include <sys/types.h>
  #include <sys/stat.h>
+ #include <private/module.h>
+ #include <udjat/tools/abstractresponse.h>
+ #include <udjat/tools/http/response.h>
  #include <udjat/tools/http/timestamp.h>
  #include <udjat/tools/logger.h>
  #include <udjat/tools/intl.h>
@@ -54,12 +57,86 @@
 
 	}
 
-	int CivetWeb::Connection::success(const char *mime_type, const char *response, size_t length) const noexcept {
-		mg_send_http_ok(conn, mime_type, length);
-		mg_write(conn, response, length);
+	int CivetWeb::Connection::send(const char *mime_type, const char *text, size_t length) const noexcept {
+
+		mg_response_header_start(conn, 200);
+		mg_response_header_add(conn, "Content-Type",mime_type,-1);
+		mg_response_header_add(conn, "Content-Length", std::to_string(length).c_str(), -1);
+		mg_response_header_send(conn);
+
+		// Send response.
+		mg_write(conn, text, length);
+
 		return 200;
 	}
 
+	static void response_add_cache_headers(struct mg_connection *conn, const Abstract::Response &response) {
+
+		time_t modtime = response.last_modified();
+		if(!modtime) {
+			modtime = time(0);
+		}
+		mg_response_header_add(conn, "Last-Modified", HTTP::TimeStamp{modtime}.to_string().c_str(), -1);
+
+		time_t expires = response.expires();
+		if(expires) {
+
+			mg_response_header_add(conn, "Expires", HTTP::TimeStamp{expires}.to_string().c_str(), -1);
+
+		} else {
+
+			mg_response_header_add(conn, "Cache-Control", "no-cache, no-store, must-revalidate, private, max-age=0", -1);
+			mg_response_header_add(conn, "Expires", "0", -1);
+
+		}
+
+	}
+
+	int CivetWeb::Connection::send(const HTTP::Response &response) const noexcept {
+
+		std::string text{response.to_string()};
+		int code = 200;
+
+		debug(text);
+
+		// Send header.
+		mg_response_header_start(conn, code);
+		mg_response_header_add(conn, "Content-Type",std::to_string((MimeType) *this),-1);
+		mg_response_header_add(conn, "Content-Length", std::to_string(text.size()).c_str(), -1);
+
+		response_add_cache_headers(conn,response);
+
+		mg_response_header_send(conn);
+
+		// Send response.
+		mg_write(conn, text.c_str(), text.size());
+		return code;
+
+	}
+
+	int CivetWeb::Connection::send(const HTTP::Report &response) const noexcept {
+
+		std::string text{response.to_string()};
+		int code = 200;
+
+		debug(text);
+
+		// Send header.
+		mg_response_header_start(conn, code);
+		mg_response_header_add(conn, "Content-Type",std::to_string((MimeType) *this),-1);
+		mg_response_header_add(conn, "Content-Length", std::to_string(text.size()).c_str(), -1);
+
+		response_add_cache_headers(conn,response);
+
+		mg_response_header_send(conn);
+
+		// Send response.
+		mg_write(conn, text.c_str(), text.size());
+		return code;
+
+	}
+
+	/*
 	int CivetWeb::Connection::failed(int status, const char *title, const char *body) const noexcept {
 
 		if((status > 199) && (status != 204) && (status != 304)) {
@@ -79,6 +156,7 @@
 
 		return status;
 	}
+	*/
 
  }
 

@@ -37,6 +37,7 @@
 
  namespace Udjat {
 
+	/*
 	std::string HTTP::Request::exec(const MimeType mimetype) {
 
 		// https://softwareengineering.stackexchange.com/questions/431218/rest-api-endpoint-returning-detailed-or-summary-data
@@ -63,6 +64,7 @@
 		throw system_error(ENOENT,system_category(),"Unknown path");
 
 	}
+	*/
 
 	String HTTP::Request::cookie(const char *) const {
 		return "";
