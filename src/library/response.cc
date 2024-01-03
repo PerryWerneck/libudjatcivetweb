@@ -24,6 +24,7 @@
  #include <udjat/tools/http/value.h>
  #include <udjat/tools/http/value.h>
  #include <udjat/tools/http/layouts.h>
+ #include <udjat/tools/http/exception.h>
  #include <udjat/tools/intl.h>
  #include <udjat/tools/logger.h>
  #include <iostream>
@@ -40,6 +41,17 @@
 	}
 
 	HTTP::Response::~Response() {
+	}
+
+	int HTTP::Response::status_code() const noexcept {
+
+		int code = Abstract::Response::status_code();
+		if(!code) {
+			return 200;
+		}
+
+		return HTTP::Exception::translate(code);
+
 	}
 
 	bool HTTP::Response::empty() const noexcept {

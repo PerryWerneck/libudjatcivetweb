@@ -51,16 +51,23 @@
 
 		// List
 		HTTP::Report response{(MimeType) connection};
-		Udjat::exec(request,response);
+
+		if(!Udjat::exec(request,response)) {
+			response.failed(strerror(ENOENT),ENOENT);
+		}
+
 		return connection.send(response);
 
 	} else {
 
 		// Detailed or combined.
 		HTTP::Response response{(MimeType) connection};
-		Udjat::exec(request,response);
 
-		// TODO: If output_format == 2 append report on response.
+		if(!Udjat::exec(request,response)) {
+			response.failed(strerror(ENOENT),ENOENT);
+		}
+
+		// TODO: If not failed and output_format == 2 append report on response.
 
 		return connection.send(response);
 

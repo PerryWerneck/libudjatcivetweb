@@ -38,6 +38,8 @@
 			Response(Udjat::MimeType mimetype);
 			virtual ~Response();
 
+			int status_code() const noexcept;
+
 			operator Type() const noexcept override;
 
 			bool empty() const noexcept override;

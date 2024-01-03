@@ -26,6 +26,7 @@
  #include <udjat/tools/http/timestamp.h>
  #include <udjat/tools/logger.h>
  #include <udjat/tools/intl.h>
+ #include <udjat/tools/string.h>
  #include <udjat/tools/configuration.h>
 
  using namespace std;
@@ -83,6 +84,8 @@
 		time_t expires = response.expires();
 		if(expires && expires >= now) {
 
+			// https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
+			mg_response_header_add(conn, "Cache-Control", String{"max-age=",(unsigned int) (now-expires),", must-revalidate, private"}.c_str(), -1);
 			mg_response_header_add(conn, "Expires", HTTP::TimeStamp{expires}.to_string().c_str(), -1);
 
 		} else {
@@ -96,8 +99,34 @@
 
 	int CivetWeb::Connection::send(const HTTP::Response &response) const noexcept {
 
+		int code = response.status_code();
+
+		if(code != 200) {
+
+			const struct mg_request_info *request_info = mg_get_request_info(conn);
+
+			Logger::String{
+				request_info->remote_addr," ",
+				request_info->request_method," ",
+				request_info->local_uri," ",
+				std::to_string(code)
+			}.warning("civetweb");
+
+		} else if(response.empty()) {
+
+			const struct mg_request_info *request_info = mg_get_request_info(conn);
+
+			Logger::String{
+				request_info->remote_addr," ",
+				request_info->request_method," ",
+				request_info->local_uri," ",
+				" - Empty response"
+			}.warning("civetweb");
+
+			code = 204;
+		}
+
 		std::string text{response.to_string()};
-		int code = 200;
 
 		debug(text);
 
