@@ -43,11 +43,11 @@
 			/// @brief Add request handler.
 			/// @param uri the URI for the handler.
 			/// @param handler The request handler.
-			virtual bool push_back(Handler *handler);
+			virtual bool push_back(Handler *handler) = 0;
 
 			/// @brief Remove request handler.
 			/// @param uri the URI for the handler.
-			virtual bool remove(Handler *handler);
+			virtual bool remove(Handler *handler) = 0;
 
 			/// @brief Get active HTTP server.
 			static Server & getInstance();

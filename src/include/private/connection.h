@@ -151,7 +151,7 @@
  int faviconWebHandler(struct mg_connection *conn, void *cbdata);
 
  /// @brief Handler for custom requests.
- //int customWebHandler(struct mg_connection *conn, void *cbdata);
+ int customWebHandler(struct mg_connection *conn, void *cbdata);
 
  /// @brief Send error page.
  int http_error( struct mg_connection *conn, int status, const char *msg );

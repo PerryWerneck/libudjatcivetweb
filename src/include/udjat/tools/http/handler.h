@@ -20,50 +20,44 @@
  #pragma once
 
  #include <udjat/defs.h>
- #include <udjat/tools/value.h>
+ #include <udjat/tools/xml.h>
  #include <udjat/tools/http/connection.h>
  #include <udjat/tools/http/mimetype.h>
- #include <map>
+ #include <udjat/tools/http/request.h>
+ #include <cstring>
 
  namespace Udjat {
 
 	namespace HTTP {
 
-		class Connection;
-		class Server;
-
-		/*
 		class UDJAT_API Handler {
 		protected:
-			friend class Server;
-			const char * uri;
-			Server *server = nullptr;
+			const char * path;	///< @brief The path for this requests.
 
 			/// @brief Create a new httpd handler, insert it to default server.
-			/// @param uri the URI for the handler.
-			Handler(const char *u);
-			Handler(const pugi::xml_node &node, const char *tagname = "http-handler");
+			/// @param path the path for the handler.
+			Handler(const char *path);
+			Handler(const XML::Node &node, const char *tagname = "http-handler");
 
 		public:
 			virtual ~Handler();
 
 			inline operator bool() const noexcept {
-				return (uri && *uri);
+				return (path && *path);
 			}
 
-			inline bool active() const noexcept {
-				return (bool) server;
+			inline bool operator==(const char *p) const noexcept {
+				return p && *p && strcasecmp(p,this->path) == 0;
 			}
 
 			inline const char * c_str() const noexcept {
-				return uri;
+				return path;
 			}
 
 			/// @brief Handle request.
 			virtual int handle(const Udjat::HTTP::Connection &conn, const Udjat::HTTP::Request &request, const Udjat::MimeType mimetype) = 0;
 
 		};
-		*/
 
 	}
 

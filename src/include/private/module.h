@@ -151,7 +151,7 @@
  int faviconWebHandler(struct mg_connection *conn, void *cbdata);
 
  /// @brief Handler for custom requests.
- //int customWebHandler(struct mg_connection *conn, void *cbdata);
+ int customWebHandler(struct mg_connection *conn, void *cbdata);
 
  /// @brief Get mime-type from 'Accept' or 'Content-Type' header.
  /// @param conn Civetweb connection data.

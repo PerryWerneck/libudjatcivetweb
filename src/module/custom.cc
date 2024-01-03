@@ -17,44 +17,31 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
- /*
- #include <private/module.h>
- #include <udjat/worker.h>
+ #include <config.h>
  #include <udjat/civetweb.h>
- #include <udjat/tools/protocol.h>
- #include <udjat/tools/http/server.h>
  #include <udjat/tools/http/handler.h>
  #include <udjat/tools/http/request.h>
- #include <udjat/tools/http/mimetype.h>
+ #include <private/module.h>
  #include <udjat/tools/logger.h>
+
+ using namespace Udjat;
 
  int customWebHandler(struct mg_connection *conn, void *cbdata) {
 
-	CivetWeb::Connection connection(conn);
+	HTTP::Handler &handler = *((HTTP::Handler *) cbdata);
 
-	HTTP::Handler *handler = (HTTP::Handler *) cbdata;
+	CivetWeb::Connection connection{conn};
 
 	const struct mg_request_info *ri = connection.request_info();
-	MimeType mimetype{MimeType::custom};
-	string rsp;
 
 	debug("Using custom web handler for '",ri->local_uri,"' request");
 
 	try {
 
-		// Extract mimetype
-		string uri = ri->local_uri;
-		{
-			auto ext = uri.find_last_of('.');
-			if(ext != string::npos && ext > 1) {
-				mimetype = MimeTypeFactory(uri.c_str()+ext+1);
-			}
-		}
-
-		return handler->handle(
+		return handler.handle(
 			connection,
-			HTTP::Request(uri.c_str(),ri->request_method),
-			mimetype
+			HTTP::Request{ri->local_uri,ri->request_method},
+			(MimeType) connection
 		);
 
 	} catch(const HTTP::Exception &error) {
@@ -83,6 +70,5 @@
 	return 500;
 
  }
- */
 
 

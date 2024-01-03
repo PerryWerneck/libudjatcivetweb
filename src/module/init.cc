@@ -343,54 +343,51 @@
 
 	bool push_back(HTTP::Handler *handler) override {
 
-		/*
-		if(HTTP::Server::push_back(handler)) {
+		string uri{handler->c_str()};
 
-			string uri{handler->c_str()};
-
-			if(uri[uri.size()-1] == '/') {
-				uri.resize(uri.size()-1);
-			}
-
-			mg_set_request_handler(ctx, uri.c_str(), customWebHandler, handler);
-
-			if(Logger::enabled(Logger::Debug)) {
-
-				struct mg_server_port ports[10];
-				if(mg_get_server_ports(ctx,10,ports) > 0) {
-
-					Logger::String{
-						"New request handler was activated on ",
-						(ports[0].is_ssl ? "https" : "http"),
-						"://",
-						(ports[0].protocol == 1 ? "127.0.0.1" : "localhost"),
-						":",
-						ports[0].port,
-						uri
-					}.write(Logger::Debug,"civetweb");
-
-				} else {
-					Logger::String{"Request handler for '",uri,"' was activated"}.write(Logger::Debug,"civetweb");
-				}
-
-			}
-
-			return true;
+		if(uri[uri.size()-1] == '/') {
+			uri.resize(uri.size()-1);
 		}
-		*/
-		return false;
+
+		mg_set_request_handler(ctx, uri.c_str(), customWebHandler, handler);
+
+		if(Logger::enabled(Logger::Trace)) {
+
+			struct mg_server_port ports[10];
+			if(mg_get_server_ports(ctx,10,ports) > 0) {
+
+				Logger::String{
+					"New request handler was activated on ",
+					(ports[0].is_ssl ? "https" : "http"),
+					"://",
+					(ports[0].protocol == 1 ? "127.0.0.1" : "localhost"),
+					":",
+					ports[0].port,
+					uri
+				}.write(Logger::Trace,"civetweb");
+
+			}
+
+		} else {
+			Logger::String{"Custom handler for '",handler->c_str(),"' added"}.info("civetweb");
+		}
+
+		return true;
+
 	}
 
 	bool remove(HTTP::Handler *handler) override {
 
-		/*
-		if(HTTP::Server::remove(handler)) {
-			cout << "civetweb\tRemoving http handle '" << handler->c_str() << "'" << endl;
-			mg_set_request_handler(ctx, handler->c_str(), NULL, NULL);
-			return true;
+		string uri{handler->c_str()};
+
+		if(uri[uri.size()-1] == '/') {
+			uri.resize(uri.size()-1);
 		}
-		*/
-		return false;
+
+		mg_set_request_handler(ctx, uri.c_str(), NULL, NULL);
+		Logger::String{"Custom handler for '",handler->c_str(),"' removed"}.info("civetweb");
+
+		return true;
 	}
 
  };
