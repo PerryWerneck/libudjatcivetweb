@@ -47,6 +47,8 @@
 
 			Udjat::Value & append(const Type type = Object) override;
 			Udjat::Value & reset(const Udjat::Value::Type type) override;
+			Udjat::Value & set(const char *value, const Type type = String) override;
+
 
 		};
 

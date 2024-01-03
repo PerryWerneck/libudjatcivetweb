@@ -24,6 +24,7 @@
  #include <udjat/tools/http/value.h>
  #include <udjat/tools/http/value.h>
  #include <udjat/tools/http/layouts.h>
+ #include <udjat/tools/intl.h>
  #include <udjat/tools/logger.h>
  #include <iostream>
  #include <sstream>
@@ -49,11 +50,13 @@
 		return this->type;
 	}
 
-	Udjat::Value & HTTP::Response::append(const Type type) {
+	Udjat::Value & HTTP::Response::set(const char *value, const Type type) {
+		throw logic_error(Logger::Message{_("Unable to insert '{}' as '{}' on http response object, you should insert a child value first"),value,std::to_string(type)});
+	}
 
+	Udjat::Value & HTTP::Response::append(const Type type) {
 		reset(Value::Array);
 		return children[std::to_string((int) children.size()).c_str()];
-
 	}
 
 	Udjat::Value & HTTP::Response::reset(const Udjat::Value::Type type) {
@@ -84,6 +87,7 @@
 	}
 
 	Udjat::Value & HTTP::Response::operator[](const char *name) {
+		debug("-----------------------> [",name,"]");
 		return children[name];
 	}
 
