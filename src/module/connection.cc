@@ -21,13 +21,19 @@
  #include <sys/types.h>
  #include <sys/stat.h>
  #include <private/module.h>
- #include <udjat/tools/abstractresponse.h>
+ #include <udjat/tools/abstract/response.h>
  #include <udjat/tools/http/response.h>
  #include <udjat/tools/http/timestamp.h>
+ #include <udjat/tools/http/exception.h>
  #include <udjat/tools/logger.h>
  #include <udjat/tools/intl.h>
  #include <udjat/tools/string.h>
  #include <udjat/tools/configuration.h>
+ #include <udjat/tools/application.h>
+
+ #ifdef HAVE_UNISTD_H
+	#include <unistd.h>
+ #endif // HAVE_UNISTD_H
 
  using namespace std;
 
@@ -71,123 +77,106 @@
 		return 200;
 	}
 
-	static void response_add_cache_headers(struct mg_connection *conn, const Abstract::Response &response) {
+	int CivetWeb::Connection::send(const Abstract::Response &response) const noexcept {
 
-		time_t now = time(0);
+		int code = HTTP::Exception::translate(response.status_code());
 
-		time_t modtime = response.last_modified();
-		if(!modtime) {
-			modtime = now;
+		std::string text{response.to_string()};
+		if(code == 200 && text.empty()) {
+			code = 204;
 		}
-		mg_response_header_add(conn, "Last-Modified", HTTP::TimeStamp{modtime}.to_string().c_str(), -1);
 
-		time_t expires = response.expires();
-		if(expires && expires >= now) {
+		// Build and send header
+		mg_response_header_start(conn, code);
 
-			// https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
-			mg_response_header_add(conn, "Cache-Control", String{"max-age=",(unsigned int) (now-expires),", must-revalidate, private"}.c_str(), -1);
-			mg_response_header_add(conn, "Expires", HTTP::TimeStamp{expires}.to_string().c_str(), -1);
+		if(code < 200 || code > 299) {
 
-		} else {
+			// It's an error, log it, ignore cache and test for an alternative text output.
+
+			const struct mg_request_info *request_info = mg_get_request_info(conn);
+
+			Logger::String{
+				request_info->remote_addr," ",
+				request_info->request_method," ",
+				request_info->local_uri," HTTP Error ",
+				std::to_string(code)," - ",response.message()," ( Error ",std::to_string(response.status_code()),")"
+			}.warning("civetweb");
 
 			mg_response_header_add(conn, "Cache-Control", "no-cache, no-store, must-revalidate, private, max-age=0", -1);
 			mg_response_header_add(conn, "Expires", "0", -1);
 
-		}
+			if(Config::Value<bool>("httpd","use-error-templates",true) && *this != MimeType::custom) {
 
-	}
+				// TODO: Try to load custom error page.
+#ifdef DEBUG
+				Application::DataFile page{"./templates/error."};
+#else
+				Application::DataFile page{"templates/www/error."};
+#endif // DEBUG
+				page += to_string((MimeType) *this,true);
 
-	int CivetWeb::Connection::send(const HTTP::Response &response) const noexcept {
+				debug("Checking for http error template in file '",page.c_str(),"'");
 
-		int code = response.status_code();
+				if(!access(page.c_str(),R_OK)) {
 
-		if(code != 200) {
+					Logger::String{"Loading error page from '",page.c_str(),"'"}.trace("civetweb");
 
-			const struct mg_request_info *request_info = mg_get_request_info(conn);
+					text = page.load().expand([&response,code](const char *key, std::string &value) {
 
-			Logger::String{
-				request_info->remote_addr," ",
-				request_info->request_method," ",
-				request_info->local_uri," ",
-				std::to_string(code)
-			}.warning("civetweb");
+						if(!strcasecmp(key,"code")) {
+							value = std::to_string(code);
+						} else if(!strcasecmp(key,"message")) {
+							value = response.message();
+						} else if(!strcasecmp(key,"body")) {
+							value = response.body();
+						} else if(!strcasecmp(key,"syscode")) {
+							value = std::to_string(response.status_code());
+						}
 
-		} else if(response.empty()) {
+						return !value.empty();
 
-			const struct mg_request_info *request_info = mg_get_request_info(conn);
+					},true,true);
 
-			Logger::String{
-				request_info->remote_addr," ",
-				request_info->request_method," ",
-				request_info->local_uri," ",
-				" - Empty response"
-			}.warning("civetweb");
+				}
 
-			code = 204;
-		}
-
-		std::string text{response.to_string()};
-
-		debug(text);
-
-		// Send header.
-		mg_response_header_start(conn, code);
-		mg_response_header_add(conn, "Content-Type",std::to_string((MimeType) *this),-1);
-		mg_response_header_add(conn, "Content-Length", std::to_string(text.size()).c_str(), -1);
-
-		response_add_cache_headers(conn,response);
-
-		mg_response_header_send(conn);
-
-		// Send response.
-		mg_write(conn, text.c_str(), text.size());
-		return code;
-
-	}
-
-	int CivetWeb::Connection::send(const HTTP::Report &response) const noexcept {
-
-		std::string text{response.to_string()};
-		int code = 200;
-
-		debug(text);
-
-		// Send header.
-		mg_response_header_start(conn, code);
-		mg_response_header_add(conn, "Content-Type",std::to_string((MimeType) *this),-1);
-		mg_response_header_add(conn, "Content-Length", std::to_string(text.size()).c_str(), -1);
-
-		response_add_cache_headers(conn,response);
-
-		mg_response_header_send(conn);
-
-		// Send response.
-		mg_write(conn, text.c_str(), text.size());
-		return code;
-
-	}
-
-	/*
-	int CivetWeb::Connection::failed(int status, const char *title, const char *body) const noexcept {
-
-		if((status > 199) && (status != 204) && (status != 304)) {
-
-			// Has body
-			http_error(conn, MimeTypeFactory(conn,Udjat::MimeType::html), status, title, body);
+			}
 
 		} else {
 
-			// No body.
-			mg_response_header_start(conn, status);
-			mg_response_header_add(conn, "Cache-Control","no-cache, no-store, must-revalidate, private, max-age=0",-1);
-			mg_response_header_add(conn, "Expires", "0", -1);
-			mg_response_header_send(conn);
+			// It's not and error, setup cache
+			time_t now = time(0);
+
+			time_t modtime = response.last_modified();
+			if(!modtime) {
+				modtime = now;
+			}
+			mg_response_header_add(conn, "Last-Modified", HTTP::TimeStamp{modtime}.to_string().c_str(), -1);
+
+			time_t expires = response.expires();
+			if(expires && expires >= now) {
+
+				// https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
+				mg_response_header_add(conn, "Cache-Control", String{"max-age=",(unsigned int) (now-expires),", must-revalidate, private"}.c_str(), -1);
+				mg_response_header_add(conn, "Expires", HTTP::TimeStamp{expires}.to_string().c_str(), -1);
+
+			} else {
+
+				mg_response_header_add(conn, "Cache-Control", "no-cache, no-store, must-revalidate, private, max-age=0", -1);
+				mg_response_header_add(conn, "Expires", "0", -1);
+
+			}
 
 		}
 
-		return status;
+		mg_response_header_add(conn, "Content-Type",std::to_string((MimeType) *this),-1);
+		mg_response_header_add(conn, "Content-Length", std::to_string(text.size()).c_str(), -1);
+		mg_response_header_send(conn);
+
+		// Send response.
+		mg_write(conn, text.c_str(), text.size());
+		return code;
+
 	}
-	*/
 
  }
 

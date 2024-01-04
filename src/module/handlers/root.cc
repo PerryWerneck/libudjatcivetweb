@@ -53,7 +53,7 @@
 		HTTP::Report response{(MimeType) connection};
 
 		if(!Udjat::exec(request,response)) {
-			response.failed(strerror(ENOENT),ENOENT);
+			response.failed(ENOENT);
 		}
 
 		return connection.send(response);
@@ -64,7 +64,7 @@
 		HTTP::Response response{(MimeType) connection};
 
 		if(!Udjat::exec(request,response)) {
-			response.failed(strerror(ENOENT),ENOENT);
+			response.failed(ENOENT);
 		}
 
 		// TODO: If not failed and output_format == 2 append report on response.

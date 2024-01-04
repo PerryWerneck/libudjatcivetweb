@@ -53,11 +53,10 @@
 
 			operator MimeType() const override;
 
-			// int failed(int code, const char *title, const char *body = "") const noexcept override;
+			/// @brief Send response.
+			int send(const Abstract::Response &response) const noexcept override;
 
 			int send(const char *mime_type, const char *response, size_t length) const noexcept override;
-			int send(const HTTP::Response &response) const noexcept override;
-			int send(const HTTP::Report &response) const noexcept override;
 			int send(const HTTP::Method method, const char *filename, bool allow_index, const char *mime_type, unsigned int max_age) const override;
 
 			inline struct mg_connection * connection() {

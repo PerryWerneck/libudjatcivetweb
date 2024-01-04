@@ -68,10 +68,6 @@
 		<Unit filename="src/library/index.cc" />
 		<Unit filename="src/library/keypair.cc" />
 		<Unit filename="src/library/layout/csv.cc" />
-		<Unit filename="src/library/layout/html.cc" />
-		<Unit filename="src/library/layout/json.cc" />
-		<Unit filename="src/library/layout/xml.cc" />
-		<Unit filename="src/library/layout/yaml.cc" />
 		<Unit filename="src/library/oauth2/access_token.cc" />
 		<Unit filename="src/library/oauth2/authorize.cc" />
 		<Unit filename="src/library/oauth2/client.cc" />

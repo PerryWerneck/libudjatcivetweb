@@ -51,8 +51,7 @@
 
 			/// @brief Send response.
 			/// @return http error response.
-			virtual int send(const HTTP::Response &response) const noexcept = 0;
-			virtual int send(const HTTP::Report &response) const noexcept = 0;
+			virtual int send(const Abstract::Response &response) const noexcept = 0;
 
 			/// @brief Send string.
 			/// @return http error response (200).
