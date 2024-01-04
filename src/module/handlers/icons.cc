@@ -80,7 +80,7 @@
 
 	} catch(const system_error &e) {
 
-		int code = HTTP::Exception::translate(e);
+		int code = HTTP::Exception::code(e);
 		mg_send_http_error(conn, code, "%s", e.what());
 		return code;
 

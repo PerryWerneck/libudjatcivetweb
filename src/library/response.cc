@@ -44,14 +44,7 @@
 	}
 
 	int HTTP::Response::status_code() const noexcept {
-
-		int code = Abstract::Response::status_code();
-		if(!code) {
-			return 200;
-		}
-
-		return HTTP::Exception::translate(code);
-
+		return HTTP::Exception::code(Abstract::Response::status_code());
 	}
 
 	bool HTTP::Response::empty() const noexcept {

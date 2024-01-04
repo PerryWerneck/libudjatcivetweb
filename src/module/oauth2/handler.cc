@@ -35,6 +35,8 @@
  #include <stdexcept>
  #include <udjat/tools/http/oauth.h>
  #include <udjat/tools/http/timestamp.h>
+ #include <udjat/tools/http/response.h>
+ #include <udjat/tools/http/exception.h>
  #include <udjat/tools/logger.h>
  #include <udjat/tools/configuration.h>
  #include <udjat/tools/application.h>
@@ -235,7 +237,9 @@
 	}
 
 	debug("OAuth handler exit with error ",code);
-	return http_error(conn,mimetype,code,context.message.c_str());
+
+	CivetWeb::Connection{conn}.send(mimetype,HTTP::Response{mimetype}.failed(HTTP::Exception::syscode(code),context.message.c_str()));
+	return code;
 
  }
 

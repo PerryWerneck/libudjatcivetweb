@@ -55,6 +55,7 @@
 
 			/// @brief Send response.
 			int send(const Abstract::Response &response) const noexcept override;
+			int send(const MimeType mimetype, const Abstract::Response &response) const noexcept;
 
 			int send(const char *mime_type, const char *response, size_t length) const noexcept override;
 			int send(const HTTP::Method method, const char *filename, bool allow_index, const char *mime_type, unsigned int max_age) const override;
@@ -162,7 +163,7 @@
  Udjat::MimeType MimeTypeFactory(struct mg_connection *conn, const Udjat::MimeType def = Udjat::MimeType::json);
 
  /// @brief Send error page.
- int http_error( struct mg_connection *conn, int status, const char *msg );
+ int http_error(struct mg_connection *conn, int code, const char *message) noexcept;
 
  /// @brief Send error page.
- int http_error( struct mg_connection *conn, const MimeType mimetype, int status, const char *title, const char *body = "");
+ int http_error(struct mg_connection *conn, int code, const char *message, const char *body) noexcept;

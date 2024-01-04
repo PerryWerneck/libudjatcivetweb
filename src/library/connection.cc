@@ -34,36 +34,8 @@
 	HTTP::Connection::~Connection() {
 	}
 
-	/*
-	int HTTP::Connection::response(const HTTP::Exception &error) const noexcept {
-		return failed(error.codes().http, error.what());
-	}
-
-	int HTTP::Connection::response(const system_error &error) const noexcept {
-		return failed(HTTP::Exception::translate(error), error.what());
-	}
-
-	int HTTP::Connection::response(const std::exception &e) const noexcept {
-		return failed(500,e.what());
-	}
-	*/
-
-	int HTTP::Connection::send(int code, const char *title, const char *body) const noexcept {
-
-		HTTP::Response response{(MimeType) *this};
-		response.failed(title,code);
-
-		if(body && *body) {
-			response["body"] = body;
-		}
-
-		send(response);
-
-		if(code < 100) {
-			return HTTP::Exception::translate(code);
-		}
-
-		return code;
+	int HTTP::Connection::send(int code, const char *message, const char *body) const noexcept {
+		return send(HTTP::Response{(MimeType) *this}.failed(code,message,body));
 	}
 
  }

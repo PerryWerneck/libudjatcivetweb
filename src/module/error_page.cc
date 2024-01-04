@@ -17,6 +17,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+ /*
  #include <private/module.h>
  #include <udjat/defs.h>
  #include <udjat/module.h>
@@ -37,36 +38,6 @@
  using namespace Udjat;
  using namespace std;
 
- Udjat::MimeType MimeTypeFactory(struct mg_connection *conn, const Udjat::MimeType def) {
-
-	static const char *headers[] = { "Content-Type", "Accept" };
-
-	for(const char *header : headers) {
-
-		// Check 'accept' header.
-		const char *hdr = mg_get_header(conn, header);
-
-		debug("header[",header,"]='",hdr,"'");
-
-		if(hdr && *hdr) {
-
-			for(String &value : String{hdr}.split(",")) {
-
-				auto mime = MimeTypeFactory(value.c_str(),MimeType::custom);
-				if(mime != MimeType::custom) {
-					return mime;
-				}
-			}
-		}
-
-	}
-
-	// Use default
-	const struct mg_request_info *info{mg_get_request_info(conn)};
-	Logger::String{info->remote_addr,": Unexpected mime-type on ",info->request_uri,", using ",std::to_string(def)}.warning("civetweb");
-	return def;
-
- }
 
  /// @brief Application error handler.
  int http_error(struct mg_connection *conn, const MimeType mimetype, int code, const char *title, const char *body) {
@@ -191,4 +162,5 @@
 	http_error(conn, MimeTypeFactory(conn,Udjat::MimeType::html), status, message);
 	return 1;
  }
+ */
 

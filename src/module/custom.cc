@@ -70,7 +70,7 @@
 
 		cerr << "civetweb\tUnexpected error" << endl;
 		HTTP::Response response{(MimeType) connection};
-		response.failed(_("Unexpected error on http handler"),-1);
+		response.failed(_("Unexpected error on http handler"));
 		return connection.send(response);
 	}
 

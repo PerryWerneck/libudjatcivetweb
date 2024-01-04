@@ -78,105 +78,198 @@
 	}
 
 	int CivetWeb::Connection::send(const Abstract::Response &response) const noexcept {
+		return send((MimeType) *this, response);
+	}
 
-		int code = HTTP::Exception::translate(response.status_code());
+	int CivetWeb::Connection::send(const MimeType mimetype, const Abstract::Response &response) const noexcept {
 
-		std::string text{response.to_string()};
-		if(code == 200 && text.empty()) {
-			code = 204;
-		}
+		int code = HTTP::Exception::code(response.status_code());
 
-		// Build and send header
-		mg_response_header_start(conn, code);
+		try {
 
-		if(code < 200 || code > 299) {
+			std::string text{response.to_string()};
+			if(code == 200 && text.empty()) {
+				code = 204;
+			}
 
-			// It's an error, log it, ignore cache and test for an alternative text output.
+			// Build and send header
+			mg_response_header_start(conn, code);
 
-			const struct mg_request_info *request_info = mg_get_request_info(conn);
+			if(code < 200 || code > 299) {
 
-			Logger::String{
-				request_info->remote_addr," ",
-				request_info->request_method," ",
-				request_info->local_uri," HTTP Error ",
-				std::to_string(code)," - ",response.message()," ( Error ",std::to_string(response.status_code()),")"
-			}.warning("civetweb");
+				// It's an error, log it, ignore cache and test for an alternative text output.
 
-			mg_response_header_add(conn, "Cache-Control", "no-cache, no-store, must-revalidate, private, max-age=0", -1);
-			mg_response_header_add(conn, "Expires", "0", -1);
+				const struct mg_request_info *request_info = mg_get_request_info(conn);
 
-			if(Config::Value<bool>("httpd","use-error-templates",true) && *this != MimeType::custom) {
+				Logger::String{
+					request_info->remote_addr," ",
+					request_info->request_method," ",
+					request_info->local_uri," HTTP Error ",
+					std::to_string(code)," - ",response.message()," ( Error ",std::to_string(response.status_code()),")"
+				}.warning("civetweb");
 
-				// TODO: Try to load custom error page.
-#ifdef DEBUG
-				Application::DataFile page{"./templates/error."};
-#else
-				Application::DataFile page{"templates/www/error."};
-#endif // DEBUG
-				page += to_string((MimeType) *this,true);
+				mg_response_header_add(conn, "Cache-Control", "no-cache, no-store, must-revalidate, private, max-age=0", -1);
+				mg_response_header_add(conn, "Expires", "0", -1);
 
-				debug("Checking for http error template in file '",page.c_str(),"'");
+				if(Config::Value<bool>("httpd","use-error-templates",true) && mimetype != MimeType::custom) {
 
-				if(!access(page.c_str(),R_OK)) {
+					// TODO: Try to load custom error page.
+	#ifdef DEBUG
+					Application::DataFile page{"./templates/error."};
+	#else
+					Application::DataFile page{"templates/www/error."};
+	#endif // DEBUG
+					page += to_string(mimetype,true);
 
-					Logger::String{"Loading error page from '",page.c_str(),"'"}.trace("civetweb");
+					debug("Checking for http error template in file '",page.c_str(),"'");
 
-					text = page.load().expand([&response,code](const char *key, std::string &value) {
+					if(!access(page.c_str(),R_OK)) {
 
-						if(!strcasecmp(key,"code")) {
-							value = std::to_string(code);
-						} else if(!strcasecmp(key,"message")) {
-							value = response.message();
-						} else if(!strcasecmp(key,"body")) {
-							value = response.body();
-						} else if(!strcasecmp(key,"syscode")) {
-							value = std::to_string(response.status_code());
-						}
+						Logger::String{"Loading error page from '",page.c_str(),"'"}.trace("civetweb");
 
-						return !value.empty();
+						text = page.load().expand([&response,code](const char *key, std::string &value) {
 
-					},true,true);
+							if(!strcasecmp(key,"code")) {
+								value = std::to_string(code);
+							} else if(!strcasecmp(key,"message")) {
+								value = response.message();
+							} else if(!strcasecmp(key,"body")) {
+								value = response.body();
+							} else if(!strcasecmp(key,"syscode")) {
+								value = std::to_string(response.status_code());
+							}
+
+							return !value.empty();
+
+						},true,true);
+
+					}
+
+				}
+
+			} else {
+
+				// It's not and error, setup cache
+				time_t now = time(0);
+
+				time_t modtime = response.last_modified();
+				if(!modtime) {
+					modtime = now;
+				}
+				mg_response_header_add(conn, "Last-Modified", HTTP::TimeStamp{modtime}.to_string().c_str(), -1);
+
+				time_t expires = response.expires();
+				if(expires && expires >= now) {
+
+					// https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
+					mg_response_header_add(conn, "Cache-Control", String{"max-age=",(unsigned int) (now-expires),", must-revalidate, private"}.c_str(), -1);
+					mg_response_header_add(conn, "Expires", HTTP::TimeStamp{expires}.to_string().c_str(), -1);
+
+				} else {
+
+					mg_response_header_add(conn, "Cache-Control", "no-cache, no-store, must-revalidate, private, max-age=0", -1);
+					mg_response_header_add(conn, "Expires", "0", -1);
 
 				}
 
 			}
 
-		} else {
+			mg_response_header_add(conn, "Content-Type",std::to_string(mimetype),-1);
+			mg_response_header_add(conn, "Content-Length", std::to_string(text.size()).c_str(), -1);
+			mg_response_header_send(conn);
 
-			// It's not and error, setup cache
-			time_t now = time(0);
+			// Send response.
+			mg_write(conn, text.c_str(), text.size());
 
-			time_t modtime = response.last_modified();
-			if(!modtime) {
-				modtime = now;
-			}
-			mg_response_header_add(conn, "Last-Modified", HTTP::TimeStamp{modtime}.to_string().c_str(), -1);
 
-			time_t expires = response.expires();
-			if(expires && expires >= now) {
+		} catch( const std::exception &e ) {
 
-				// https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
-				mg_response_header_add(conn, "Cache-Control", String{"max-age=",(unsigned int) (now-expires),", must-revalidate, private"}.c_str(), -1);
-				mg_response_header_add(conn, "Expires", HTTP::TimeStamp{expires}.to_string().c_str(), -1);
+			const struct mg_request_info *request_info = mg_get_request_info(conn);
+			Logger::String{
+				request_info->remote_addr," ",
+				request_info->request_method," ",
+				request_info->local_uri," ",
+				code," - ",e.what()
+			}.error("civetweb");
 
-			} else {
+			mg_send_http_error(conn, code, e.what());
 
-				mg_response_header_add(conn, "Cache-Control", "no-cache, no-store, must-revalidate, private, max-age=0", -1);
-				mg_response_header_add(conn, "Expires", "0", -1);
+		} catch( ... ) {
 
-			}
+			const struct mg_request_info *request_info = mg_get_request_info(conn);
+			Logger::String{
+				request_info->remote_addr," ",
+				request_info->request_method," ",
+				request_info->local_uri," ",
+				code," - Unexpected error"
+			}.error("civetweb");
+
+			mg_send_http_error(conn, code, "Unexpected error");
 
 		}
 
-		mg_response_header_add(conn, "Content-Type",std::to_string((MimeType) *this),-1);
-		mg_response_header_add(conn, "Content-Length", std::to_string(text.size()).c_str(), -1);
-		mg_response_header_send(conn);
-
-		// Send response.
-		mg_write(conn, text.c_str(), text.size());
 		return code;
+	}
+
+ }
+
+ Udjat::MimeType MimeTypeFactory(struct mg_connection *conn, const Udjat::MimeType def) {
+
+	static const char *headers[] = { "Content-Type", "Accept" };
+
+	for(const char *header : headers) {
+
+		// Check 'accept' header.
+		const char *hdr = mg_get_header(conn, header);
+
+		debug("header[",header,"]='",hdr,"'");
+
+		if(hdr && *hdr) {
+
+			for(String &value : String{hdr}.split(",")) {
+
+				auto mime = MimeTypeFactory(value.c_str(),MimeType::custom);
+				if(mime != MimeType::custom) {
+					return mime;
+				}
+			}
+		}
 
 	}
 
+	// Use default
+	const struct mg_request_info *info{mg_get_request_info(conn)};
+	Logger::String{info->remote_addr,": Unexpected mime-type on ",info->request_uri,", using ",std::to_string(def)}.warning("civetweb");
+	return def;
+
+ }
+
+ int http_error(struct mg_connection *conn, int code, const char *message, const char *body) noexcept {
+
+	MimeType mimetype{MimeTypeFactory(conn)};
+
+ 	try {
+
+		CivetWeb::Connection{conn}.send(mimetype,HTTP::Response{mimetype}.failed(code,message,body));
+
+ 	} catch(...) {
+
+		const struct mg_request_info *request_info = mg_get_request_info(conn);
+
+		Logger::String{
+			request_info->remote_addr," ",
+			request_info->request_method," ",
+			request_info->local_uri," ",
+			code," ",message," (",std::to_string(mimetype),")"
+		}.error("civetweb");
+
+		mg_send_http_error(conn, code, message);
+
+ 	}
+	return code;
+ }
+
+ int http_error(struct mg_connection *conn, int code, const char *message) noexcept {
+ 	return http_error(conn,code,message,"");
  }
 
