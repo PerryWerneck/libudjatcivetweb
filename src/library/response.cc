@@ -27,6 +27,8 @@
  #include <udjat/tools/http/exception.h>
  #include <udjat/tools/intl.h>
  #include <udjat/tools/logger.h>
+ #include <udjat/tools/http/icon.h>
+ #include <udjat/tools/file.h>
  #include <iostream>
  #include <sstream>
 
@@ -94,5 +96,35 @@
 	Udjat::Value & HTTP::Response::operator[](const char *name) {
 		return children[name];
 	}
+
+	std::string HTTP::Response::to_string() const {
+
+		if(mimetype == MimeType::svg) {
+
+			// It's an svg
+			HTTP::Icon icon;
+
+			for_each([&icon](const char *, const Udjat::Value &value){
+				if(value == Value::Icon) {
+					icon = HTTP::Icon::getInstance(value.to_string());
+					return (bool) icon;
+				}
+				return false;
+
+			});
+
+			if(!icon) {
+				throw system_error(ENOENT,system_category(),"No icon here");
+			}
+
+			debug("Sending icon '",icon.c_str(),"'");
+
+			return string{File::Text{icon.c_str()}.c_str()};
+
+		}
+
+		return Udjat::Response::Value::to_string();
+	}
+
 
  }

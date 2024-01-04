@@ -72,8 +72,8 @@
 						<< "<li><a href=\"/api/1.0/htmlagent.html\">";
 
 				{
-					auto icon = std::to_string(Abstract::Agent::root()->state()->level());
-					if(HTTP::Icon{icon}) {
+					auto icon = HTTP::Icon::getInstance(std::to_string(Abstract::Agent::root()->state()->level()));
+					if(icon) {
 						page << "<img src=\"icon/" << icon << ".svg\" height=\"16\" style=\"vertical-align:bottom\"/>&nbsp;";
 					}
 				}
@@ -99,8 +99,8 @@
 					page << "<li><a href=\"/api/1.0/agent" << agent.path() << ".html\">";
 
 					{
-						auto icon = std::to_string(agent.state()->level());
-						if(HTTP::Icon{icon}) {
+						auto icon = HTTP::Icon::getInstance(std::to_string(agent.state()->level()));
+						if(icon) {
 							page << "<img src=\"icon/" << icon << ".svg\" height=\"16\" style=\"vertical-align:bottom\"/>&nbsp;";
 						}
 					}
