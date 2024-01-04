@@ -34,6 +34,7 @@
  #include <udjat/tools/http/mimetype.h>
  #include <udjat/tools/configuration.h>
  #include <udjat/tools/logger.h>
+ #include <udjat/tools/intl.h>
 
 #ifndef _WIN32
 	#include <unistd.h>
@@ -61,11 +62,10 @@
 		Udjat::HTTP::Icon icon = Udjat::HTTP::Icon::getInstance(path);
 
 		if(icon.empty()) {
-			mg_send_http_error(conn, 404, "Cant find icon '%s'", path);
-			return 404;
+			return http_error(conn, 404, _("Not available"));
 		}
 
-		CivetWeb::Connection(conn).send(
+		return CivetWeb::Connection(conn).send(
 			HTTP::Get,
 			icon.c_str(),
 			false,
@@ -73,30 +73,20 @@
 			Config::Value<unsigned int>("theme","icon-max-age",604800)
 		);
 
-	} catch(const HTTP::Exception &error) {
-
-		mg_send_http_error(conn, error.codes().http, "%s", error.what());
-		return error.codes().http;
+	} catch(const HTTP::Exception &e) {
+		return http_error(conn, e.codes().http, e.what());
 
 	} catch(const system_error &e) {
-
-		int code = HTTP::Exception::code(e);
-		mg_send_http_error(conn, code, "%s", e.what());
-		return code;
+		return http_error(conn, HTTP::Exception::code(e), e.what());
 
 	} catch(const exception &e) {
-
-		mg_send_http_error(conn, 500, "%s", e.what());
-		return 500;
+		return http_error(conn, 500, e.what());
 
 	} catch(...) {
-
-		mg_send_http_error(conn, 500, "%s", "Unexpected error");
-		return 500;
+		return http_error(conn, 500, "Unexpected error");
 
 	}
 
-	mg_send_http_error(conn, 404, "Not available");
-	return 404;
+	return http_error(conn, 404, _("Not available"));
 
  }

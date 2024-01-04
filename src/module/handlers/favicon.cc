@@ -93,7 +93,7 @@
 #endif // _WIN32
 
 		if(!filename.empty() && access(filename.c_str(),R_OK) == 0) {
-			CivetWeb::Connection(conn).send(
+			return CivetWeb::Connection{conn}.send(
 				HTTP::Get,
 				filename.c_str(),
 				false,
@@ -102,32 +102,20 @@
 			);
 		}
 
-		mg_send_http_error(conn, 404, _("Cant find icon"));
-
-	} catch(const HTTP::Exception &error) {
-
-		mg_send_http_error(conn, error.codes().http, "%s", error.what());
-		return error.codes().http;
+	} catch(const HTTP::Exception &e) {
+		return http_error(conn, e.codes().http, e.what());
 
 	} catch(const system_error &e) {
-
-		int code = HTTP::Exception::code(e);
-		mg_send_http_error(conn, code, "%s", e.what());
-		return code;
+		return http_error(conn, HTTP::Exception::code(e), e.what());
 
 	} catch(const exception &e) {
-
-		mg_send_http_error(conn, 500, "%s", e.what());
-		return 500;
+		return http_error(conn, 500, e.what());
 
 	} catch(...) {
-
-		mg_send_http_error(conn, 500, "%s", _("Unexpected error"));
-		return 500;
+		return http_error(conn, 500, "Unexpected error");
 
 	}
 
-	mg_send_http_error(conn, 404, _("Not available"));
-	return 404;
+	return http_error(conn, 404, _("Not available"));
 
  }

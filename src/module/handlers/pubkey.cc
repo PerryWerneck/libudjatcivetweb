@@ -59,30 +59,22 @@
 
 		}
 
-		mg_send_http_error(conn, 404, _("No pubkey"));
-		return 404;
-
-
 	} catch(const exception &e) {
 
-		mg_send_http_error(conn, 500, "%s", e.what());
-		return 500;
+		return http_error(conn, 500, e.what());
 
 	} catch(...) {
 
-		mg_send_http_error(conn, 500, "%s", _("Unexpected error"));
-		return 500;
+		return http_error(conn, 500, _("Unexpected errror"));
 
 	}
 
+	return http_error(conn, 404, _("Not available"));
 
 #else
 
-	mg_send_http_error(conn, 404, _("Unsupported method"));
+	return http_error(conn, 404, _("Unsupported"));
 
 #endif // HAVE_LIBSSL
-
-	mg_send_http_error(conn, 404, _("Not available"));
-	return 404;
 
  }

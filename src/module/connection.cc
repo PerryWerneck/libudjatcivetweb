@@ -222,7 +222,7 @@
 		// Check 'accept' header.
 		const char *hdr = mg_get_header(conn, header);
 
-		debug("header[",header,"]='",hdr,"'");
+//		debug("header[",header,"]='",hdr,"'");
 
 		if(hdr && *hdr) {
 
@@ -251,21 +251,29 @@
  	try {
 
 		CivetWeb::Connection{conn}.send(mimetype,HTTP::Response{mimetype}.failed(code,message,body));
+		return code;
 
  	} catch(...) {
 
-		const struct mg_request_info *request_info = mg_get_request_info(conn);
+	}
 
-		Logger::String{
-			request_info->remote_addr," ",
-			request_info->request_method," ",
-			request_info->local_uri," ",
-			code," ",message," (",std::to_string(mimetype),")"
-		}.error("civetweb");
+	const struct mg_request_info *request_info = mg_get_request_info(conn);
 
-		mg_send_http_error(conn, code, message);
+	Logger::String{
+		request_info->remote_addr," ",
+		request_info->request_method," ",
+		request_info->local_uri," ",
+		code," ",message," (",std::to_string(mimetype),")"
+	}.error("civetweb");
 
- 	}
+	// Send error without body.
+	mg_response_header_start(conn, code);
+	mg_response_header_add(conn, "Content-Type",std::to_string(mimetype),-1);
+	mg_response_header_add(conn, "Content-Length", "0", -1);
+	mg_response_header_add(conn, "Cache-Control","no-cache, no-store, must-revalidate, private, max-age=0",-1);
+	mg_response_header_add(conn, "Expires", "0", -1);
+	mg_response_header_send(conn);
+
 	return code;
  }
 
