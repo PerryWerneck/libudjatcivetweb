@@ -360,6 +360,8 @@
 
 	//mg_send_http_error(conn, HTTP::Exception::code(code), message.c_str());
 
-	return code;
+	debug("Returning error ",http_error_code);
+
+	return http_error_code;
  }
 
