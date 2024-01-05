@@ -341,17 +341,24 @@
 
 	}
 
-	debug(__FUNCTION__," has failed, sending empty error response");
-
 	int http_error_code = HTTP::Exception::code(code);
-
 	const struct mg_request_info *request_info = mg_get_request_info(conn);
+
+	Logger::String{
+		"Standard 'send' method has failed with exception '",
+		message.c_str(),
+		"', sending empty HTTP error ",
+		http_error_code,
+		" to ",
+		request_info->remote_addr
+	}.error("civetweb");
+
 	Logger::String{
 		request_info->remote_addr," ",
 		request_info->request_method," ",
 		request_info->local_uri," ",
 		http_error_code, " - ", message.c_str()," (syserror ",code,")"
-	}.error("civetweb");
+	}.trace("civetweb");
 
 	mg_response_header_start(conn, http_error_code);
 	mg_response_header_add(conn, "Cache-Control", "no-cache, no-store, must-revalidate, private, max-age=0", -1);
