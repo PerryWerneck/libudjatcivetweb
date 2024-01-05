@@ -55,7 +55,6 @@
 
 			/// @brief Send response.
 			int send(const Abstract::Response &response) const noexcept override;
-			int send(const MimeType mimetype, const Abstract::Response &response) const noexcept;
 
 			int send(const char *mime_type, const char *response, size_t length) const noexcept override;
 			int send(const HTTP::Method method, const char *filename, bool allow_index, const char *mime_type, unsigned int max_age) const override;
@@ -149,18 +148,21 @@
  //int swaggerWebHandler(struct mg_connection *conn, void *cbdata);
 
  /// @brief Handler for '/' request.
- int rootWebHandler(struct mg_connection *conn, void *cbdata);
+ int rootWebHandler(struct mg_connection *conn, void *cbdata) noexcept;
 
  /// @brief Handler for '/favicon.ico' request.
- int faviconWebHandler(struct mg_connection *conn, void *cbdata);
+ int faviconWebHandler(struct mg_connection *conn, void *cbdata) noexcept;
 
  /// @brief Handler for custom requests.
- int customWebHandler(struct mg_connection *conn, void *cbdata);
+ int customWebHandler(struct mg_connection *conn, void *cbdata) noexcept;
 
  /// @brief Get mime-type from 'Accept' or 'Content-Type' header.
  /// @param conn Civetweb connection data.
  /// @param def The mimetype to use if connection doesnt set one.
- Udjat::MimeType MimeTypeFactory(struct mg_connection *conn, const Udjat::MimeType def = Udjat::MimeType::json);
+ Udjat::MimeType MimeTypeFactory(struct mg_connection *conn, const Udjat::MimeType def = Udjat::MimeType::json) noexcept;
+
+ /// @brief Send response.
+ int send(struct mg_connection *conn, const Abstract::Response &response) noexcept;
 
  /// @brief Send error page.
  int http_error(struct mg_connection *conn, int code, const char *message) noexcept;

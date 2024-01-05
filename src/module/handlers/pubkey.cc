@@ -59,22 +59,22 @@
 
 		}
 
-	} catch(const exception &e) {
+	} catch(const HTTP::Exception &e) {
+		return send(conn, HTTP::Response{MimeTypeFactory(conn)}.failed(e));
 
-		return http_error(conn, 500, e.what());
+	} catch(const system_error &e) {
+		return send(conn, HTTP::Response{MimeTypeFactory(conn)}.failed(e));
+
+	} catch(const exception &e) {
+		return send(conn, HTTP::Response{MimeTypeFactory(conn)}.failed(e));
 
 	} catch(...) {
-
-		return http_error(conn, 500, _("Unexpected errror"));
+		return send(conn, HTTP::Response{MimeTypeFactory(conn)}.failed(_("Unexpected error")));
 
 	}
 
-	return http_error(conn, 404, _("Not available"));
-
-#else
+#endif // HAVE_LIBSSL
 
 	return http_error(conn, 404, _("Unsupported"));
-
-#endif // HAVE_LIBSSL
 
  }

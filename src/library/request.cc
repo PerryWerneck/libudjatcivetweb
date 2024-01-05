@@ -44,7 +44,13 @@
 				// Parse as legacy request
 				const char *next = strchr(reqpath+1,'/');
 				if(!next) {
-					throw runtime_error(_("Request path should be /api/[APIVER]/[REQUEST]"));
+					throw system_error(
+								ENOENT,system_category(),
+								Logger::Message{
+									_("Request path should be /api/{}/[REQUEST]"),
+									Config::Value<string>{"http","apiver","[APIVER]"}.c_str()
+								}
+							);
 				}
 
 				reqpath = next;

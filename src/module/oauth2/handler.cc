@@ -238,8 +238,7 @@
 
 	debug("OAuth handler exit with error ",code);
 
-	CivetWeb::Connection{conn}.send(mimetype,HTTP::Response{mimetype}.failed(HTTP::Exception::syscode(code),context.message.c_str()));
-	return code;
+	return ::send(conn,HTTP::Response{mimetype}.failed(HTTP::Exception::syscode(code),context.message.c_str()));
 
  }
 

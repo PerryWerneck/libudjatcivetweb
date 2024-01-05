@@ -40,36 +40,52 @@
  using namespace std;
  using namespace Udjat;
 
- int rootWebHandler(struct mg_connection *conn, void *) {
+ int rootWebHandler(struct mg_connection *conn, void *) noexcept {
 
-	CivetWeb::Connection connection{conn};
-	CivetWeb::Request request{conn};
+	try {
 
-	size_t output_format = request.getArgument("output-format","detailed").select("detailed","list","combined",nullptr);
+		CivetWeb::Connection connection{conn};
+		CivetWeb::Request request{conn};
 
-	if(output_format == 1 || connection ==  MimeType::csv) {
+		size_t output_format = request.getArgument("output-format","detailed").select("detailed","list","combined",nullptr);
 
-		// List
-		HTTP::Report response{(MimeType) connection};
+		if(output_format == 1 || connection ==  MimeType::csv) {
 
-		if(!Udjat::exec(request,response)) {
-			response.failed(ENOENT);
+			// List
+			HTTP::Report response{(MimeType) connection};
+
+			if(!Udjat::exec(request,response)) {
+				response.failed(ENOENT);
+			}
+
+			return connection.send(response);
+
+		} else {
+
+			// Detailed or combined.
+			HTTP::Response response{(MimeType) connection};
+
+			if(!Udjat::exec(request,response)) {
+				response.failed(ENOENT);
+			}
+
+			// TODO: If not failed and output_format == 2 append report on response.
+
+			return connection.send(response);
+
 		}
 
-		return connection.send(response);
+	} catch(const HTTP::Exception &e) {
+		return send(conn, HTTP::Response{MimeTypeFactory(conn)}.failed(e));
 
-	} else {
+	} catch(const system_error &e) {
+		return send(conn, HTTP::Response{MimeTypeFactory(conn)}.failed(e));
 
-		// Detailed or combined.
-		HTTP::Response response{(MimeType) connection};
+	} catch(const exception &e) {
+		return send(conn, HTTP::Response{MimeTypeFactory(conn)}.failed(e));
 
-		if(!Udjat::exec(request,response)) {
-			response.failed(ENOENT);
-		}
-
-		// TODO: If not failed and output_format == 2 append report on response.
-
-		return connection.send(response);
+	} catch(...) {
+		return send(conn, HTTP::Response{MimeTypeFactory(conn)}.failed(_("Unexpected error")));
 
 	}
 

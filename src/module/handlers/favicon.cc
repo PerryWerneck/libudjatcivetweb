@@ -41,7 +41,7 @@
 
  using namespace Udjat;
 
- int faviconWebHandler(struct mg_connection *conn, void *) {
+ int faviconWebHandler(struct mg_connection *conn, void *) noexcept {
 
 	try {
 

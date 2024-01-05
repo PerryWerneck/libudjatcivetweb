@@ -27,7 +27,7 @@
 
  using namespace Udjat;
 
- int customWebHandler(struct mg_connection *conn, void *cbdata) {
+ int customWebHandler(struct mg_connection *conn, void *cbdata) noexcept {
 
 	HTTP::Handler &handler = *((HTTP::Handler *) cbdata);
 
