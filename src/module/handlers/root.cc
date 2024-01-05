@@ -54,10 +54,12 @@
 			// List
 			HTTP::Report response{(MimeType) connection};
 
+			debug("Getting response as table...");
 			if(!Udjat::exec(request,response)) {
 				response.failed(ENOENT);
 			}
 
+			debug("Sending response as table...");
 			return connection.send(response);
 
 		} else {
@@ -76,15 +78,19 @@
 		}
 
 	} catch(const HTTP::Exception &e) {
+		debug("-----> ",__FUNCTION__,": ",e.what());
 		return send(conn, HTTP::Response{MimeTypeFactory(conn)}.failed(e));
 
 	} catch(const system_error &e) {
+		debug("-----> ",__FUNCTION__,": ",e.what());
 		return send(conn, HTTP::Response{MimeTypeFactory(conn)}.failed(e));
 
 	} catch(const exception &e) {
+		debug("-----> ",__FUNCTION__,": ",e.what());
 		return send(conn, HTTP::Response{MimeTypeFactory(conn)}.failed(e));
 
 	} catch(...) {
+		debug("-----> ",__FUNCTION__,": ","Unexpected error");
 		return send(conn, HTTP::Response{MimeTypeFactory(conn)}.failed(_("Unexpected error")));
 
 	}
