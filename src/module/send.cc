@@ -353,12 +353,14 @@
 		request_info->remote_addr
 	}.error("civetweb");
 
-	Logger::String{
-		request_info->remote_addr," ",
-		request_info->request_method," ",
-		request_info->local_uri," ",
-		http_error_code, " - ", message.c_str()," (syserror ",code,")"
-	}.trace("civetweb");
+	if(Logger::enabled(Logger::Trace)) {
+		Logger::String{
+			request_info->remote_addr," ",
+			request_info->request_method," ",
+			request_info->local_uri," ",
+			http_error_code, " - ", message.c_str()," (syserror ",code,")"
+		}.trace("civetweb");
+	}
 
 	mg_response_header_start(conn, http_error_code);
 	mg_response_header_add(conn, "Cache-Control", "no-cache, no-store, must-revalidate, private, max-age=0", -1);
