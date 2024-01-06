@@ -49,6 +49,12 @@
 			/// @retval 404 No index page.
 			int info(const char *path);
 
+			/// @brief Get text for response..
+			/// @param response Response to.
+			/// @param mimetype The mimetype for response.
+			/// @return true if the string
+			static std::string get(const Udjat::Abstract::Response &response, const MimeType mimetype);
+
 			/// @brief Send response.
 			/// @return http error response.
 			virtual int send(const Abstract::Response &response) const noexcept = 0;
@@ -72,24 +78,6 @@
 			/// @param body Text explaining the failure
 			/// @return Error code.
 			virtual int send(int code, const char *title, const char *body = "") const noexcept;
-
-			/*
-			/// @brief Send response.
-			/// @param mime_type The content type to be sent.
-			/// @param length Length of the following body data.
-			/// @return Fixed value '200'.
-			virtual int success(const char *mime_type, const char *response, size_t length) const noexcept = 0;
-
-			int success(const char *mime_type, const std::string &response) const {
-				return success(mime_type,response.c_str(),response.size());
-			}
-
-			int response(const HTTP::Exception &error) const noexcept;
-			int response(const std::system_error &error) const noexcept;
-			int response(const std::exception &e) const noexcept;
-
-			*/
-
 
 		};
 

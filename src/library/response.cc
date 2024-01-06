@@ -25,10 +25,18 @@
  #include <udjat/tools/http/value.h>
  #include <udjat/tools/http/layouts.h>
  #include <udjat/tools/http/exception.h>
+ #include <udjat/tools/http/mimetype.h>
  #include <udjat/tools/intl.h>
  #include <udjat/tools/logger.h>
  #include <udjat/tools/http/icon.h>
  #include <udjat/tools/file.h>
+ #include <udjat/tools/configuration.h>
+ #include <udjat/tools/application.h>
+
+ #ifdef HAVE_UNISTD_H
+	#include <unistd.h>
+ #endif // HAVE_UNISTD_H
+
  #include <iostream>
  #include <sstream>
 
@@ -126,5 +134,71 @@
 		return Udjat::Response::Value::to_string();
 	}
 
+	std::string HTTP::Response::to_string(const Udjat::Abstract::Response &response, const MimeType mimetype) {
+
+		int code = HTTP::Exception::code(response.status_code());
+		std::string text{response.to_string()};
+
+		if(code == 200 && text.empty()) {
+			code = 204;
+		}
+
+		if(code < 200 || code > 299) {
+
+			// It's an error, check for customized error page.
+			try {
+
+				if(Config::Value<bool>("http","use-error-templates",true) && mimetype != MimeType::custom) {
+
+					// Try to load custom error page.
+#ifdef DEBUG
+					Application::DataFile page{"./templates/error."};
+#else
+					Application::DataFile page{"templates/www/error."};
+#endif // DEBUG
+					page += std::to_string(mimetype,true);
+
+					debug("Checking for http error template in file '",page.c_str(),"'");
+
+					if(!access(page.c_str(),R_OK)) {
+
+						Logger::String{"Loading error page from '",page.c_str(),"'"}.trace("civetweb");
+
+						text = page.load().expand([&response,code](const char *key, std::string &value) {
+
+							if(!strcasecmp(key,"code")) {
+								value = std::to_string(code);
+							} else if(!strcasecmp(key,"message")) {
+								value = response.message();
+							} else if(!strcasecmp(key,"body")) {
+								value = response.body();
+#ifdef DEBUG
+								if(!*response.body()) {
+									value = "No body on this error (DEBUG)";
+								}
+#endif // DEBUG
+							} else if(!strcasecmp(key,"syscode")) {
+								value = std::to_string(response.status_code());
+							}
+
+							return !value.empty();
+
+						},true,true);
+
+					}
+				}
+
+			} catch(const std::exception &e) {
+
+				Logger::String{"Can't load custom error page: ",e.what()}.trace("civetweb");
+
+			}
+
+		}
+
+		// TODO: If text.empty() && mimetype == json format standard json error.
+
+		return text;
+	}
 
  }

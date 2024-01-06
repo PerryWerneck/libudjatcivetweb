@@ -23,6 +23,7 @@
  #include <udjat/version.h>
  #include <udjat/tools/http/timestamp.h>
  #include <udjat/tools/http/mimetype.h>
+ #include <udjat/tools/http/connection.h>
  #include <udjat/tools/file.h>
  #include <udjat/tools/logger.h>
  #include <udjat/tools/configuration.h>
@@ -227,11 +228,7 @@
 	string message;
 
 	try {
-
-		std::string text{response.to_string()};
-		if(code == 200 && text.empty()) {
-			code = 204;
-		}
+		string text{HTTP::Response::to_string(response,mimetype)};
 
 		// Build and send header
 		mg_response_header_start(conn, code);
@@ -251,55 +248,6 @@
 
 			mg_response_header_add(conn, "Cache-Control", "no-cache, no-store, must-revalidate, private, max-age=0", -1);
 			mg_response_header_add(conn, "Expires", "0", -1);
-
-			// Check for customized error page.
-			try {
-
-				if(Config::Value<bool>("httpd","error-templates",true) && mimetype != MimeType::custom) {
-
-					// Try to load custom error page.
-	#ifdef DEBUG
-					Application::DataFile page{"./templates/error."};
-	#else
-					Application::DataFile page{"templates/www/error."};
-	#endif // DEBUG
-					page += to_string(mimetype,true);
-
-					debug("Checking for http error template in file '",page.c_str(),"'");
-
-					if(!access(page.c_str(),R_OK)) {
-
-						Logger::String{"Loading error page from '",page.c_str(),"'"}.trace("civetweb");
-
-						text = page.load().expand([&response,code](const char *key, std::string &value) {
-
-							if(!strcasecmp(key,"code")) {
-								value = std::to_string(code);
-							} else if(!strcasecmp(key,"message")) {
-								value = response.message();
-							} else if(!strcasecmp(key,"body")) {
-								value = response.body();
-#ifdef DEBUG
-								if(!*response.body()) {
-									value = "No body on this error (DEBUG)";
-								}
-#endif // DEBUG
-							} else if(!strcasecmp(key,"syscode")) {
-								value = std::to_string(response.status_code());
-							}
-
-							return !value.empty();
-
-						},true,true);
-
-					}
-				}
-
-			} catch(const std::exception &e) {
-
-				Logger::String{"Can't load custom error page: ",e.what()}.trace("civetweb");
-
-			}
 
 		} else {
 

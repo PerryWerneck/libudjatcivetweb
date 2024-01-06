@@ -44,6 +44,12 @@
 
 			bool empty() const noexcept override;
 
+			/// @brief Get text for response, parse errors, add custom page if necessary.
+			/// @param response Response to.
+			/// @param mimetype The mimetype for response.
+			/// @return true if the string
+			static std::string to_string(const Udjat::Abstract::Response &response, const MimeType mimetype);
+
 			std::string to_string() const override;
 
 			bool for_each(const std::function<bool(const char *name, const Udjat::Value &value)> &call) const override;
