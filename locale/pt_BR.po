@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udjat-module-httpd 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-11-30 12:19-0300\n"
+"POT-Creation-Date: 2023-12-13 23:38-0300\n"
 "PO-Revision-Date: 2022-11-30 12:19-0300\n"
 "Last-Translator: Perry Werneck <perry.werneck@gmail.com>\n"
 "Language-Team: Brazilian Portuguese <perry.werneck@gmail.com>\n"
@@ -22,34 +22,40 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n > 1)\n"
 "X-Generator: Gtranslator 3.38.0\n"
 
-#: src/library/index.cc:67
+#: src/library/index.cc:71
 msgid "Active agents"
 msgstr "Agentes ativos"
 
-#: src/module/index.cc:68
-msgid "Agent info"
-msgstr "Informações de agente"
-
-#: src/library/index.cc:68
+#: src/library/index.cc:81
 msgid "Application"
 msgstr "Aplicação"
 
-#: src/module/swagger.cc:37
-msgid "Not implemented"
-msgstr "Não implementado"
+#: src/module/connection.cc:100
+msgid ""
+"Erro {} ({}) on HTTP request\n"
+"{}\n"
+msgstr ""
 
-#: src/module/index.cc:69
-msgid "Service information"
-msgstr "Informação de serviços"
+#: src/library/request.cc:45 src/module/connection.cc:49
+msgid "Request path should be /api/[APIVER]/[REQUEST]"
+msgstr ""
 
-#: src/module/index.cc:91
-msgid "URL workers"
-msgstr "Processadores de URL"
-
-#: src/library/index.cc:118
+#: src/library/index.cc:123
 msgid "Workers"
 msgstr "Processadores"
 
-#: src/library/index.cc:52 src/module/index.cc:53
+#: src/library/index.cc:55
 msgid "en"
 msgstr "pt_BR"
+
+#~ msgid "Agent info"
+#~ msgstr "Informações de agente"
+
+#~ msgid "Not implemented"
+#~ msgstr "Não implementado"
+
+#~ msgid "Service information"
+#~ msgstr "Informação de serviços"
+
+#~ msgid "URL workers"
+#~ msgstr "Processadores de URL"

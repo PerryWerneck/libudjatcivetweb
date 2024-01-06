@@ -266,8 +266,9 @@ install-module: \
 
 install-dev: \
 	install-@OSNAME@-dev \
-	install-@OSNAME@-static 
-	
+	install-@OSNAME@-static \
+	install-templates
+		
 	@$(MKDIR) \
 		$(DESTDIR)$(includedir)/udjat/tools/http
 
@@ -286,6 +287,15 @@ install-dev: \
 	@$(INSTALL_DATA) \
 		sdk/@OSNAME@/static.pc \
 		$(DESTDIR)$(libdir)/pkgconfig/udjat-$(LIBRARY_NAME)-static.pc
+
+install-templates:
+
+	@$(MKDIR) \
+		$(DESTDIR)/$(datarootdir)/@PRODUCT_NAME@/templates/www
+
+	@$(INSTALL_DATA) \
+		templates/*.html \
+		$(DESTDIR)/$(datarootdir)/@PRODUCT_NAME@/templates/www
 
 install-linux-static: \
 	$(BINRLS)/libudjat$(LIBRARY_NAME).a

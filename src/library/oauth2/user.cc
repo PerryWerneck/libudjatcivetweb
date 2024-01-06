@@ -30,6 +30,7 @@
  #include <udjat/tools/http/keypair.h>
  #include <udjat/tools/logger.h>
  #include <udjat/tools/configuration.h>
+ #include <udjat/tools/application.h>
  #include <udjat/tools/intl.h>
  #include <cstring>
 
@@ -51,6 +52,7 @@
  #endif // HAVE_PAM
 
  using namespace std;
+ using namespace Udjat;
 
  namespace Udjat {
 
@@ -266,10 +268,15 @@
 		pam_handle_t 	* local_auth_handle = NULL; // this gets set by pam_start
 
 #ifdef DEBUG
-		retval = pam_start("common-auth", username, &local_conversation, &local_auth_handle);
+		retval = pam_start(
+						Config::Value<std::string>{"oauth2","service-name","common-auth"}.c_str(),
+						username,
+						&local_conversation,
+						&local_auth_handle
+					);
 #else
 		retval = pam_start(
-						Config::Value{"oauth2","service-name",Application::Name().c_str()}.c_str(),
+						Config::Value<std::string>{"oauth2","service-name",Application::Name().c_str()}.c_str(),
 						username,
 						&local_conversation,
 						&local_auth_handle
