@@ -246,51 +246,64 @@
 				request_info->remote_addr," ",
 				request_info->request_method," ",
 				request_info->local_uri," HTTP Error ",
-				std::to_string(code)," - ",response.message()," ( Error ",std::to_string(response.status_code()),")"
+				std::to_string(code)," - ",response.message()," (Error ",std::to_string(response.status_code()),")"
 			}.warning("civetweb");
 
 			mg_response_header_add(conn, "Cache-Control", "no-cache, no-store, must-revalidate, private, max-age=0", -1);
 			mg_response_header_add(conn, "Expires", "0", -1);
 
-			if(Config::Value<bool>("httpd","use-error-templates",true) && mimetype != MimeType::custom) {
+			// Check for customized error page.
+			try {
 
-				// TODO: Try to load custom error page.
+				if(Config::Value<bool>("httpd","error-templates",true) && mimetype != MimeType::custom) {
+
+					// Try to load custom error page.
+	#ifdef DEBUG
+					Application::DataFile page{"./templates/error."};
+	#else
+					Application::DataFile page{"templates/www/error."};
+	#endif // DEBUG
+					page += to_string(mimetype,true);
+
+					debug("Checking for http error template in file '",page.c_str(),"'");
+
+					if(!access(page.c_str(),R_OK)) {
+
+						Logger::String{"Loading error page from '",page.c_str(),"'"}.trace("civetweb");
+
+						text = page.load().expand([&response,code](const char *key, std::string &value) {
+
+							if(!strcasecmp(key,"code")) {
+								value = std::to_string(code);
+							} else if(!strcasecmp(key,"message")) {
+								value = response.message();
+							} else if(!strcasecmp(key,"body")) {
+								value = response.body();
 #ifdef DEBUG
-				Application::DataFile page{"./templates/error."};
-#else
-				Application::DataFile page{"templates/www/error."};
+								if(!*response.body()) {
+									value = "No body on this error (DEBUG)";
+								}
 #endif // DEBUG
-				page += to_string(mimetype,true);
+							} else if(!strcasecmp(key,"syscode")) {
+								value = std::to_string(response.status_code());
+							}
 
-				debug("Checking for http error template in file '",page.c_str(),"'");
+							return !value.empty();
 
-				if(!access(page.c_str(),R_OK)) {
+						},true,true);
 
-					Logger::String{"Loading error page from '",page.c_str(),"'"}.trace("civetweb");
-
-					text = page.load().expand([&response,code](const char *key, std::string &value) {
-
-						if(!strcasecmp(key,"code")) {
-							value = std::to_string(code);
-						} else if(!strcasecmp(key,"message")) {
-							value = response.message();
-						} else if(!strcasecmp(key,"body")) {
-							value = response.body();
-						} else if(!strcasecmp(key,"syscode")) {
-							value = std::to_string(response.status_code());
-						}
-
-						return !value.empty();
-
-					},true,true);
-
+					}
 				}
+
+			} catch(const std::exception &e) {
+
+				Logger::String{"Can't load custom error page: ",e.what()}.trace("civetweb");
 
 			}
 
 		} else {
 
-			// It's not and error, setup cache
+			// It's not an error, setup cache
 			time_t now = time(0);
 
 			time_t modtime = response.last_modified();

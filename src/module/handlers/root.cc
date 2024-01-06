@@ -56,10 +56,12 @@
 
 			debug("Getting response as table...");
 			if(!Udjat::exec(request,response)) {
-				response.failed(ENOENT);
+				Logger::String("Request has failed").trace("civetweb");
+				return connection.send(response);
 			}
 
 			debug("Sending response as table...");
+
 			return connection.send(response);
 
 		} else {
@@ -68,10 +70,11 @@
 			HTTP::Response response{(MimeType) connection};
 
 			if(!Udjat::exec(request,response)) {
-				response.failed(ENOENT);
+				Logger::String("Request has failed").trace("civetweb");
+				return connection.send(response);
 			}
 
-			// TODO: If not failed and output_format == 2 append report on response.
+			// TODO: If output_format == 2 append report on response.
 
 			return connection.send(response);
 

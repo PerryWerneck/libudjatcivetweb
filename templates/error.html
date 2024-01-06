@@ -7,9 +7,16 @@
 	<title>Error ${code}</title>
 </head>
 <body>
-<h1>HTTP Error ${code}</h1>
-<p>${message}</p>
-<p><small>${body}</small></p>
+<section style="display:flex">
+<div>
+<img src="/icon/computer-fail-symbolic" height="64px">
+</div>
+<div>
+<h1 style="margin:0px 3px 6px 3px">HTTP Error ${code}</h1>
+<p style="margin:0px 3px 6px 3px">${message}</p>
+<p style="margin:0px 3px 6px 3px"><small>${body}</small></p>
+</div>
+</section>
 </body>
 </html>
 
