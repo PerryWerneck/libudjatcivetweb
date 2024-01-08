@@ -18,7 +18,7 @@
  */
 
  /**
-  * @brief Implements the default index page.
+  * @brief Implements the default http handler.
   *
   */
 
@@ -49,7 +49,7 @@
 
 		size_t output_format = request.getArgument("output-format","detailed").select("detailed","list","combined",nullptr);
 
-		if(output_format == 1 || connection ==  MimeType::csv) {
+		if(output_format == 1 || connection == MimeType::csv) {
 
 			// List
 			HTTP::Report response{(MimeType) connection};

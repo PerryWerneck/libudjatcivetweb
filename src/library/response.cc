@@ -139,10 +139,6 @@
 		int code = HTTP::Exception::code(response.status_code());
 		std::string text{response.to_string()};
 
-		if(code == 200 && text.empty()) {
-			code = 204;
-		}
-
 		if(code < 200 || code > 299) {
 
 			// It's an error, check for customized error page.
@@ -197,6 +193,7 @@
 		}
 
 		// TODO: If text.empty() && mimetype == json format standard json error.
+		// https://github.com/omniti-labs/jsend
 
 		return text;
 	}
