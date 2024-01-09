@@ -66,10 +66,13 @@
 	}
 
 	Udjat::Value & HTTP::Response::set(const char *value, const Type type) {
-		throw logic_error(Logger::Message{_("Unable to insert '{}' as '{}' on http response object, you should insert a child value first"),value,std::to_string(type)});
+		Udjat::Value &child{(*this)["value"]};
+		child.set(value,type);
+		debug("Response value set to '",child.to_string(),"'");
+		return child;
 	}
 
-	Udjat::Value & HTTP::Response::append(const Type type) {
+	Udjat::Value & HTTP::Response::append(const Type) {
 		reset(Value::Array);
 		return children[std::to_string((int) children.size()).c_str()];
 	}
