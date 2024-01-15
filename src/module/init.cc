@@ -268,23 +268,27 @@
 					ports[ix].port
 				).write(Logger::Trace,"civetweb");
 
-				if(Logger::enabled(Logger::Debug)) {
-
-					if(Udjat::Worker::find("agent")) {
-						Logger::String(
-							"Application state available on ",
-							(ports[ix].is_ssl ? "https" : "http"),
-							"://",
-							(ports[ix].protocol == 1 ? "127.0.0.1" : "localhost"),
-							":",
-							ports[ix].port,
-							"/api/1.0/agent"
-						).write(Logger::Debug,"civetweb");
-					}
-
-				}
-
 				if(Logger::enabled(Logger::Trace)) {
+
+					Udjat::Worker::for_each([ports,ix](const Worker &worker){
+
+						debug("---> ",worker.c_str());
+						if(!strcasecmp(worker.c_str(),"agent")) {
+							Logger::String(
+								"Application state available on ",
+								(ports[ix].is_ssl ? "https" : "http"),
+								"://",
+								(ports[ix].protocol == 1 ? "127.0.0.1" : "localhost"),
+								":",
+								ports[ix].port,
+								"/api/1.0/agent"
+							).trace("civetweb");
+							return true;
+						}
+
+						return false;
+
+					});
 
 					auto module = Udjat::Module::find("information");
 					String options;
