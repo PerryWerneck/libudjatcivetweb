@@ -45,40 +45,7 @@
 	try {
 
 		CivetWeb::Connection connection{conn};
-		CivetWeb::Request request{conn};
-
-		size_t output_format = request.getArgument("output-format","detailed").select("detailed","list","combined",nullptr);
-
-		if(output_format == 1 || connection == MimeType::csv) {
-
-			// List
-			HTTP::Report response{(MimeType) connection};
-
-			debug("Getting response as table...");
-			if(!Udjat::exec(request,response)) {
-				Logger::String("Request has failed").trace("civetweb");
-				return connection.send(response);
-			}
-
-			debug("Sending response as table...");
-
-			return connection.send(response);
-
-		} else {
-
-			// Detailed or combined.
-			HTTP::Response response{(MimeType) connection};
-
-			if(!Udjat::exec(request,response)) {
-				Logger::String("Request has failed").trace("civetweb");
-				return connection.send(response);
-			}
-
-			// TODO: If output_format == 2 append report on response.
-
-			return connection.send(response);
-
-		}
+		return CivetWeb::Request{conn}.exec(connection);
 
 	} catch(const HTTP::Exception &e) {
 		debug("-----> ",__FUNCTION__,": ",e.what());

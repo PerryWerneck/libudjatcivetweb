@@ -31,40 +31,93 @@
  #include <udjat/tools/http/exception.h>
  #include <udjat/tools/worker.h>
  #include <udjat/tools/logger.h>
+ #include <udjat/tools/intl.h>
  #include <string>
 
  using namespace std;
 
  namespace Udjat {
 
-	/*
-	std::string HTTP::Request::exec(const MimeType mimetype) {
+	int HTTP::Request::exec(HTTP::Connection &connection) {
 
-		// https://softwareengineering.stackexchange.com/questions/431218/rest-api-endpoint-returning-detailed-or-summary-data
-		size_t output_format = getArgument("output-format","detailed").select("detailed","list","combined",nullptr);
+		Worker::ResponseType response_type = Worker::None;
+		const Worker *worker = nullptr;
 
-		if(output_format == 1 || mimetype == MimeType::csv) {
+		Worker::for_each([&worker,&response_type,this](const Worker &w){
+			response_type = w.probe(*this);
+			if(response_type != Worker::None) {
+				worker = &w;
+				return true;
+			}
+			return false;
+		});
 
-			// List
-			HTTP::Report response{mimetype};
-			debug("Sending list response");
-			Udjat::exec(*this,response);
-			return response.to_string();
+		switch(response_type) {
+		case Worker::None:
+			return connection.send(HTTP::Response{(MimeType) connection}.failed(ENOENT));
 
-		} else {
+		case Worker::Value:
+			{
+				if(connection == MimeType::csv) {
+					throw system_error(ENOENT,system_category(),"Unsupported output format");
+				}
 
-			// Detailed
-			HTTP::Response response{mimetype};
-			debug("Sending detailed response");
-			Udjat::exec(*this,response);
-			return response.to_string();
+				HTTP::Response response{(MimeType) connection};
+				if(!worker->exec(*this,response)) {
+					Logger::String("Request has failed").trace("civetweb");
+					return connection.send(response);
+				}
+				return connection.send(response);
+			}
+
+		case Worker::Table:
+			{
+				HTTP::Report response{(MimeType) connection};
+				if(!worker->exec(*this,response)) {
+					Logger::String("Request has failed").trace("civetweb");
+					return connection.send(response);
+				}
+				return connection.send(response);
+			}
+
+		case Worker::Both:
+			{
+				size_t output_format = getArgument("output-format","detailed").select("list","combined",nullptr);
+
+				if(connection == MimeType::csv || output_format == 0) {
+
+					// List
+					HTTP::Report response{(MimeType) connection};
+					if(!worker->exec(*this,response)) {
+						Logger::String("Request has failed").trace("civetweb");
+						return connection.send(response);
+					}
+					return connection.send(response);
+
+				} else if(output_format == 1) {
+
+					// Combined
+					throw system_error(ENOTSUP,system_category(),"Unsupported output format");
+
+				} else {
+
+					// All others
+					HTTP::Response response{(MimeType) connection};
+					if(!worker->exec(*this,response)) {
+						Logger::String("Request has failed").trace("civetweb");
+						return connection.send(response);
+					}
+					return connection.send(response);
+
+				}
+
+			}
 
 		}
 
-		throw system_error(ENOENT,system_category(),"Unknown path");
+		return connection.send(HTTP::Response{(MimeType) connection}.failed(ENOENT));
 
 	}
-	*/
 
 	String HTTP::Request::cookie(const char *) const {
 		return "";

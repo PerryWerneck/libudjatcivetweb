@@ -21,8 +21,7 @@
 
  #include <udjat/defs.h>
  #include <udjat/tools/request.h>
- #include <udjat/tools/http/mimetype.h>
- #include <udjat/tools/timestamp.h>
+ #include <udjat/tools/http/connection.h>
 
  #ifdef _WIN32
 	#include <windows.h>
@@ -67,7 +66,7 @@
 			const char *c_str() const noexcept override;
 			bool cached(const Udjat::TimeStamp &timestamp) const override;
 
-			// void exec(HTTP::Response &response) noexcept;
+			int exec(Connection &connection);
 
 			/// @brief Get Authentication token.
 			/// @return true if the token has valid authentication.

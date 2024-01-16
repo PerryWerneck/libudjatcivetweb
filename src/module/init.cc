@@ -272,7 +272,6 @@
 
 					Udjat::Worker::for_each([ports,ix](const Worker &worker){
 
-						debug("---> ",worker.c_str());
 						if(!strcasecmp(worker.c_str(),"agent")) {
 							Logger::String(
 								"Application state available on ",
