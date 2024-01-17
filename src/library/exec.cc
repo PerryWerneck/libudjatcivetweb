@@ -63,7 +63,7 @@
 				}
 
 				HTTP::Response response{(MimeType) connection};
-				if(!worker->exec(*this,response)) {
+				if(!worker->work(*this,response)) {
 					Logger::String("Request has failed").trace("civetweb");
 					return connection.send(response);
 				}
@@ -73,7 +73,7 @@
 		case Worker::Table:
 			{
 				HTTP::Report response{(MimeType) connection};
-				if(!worker->exec(*this,response)) {
+				if(!worker->work(*this,response)) {
 					Logger::String("Request has failed").trace("civetweb");
 					return connection.send(response);
 				}
@@ -88,7 +88,7 @@
 
 					// List
 					HTTP::Report response{(MimeType) connection};
-					if(!worker->exec(*this,response)) {
+					if(!worker->work(*this,response)) {
 						Logger::String("Request has failed").trace("civetweb");
 						return connection.send(response);
 					}
@@ -103,7 +103,7 @@
 
 					// All others
 					HTTP::Response response{(MimeType) connection};
-					if(!worker->exec(*this,response)) {
+					if(!worker->work(*this,response)) {
 						Logger::String("Request has failed").trace("civetweb");
 						return connection.send(response);
 					}

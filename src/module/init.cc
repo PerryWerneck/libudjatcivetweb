@@ -248,9 +248,6 @@
 		struct mg_server_port ports[10];
 
 		int count = mg_get_server_ports(ctx,10,ports);
-
-		debug("------------------------------->",count);
-
 		if(count > 0) {
 
 			for(int ix = 0; ix < count;ix++) {
@@ -259,29 +256,24 @@
 					continue;
 				}
 
-				Logger::String(
-					"Listening on ",
+				String baseref{
 					(ports[ix].is_ssl ? "https" : "http"),
 					"://",
 					(ports[ix].protocol == 1 ? "127.0.0.1" : "localhost"),
 					":",
 					ports[ix].port
-				).write(Logger::Trace,"civetweb");
+				};
+
+				string apiversion{"1.0"};
+
+				Logger::String{"Listening on ",baseref}.info("civetweb");
 
 				if(Logger::enabled(Logger::Trace)) {
 
-					Udjat::Worker::for_each([ports,ix](const Worker &worker){
+					Udjat::Worker::for_each([&baseref,&apiversion](const Worker &worker){
 
 						if(!strcasecmp(worker.c_str(),"agent")) {
-							Logger::String(
-								"Application state available on ",
-								(ports[ix].is_ssl ? "https" : "http"),
-								"://",
-								(ports[ix].protocol == 1 ? "127.0.0.1" : "localhost"),
-								":",
-								ports[ix].port,
-								"/api/1.0/agent"
-							).trace("civetweb");
+							Logger::String{"Application state available on ",baseref,"/api/",apiversion,"/agent"}.trace("civetweb");
 							return true;
 						}
 
@@ -293,40 +285,14 @@
 					String options;
 					if(module && module->getProperty("options",options)) {
 						for(const std::string &option : options.split(",")) {
-							Logger::String(
-								"Service info available on ",
-								(ports[ix].is_ssl ? "https" : "http"),
-								"://",
-								(ports[ix].protocol == 1 ? "127.0.0.1" : "localhost"),
-								":",
-								ports[ix].port,
-								"/api/1.0/info/",
-								option.c_str()
-							).write(Logger::Trace,"civetweb");
+							Logger::String{"Service info available on ",baseref,"/api/",apiversion,"/info/",option.c_str()}.write(Logger::Trace,"civetweb");
 						}
 					}
 
 #ifdef HAVE_LIBSSL
-					Logger::String(
-						"Public key available on ",
-						(ports[ix].is_ssl ? "https" : "http"),
-						"://",
-						(ports[ix].protocol == 1 ? "127.0.0.1" : "localhost"),
-						":",
-						ports[ix].port,
-						"/pubkey.pem"
-					).write(Logger::Trace,"civetweb");
-
+					Logger::String{"Public key available on ",baseref,"/pubkey.pem"}.write(Logger::Trace,"civetweb");
 					if(Config::Value<bool>{"oauth2","enable-internal",false}) {
-						Logger::String(
-							"OAuth2 service available on ",
-							(ports[ix].is_ssl ? "https" : "http"),
-							"://",
-							(ports[ix].protocol == 1 ? "127.0.0.1" : "localhost"),
-							":",
-							ports[ix].port,
-							"/oauth2"
-						).write(Logger::Trace,"civetweb");
+						Logger::String{"OAuth2 service available on ",baseref,"/oauth2"}.write(Logger::Trace,"civetweb");
 					}
 #endif // HAVE_LIBSSL
 
