@@ -29,6 +29,7 @@
  #include <udjat/tools/configuration.h>
  #include <udjat/tools/application.h>
  #include <udjat/tools/intl.h>
+ #include <udjat/tools/exception.h>
  #include <sstream>
  #include <fcntl.h>
 
@@ -223,12 +224,34 @@
 
  int send(struct mg_connection *conn, const Udjat::Abstract::Response &response) noexcept {
 
-	const MimeType mimetype{MimeTypeFactory(conn)};
 	int code = HTTP::Exception::code(response.status_code());
+	const struct mg_request_info *request_info = mg_get_request_info(conn);
 	string message;
 
+	if(response.not_modified()) {
+
+		// Not modified
+		if(Logger::enabled(Logger::Trace)) {
+			Logger::String{
+				request_info->remote_addr," ",
+				request_info->request_method," ",
+				request_info->local_uri," Not Modified - 304"
+			}.info("civetweb");
+		}
+
+		mg_response_header_start(conn, 304);
+		response.for_each([conn](const char *header_name, const char *header_value){
+			debug(header_name,"='",header_value,"'");
+			mg_response_header_add(conn, header_name, header_value, -1);
+		});
+		mg_response_header_send(conn);
+
+		return 304;
+	}
+
 	try {
-		string text{HTTP::Response::to_string(response,mimetype)};
+
+		string text{response.to_string()};
 
 		// Build and send header
 		mg_response_header_start(conn, code);
@@ -236,9 +259,6 @@
 		if(code < 200 || code > 299) {
 
 			// It's an error, log it
-
-			const struct mg_request_info *request_info = mg_get_request_info(conn);
-
 			Logger::String{
 				request_info->remote_addr," ",
 				request_info->request_method," ",
@@ -254,14 +274,24 @@
 			mg_response_header_add(conn, header_name, header_value, -1);
 		});
 
-		mg_response_header_add(conn, "Content-Type",std::to_string(mimetype),-1);
-		mg_response_header_add(conn, "Content-Length", std::to_string(text.size()).c_str(), -1);
-		mg_response_header_send(conn);
+		if(text.empty()) {
 
-		// Send response.
-		mg_write(conn, text.c_str(), text.size());
+			mg_response_header_send(conn);
+
+		} else {
+
+			mg_response_header_add(conn, "Content-Length", std::to_string(text.size()).c_str(), -1);
+			mg_response_header_send(conn);
+			mg_write(conn, text.c_str(), text.size());
+
+		}
 
 		return code;
+
+	} catch( const Udjat::Exception &e ) {
+		debug("-----> ",__FUNCTION__,": ",e.what());
+		message = e.what();
+		code = e.syscode();
 
 	} catch( const std::system_error &e ) {
 		debug("-----> ",__FUNCTION__,": ",e.what());
@@ -281,7 +311,6 @@
 	}
 
 	int http_error_code = HTTP::Exception::code(code);
-	const struct mg_request_info *request_info = mg_get_request_info(conn);
 
 	Logger::String{
 		"Standard 'send' method has failed with exception '",
