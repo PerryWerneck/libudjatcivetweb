@@ -230,6 +230,8 @@
 
 	if(response.not_modified()) {
 
+		debug("------------------------------------> NOT MODIFIED");
+
 		// Not modified
 		if(Logger::enabled(Logger::Trace)) {
 			Logger::String{
