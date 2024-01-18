@@ -65,6 +65,7 @@
 				HTTP::Response response{(MimeType) connection};
 				if(!worker->work(*this,response)) {
 					Logger::String("Request has failed").trace("civetweb");
+					response.failed(ENOENT);
 					return connection.send(response);
 				}
 				return connection.send(response);
@@ -75,6 +76,7 @@
 				HTTP::Report response{(MimeType) connection};
 				if(!worker->work(*this,response)) {
 					Logger::String("Request has failed").trace("civetweb");
+					response.failed(ENOENT);
 					return connection.send(response);
 				}
 				return connection.send(response);
@@ -90,6 +92,7 @@
 					HTTP::Report response{(MimeType) connection};
 					if(!worker->work(*this,response)) {
 						Logger::String("Request has failed").trace("civetweb");
+						response.failed(ENOENT);
 						return connection.send(response);
 					}
 					return connection.send(response);
@@ -105,6 +108,7 @@
 					HTTP::Response response{(MimeType) connection};
 					if(!worker->work(*this,response)) {
 						Logger::String("Request has failed").trace("civetweb");
+						response.failed(ENOENT);
 						return connection.send(response);
 					}
 					return connection.send(response);

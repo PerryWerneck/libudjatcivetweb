@@ -47,14 +47,6 @@
 		CivetWeb::Connection connection{conn};
 		return CivetWeb::Request{conn}.exec(connection);
 
-	} catch(const HTTP::Exception &e) {
-		debug("-----> ",__FUNCTION__,": ",e.what());
-		return send(conn, HTTP::Response{MimeTypeFactory(conn)}.failed(e));
-
-	} catch(const system_error &e) {
-		debug("-----> ",__FUNCTION__,": ",e.what());
-		return send(conn, HTTP::Response{MimeTypeFactory(conn)}.failed(e));
-
 	} catch(const exception &e) {
 		debug("-----> ",__FUNCTION__,": ",e.what());
 		return send(conn, HTTP::Response{MimeTypeFactory(conn)}.failed(e));

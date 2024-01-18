@@ -82,11 +82,8 @@
 		<Unit filename="src/library/response.cc" />
 		<Unit filename="src/library/server.cc" />
 		<Unit filename="src/library/value.cc" />
-		<Unit filename="src/module/api.cc" />
 		<Unit filename="src/module/connection.cc" />
 		<Unit filename="src/module/custom.cc" />
-		<Unit filename="src/module/error_page.cc" />
-		<Unit filename="src/module/handler.cc" />
 		<Unit filename="src/module/handlers/favicon.cc" />
 		<Unit filename="src/module/handlers/icons.cc" />
 		<Unit filename="src/module/handlers/images.cc" />

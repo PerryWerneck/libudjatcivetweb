@@ -31,7 +31,9 @@
  #include <udjat/tools/http/icon.h>
  #include <udjat/tools/file.h>
  #include <udjat/tools/configuration.h>
+ #include <udjat/tools/string.h>
  #include <udjat/tools/application.h>
+ #include <udjat/tools/http/timestamp.h>
 
  #ifdef HAVE_UNISTD_H
 	#include <unistd.h>
@@ -70,6 +72,31 @@
 		child.set(value,type);
 		debug("Response value set to '",child.to_string(),"'");
 		return child;
+	}
+
+	void HTTP::Response::for_each(const std::function<void(const char *header_name, const char *header_value)> &call) const noexcept {
+
+		Abstract::Response::for_each(call);
+
+		// https://stackoverflow.com/questions/3715981/what-s-the-best-restful-method-to-return-total-number-of-items-in-an-object
+		if(total_count) {
+			call("X-Total-Count",std::to_string(total_count).c_str());
+		}
+
+		if(range.total) {
+			call("Content-Range",Udjat::String{"items ",range.from,"-",range.to,"/",range.total}.c_str());
+		}
+
+	}
+
+	void HTTP::Response::count(size_t value) noexcept {
+		total_count = value;
+	}
+
+	void HTTP::Response::content_range(size_t from, size_t to, size_t total) noexcept {
+		range.from = from;
+		range.to = to;
+		range.total = total;
 	}
 
 	Udjat::Value & HTTP::Response::append(const Type) {

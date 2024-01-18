@@ -235,7 +235,7 @@
 
 		if(code < 200 || code > 299) {
 
-			// It's an error, log it, ignore cache and test for an alternative text output.
+			// It's an error, log it
 
 			const struct mg_request_info *request_info = mg_get_request_info(conn);
 
@@ -246,35 +246,13 @@
 				std::to_string(code)," - ",response.message()," (Error ",std::to_string(response.status_code()),")"
 			}.warning("civetweb");
 
-			mg_response_header_add(conn, "Cache-Control", "no-cache, no-store, must-revalidate, private, max-age=0", -1);
-			mg_response_header_add(conn, "Expires", "0", -1);
-
-		} else {
-
-			// It's not an error, setup cache
-			time_t now = time(0);
-
-			time_t modtime = response.last_modified();
-			if(!modtime) {
-				modtime = now;
-			}
-			mg_response_header_add(conn, "Last-Modified", HTTP::TimeStamp{modtime}.to_string().c_str(), -1);
-
-			time_t expires = response.expires();
-			if(expires && expires >= now) {
-
-				// https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
-				mg_response_header_add(conn, "Cache-Control", String{"max-age=",(unsigned int) (now-expires),", must-revalidate, private"}.c_str(), -1);
-				mg_response_header_add(conn, "Expires", HTTP::TimeStamp{expires}.to_string().c_str(), -1);
-
-			} else {
-
-				mg_response_header_add(conn, "Cache-Control", "no-cache, no-store, must-revalidate, private, max-age=0", -1);
-				mg_response_header_add(conn, "Expires", "0", -1);
-
-			}
-
 		}
+
+		// Setup headers
+		response.for_each([conn](const char *header_name, const char *header_value){
+			debug(header_name,"='",header_value,"'");
+			mg_response_header_add(conn, header_name, header_value, -1);
+		});
 
 		mg_response_header_add(conn, "Content-Type",std::to_string(mimetype),-1);
 		mg_response_header_add(conn, "Content-Length", std::to_string(text.size()).c_str(), -1);
@@ -327,8 +305,6 @@
 	mg_response_header_add(conn, "Cache-Control", "no-cache, no-store, must-revalidate, private, max-age=0", -1);
 	mg_response_header_add(conn, "Expires", "0", -1);
 	mg_response_header_send(conn);
-
-	//mg_send_http_error(conn, HTTP::Exception::code(code), message.c_str());
 
 	debug("Returning error ",http_error_code);
 
