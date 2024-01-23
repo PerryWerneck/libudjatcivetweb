@@ -49,7 +49,7 @@
 
 	bool HTTP::Value::for_each(const std::function<bool(const char *name, const Udjat::Value &value)> &call) const {
 
-		for(const auto [key, value] : children)	{
+		for(const auto & [key, value] : children)	{
 			if(call(key.c_str(),*value)) {
 				return true;
 			}
