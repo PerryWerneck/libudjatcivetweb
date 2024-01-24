@@ -32,6 +32,7 @@
  #include <udjat/tools/logger.h>
  #include <udjat/tools/string.h>
  #include <udjat/tools/worker.h>
+ #include <udjat/module/abstract.h>
  #include <unistd.h>
 
  #include <private/module.h>
@@ -264,22 +265,35 @@
 					ports[ix].port
 				};
 
-				string apiversion{"1.0"};
-
 				Logger::String{"Listening on ",baseref}.info("civetweb");
 
 				if(Logger::enabled(Logger::Trace)) {
 
-					Udjat::Worker::for_each([&baseref,&apiversion](const Worker &worker){
+#ifdef HAVE_LIBSSL
+					Logger::String{"Public key available on ",baseref,"/pubkey.pem"}.write(Logger::Trace,"civetweb");
+					if(Config::Value<bool>{"oauth2","enable-internal",false}) {
+						Logger::String{"OAuth2 service available on ",baseref,"/oauth2"}.write(Logger::Trace,"civetweb");
+					}
+#endif // HAVE_LIBSSL
 
+					baseref += "/api/";
+					baseref += Config::Value<string>{"http","apiversion",PACKAGE_VERSION};
+					baseref += "/";
+
+					Udjat::Worker::for_each([&baseref](const Worker &worker){
 						if(!strcasecmp(worker.c_str(),"agent")) {
-							Logger::String{"Application state available on ",baseref,"/api/",apiversion,"/agent"}.trace("civetweb");
+							Logger::String{"Application state available on ",baseref,"agent"}.trace("civetweb");
 							return true;
 						}
-
 						return false;
-
 					});
+
+					Udjat::Module::for_each([&baseref](const Udjat::Module &module){
+						module.trace_paths(baseref.c_str());
+						return false;
+					});
+
+					/*
 
 					auto module = Udjat::Module::find("information");
 					String options;
@@ -288,13 +302,7 @@
 							Logger::String{"Service info available on ",baseref,"/api/",apiversion,"/info/",option.c_str()}.write(Logger::Trace,"civetweb");
 						}
 					}
-
-#ifdef HAVE_LIBSSL
-					Logger::String{"Public key available on ",baseref,"/pubkey.pem"}.write(Logger::Trace,"civetweb");
-					if(Config::Value<bool>{"oauth2","enable-internal",false}) {
-						Logger::String{"OAuth2 service available on ",baseref,"/oauth2"}.write(Logger::Trace,"civetweb");
-					}
-#endif // HAVE_LIBSSL
+					*/
 
 				}
 
