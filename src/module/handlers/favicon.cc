@@ -103,7 +103,7 @@
 		}
 
 	} catch(const HTTP::Exception &e) {
-		return http_error(conn, e.codes().http, e.what());
+		return http_error(conn, e.code(), e.what());
 
 	} catch(const system_error &e) {
 		return http_error(conn, HTTP::Exception::code(e), e.what());

@@ -19,6 +19,7 @@
 
  #include <config.h>
  #include <udjat/civetweb.h>
+ #include <private/request.h>
  #include <udjat/tools/http/handler.h>
  #include <udjat/tools/http/request.h>
  #include <udjat/tools/intl.h>
@@ -41,7 +42,7 @@
 
 		return handler.handle(
 			connection,
-			HTTP::Request{ri->local_uri,ri->request_method},
+			CivetWeb::Request{conn},
 			(MimeType) connection
 		);
 

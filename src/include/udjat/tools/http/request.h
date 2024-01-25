@@ -75,10 +75,18 @@
 			bool authenticated() const noexcept override;
 
 			/// @brief The client address.
-			virtual String address() const;
+			virtual String address() const = 0;
+
+			bool for_each(const std::function<bool(const char *name, const char *value)> &call) const override;
 
 			/// @brief HTTP cookie.
 			virtual String cookie(const char *name) const;
+
+			bool getProperty(const char *key, std::string &value) const override;
+
+			/// @brief Get HTTP header value.
+			virtual const char * header(const char *name) const noexcept = 0;
+
 
 		};
 

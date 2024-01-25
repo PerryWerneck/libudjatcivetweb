@@ -84,11 +84,34 @@
 		return Udjat::Request::path();
 	}
 
+	const char * HTTP::Request::header(const char *) const noexcept {
+		return "";
+	}
+
+	bool HTTP::Request::getProperty(const char *key, std::string &value) const {
+
+		if(!strcasecmp(key,"client-address")) {
+			value = address();
+			return true;
+		}
+
+		return Udjat::Request::getProperty(key,value);
+	}
+
+	bool HTTP::Request::for_each(const std::function<bool(const char *name, const char *value)> &call) const {
+
+		if(call("client-address",address().c_str())) {
+			return true;
+		}
+
+		return Udjat::Request::for_each(call);
+	}
+
 	static inline bool decrypt(const HTTP::Request &request, HTTP::Request::Token &token) {
 
 		// Check for authorization header.
 		{
-			String b64 = request.getProperty("Authorization");
+			String b64 = request.header("Authorization");
 			if(!b64.empty() && b64.has_prefix("Bearer ",true) && HTTP::KeyPair::getInstance().decrypt(b64.c_str()+7,&token,sizeof(token))) {
 				debug("Got authentication from header");
 				return true;
@@ -179,7 +202,7 @@
 
 	bool HTTP::Request::cached(const Udjat::TimeStamp &timestamp) const {
 
-		HTTP::TimeStamp	reqtime{getProperty("If-Modified-Since","").c_str()};
+		HTTP::TimeStamp	reqtime{header("If-Modified-Since")};
 
 		if(reqtime && ((time_t) reqtime) >= ((time_t) timestamp)) {
 			return true;

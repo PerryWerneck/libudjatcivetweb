@@ -50,7 +50,7 @@
 			// debug("Authorization:",getProperty("Authorization"));
 
 			// https://github.com/civetweb/civetweb/blob/master/examples/embedded_c/embedded_c.c
-			if(!strcasecmp(getProperty("Content-Type").c_str(),"application/x-www-form-urlencoded")) {
+			if(!strcasecmp(header("Content-Type"),"application/x-www-form-urlencoded")) {
 
 				// https://github.com/civetweb/civetweb/blob/master/examples/embedded_c/embedded_c.c#L466
 				struct InputParser {
@@ -100,6 +100,18 @@
 		}
 
 		String Request::address() const {
+
+			for(int header = 0; header < info->num_headers; header++) {
+				if(!strcasecmp(info->http_headers[header].name,"X-Forwarded-For")) {
+					String proxy{info->http_headers[header].value};
+					auto separator = proxy.find(',');
+					if(separator != string::npos) {
+						proxy.resize(separator);
+					}
+					return proxy;
+				}
+			}
+
 			return info->remote_addr;
 		}
 
@@ -122,7 +134,7 @@
 
 		MimeType Request::mimetype() const noexcept {
 
-			for(String &value : getProperty("accept").split(",")) {
+			for(String &value : String{header("accept")}.split(",")) {
 				auto mime = MimeTypeFactory(value.c_str(),MimeType::custom);
 				if(mime != MimeType::custom) {
 					return mime;
@@ -132,6 +144,55 @@
 			return MimeType::custom;
 		}
 
+		const char * Request::header(const char *name) const noexcept {
+
+			for(int header = 0; header < info->num_headers; header++) {
+				if(!strcasecmp(info->http_headers[header].name,name)) {
+					return info->http_headers[header].value;
+				}
+			}
+
+			return "";
+		}
+
+		bool Request::for_each(const std::function<bool(const char *name, const char *value)> &call) const {
+
+			// First check parsed value (from post, put & cia.
+			if(!values.empty()) {
+				for(const auto& [name, value] : values) {
+					if(call(name.c_str(),value.c_str())) {
+						return true;
+					}
+				}
+			}
+
+			// Then, check parent values
+			if(HTTP::Request::for_each(call)) {
+				return true;
+			}
+
+			// Last, check for headers.
+			for(int header = 0; header < info->num_headers; header++) {
+				if(call(info->http_headers[header].name,info->http_headers[header].value)) {
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+		bool Request::getProperty(const char *key, std::string &value) const {
+
+			auto it = values.find(key);
+			if(it != values.end()) {
+				value = it->second;
+				return true;
+			}
+
+			return HTTP::Request::getProperty(key,value);
+		}
+
+		/*
  		String Request::getProperty(const char *name, const char *def) const {
 
  			for(int header = 0; header < info->num_headers; header++) {
@@ -154,6 +215,7 @@
 			return HTTP::Request::getArgument(name,def);
 
 		}
+		*/
 
 	}
 

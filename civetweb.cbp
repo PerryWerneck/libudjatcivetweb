@@ -44,7 +44,6 @@
 		</Linker>
 		<Unit filename="conf/50-civetweb.conf" />
 		<Unit filename="src/include/config.h" />
-		<Unit filename="src/include/private/authtoken.h" />
 		<Unit filename="src/include/private/connection.h" />
 		<Unit filename="src/include/private/module.h" />
 		<Unit filename="src/include/private/request.h" />

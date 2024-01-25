@@ -42,9 +42,14 @@
 			Request(struct mg_connection *conn);
 
 			const char *c_str() const noexcept override;
-			String getProperty(const char *name, const char *def = "") const override;
+
 			const char * query(const char *def = "") const override;
-			String getArgument(const char *name, const char *def = "") const override;
+
+			bool for_each(const std::function<bool(const char *name, const char *value)> &call) const override;
+
+			bool getProperty(const char *key, std::string &value) const override;
+
+			const char * header(const char *name) const noexcept override;
 
 			MimeType mimetype() const noexcept;
 

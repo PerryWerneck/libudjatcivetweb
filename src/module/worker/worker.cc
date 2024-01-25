@@ -231,7 +231,7 @@
 
 					cout << "civetweb\tServer response was '" << info->status_code << " " << info->status_text << "'" << endl;
 
-					throw HTTP::Exception(info->status_code, url().c_str(), info->status_text);
+					throw HTTP::Exception(info->status_code, info->status_text);
 
 				}
 

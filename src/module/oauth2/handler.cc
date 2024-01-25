@@ -83,10 +83,10 @@
 
 			if(!strcasecmp(key,"login_message")) {
 				value = context.message;
-			} else {
-				value = request.getArgument(key);
 			}
-			return true;
+
+			return request.getProperty(key,value);
+
         });
 
         mg_response_header_start(conn, 200);

@@ -94,7 +94,7 @@
 
 		// Check for authorization
 		{
-			String token = request.getProperty("Authorization");
+			String token = request.Abstract::Object::getProperty("Authorization","");
 			if(!token.empty() && token.has_prefix("Bearer ",true) && decrypt(token.c_str()+7)) {
 				debug("Got user fron 'Authorization' header");
 				return;

@@ -24,6 +24,7 @@
  #include <config.h>
  #include <udjat/defs.h>
  #include <udjat/tools/request.h>
+ #include <udjat/tools/abstract/object.h>
  #include <udjat/tools/http/request.h>
  #include <udjat/tools/http/response.h>
  #include <udjat/tools/http/report.h>
@@ -84,7 +85,7 @@
 
 		case Worker::Both:
 			{
-				size_t output_format = getArgument("output-format","detailed").select("list","combined",nullptr);
+				size_t output_format = Abstract::Object::getProperty("output-format","detailed").select("list","combined",nullptr);
 
 				if(connection == MimeType::csv || output_format == 0) {
 
@@ -127,6 +128,7 @@
 		return "";
 	}
 
+	/*
 	String HTTP::Request::address() const {
 
 		String proxy{getProperty("X-Forwarded-For")};
@@ -141,5 +143,6 @@
 
 		return "";
 	}
+	*/
 
  }
