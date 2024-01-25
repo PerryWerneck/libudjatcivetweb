@@ -135,29 +135,42 @@
 		return children[name];
 	}
 
-	std::string HTTP::Response::to_string() const {
+	std::string HTTP::Response::to_string() const noexcept {
 
-		if(mimetype == MimeType::svg) {
+		try {
 
-			// It's an svg
-			HTTP::Icon icon;
+			if(mimetype == MimeType::svg) {
 
-			for_each([&icon](const char *, const Udjat::Value &value){
-				if(value == Value::Icon) {
-					icon = HTTP::Icon::getInstance(value.to_string());
-					return (bool) icon;
+				// It's an svg
+				HTTP::Icon icon;
+
+				for_each([&icon](const char *, const Udjat::Value &value){
+					if(value == Value::Icon) {
+						icon = HTTP::Icon::getInstance(value.to_string());
+						return (bool) icon;
+					}
+					return false;
+
+				});
+
+				if(!icon) {
+					throw system_error(ENOENT,system_category(),"No icon here");
 				}
-				return false;
 
-			});
+				debug("Sending icon '",icon.c_str(),"'");
 
-			if(!icon) {
-				throw system_error(ENOENT,system_category(),"No icon here");
+				return string{File::Text{icon.c_str()}.c_str()};
+
 			}
 
-			debug("Sending icon '",icon.c_str(),"'");
 
-			return string{File::Text{icon.c_str()}.c_str()};
+		} catch(const std::exception &e) {
+
+			return e.what();
+
+		} catch(...) {
+
+			return _( "Unexpected error converting value" );
 
 		}
 

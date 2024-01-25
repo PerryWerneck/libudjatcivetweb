@@ -78,13 +78,17 @@
 				time_t expiration_time = 0;
 				uint32_t scopes = 7;
 #ifdef _WIN32
+				union {
+					in_addr v4;		// https://learn.microsoft.com/en-us/windows/win32/api/winsock2/ns-winsock2-in_addr
+					in6_addr v6;	// https://learn.microsoft.com/en-us/previous-versions/windows/desktop/legacy/ms738560(v=vs.85)
+				} ip;
 #else
 				uint32_t uid = (uint32_t) (-1);
-#endif // _WIN32
 				union {
 					in_addr_t v4;
 					struct in6_addr v6;
 				} ip;
+#endif // _WIN32
 
 			} data;
 			#pragma pack()

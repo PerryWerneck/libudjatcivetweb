@@ -62,7 +62,7 @@
 			/// @return true if the string
 			static std::string to_string(const Udjat::Abstract::Response &response, const MimeType mimetype);
 
-			std::string to_string() const override;
+			std::string to_string() const noexcept override;
 
 			/// @brief Enumerate headers.
 			void for_each(const std::function<void(const char *header_name, const char *header_value)> &call) const noexcept;
