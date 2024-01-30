@@ -27,8 +27,13 @@
  #include <udjat/tools/logger.h>
  #include <udjat/tools/configuration.h>
 
- #include <sys/socket.h>
- #include <netinet/in.h>
+ #ifdef _WIN32
+	#include <winsock2.h>
+	#include <windows.h>
+ #else
+	#include <sys/socket.h>
+	#include <netinet/in.h>
+ #endif // _WIN32
 
  namespace Udjat {
 
@@ -48,6 +53,11 @@
 		String req_addr{request.address()};
 		sockaddr_storage addr;
 
+#ifdef _WIN32
+
+		// TODO: Implement win32 addr translation.
+
+#else
 		if(inet_pton(AF_INET,req_addr.c_str(),&((struct sockaddr_in *) &addr)->sin_addr) == 1) {
 			data.type |= 0x04;
 			data.ip.v4 = ((struct sockaddr_in *) &addr)->sin_addr.s_addr;
@@ -58,6 +68,7 @@
 			memset(&data.ip,0,sizeof(data.ip));
 			Logger::String{"Cant identify address '",req_addr.c_str(),"'"}.warning("oauth");
 		}
+#endif // _WIN32
 
 	}
 
@@ -84,10 +95,17 @@
 				return false;
 			}
 
+#ifdef _WIN32
+			if(data.type == 0x14 && memcmp(&data.ip.v4,&this->data.ip.v4,sizeof(data.ip.v4))) {
+				Logger::String{"Rejecting client token by IPV4 mismatch"}.trace("oauth2");
+				return false;
+			}
+#else
 			if(data.type == 0x14 && data.ip.v4 != this->data.ip.v4) {
 				Logger::String{"Rejecting client token by IPV4 mismatch"}.trace("oauth2");
 				return false;
 			}
+#endif // _WIN32
 
 			if(data.type == 0x16 && memcmp(&data.ip.v6,&this->data.ip.v6,sizeof(this->data.ip.v6))) {
 				Logger::String{"Rejecting client token by IPV6 mismatch"}.trace("oauth2");

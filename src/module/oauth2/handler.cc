@@ -85,8 +85,42 @@
 				value = context.message;
 			}
 
-			return request.getProperty(key,value);
+			if(!strcasecmp(key,"domain")) {
+				value = Config::Value<std::string>{"oauth2","domain",""};
+			}
 
+			if(request.getProperty(key,value)) {
+				return true;
+			}
+
+			{
+				Config::Value<std::string> config{"oauth2",key,""};
+				if(!config.empty()) {
+					value = config;
+					return true;
+				}
+			}
+
+			if(!strcasecmp(key,"css-name")) {
+
+				value = Config::Value<std::string>{"theme","httpd",""};
+
+				if(value.empty()) {
+					value = Application::Name();
+					value += "/css/style.css";
+				}
+
+				return true;
+			}
+
+			if(!strcasecmp(key,"login-title")) {
+				value = Config::Value<std::string>{"theme","login-title",""};
+				if(value.empty()) {
+					value = _("Access to ${client_id}");
+				}
+			}
+
+			return false;
         });
 
         mg_response_header_start(conn, 200);

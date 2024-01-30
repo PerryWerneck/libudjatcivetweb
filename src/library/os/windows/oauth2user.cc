@@ -33,6 +33,7 @@
  #include <udjat/tools/application.h>
  #include <udjat/tools/intl.h>
  #include <cstring>
+ #include <udjat/win32/exception.h>
 
  #include <windows.h>
 
@@ -40,6 +41,75 @@
  using namespace Udjat;
 
  namespace Udjat {
+
+	bool HTTP::Request::get(Request::Token &token) const noexcept {
+
+		try {
+
+			if(!decrypt(token)) {
+				return false;
+			}
+
+			if(token.expiration_time < time(0)) {
+				Logger::String{"Rejecting expired authentication token"}.error("civetweb");
+				return false;
+			}
+
+			String req_addr{address()};
+			sockaddr_storage addr;
+
+			// TODO: Decode win32 adresses.
+
+			/*
+			if(inet_pton(AF_INET,req_addr.c_str(),&((struct sockaddr_in *) &addr)->sin_addr) == 1) {
+
+				if( (token.type & 0x0F) != 4) {
+					Logger::String{"Rejecting authentication token by network type"}.error("civetweb");
+					return false;
+				}
+
+				if(token.ip.v4 != ((struct sockaddr_in *) &addr)->sin_addr.s_addr) {
+					Logger::String{"Rejecting authentication token by IPV4 network address"}.error("civetweb");
+					return false;
+				}
+
+			} else if(inet_pton(AF_INET6,req_addr.c_str(),&((struct sockaddr_in6 *) &addr)->sin6_addr) == 1) {
+
+				if( (token.type & 0x0F) != 6) {
+					Logger::String{"Rejecting authentication token by network type"}.error("civetweb");
+					return false;
+				}
+
+				if(memcmp(&token.ip.v6,&((struct sockaddr_in6 *) &addr)->sin6_addr,sizeof(token.ip.v6))) {
+					Logger::String{"Rejecting authentication token by IPV6 network address"}.error("civetweb");
+					return false;
+				}
+
+			} else {
+
+				if( (token.type & 0x0F) != 0) {
+					Logger::String{"Cant identify address '",req_addr.c_str(),"', rejecting authentication token"}.error("civetweb");
+					return false;
+				};
+
+			}
+			*/
+
+			return true;
+
+		} catch(const std::exception &e) {
+
+			Logger::String{"Error checking authentication: ",e.what()}.error("civetweb");
+
+		} catch(...) {
+
+			Logger::String{"Unexpected error checking authentication"}.error("civetweb");
+
+		}
+
+		return false;
+
+	}
 
 	void OAuth::User::set(HTTP::Request &request) {
 
@@ -49,6 +119,9 @@
 
 		debug("Building user info from ",req_addr.c_str()," request");
 
+		// TODO: Decode win32 addresses
+
+		/*
 		if(inet_pton(AF_INET,req_addr.c_str(),&((struct sockaddr_in *) &addr)->sin_addr) == 1) {
 			data.type |= 0x04;
 			data.ip.v4 = ((struct sockaddr_in *) &addr)->sin_addr.s_addr;
@@ -59,6 +132,7 @@
 			memset(&data.ip,0,sizeof(data.ip));
 			Logger::String{"Cant identify address '",req_addr.c_str(),"'"}.warning("oauth");
 		}
+		*/
 
 		// Check for authorization
 		{
@@ -86,7 +160,6 @@
 	bool OAuth::User::authenticate(HTTP::Request &request, std::string &message) {
 
 		message = _("Access Denied");
-		data.uid = (unsigned int) -1;
 
 		String username{request["username"]};
 		if(username.empty()) {
@@ -103,8 +176,43 @@
 			return false;
 		}
 
-		// No authentication module
-		message = strerror(ENOTSUP);
+		Config::Value<std::string> domain{"oauth2","domain",""};
+
+		DWORD dwLogonType;
+
+		{
+			static DWORD types[] = {
+				LOGON32_LOGON_BATCH,
+				LOGON32_LOGON_INTERACTIVE,
+				LOGON32_LOGON_NETWORK,
+				LOGON32_LOGON_SERVICE
+			};
+
+			int lt = Config::Value<string>{"oauth2","logon-type","network"}.select("batch","interactive","network","service",nullptr);
+			if(lt < 0 || lt > N_ELEMENTS(types)) {
+				throw runtime_error("Invalid oauth2 logon type, check configuration");
+			}
+
+			dwLogonType = types[lt];
+		}
+
+		HANDLE hToken = 0;
+
+		if(LogonUser(
+			username.c_str(),
+			(domain.empty() ? NULL : TEXT(domain.c_str())),
+			password.c_str(),
+			dwLogonType,
+			LOGON32_PROVIDER_DEFAULT,
+			&hToken
+		)) {
+
+			CloseHandle(hToken);
+
+			return true;
+		}
+
+		Logger::String{Win32::Exception::format("LogonUser has failed")}.error("oauth2");
 
 		return false;
 	}
@@ -118,5 +226,15 @@
 
 	}
 
+	bool OAuth::User::get(Udjat::Value &value) {
+
+		if(!*this) {
+			return false;
+		}
+
+		// TODO: Get win32 user info
+
+		return false;
+	}
 
  }

@@ -33,7 +33,9 @@
  #include <string>
 
  #ifdef _WIN32
+	#include <winsock2.h>
 	#include <windows.h>
+	#include <in6addr.h>
  #else
 	#include <sys/types.h>
 	#include <pwd.h>
@@ -123,14 +125,17 @@
 				uint16_t scope = 0x000F;
 				char username[40] = "";
 #ifdef _WIN32
-
+				union {
+					in_addr v4;		// https://learn.microsoft.com/en-us/windows/win32/api/winsock2/ns-winsock2-in_addr
+					in6_addr v6;	// https://learn.microsoft.com/en-us/previous-versions/windows/desktop/legacy/ms738560(v=vs.85)
+				} ip;
 #else
 				unsigned int uid = (unsigned int) -1;
-#endif // _WIN32
 				union {
 					in_addr_t v4;
 					struct in6_addr v6;
 				} ip;
+#endif // _WIN32
 
 			} data;
 			#pragma pack()

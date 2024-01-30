@@ -107,11 +107,13 @@
 		return Udjat::Request::for_each(call);
 	}
 
-	static inline bool decrypt(const HTTP::Request &request, HTTP::Request::Token &token) {
+	bool HTTP::Request::decrypt(HTTP::Request::Token &token) const {
+
+		memset(&token,0,sizeof(token));
 
 		// Check for authorization header.
 		{
-			String b64 = request.header("Authorization");
+			String b64 = header("Authorization");
 			if(!b64.empty() && b64.has_prefix("Bearer ",true) && HTTP::KeyPair::getInstance().decrypt(b64.c_str()+7,&token,sizeof(token))) {
 				debug("Got authentication from header");
 				return true;
@@ -120,7 +122,7 @@
 
 		// Check for cookie.
 		{
-			String b64 = request.cookie((Application::Name() + "-session").c_str());
+			String b64 = cookie((Application::Name() + "-session").c_str());
 			if(!b64.empty() && HTTP::KeyPair::getInstance().decrypt(b64.c_str(),&token,sizeof(token))) {
 				debug("Got authentication from cookie");
 				return true;
@@ -133,71 +135,6 @@
 	bool HTTP::Request::authenticated() const noexcept {
 		Token token;
 		return get(token);
-	}
-
-	bool HTTP::Request::get(Request::Token &token) const noexcept {
-
-		try {
-
-			if(!decrypt(*this,token)) {
-				return false;
-			}
-
-			if(token.expiration_time < time(0)) {
-				Logger::String{"Rejecting expired authentication token"}.error("civetweb");
-				return false;
-			}
-
-			String req_addr{address()};
-			sockaddr_storage addr;
-
-			if(inet_pton(AF_INET,req_addr.c_str(),&((struct sockaddr_in *) &addr)->sin_addr) == 1) {
-
-				if( (token.type & 0x0F) != 4) {
-					Logger::String{"Rejecting authentication token by network type"}.error("civetweb");
-					return false;
-				}
-
-				if(token.ip.v4 != ((struct sockaddr_in *) &addr)->sin_addr.s_addr) {
-					Logger::String{"Rejecting authentication token by IPV4 network address"}.error("civetweb");
-					return false;
-				}
-
-			} else if(inet_pton(AF_INET6,req_addr.c_str(),&((struct sockaddr_in6 *) &addr)->sin6_addr) == 1) {
-
-				if( (token.type & 0x0F) != 6) {
-					Logger::String{"Rejecting authentication token by network type"}.error("civetweb");
-					return false;
-				}
-
-				if(memcmp(&token.ip.v6,&((struct sockaddr_in6 *) &addr)->sin6_addr,sizeof(token.ip.v6))) {
-					Logger::String{"Rejecting authentication token by IPV6 network address"}.error("civetweb");
-					return false;
-				}
-
-			} else {
-
-				if( (token.type & 0x0F) != 0) {
-					Logger::String{"Cant identify address '",req_addr.c_str(),"', rejecting authentication token"}.error("civetweb");
-					return false;
-				};
-
-			}
-
-			return true;
-
-		} catch(const std::exception &e) {
-
-			Logger::String{"Error checking authentication: ",e.what()}.error("civetweb");
-
-		} catch(...) {
-
-			Logger::String{"Unexpected error checking authentication"}.error("civetweb");
-
-		}
-
-		return false;
-
 	}
 
 	bool HTTP::Request::cached(const Udjat::TimeStamp &timestamp) const {

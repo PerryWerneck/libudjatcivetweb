@@ -24,7 +24,9 @@
  #include <udjat/tools/http/connection.h>
 
  #ifdef _WIN32
+	#include <winsock2.h>
 	#include <windows.h>
+	#include <in6addr.h>
  #else
 	#include <sys/types.h>
 	#include <pwd.h>
@@ -47,16 +49,21 @@
 				uint64_t uid = (uint64_t) -1;
 				char username[40] = "";	///< @brief The user name
 #ifdef _WIN32
-
+				union {
+					in_addr v4;		// https://learn.microsoft.com/en-us/windows/win32/api/winsock2/ns-winsock2-in_addr
+					in6_addr v6;	// https://learn.microsoft.com/en-us/previous-versions/windows/desktop/legacy/ms738560(v=vs.85)
+				} ip;
 #else
 				union {
 					in_addr_t v4;
-					struct in6_addr v6;
+					in6_addr v6;
 				} ip;
 #endif // _WIN32
 
 			};
 			#pragma pack()
+
+			bool decrypt(HTTP::Request::Token &token) const;
 
 			Request(const char *path = "", HTTP::Method m = HTTP::Get);
 

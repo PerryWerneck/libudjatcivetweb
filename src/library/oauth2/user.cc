@@ -40,14 +40,13 @@
 		data.expiration_time = time(0) + Config::Value<time_t>("oauth2","expiration-time",86400);
 		data.type = 0x20;
 		data.scope = 0x0f;	// Default scope.
+#ifndef _WIN32
 		data.uid = (unsigned int) -1;
+#endif // _WIN32
 	}
 
 	OAuth::User::User(HTTP::Request &request) : User() {
 		set(request);
-	}
-
-	OAuth::User::~User() {
 	}
 
 	String OAuth::User::encrypt() {
@@ -62,7 +61,9 @@
 
 		token.expiration_time = data.expiration_time;
 		token.scope = data.scope;
+#ifndef _WIN32
 		token.uid = data.uid;
+#endif // _WIN32
 
 		memset(token.username,0,sizeof(token.username));
 		strncpy(token.username,data.username,sizeof(token.username)-1);
@@ -114,10 +115,17 @@
 				return false;
 			}
 
+#ifdef _WIN32
+			if(data.type == 0x14 && memcmp(&data.ip.v4,&this->data.ip.v4,sizeof(data.ip.v4))) {
+				Logger::String{"Rejecting user token by IPV4 mismatch"}.error("oauth2");
+				return false;
+			}
+#else
 			if(data.type == 0x14 && data.ip.v4 != this->data.ip.v4) {
 				Logger::String{"Rejecting user token by IPV4 mismatch"}.error("oauth2");
 				return false;
 			}
+#endif // _WIN32
 
 			if(data.type == 0x16 && memcmp(&data.ip.v6,&this->data.ip.v6,sizeof(this->data.ip.v6))) {
 				Logger::String{"Rejecting user token by IPV6 mismatch"}.error("oauth2");
@@ -130,22 +138,16 @@
 			}
 
 			this->data = data;
+#ifdef _WIN32
+			Logger::String{"Accepting valid user token"}.trace("oauth2");
+#else
 			Logger::String{"Accepting valid user token for uid ",this->data.uid}.trace("oauth2");
+#endif // _WIN32
 
 			return true;
 		}
 
 		return false;
-	}
-
-	bool OAuth::User::get(Udjat::Value &value) {
-
-		if(!*this) {
-			return false;
-		}
-
-		return get(data.uid,data.scope,value);
-
 	}
 
  }

@@ -57,6 +57,74 @@
 		"userinfo", 	// 0x0002
 	};
 
+	bool HTTP::Request::get(Request::Token &token) const noexcept {
+
+		try {
+
+			if(!decrypt(token)) {
+				return false;
+			}
+
+			if(token.expiration_time < time(0)) {
+				Logger::String{"Rejecting expired authentication token"}.error("civetweb");
+				return false;
+			}
+
+			String req_addr{address()};
+			sockaddr_storage addr;
+
+			if(inet_pton(AF_INET,req_addr.c_str(),&((struct sockaddr_in *) &addr)->sin_addr) == 1) {
+
+				if( (token.type & 0x0F) != 4) {
+					Logger::String{"Rejecting authentication token by network type"}.error("civetweb");
+					return false;
+				}
+
+				if(token.ip.v4 != ((struct sockaddr_in *) &addr)->sin_addr.s_addr) {
+					Logger::String{"Rejecting authentication token by IPV4 network address"}.error("civetweb");
+					return false;
+				}
+
+			} else if(inet_pton(AF_INET6,req_addr.c_str(),&((struct sockaddr_in6 *) &addr)->sin6_addr) == 1) {
+
+				if( (token.type & 0x0F) != 6) {
+					Logger::String{"Rejecting authentication token by network type"}.error("civetweb");
+					return false;
+				}
+
+				if(memcmp(&token.ip.v6,&((struct sockaddr_in6 *) &addr)->sin6_addr,sizeof(token.ip.v6))) {
+					Logger::String{"Rejecting authentication token by IPV6 network address"}.error("civetweb");
+					return false;
+				}
+
+			} else {
+
+				if( (token.type & 0x0F) != 0) {
+					Logger::String{"Cant identify address '",req_addr.c_str(),"', rejecting authentication token"}.error("civetweb");
+					return false;
+				};
+
+			}
+
+			return true;
+
+		} catch(const std::exception &e) {
+
+			Logger::String{"Error checking authentication: ",e.what()}.error("civetweb");
+
+		} catch(...) {
+
+			Logger::String{"Unexpected error checking authentication"}.error("civetweb");
+
+		}
+
+		return false;
+
+	}
+
+	OAuth::User::~User() {
+	}
+
 	void OAuth::User::set(HTTP::Request &request) {
 
 		// Setup token from request.
@@ -310,5 +378,14 @@
 
 	}
 
+	bool OAuth::User::get(Udjat::Value &value) {
+
+		if(!*this) {
+			return false;
+		}
+
+		return get(data.uid,data.scope,value);
+
+	}
 
  }

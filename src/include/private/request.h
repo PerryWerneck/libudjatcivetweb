@@ -37,7 +37,6 @@
 			/// @brief Values from form.
 			std::map<std::string,std::string> values;
 
-
 		public:
 			Request(struct mg_connection *conn);
 
