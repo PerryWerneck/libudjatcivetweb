@@ -72,10 +72,10 @@
 		<Unit filename="src/library/oauth2/client.cc" />
 		<Unit filename="src/library/oauth2/signin.cc" />
 		<Unit filename="src/library/oauth2/user.cc" />
-		<Unit filename="src/library/os/linux/icon.cc" />
 		<Unit filename="src/library/os/linux/image.cc" />
-		<Unit filename="src/library/os/windows/icon.cc" />
+		<Unit filename="src/library/os/linux/oauth2user.cc" />
 		<Unit filename="src/library/os/windows/image.cc" />
+		<Unit filename="src/library/os/windows/oauth2user.cc" />
 		<Unit filename="src/library/report.cc" />
 		<Unit filename="src/library/request.cc" />
 		<Unit filename="src/library/response.cc" />
