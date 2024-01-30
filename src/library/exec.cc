@@ -55,7 +55,12 @@
 
 		switch(response_type) {
 		case Worker::None:
-			return connection.send(HTTP::Response{(MimeType) connection}.failed(ENOENT));
+			{
+				HTTP::Response response{(MimeType) connection};
+				response.failed(ENOENT);
+				Logger::String("Request has failed with error ",response.status_code()).trace("civetweb");
+				return connection.send(response);
+			}
 
 		case Worker::Value:
 			{
@@ -65,8 +70,8 @@
 
 				HTTP::Response response{(MimeType) connection};
 				if(!worker->work(*this,response)) {
-					Logger::String("Request has failed").trace("civetweb");
 					response.failed(ENOENT);
+					Logger::String("Request has failed with error ",response.status_code()).trace("civetweb");
 					return connection.send(response);
 				}
 				return connection.send(response);
@@ -76,8 +81,8 @@
 			{
 				HTTP::Report response{(MimeType) connection};
 				if(!worker->work(*this,response)) {
-					Logger::String("Request has failed").trace("civetweb");
 					response.failed(ENOENT);
+					Logger::String("Request has failed with error ",response.status_code()).trace("civetweb");
 					return connection.send(response);
 				}
 				return connection.send(response);
@@ -92,8 +97,8 @@
 					// List
 					HTTP::Report response{(MimeType) connection};
 					if(!worker->work(*this,response)) {
-						Logger::String("Request has failed").trace("civetweb");
 						response.failed(ENOENT);
+						Logger::String("Request has failed with error ",response.status_code()).trace("civetweb");
 						return connection.send(response);
 					}
 					return connection.send(response);
@@ -108,8 +113,8 @@
 					// All others
 					HTTP::Response response{(MimeType) connection};
 					if(!worker->work(*this,response)) {
-						Logger::String("Request has failed").trace("civetweb");
 						response.failed(ENOENT);
+						Logger::String("Request has failed with error ",response.status_code()).trace("civetweb");
 						return connection.send(response);
 					}
 					return connection.send(response);
@@ -120,7 +125,12 @@
 
 		}
 
-		return connection.send(HTTP::Response{(MimeType) connection}.failed(ENOENT));
+		{
+			HTTP::Response response{(MimeType) connection};
+			response.failed(ENOENT);
+			Logger::String("Request has failed with error ",response.status_code()).trace("civetweb");
+			return connection.send(response);
+		}
 
 	}
 

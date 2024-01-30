@@ -126,6 +126,10 @@
 
  }
 
+ /*
+ /// @brief Handler for product requests.
+ int productWebHandler(struct mg_connection *conn, void *cbdata);
+
  /// @brief Handler for icon requests.
  int iconWebHandler(struct mg_connection *conn, void *cbdata);
 
@@ -152,4 +156,4 @@
 
  /// @brief Handler for custom requests.
  int customWebHandler(struct mg_connection *conn, void *cbdata);
-
+ */

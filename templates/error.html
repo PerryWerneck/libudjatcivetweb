@@ -5,18 +5,17 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
 	<meta name="robots" content="noindex, follow" />
 	<title>Error ${code}</title>
+	<link rel="stylesheet" type="text/css" href="${css-name}" />
 </head>
-<body>
-<section style="display:flex">
+<body class="error-body">
 <div>
-<img src="/icon/computer-fail-symbolic" height="64px">
+	<img src="/icon/computer-fail-symbolic">
 </div>
 <div>
-<h1 style="margin:0px 3px 6px 3px">HTTP Error ${code}</h1>
-<p style="margin:0px 3px 6px 3px">${message}</p>
-<p style="margin:0px 3px 6px 3px"><small>${body}</small></p>
+	<h1>HTTP Error ${code}</h1>
+	<p>${message}</p>
+	<p><small>${body}</small></p>
 </div>
-</section>
 </body>
 </html>
 

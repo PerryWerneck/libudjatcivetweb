@@ -132,6 +132,9 @@
  /// @brief Handler for icon requests.
  int iconWebHandler(struct mg_connection *conn, void *cbdata);
 
+ /// @brief Handler for product requests.
+ int productWebHandler(struct mg_connection *conn, void *cbdata) noexcept;
+
  /// @brief Handler for image requests.
  int imageWebHandler(struct mg_connection *conn, void *cbdata);
 

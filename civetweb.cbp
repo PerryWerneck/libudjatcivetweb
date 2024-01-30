@@ -59,6 +59,7 @@
 		<Unit filename="src/include/udjat/tools/http/request.h" />
 		<Unit filename="src/include/udjat/tools/http/response.h" />
 		<Unit filename="src/include/udjat/tools/http/server.h" />
+		<Unit filename="src/include/udjat/tools/http/template.h" />
 		<Unit filename="src/include/udjat/tools/http/value.h" />
 		<Unit filename="src/library/connection.cc" />
 		<Unit filename="src/library/exec.cc" />
@@ -80,12 +81,14 @@
 		<Unit filename="src/library/request.cc" />
 		<Unit filename="src/library/response.cc" />
 		<Unit filename="src/library/server.cc" />
+		<Unit filename="src/library/template.cc" />
 		<Unit filename="src/library/value.cc" />
 		<Unit filename="src/module/connection.cc" />
 		<Unit filename="src/module/custom.cc" />
 		<Unit filename="src/module/handlers/favicon.cc" />
 		<Unit filename="src/module/handlers/icons.cc" />
 		<Unit filename="src/module/handlers/images.cc" />
+		<Unit filename="src/module/handlers/product.cc" />
 		<Unit filename="src/module/handlers/pubkey.cc" />
 		<Unit filename="src/module/handlers/report.cc" />
 		<Unit filename="src/module/handlers/root.cc" />

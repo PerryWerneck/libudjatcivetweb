@@ -82,6 +82,7 @@
 
 	void setHandlers() noexcept {
 		mg_set_request_handler(ctx, "/icon/", iconWebHandler, 0);
+		mg_set_request_handler(ctx, "/" STRINGIZE_VALUE_OF(PRODUCT_NAME) "/", productWebHandler, 0);
 		mg_set_request_handler(ctx, "/image/", imageWebHandler, 0);
 		mg_set_request_handler(ctx, "/favicon.ico", faviconWebHandler, 0);
 
