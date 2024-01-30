@@ -2,14 +2,14 @@
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <perry.werneck@gmail.com>, 2022.
-# Perry Werneck <perry.werneck@gmail.com>, 2022.
+# Perry Werneck <perry.werneck@gmail.com>, 2022-2024.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: udjat-module-httpd 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-12-13 23:38-0300\n"
-"PO-Revision-Date: 2022-11-30 12:19-0300\n"
+"POT-Creation-Date: 2024-01-30 20:06-0300\n"
+"PO-Revision-Date: 2024-01-30 20:11-0300\n"
 "Last-Translator: Perry Werneck <perry.werneck@gmail.com>\n"
 "Language-Team: Brazilian Portuguese <perry.werneck@gmail.com>\n"
 "Language: pt_BR\n"
@@ -20,7 +20,15 @@ msgstr ""
 "X-Poedit-Country: BRAZIL\n"
 "X-Poedit-SourceCharset: utf-8\n"
 "Plural-Forms: nplurals=2; plural=(n > 1)\n"
-"X-Generator: Gtranslator 3.38.0\n"
+"X-Generator: Gtranslator 41.0\n"
+
+#: src/library/oauth2/signin.cc:45 src/library/os/linux/oauth2user.cc:294
+msgid "Access Denied"
+msgstr "Acesso negado"
+
+#: src/module/oauth2/handler.cc:104
+msgid "Access to ${client_id}"
+msgstr "Acesso ${client_id}"
 
 #: src/library/index.cc:71
 msgid "Active agents"
@@ -30,15 +38,60 @@ msgstr "Agentes ativos"
 msgid "Application"
 msgstr "Aplicação"
 
-#: src/module/connection.cc:100
-msgid ""
-"Erro {} ({}) on HTTP request\n"
-"{}\n"
-msgstr ""
+#: src/library/os/linux/oauth2user.cc:271
+msgid "Invalid username"
+msgstr "Usuário inválido"
 
-#: src/library/request.cc:45 src/module/connection.cc:49
+#: src/module/handlers/product.cc:88 src/module/handlers/icons.cc:65
+#: src/module/handlers/favicon.cc:119
+msgid "Not available"
+msgstr "Não disponível"
+
+#: src/module/oauth2/handler.cc:124
+msgid "Password"
+msgstr "Senha"
+
+#: src/library/os/linux/oauth2user.cc:308
+msgid "Please, inform password"
+msgstr "Informe a senha de acesso"
+
+#: src/library/os/linux/oauth2user.cc:299
+msgid "Please, inform username"
+msgstr "Informe o nome de usuário"
+
+#: src/library/request.cc:45
 msgid "Request path should be /api/[APIVER]/[REQUEST]"
-msgstr ""
+msgstr "Requisições devem ser no formato /api/[VERSÃO]/RECURSO"
+
+#: src/module/connection.cc:63
+msgid "Request path should be /api/{}/[REQUEST]"
+msgstr "Requisição deve ser /api/{}/[RECURSO]"
+
+#: src/module/oauth2/handler.cc:114
+msgid "Sign in"
+msgstr "Acessar"
+
+#: src/module/send.cc:310 src/module/handlers/root.cc:56
+#: src/module/handlers/pubkey.cc:72 src/module/handlers/images.cc:80
+#: src/module/handlers/icons.cc:86 src/module/oauth2/handler.cc:290
+msgid "Unexpected error"
+msgstr "Erro inesperado"
+
+#: src/module/custom.cc:74
+msgid "Unexpected error on http handler"
+msgstr "Erro inesperado no controlador http"
+
+#: src/library/response.cc:228
+msgid "Unexpected error processing response text"
+msgstr "Erro inesperado ao processar o texto da resposta"
+
+#: src/module/handlers/pubkey.cc:78
+msgid "Unsupported"
+msgstr "Não suportado"
+
+#: src/module/oauth2/handler.cc:119
+msgid "Username"
+msgstr "Usuário"
 
 #: src/library/index.cc:123
 msgid "Workers"
