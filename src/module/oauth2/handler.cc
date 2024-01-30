@@ -147,9 +147,20 @@
 	CivetWeb::Request request{conn};
 	MimeType mimetype{request.mimetype()};
 
+	request.pop();	// Remove '/oauth2'
+
 	int code = 500;				///< @brief The HTTP return code.
 	OAuth::Context context;		///< @brief The Current context.
 	context.expiration_time = time(0) + 86400;
+
+	if(!*request.path()) {
+		Logger::String{"Empty html request, sending login page"}.info("oauth2");
+		OAuth::User{request}.get(context);
+		context.message.clear();
+		return login_page(conn,request,context);
+	}
+
+	debug("------------------> '",request.path(),"'");
 
 	try {
 

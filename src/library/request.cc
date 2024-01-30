@@ -37,40 +37,17 @@
 
 	HTTP::Request::Request(const char *path, HTTP::Method method) : Udjat::Request{path, method} {
 
-		if(reqpath && *reqpath) {
+		if(reqpath && *reqpath && !strncasecmp(reqpath,"/api/",5)) {
 
-			if(strncasecmp(reqpath,"/api/",5) && Config::Value<bool>("httpd","allow-legacy-path",true)) {
+			// Is an standard API request, extract version.
 
-				// Parse as legacy request
-				const char *next = strchr(reqpath+1,'/');
-				if(!next) {
-					throw system_error(
-								ENOENT,system_category(),
-								Logger::Message{
-									_("Request path should be /api/{}/[REQUEST]"),
-									Config::Value<string>{"http","apiver","[APIVER]"}.c_str()
-								}
-							);
+			reqpath += 5;
+			while(*reqpath && *reqpath != '/') {
+				if(isdigit(*reqpath)) {
+					apiver *= 10;
+					apiver += ('0' - *reqpath);
 				}
-
-				reqpath = next;
-
-				// TODO: Check if the first path element is the same as mimetype
-
-			} else {
-
-				// Is an standard API request, extract version.
-
-				reqpath += 5;
-
-				while(*reqpath && *reqpath != '/') {
-					if(isdigit(*reqpath)) {
-						apiver *= 10;
-						apiver += ('0' - *reqpath);
-					}
-					reqpath++;
-				}
-
+				reqpath++;
 			}
 
 		}
