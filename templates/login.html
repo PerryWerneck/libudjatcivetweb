@@ -5,20 +5,20 @@
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
 	<meta name="robots" content="noindex, follow" />
-	<link rel="stylesheet" type="text/css" href="/${css-name}" />  
+	<link rel="stylesheet" type="text/css" href="${css-name}" />  
 </head>
 <body class="login-body">
-  <form action="signin" method="post" style="padding:1em 1em 7em 1em;">
+  <form action="signin" method="post">
   	<div>
-		<h3>${login-title}</h3>
-		<p><label>Username: <input type="text" name="username" placeholder="name" value="${username}"></label></p>
-		<p><label>Password: <input type="Password" placeholder="password" name="password"></label></p>
+		<h1>${login-title}</h1>
+		<p><label for="username">${user-label}</label><input type="text" id="username" name="username" placeholder="name" value="${username}"></label>
+		<p><label for="password">${password-label}</label><input type="Password" id="password" placeholder="password" name="password"></p>
 		<input type="hidden" name="client_id" value="${client_id}">
 		<input type="hidden" name="redirect_uri" value="${redirect_uri}">
 		<input type="hidden" name="response_type" value="${response_type}">
 		<input type="hidden" name="state" value="${state}">
-		<p>${login_message}</p>
-		<p><input type="submit" value="Sign in"></p>
+		<p>${login-message}</p>
+		<p class="login-buttons"><input type="submit" value="${login-button}"></p>
 	</div>
   </form>
 </body>

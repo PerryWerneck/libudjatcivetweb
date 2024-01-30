@@ -40,6 +40,7 @@
  #include <udjat/tools/logger.h>
  #include <udjat/tools/configuration.h>
  #include <udjat/tools/application.h>
+ #include <udjat/tools/http/template.h>
 
 #ifdef HAVE_LIBSSL
 
@@ -70,23 +71,21 @@
 
  static int login_page(struct mg_connection *conn, CivetWeb::Request &request, const OAuth::Context &context) {
 
-#ifdef DEBUG
-        String text{Application::DataFile{"./templates/login.html"}.load()};
-#else
-        String text{Application::DataFile{"templates/www/login.html"}.load()};
-#endif // DEBUG
-
-        // TODO: Expand common values
+		Udjat::HTTP::Template text{"login",Udjat::MimeType::html};
 
         // Last, expand request arguments.
         text.expand([request,context](const char *key, std::string &value) {
 
-			if(!strcasecmp(key,"login_message")) {
+			debug("[[[[",key,"]]]]");
+
+			if(!strcasecmp(key,"login-message")) {
 				value = context.message;
+				return true;
 			}
 
 			if(!strcasecmp(key,"domain")) {
 				value = Config::Value<std::string>{"oauth2","domain",""};
+				return true;
 			}
 
 			if(request.getProperty(key,value)) {
@@ -101,23 +100,34 @@
 				}
 			}
 
-			if(!strcasecmp(key,"css-name")) {
-
-				value = Config::Value<std::string>{"theme","httpd",""};
-
-				if(value.empty()) {
-					value = Application::Name();
-					value += "/css/style.css";
-				}
-
+			if(!strcasecmp(key,"login-title")) {
+				value = Config::Value<std::string>{"theme","login-title",_("Access to ${client_id}")};
 				return true;
 			}
 
-			if(!strcasecmp(key,"login-title")) {
-				value = Config::Value<std::string>{"theme","login-title",""};
-				if(value.empty()) {
-					value = _("Access to ${client_id}");
-				}
+			if(!strcasecmp(key,"username")) {
+				value = "";
+				return true;
+			}
+
+			if(!strcasecmp(key,"login-button")) {
+				value = Config::Value<std::string>{"theme","login-button",_("Sign in")};
+				return true;
+			}
+
+			if(!strcasecmp(key,"user-label")) {
+				value = Config::Value<std::string>{"theme","user-label",_("Username")};
+				return true;
+			}
+
+			if(!strcasecmp(key,"password-label")) {
+				value = Config::Value<std::string>{"theme","password-label",_("Password")};
+				return true;
+			}
+
+			if(!strcasecmp(key,"client_id")) {
+				value = STRINGIZE_VALUE_OF(PRODUCT_NAME);
+				return true;
 			}
 
 			return false;
