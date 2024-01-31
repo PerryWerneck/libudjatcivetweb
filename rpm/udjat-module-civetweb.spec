@@ -49,14 +49,10 @@ BuildRequires:	civetweb-devel >= 1.15
 BuildRequires:	gettext-devel
 BuildRequires:	make
 
-# Web & svg optimization
-BuildRequires:	python3-setuptools
-BuildRequires:	python-xml
-BuildRequires:	python-scour
-BuildRequires:	python3-css-html-js-minify
-
 Provides:		udjat-module-httpd
 Conflicts:		otherproviders(udjat-module-httpd)
+
+Recommends:		udjat-branding-http
 
 Provides:		udjat-module-http
 
@@ -71,26 +67,12 @@ Summary:	%{product_name} httpd library
 %description -n libudjathttpd%{_libvrs}
 HTTP Server abstraction library for %{product_name}
 
-#---[ Branding ]------------------------------------------------------------------------------------------------------
-
-%package -n %{product_name}-branding-httpd
-Summary:		Branding for %{name}
-Recommends:		adwaita-icon-theme
-Recommends:		udjat-module-httpd
-Supplements:	udjat-branding
-BuildArch:		noarch
-
-%description -n udjat-branding-httpd
-
-Branding for %{product_name}'s HTTP server.
-
 #---[ Development ]---------------------------------------------------------------------------------------------------
 
 %package -n udjat-httpd-devel
 Summary:	Development files for %{name}
 Requires:	pkgconfig(libudjat)
 Requires:	libudjathttpd%{_libvrs} = %{version}
-Recommends:	udjat-httpd-branding
 
 %description -n udjat-httpd-devel
 
@@ -115,14 +97,6 @@ make all
 %makeinstall
 %find_lang libudjathttpd-%{MAJOR_VERSION}.%{MINOR_VERSION} langfiles
 
-for file in $(find %{buildroot} -iname *.html);
-do
-	HTM=$(echo ${file} | sed "s@.html@.htm@g")
-	mv "${file}" "${HTM}"
-	css-html-js-minify "${HTM}"
-	rm -f "${HTM}"
-done
-
 %files
 %defattr(-,root,root)
 %{module_path}/*.so
@@ -140,12 +114,6 @@ done
 %{_libdir}/*.so
 %exclude %{_libdir}/*.a
 %{_libdir}/pkgconfig/*.pc
-
-%files -n udjat-branding-httpd
-%dir %{_datadir}/%{product_name}
-%dir %{_datadir}/%{product_name}/templates
-%dir %{_datadir}/%{product_name}/templates/www
-%{_datadir}/%{product_name}/templates/www/*
 
 %pre -n libudjathttpd%{_libvrs} -p /sbin/ldconfig
 

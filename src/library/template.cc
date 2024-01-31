@@ -44,11 +44,7 @@
 			return;
 		}
 
-#ifdef DEBUG
-		Application::DataFile filename{"./templates/"};
-#else
 		Application::DataFile filename{"templates/www/"};
-#endif // DEBUG
 
 		filename += name;
 		filename += ".";
