@@ -73,16 +73,16 @@ HTTP Server abstraction library for %{product_name}
 
 #---[ Branding ]------------------------------------------------------------------------------------------------------
 
-%package -n udjat-httpd-branding
-Summary:		Development files for %{name}
+%package -n %{product_name}-branding-httpd
+Summary:		Branding for %{name}
 Recommends:		adwaita-icon-theme
-Requires:		libudjathttpd%{_libvrs} = %{version}
+Recommends:		udjat-module-httpd
 Supplements:	udjat-branding
 BuildArch:		noarch
 
-%description -n udjat-httpd-branding
+%description -n udjat-branding-httpd
 
-Branding for %{product_name}'s HTTP server abstraction library.
+Branding for %{product_name}'s HTTP server.
 
 #---[ Development ]---------------------------------------------------------------------------------------------------
 
@@ -141,7 +141,7 @@ done
 %exclude %{_libdir}/*.a
 %{_libdir}/pkgconfig/*.pc
 
-%files -n udjat-httpd-branding
+%files -n udjat-branding-httpd
 %dir %{_datadir}/%{product_name}
 %dir %{_datadir}/%{product_name}/templates
 %dir %{_datadir}/%{product_name}/templates/www

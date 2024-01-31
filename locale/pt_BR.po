@@ -42,8 +42,8 @@ msgstr "Aplicação"
 msgid "Invalid username"
 msgstr "Usuário inválido"
 
-#: src/module/handlers/product.cc:88 src/module/handlers/icons.cc:65
-#: src/module/handlers/favicon.cc:119
+#: src/module/handlers/product.cc:88 src/module/handlers/images.cc:102
+#: src/module/handlers/icons.cc:65 src/module/handlers/favicon.cc:119
 msgid "Not available"
 msgstr "Não disponível"
 
@@ -72,7 +72,7 @@ msgid "Sign in"
 msgstr "Acessar"
 
 #: src/module/send.cc:310 src/module/handlers/root.cc:56
-#: src/module/handlers/pubkey.cc:72 src/module/handlers/images.cc:80
+#: src/module/handlers/pubkey.cc:72 src/module/handlers/images.cc:98
 #: src/module/handlers/icons.cc:86 src/module/oauth2/handler.cc:290
 msgid "Unexpected error"
 msgstr "Erro inesperado"

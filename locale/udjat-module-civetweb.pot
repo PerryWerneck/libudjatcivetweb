@@ -130,7 +130,7 @@ msgstr ""
 "#-#-#-#-#  images.pot (PACKAGE VERSION)  #-#-#-#-#\n"
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-30 20:06-0300\n"
+"POT-Creation-Date: 2024-01-31 14:49-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -192,8 +192,8 @@ msgstr ""
 msgid "Invalid username"
 msgstr ""
 
-#: src/module/handlers/product.cc:88 src/module/handlers/icons.cc:65
-#: src/module/handlers/favicon.cc:119
+#: src/module/handlers/product.cc:88 src/module/handlers/images.cc:102
+#: src/module/handlers/icons.cc:65 src/module/handlers/favicon.cc:119
 msgid "Not available"
 msgstr ""
 
@@ -222,7 +222,7 @@ msgid "Sign in"
 msgstr ""
 
 #: src/module/send.cc:310 src/module/handlers/root.cc:56
-#: src/module/handlers/pubkey.cc:72 src/module/handlers/images.cc:80
+#: src/module/handlers/pubkey.cc:72 src/module/handlers/images.cc:98
 #: src/module/handlers/icons.cc:86 src/module/oauth2/handler.cc:290
 msgid "Unexpected error"
 msgstr ""
