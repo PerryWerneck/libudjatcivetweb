@@ -34,6 +34,7 @@
  #include <udjat/tools/configuration.h>
  #include <udjat/tools/intl.h>
  #include <udjat/tools/http/connection.h>
+ #include <udjat/tools/logger.h>
 
  #include <private/module.h>
  #include <civetweb.h>
@@ -57,8 +58,24 @@
 			path = ptr+1;
 		}
 
-		Udjat::HTTP::Image image{path};
+		debug("searching for image '",path,"'");
 
+
+		Udjat::HTTP::Image filename{path};
+
+		if(filename) {
+
+			Logger::String{"Sending static file '", filename.c_str(),"'"}.trace("http");
+			mg_send_file(conn,filename.c_str());
+			return 200;
+
+		} else {
+
+			Logger::String{"Cant find static file '", filename.c_str(),"'"}.error("http");
+
+		}
+
+		/*
 		return CivetWeb::Connection(conn).send(
 			HTTP::Get,
 			image.c_str(),
@@ -66,6 +83,7 @@
 			"image/svg+xml",
 			Config::Value<unsigned int>("theme","image-max-age",604800)
 		);
+		*/
 
 	} catch(const HTTP::Exception &e) {
 		return send(conn, HTTP::Response{MimeTypeFactory(conn)}.failed(e));
@@ -80,5 +98,7 @@
 		return send(conn, HTTP::Response{MimeTypeFactory(conn)}.failed(_("Unexpected error")));
 
 	}
+
+	return http_error(conn, 404, _("Not available"));
 
  }

@@ -49,6 +49,12 @@ BuildRequires:	civetweb-devel >= 1.15
 BuildRequires:	gettext-devel
 BuildRequires:	make
 
+# Web & svg optimization
+BuildRequires:	python3-setuptools
+BuildRequires:	python-xml
+BuildRequires:	python-scour
+BuildRequires:	python3-css-html-js-minify
+
 Provides:		udjat-module-httpd
 Conflicts:		otherproviders(udjat-module-httpd)
 
@@ -72,6 +78,7 @@ Summary:		Development files for %{name}
 Recommends:		adwaita-icon-theme
 Requires:		libudjathttpd%{_libvrs} = %{version}
 Supplements:	udjat-branding
+BuildArch:		noarch
 
 %description -n udjat-httpd-branding
 
@@ -107,6 +114,14 @@ make all
 %install
 %makeinstall
 %find_lang libudjathttpd-%{MAJOR_VERSION}.%{MINOR_VERSION} langfiles
+
+for file in $(find %{buildroot} -iname *.html);
+do
+	HTM=$(echo ${file} | sed "s@.html@.htm@g")
+	mv "${file}" "${HTM}"
+	css-html-js-minify "${HTM}"
+	rm -f "${HTM}"
+done
 
 %files
 %defattr(-,root,root)

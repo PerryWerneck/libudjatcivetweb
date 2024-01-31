@@ -126,34 +126,3 @@
 
  }
 
- /*
- /// @brief Handler for product requests.
- int productWebHandler(struct mg_connection *conn, void *cbdata);
-
- /// @brief Handler for icon requests.
- int iconWebHandler(struct mg_connection *conn, void *cbdata);
-
- /// @brief Handler for image requests.
- int imageWebHandler(struct mg_connection *conn, void *cbdata);
-
- /// @brief Get pubkey.
- int keyWebHandler(struct mg_connection *conn, void *cbdata);
-
- /// @brief Authentication handler.
- int oauthWebHandler(struct mg_connection *conn, void *cbdata);
-
- /// @brief Handler for report requests.
- //int reportWebHandler(struct mg_connection *conn, void *cbdata);
-
- /// @brief Handler for swagger request.
- //int swaggerWebHandler(struct mg_connection *conn, void *cbdata);
-
- /// @brief Handler for '/' request.
- int rootWebHandler(struct mg_connection *conn, void *cbdata);
-
- /// @brief Handler for '/favicon.ico' request.
- int faviconWebHandler(struct mg_connection *conn, void *cbdata);
-
- /// @brief Handler for custom requests.
- int customWebHandler(struct mg_connection *conn, void *cbdata);
- */
