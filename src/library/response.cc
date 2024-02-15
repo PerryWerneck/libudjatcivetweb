@@ -47,32 +47,8 @@
 
  namespace Udjat {
 
-	HTTP::Response::Response(Udjat::MimeType mimetype) : Udjat::Response::Value{mimetype}{
-
-		debug("Building HTTP response for ",std::to_string(mimetype));
-
-	}
-
-	HTTP::Response::~Response() {
-	}
-
 	int HTTP::Response::status_code() const noexcept {
 		return HTTP::Exception::code(Abstract::Response::status_code());
-	}
-
-	bool HTTP::Response::empty() const noexcept {
-		return children.empty();
-	}
-
-	HTTP::Response::operator Type() const noexcept {
-		return this->type;
-	}
-
-	Udjat::Value & HTTP::Response::set(const char *value, const Type type) {
-		Udjat::Value &child{(*this)["value"]};
-		child.set(value,type);
-		debug("Response value set to '",child.to_string(),"'");
-		return child;
 	}
 
 	void HTTP::Response::for_each(const std::function<void(const char *header_name, const char *header_value)> &call) const noexcept {
@@ -100,42 +76,6 @@
 		range.total = total;
 	}
 
-	Udjat::Value & HTTP::Response::append(const Type) {
-		reset(Value::Array);
-		return children[std::to_string((int) children.size()).c_str()];
-	}
-
-	Udjat::Value & HTTP::Response::reset(const Udjat::Value::Type type) {
-
-		if(type != Value::Array && type != Value::Object) {
-			throw runtime_error(Logger::String{"Cant handle '",std::to_string(type),"' at this level"});
-		}
-
-		if(type != this->type) {
-			debug("Response reset to '",std::to_string(type),"'");
-
-			this->type = type;
-			children.clear();
-		}
-
-		return *this;
-	}
-
-	bool HTTP::Response::for_each(const std::function<bool(const char *name, const Udjat::Value &value)> &call) const {
-
-		for(const auto& [name, value] : children)	{
-			if(call(name.c_str(),(Udjat::Value &) value)) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	Udjat::Value & HTTP::Response::operator[](const char *name) {
-		return children[name];
-	}
-
 	std::string HTTP::Response::to_string() const noexcept {
 
 		int code = status_code();
@@ -147,46 +87,53 @@
 			// Process error templates.
 			debug("--------------> Checking template for code ",code," ",(empty() ? "(Empty response)" : "(Non-empty response)"));
 
-			HTTP::Template text{"error", (MimeType) *this};
+			try {
 
-			if(text) {
+				HTTP::Template text{"error", (MimeType) *this};
 
-				text.expand([code,this](const char *key, std::string &value){
+				if(text) {
 
-					if(!strcasecmp(key,"code")) {
+					text.expand([code,this](const char *key, std::string &value){
 
-						value = std::to_string(code);
+						if(!strcasecmp(key,"code")) {
 
-					} else if(!strcasecmp(key,"message")) {
+							value = std::to_string(code);
 
-						value = this->message();
+						} else if(!strcasecmp(key,"message")) {
 
-					} else if(!strcasecmp(key,"body")) {
+							value = this->message();
 
-						value = this->body();
+						} else if(!strcasecmp(key,"body")) {
+
+							value = this->body();
 #ifdef DEBUG
-						if(!*this->body()) {
-							value = "No body on this error (DEBUG)";
-						}
+							if(!*this->body()) {
+								value = "No body on this error (DEBUG)";
+							}
 #endif // DEBUG
-					} else if(!strcasecmp(key,"syscode")) {
+						} else if(!strcasecmp(key,"syscode")) {
 
-						value = std::to_string(this->status_code());
+							value = std::to_string(this->status_code());
 
-					} else {
+						} else {
 
-						return false;
+							return false;
 
-					}
+						}
 
-					return true;
+						return true;
 
-				});
+					});
 
-				return text;
+					return text;
+
+				}
+
+			} catch(const std::exception &e) {
+
+				Logger::String{e.what()}.error("http");
 
 			}
-
 		}
 
 		try {
@@ -196,8 +143,8 @@
 				// It's an svg
 				HTTP::Icon icon;
 
-				for_each([&icon](const char *, const Udjat::Value &value){
-					if(value == Value::Icon) {
+				Response::Object::for_each([&icon](const char *, const Udjat::Value &value){
+					if(value == Udjat::Value::Icon) {
 						icon = HTTP::Icon::getInstance(value.to_string());
 						return (bool) icon;
 					}

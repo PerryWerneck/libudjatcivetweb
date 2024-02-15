@@ -20,21 +20,17 @@
  #pragma once
 
  #include <udjat/defs.h>
-
- #include <udjat/tools/response.h>
- #include <udjat/tools/value.h>
+ #include <udjat/tools/abstract/response.h>
+ #include <udjat/tools/response/object.h>
  #include <udjat/tools/http/value.h>
- #include <ostream>
+ #include <map>
 
  namespace Udjat {
 
 	namespace HTTP {
 
-		class UDJAT_API Response : public Udjat::Response::Value {
+		class UDJAT_API Response : public Udjat::Response::Object {
 		private:
-
-			Value::Type type = Value::Object;
-			std::map<std::string,HTTP::Value> children;
 
 			/// @brief Value for X-Total-Count header.
 			size_t total_count = 0;
@@ -47,26 +43,15 @@
 			} range;
 
 		public:
-			Response(Udjat::MimeType mimetype);
-			virtual ~Response();
+			Response(Udjat::MimeType mimetype) : Udjat::Response::Object{mimetype} {
+			}
 
 			int status_code() const noexcept;
-
-			operator Type() const noexcept override;
-
-			bool empty() const noexcept override;
 
 			std::string to_string() const noexcept override;
 
 			/// @brief Enumerate headers.
 			void for_each(const std::function<void(const char *header_name, const char *header_value)> &call) const noexcept;
-
-			bool for_each(const std::function<bool(const char *name, const Udjat::Value &value)> &call) const override;
-			Udjat::Value & operator[](const char *name) override;
-
-			Udjat::Value & append(const Type type = Object) override;
-			Udjat::Value & reset(const Udjat::Value::Type type) override;
-			Udjat::Value & set(const char *value, const Type type = String) override;
 
 			/// @brief Set item count for this response.
 			/// @param value The item count (for X-Total-Count http header).

@@ -163,16 +163,16 @@
 	OAuth::Context context;		///< @brief The Current context.
 	context.expiration_time = time(0) + 86400;
 
-	if(!*request.path()) {
-		Logger::String{"Empty html request, sending login page"}.info("oauth2");
-		OAuth::User{request}.get(context);
-		context.message.clear();
-		return login_page(conn,request,context);
-	}
-
-	debug("------------------> '",request.path(),"'");
-
 	try {
+
+		if(!*request.path()) {
+			Logger::String{"Empty html request, sending login page"}.info("oauth2");
+			OAuth::User{request}.get(context);
+			context.message.clear();
+			return login_page(conn,request,context);
+		}
+
+		debug("------------------> '",request.path(),"'");
 
 		// Check for operation.
 		switch(request.select("authorize","login","signin","access_token","userinfo",nullptr)) {

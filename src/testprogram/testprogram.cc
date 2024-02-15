@@ -85,6 +85,8 @@
 	Logger::redirect();
 
  	udjat_module_init();
+ 	RandomFactory rfactory;
+
 	auto rc = Application{}.run(argc,argv,"./test.xml");
 
 	debug("Application exits with rc=",rc);
