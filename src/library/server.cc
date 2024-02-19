@@ -42,7 +42,7 @@
 
 		// Check for secondary instance.
 		if(instance) {
-			clog << "httpd\tCreating a new HTTP server instance" << endl;
+			clog << "httpd\tBuilding a new HTTP server instance" << endl;
 		} else {
 			instance = this;
 		}
@@ -51,39 +51,33 @@
 	HTTP::Server::~Server() {
 		if(instance == this) {
 			instance = nullptr;
+			cout << "httpd\tDeleting default HTTP server instance" << endl;
 		} else {
 			clog << "httpd\tDeleting non default HTTP server instance" << endl;
 		}
 	}
 
+	/*
 	bool HTTP::Server::push_back(HTTP::Handler *handler) {
-		if(handler->server) {
-			handler->server->remove(handler);
-		}
 
 		if(Logger::enabled(Logger::Trace)) {
-			Logger::String{"Adding handler for '",handler->uri,"'"}.write(Logger::Trace,"civetweb");
+			Logger::String{"Adding handler for '",handler->c_str(),"'"}.write(Logger::Trace,"httpd");
 		}
 
-		handler->server = this;
-		return true;
+		return false;
 	}
 
 	/// @brief Remove request handler.
 	/// @param uri the URI for the handler.
 	bool HTTP::Server::remove(HTTP::Handler *handler) {
 
-		if(handler->server && handler->server != this) {
-			throw runtime_error("Handler is for another server");
-		}
-
 		if(Logger::enabled(Logger::Trace)) {
-			Logger::String{"Removing handler for '",handler->uri,"'"}.write(Logger::Trace,"civetweb");
+			Logger::String{"Removing handler for '",handler->c_str(),"'"}.write(Logger::Trace,"civetweb");
 		}
 
-		handler->server = nullptr;
 		return true;
 	}
+	*/
 
  }
 

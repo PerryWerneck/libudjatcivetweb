@@ -17,7 +17,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
- #include "private.h"
  #include <udjat/defs.h>
  #include <udjat/module.h>
  #include <udjat/tools/quark.h>
@@ -32,7 +31,11 @@
  #include <udjat/tools/http/handler.h>
  #include <udjat/tools/logger.h>
  #include <udjat/tools/string.h>
+ #include <udjat/tools/worker.h>
+ #include <udjat/module/abstract.h>
  #include <unistd.h>
+
+ #include <private/module.h>
 
  using namespace Udjat;
  using namespace std;
@@ -78,18 +81,23 @@
 	} protocols;
 
 	void setHandlers() noexcept {
-		mg_set_request_handler(ctx, "/api/", apiWebHandler, 0);
 		mg_set_request_handler(ctx, "/icon/", iconWebHandler, 0);
-		mg_set_request_handler(ctx, "/images/", imageWebHandler, 0);
-		mg_set_request_handler(ctx, "/state", stateWebHandler, 0);
-//		mg_set_request_handler(ctx, "/report/", reportWebHandler, 0);
-		mg_set_request_handler(ctx, "/swagger.json", swaggerWebHandler, 0);
+		mg_set_request_handler(ctx, "/" STRINGIZE_VALUE_OF(PRODUCT_NAME) "/", productWebHandler, 0);
+		mg_set_request_handler(ctx, "/image/", imageWebHandler, 0);
+		mg_set_request_handler(ctx, "/favicon.ico", faviconWebHandler, 0);
 
-		{
-			mg_set_request_handler(ctx, "/", rootWebHandler, 0);
-
+#ifdef HAVE_LIBSSL
+		mg_set_request_handler(ctx, "/pubkey.pem", keyWebHandler, 0);
+		if(Config::Value<bool>{"oauth2","enable-internal",false}) {
+			mg_set_request_handler(ctx, "/oauth2", oauthWebHandler, 0);
 		}
+#endif // HAVE_LIBSSL
 
+//		mg_set_request_handler(ctx, "/report/", reportWebHandler, 0);
+//		mg_set_request_handler(ctx, "/instrospect", swaggerWebHandler, 0);
+
+		// All other requests goes to rootwebhandler
+		mg_set_request_handler(ctx, "/", rootWebHandler, 0);
 	}
 
 	void setCallbacks(struct mg_callbacks &callbacks) noexcept {
@@ -242,49 +250,69 @@
 		struct mg_server_port ports[10];
 
 		int count = mg_get_server_ports(ctx,10,ports);
+		if(count > 0) {
 
-		if(count) {
 			for(int ix = 0; ix < count;ix++) {
-				Logger::String(
-					"Listening on ",
+
+				if(ports[ix].port <= 0) {
+					continue;
+				}
+
+				String baseref{
 					(ports[ix].is_ssl ? "https" : "http"),
 					"://",
 					(ports[ix].protocol == 1 ? "127.0.0.1" : "localhost"),
 					":",
 					ports[ix].port
-				).write(Logger::Trace,"civetweb");
-			}
-			if(Logger::enabled(Logger::Debug)) {
+				};
 
-				Logger::String(
-					"Application state available on ",
-					(ports[0].is_ssl ? "https" : "http"),
-					"://",
-					(ports[0].protocol == 1 ? "127.0.0.1" : "localhost"),
-					":",
-					ports[0].port,
-					"/api/1.0/agent.html"
-				).write(Logger::Debug,"civetweb");
+				Logger::String{"Listening on ",baseref}.info("civetweb");
 
-				auto module = Udjat::Module::find("information");
-				String options;
-				if(module && module->getProperty("options",options)) {
-					for(const std::string &option : options.split(",")) {
-						Logger::String(
-							"Service info available on ",
-							(ports[0].is_ssl ? "https" : "http"),
-							"://",
-							(ports[0].protocol == 1 ? "127.0.0.1" : "localhost"),
-							":",
-							ports[0].port,
-							"/api/1.0/info/",
-							option.c_str(),
-							".html"
-						).write(Logger::Debug,"civetweb");
+				if(Logger::enabled(Logger::Trace)) {
+
+#ifdef HAVE_LIBSSL
+					Logger::String{"Public key available on ",baseref,"/pubkey.pem"}.write(Logger::Trace,"civetweb");
+					if(Config::Value<bool>{"oauth2","enable-internal",false}) {
+						Logger::String{"OAuth2 service available on ",baseref,"/oauth2"}.write(Logger::Trace,"civetweb");
 					}
+#endif // HAVE_LIBSSL
+
+					baseref += "/api/";
+					baseref += Config::Value<string>{"http","apiversion",PACKAGE_VERSION};
+					baseref += "/";
+
+					Udjat::Worker::for_each([&baseref](const Worker &worker){
+						if(!strcasecmp(worker.c_str(),"agent")) {
+							Logger::String{"Application state available on ",baseref,"agent"}.trace("civetweb");
+							return true;
+						}
+						return false;
+					});
+
+					Udjat::Module::for_each([&baseref](const Udjat::Module &module){
+						module.trace_paths(baseref.c_str());
+						return false;
+					});
+
+					/*
+
+					auto module = Udjat::Module::find("information");
+					String options;
+					if(module && module->getProperty("options",options)) {
+						for(const std::string &option : options.split(",")) {
+							Logger::String{"Service info available on ",baseref,"/api/",apiversion,"/info/",option.c_str()}.write(Logger::Trace,"civetweb");
+						}
+					}
+					*/
+
 				}
 
 			}
+
+		} else {
+
+			Logger::String{"No input ports (mg_get_server_ports has returned ",count,")"}.error("civetweb");
+
 		}
 
 
@@ -292,49 +320,52 @@
 	}
 
 	bool push_back(HTTP::Handler *handler) override {
-		if(HTTP::Server::push_back(handler)) {
 
-			string uri{handler->c_str()};
+		string uri{handler->c_str()};
 
-			if(uri[uri.size()-1] == '/') {
-				uri.resize(uri.size()-1);
-			}
-
-			mg_set_request_handler(ctx, uri.c_str(), customWebHandler, handler);
-
-			if(Logger::enabled(Logger::Debug)) {
-
-				struct mg_server_port ports[10];
-				if(mg_get_server_ports(ctx,10,ports) > 0) {
-
-					Logger::String{
-						"New request handler was activated on ",
-						(ports[0].is_ssl ? "https" : "http"),
-						"://",
-						(ports[0].protocol == 1 ? "127.0.0.1" : "localhost"),
-						":",
-						ports[0].port,
-						uri
-					}.write(Logger::Debug,"civetweb");
-
-				} else {
-					Logger::String{"Request handler for '",uri,"' was activated"}.write(Logger::Debug,"civetweb");
-				}
-
-			}
-
-			return true;
+		if(uri[uri.size()-1] == '/') {
+			uri.resize(uri.size()-1);
 		}
-		return false;
+
+		mg_set_request_handler(ctx, uri.c_str(), customWebHandler, handler);
+
+		if(Logger::enabled(Logger::Trace)) {
+
+			struct mg_server_port ports[10];
+			if(mg_get_server_ports(ctx,10,ports) > 0) {
+
+				Logger::String{
+					"New request handler was activated on ",
+					(ports[0].is_ssl ? "https" : "http"),
+					"://",
+					(ports[0].protocol == 1 ? "127.0.0.1" : "localhost"),
+					":",
+					ports[0].port,
+					uri
+				}.write(Logger::Trace,"civetweb");
+
+			}
+
+		} else {
+			Logger::String{"Custom handler for '",handler->c_str(),"' added"}.info("civetweb");
+		}
+
+		return true;
+
 	}
 
 	bool remove(HTTP::Handler *handler) override {
-		if(HTTP::Server::remove(handler)) {
-			cout << "civetweb\tRemoving http handle '" << handler->c_str() << "'" << endl;
-			mg_set_request_handler(ctx, handler->c_str(), NULL, NULL);
-			return true;
+
+		string uri{handler->c_str()};
+
+		if(uri[uri.size()-1] == '/') {
+			uri.resize(uri.size()-1);
 		}
-		return false;
+
+		mg_set_request_handler(ctx, uri.c_str(), NULL, NULL);
+		Logger::String{"Custom handler for '",handler->c_str(),"' removed"}.info("civetweb");
+
+		return true;
 	}
 
  };

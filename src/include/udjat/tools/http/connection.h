@@ -20,9 +20,12 @@
  #pragma once
 
  #include <udjat/defs.h>
+ #include <udjat/tools/method.h>
  #include <udjat/tools/value.h>
  #include <udjat/tools/http/exception.h>
- #include <udjat/tools/http/request.h>
+ #include <udjat/tools/http/response.h>
+ #include <udjat/tools/http/report.h>
+ #include <udjat/tools/http/mimetype.h>
  #include <stdexcept>
  #include <system_error>
  #include <map>
@@ -36,6 +39,9 @@
 			Connection();
 			virtual ~Connection();
 
+			/// @brief Get the active mimetype for this connection.
+			virtual operator MimeType() const = 0;
+
 			/// @brief Send default HTML response.
 			/// @param path Local path from request.
 			/// @return Status code.
@@ -43,11 +49,19 @@
 			/// @retval 404 No index page.
 			int info(const char *path);
 
+			/// @brief Get text for response..
+			/// @param response Response to.
+			/// @param mimetype The mimetype for response.
+			/// @return true if the string
+			static std::string get(const Udjat::Abstract::Response &response, const MimeType mimetype);
+
 			/// @brief Send response.
-			/// @param mime_type The content type to be sent.
-			/// @param length Length of the following body data.
-			/// @return Fixed value '200'.
-			virtual int success(const char *mime_type, const char *response, size_t length) const noexcept = 0;
+			/// @return http error response.
+			virtual int send(const Abstract::Response &response) const noexcept = 0;
+
+			/// @brief Send string.
+			/// @return http error response (200).
+			virtual int send(const char *mime_type, const char *response, size_t length) const noexcept = 0;
 
 			/// @brief Send file.
 			/// @param Method The HTTP method from client.
@@ -58,19 +72,12 @@
 			/// @return HTML response code.
 			virtual int send(const HTTP::Method method, const char *filename, bool allow_index = false, const char *mime_type = nullptr, unsigned int max_age = 0) const = 0;
 
-			int success(const char *mime_type, const std::string &response) const {
-				return success(mime_type,response.c_str(),response.size());
-			}
-
-			int response(const HTTP::Exception &error) const noexcept;
-			int response(const std::system_error &error) const noexcept;
-			int response(const std::exception &e) const noexcept;
-
-			/// @brief Send error.
+			/// @brief Send html error page.
 			/// @param code The HTTP status code (see HTTP standard).
-			/// @param message The error message.
+			/// @param title The error message.
+			/// @param body Text explaining the failure
 			/// @return Error code.
-			virtual int failed(int code, const char *message) const noexcept = 0;
+			virtual int send(int code, const char *title, const char *body = "") const noexcept;
 
 		};
 

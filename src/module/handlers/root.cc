@@ -18,50 +18,43 @@
  */
 
  /**
-  * @brief Implements the default index page.
+  * @brief Implements the default http handler.
   *
   */
 
  #include <config.h>
  #include <udjat/defs.h>
- #include "private.h"
+ #include <private/module.h>
  #include <udjat/tools/intl.h>
  #include <udjat/tools/logger.h>
+ #include <udjat/tools/request.h>
  #include <udjat/tools/http/exception.h>
+ #include <udjat/tools/http/connection.h>
+ #include <udjat/tools/http/response.h>
+ #include <udjat/tools/http/report.h>
+ #include <udjat/tools/http/request.h>
+ #include <udjat/tools/configuration.h>
+ #include <udjat/tools/worker.h>
+ #include <private/request.h>
 
  using namespace std;
  using namespace Udjat;
 
- int rootWebHandler(struct mg_connection *conn, void UDJAT_UNUSED(*cbdata)) {
+ int rootWebHandler(struct mg_connection *conn, void *) noexcept {
 
-	CivetWeb::Connection connection{conn};
+	try {
 
- 	try {
+		CivetWeb::Connection connection{conn};
+		return CivetWeb::Request{conn}.exec(connection);
 
-		return connection.info(connection.local_uri());
-
-	} catch(const HTTP::Exception &error) {
-
-		cerr << "civetweb\t" << error.what() << endl;
-		return connection.response(error);
-
-	} catch(const system_error &error) {
-
-		cerr << "civetweb\t" << error.what() << endl;
-		return connection.response(error);
-
-	} catch(const exception &error) {
-
-		cerr << "civetweb\t" << error.what() << endl;
-		return connection.response(error);
+	} catch(const exception &e) {
+		debug("-----> ",__FUNCTION__,": ",e.what());
+		return send(conn, HTTP::Response{MimeTypeFactory(conn)}.failed(e));
 
 	} catch(...) {
-
-		cerr << "civetweb\tUnexpected error" << endl;
-		connection.failed(500, "Unexpected error");
-		return 500;
+		debug("-----> ",__FUNCTION__,": ","Unexpected error");
+		return send(conn, HTTP::Response{MimeTypeFactory(conn)}.failed(_("Unexpected error")));
 
 	}
 
-	return 500;
  }

@@ -18,11 +18,14 @@
  */
 
  #include <config.h>
+ #include <udjat/defs.h>
+ #include <udjat/tools/report.h>
  #include <udjat/tools/http/report.h>
- #include <cstdarg>
- #include <iostream>
+ #include <udjat/tools/http/value.h>
+ #include <udjat/tools/logger.h>
  #include <sstream>
- #include <udjat/tools/http/exception.h>
+ #include <udjat/tools/http/layouts.h>
+ #include <udjat/tools/http/timestamp.h>
 
  using namespace std;
 
@@ -30,199 +33,54 @@
 
 	namespace HTTP {
 
-		Report::Report() : mimetype(MimeType::json) {
-		}
-
-		Report::Report(const char *uri, const MimeType m) : Udjat::Report(), mimetype(m) {
-
-			if(mimetype != MimeType::json && mimetype != MimeType::html && mimetype != MimeType::xml) {
-				throw HTTP::Exception(501, uri, "Mimetype Not Supported");
-			}
-
+		Report::Report(Udjat::MimeType mimetype) : Udjat::Response::Table{mimetype} {
 		}
 
 		Report::~Report() {
 		}
 
-		std::string Report::to_string() const {
-			std::stringstream ss;
-
-			if(mimetype == MimeType::html) {
-				this->to_html(ss);
-			} else if(mimetype == MimeType::json) {
-				this->to_json(ss);
-			} else if(mimetype == MimeType::xml) {
-				this->to_xml(ss);
-			}
-			return ss.str();
+		bool Report::empty() const {
+			return values.empty();
 		}
 
-		void Report::to_json(std::stringstream &ss) const {
+		void Report::for_each(const std::function<void(const char *header_name, const char *header_value)> &call) const noexcept {
 
-			bool sep = false;
-			auto column = columns.names.begin();
+			Abstract::Response::for_each(call);
 
-			ss << "[{";
-			for(auto value : values) {
-
-				if(column == columns.names.end()) {
-					ss << "},{";
-					column = columns.names.begin();
-					sep = false;
-				}
-
-				if(sep) {
-					ss << ',';
-				}
-				sep = true;
-
-				ss << "\"" << column->c_str() << "\":";
-				value.json(ss);
-
-				column++;
-
+			// https://stackoverflow.com/questions/3715981/what-s-the-best-restful-method-to-return-total-number-of-items-in-an-object
+			if(total_count) {
+				call("X-Total-Count",std::to_string(total_count).c_str());
 			}
 
-			ss << "}]";
-
-		}
-
-		void Report::to_html(std::stringstream &ss) const {
-
-			ss << "<table><thead>";
-
-			// ss << "<caption>" << this->title << "</caption>"
-
-			ss << "<tr>";
-
-			for(auto column : columns.names) {
-				ss << "<th>" << column << "</th>";
-			}
-
-			ss << "</tr></thead><tbody><tr>";
-
-			auto column = columns.names.begin();
-			for(auto value : values) {
-				if(column == columns.names.end()) {
-					ss << "</tr><tr>";
-					column = columns.names.begin();
-				}
-				ss << "<td>" << value.to_string() << "</td>";
-				column++;
-			}
-
-			ss << "</tr></tbody></table>";
-		}
-
-		void Report::to_xml(std::stringstream &ss) const {
-
-			ss << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
-
-			if(values.empty()) {
-				ss << "</report>";
-			} else {
-
-				ss << "<report><item>";
-
-				auto column = columns.names.begin();
-				for(auto value : values) {
-					if(column == columns.names.end()) {
-						ss << "</item><item>";
-						column = columns.names.begin();
-					}
-					ss << "<" << *column << ">" << value.to_string() << "</" << *column << ">";
-					column++;
-				}
-
-				ss << "</item></report>";
+			if(range.total) {
+				call("Content-Range",Udjat::String{"items ",range.from,"-",range.to,"/",range.total}.c_str());
 			}
 
 		}
 
-		Udjat::Report & Report::push_back(const char *value) {
-			HTTP::Value v;
-			v << value;
-			values.push_back(v);
-			return *this;
+		void Report::count(size_t value) noexcept {
+			total_count = value;
 		}
 
-		Udjat::Report & Report::push_back(const std::string &value) {
-			HTTP::Value v;
-			v << value;
-			values.push_back(v);
-			return *this;
+		void Report::content_range(size_t from, size_t to, size_t total) noexcept {
+			range.from = from;
+			range.to = to;
+			range.total = total;
 		}
 
-		Udjat::Report & Report::push_back(const short value) {
-			HTTP::Value v;
-			v << value;
-			values.push_back(v);
-			return *this;
+		void Report::for_each(const std::function<void(const Value::Type type, const char *value)> &func) const {
+			for(const Value &value : values) {
+				func((Value::Type) value,value.to_string().c_str());
+			}
 		}
 
-		Udjat::Report & Report::push_back(const unsigned short value) {
-			HTTP::Value v;
-			v << value;
-			values.push_back(v);
-			return *this;
-		}
-
-		Udjat::Report & Report::push_back(const int value) {
-			HTTP::Value v;
-			v << value;
-			values.push_back(v);
-			return *this;
-		}
-
-		Udjat::Report & Report::push_back(const unsigned int value) {
-			HTTP::Value v;
-			v << value;
-			values.push_back(v);
-			return *this;
-		}
-
-		Udjat::Report & Report::push_back(const long value) {
-			HTTP::Value v;
-			v << value;
-			values.push_back(v);
-			return *this;
-		}
-
-		Udjat::Report & Report::push_back(const unsigned long value) {
-			HTTP::Value v;
-			v << value;
-			values.push_back(v);
-			return *this;
-		}
-
-		Udjat::Report & Report::push_back(const Udjat::TimeStamp value) {
-			HTTP::Value v;
-			v << value;
-			values.push_back(v);
-			return *this;
-		}
-
-		Udjat::Report & Report::push_back(const bool value) {
-			HTTP::Value v;
-			v << value;
-			values.push_back(v);
-			return *this;
-		}
-
-		Udjat::Report & Report::push_back(const float value) {
-			HTTP::Value v;
-			v << value;
-			values.push_back(v);
-			return *this;
-		}
-
-		Udjat::Report & Report::push_back(const double value) {
-			HTTP::Value v;
-			v << value;
-			values.push_back(v);
+		Udjat::Response::Table & Report::push_back(const char *str, Udjat::Value::Type type) {
+			values.emplace_back(str,type);
+			next();
 			return *this;
 		}
 
 	}
 
  }
+

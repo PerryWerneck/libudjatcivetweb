@@ -1,7 +1,7 @@
 /* SPDX-License-Identifier: LGPL-3.0-or-later */
 
 /*
- * Copyright (C) 2021 Perry Werneck <perry.werneck@gmail.com>
+ * Copyright (C) 2023 Perry Werneck <perry.werneck@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published
@@ -20,8 +20,18 @@
  #pragma once
 
  #include <udjat/defs.h>
- #include <udjat/request.h>
- #include <udjat/tools/http/value.h>
+ #include <udjat/tools/request.h>
+ #include <udjat/tools/http/connection.h>
+
+ #ifdef _WIN32
+	#include <winsock2.h>
+	#include <windows.h>
+	#include <in6addr.h>
+ #else
+	#include <sys/types.h>
+	#include <pwd.h>
+	#include <arpa/inet.h>
+ #endif // _WIN32
 
  namespace Udjat {
 
@@ -29,35 +39,64 @@
 
 		class UDJAT_API Request : public Udjat::Request {
 		public:
-			Request(const std::string &url, const char *type);
 
-			std::string pop() override;
+			#pragma pack(1)
+			/// @brief Authentication token
+			struct Token {
+				uint8_t type = 0x10;
+				uint16_t scope = 0x000F;
+				time_t expiration_time = 0;
+				uint64_t uid = (uint64_t) -1;
+				char username[40] = "";	///< @brief The user name
+#ifdef _WIN32
+				union {
+					in_addr v4;		// https://learn.microsoft.com/en-us/windows/win32/api/winsock2/ns-winsock2-in_addr
+					in6_addr v6;	// https://learn.microsoft.com/en-us/previous-versions/windows/desktop/legacy/ms738560(v=vs.85)
+				} ip;
+#else
+				union {
+					in_addr_t v4;
+					in6_addr v6;
+				} ip;
+#endif // _WIN32
+
+			};
+			#pragma pack()
+
+			bool decrypt(HTTP::Request::Token &token) const;
+
+			Request(const char *path = "", HTTP::Method m = HTTP::Get);
+
+			Request(const char *path, const char * method) : Request{path,HTTP::MethodFactory(method)} {
+			}
+
+			const char *c_str() const noexcept override;
+			bool cached(const Udjat::TimeStamp &timestamp) const override;
+
+			int exec(Connection &connection);
+
+			/// @brief Get Authentication token.
+			/// @return true if the token has valid authentication.
+			bool get(Request::Token &token) const noexcept;
+
+			bool authenticated() const noexcept override;
+
+			/// @brief The client address.
+			virtual String address() const = 0;
+
+			bool for_each(const std::function<bool(const char *name, const char *value)> &call) const override;
+
+			/// @brief HTTP cookie.
+			virtual String cookie(const char *name) const;
+
+			bool getProperty(const char *key, std::string &value) const override;
+
+			/// @brief Get HTTP header value.
+			virtual const char * header(const char *name) const noexcept = 0;
+
 
 		};
 
-		class UDJAT_API Response : public Udjat::Response {
-		private:
-			Udjat::HTTP::Value *value;
-
-		public:
-			Response(Udjat::MimeType type);
-			virtual ~Response();
-
-			bool isNull() const override;
-
-			std::string to_string() const;
-
-			Udjat::Value & operator[](const char *name) override;
-
-			Udjat::Value & append(const Type type) override;
-
-			Udjat::Value & reset(const Type type) override;
-
-			Udjat::Value & set(const Value &value) override;
-
-			Udjat::Value & set(const char *value, const Type type) override;
-
-		};
 
 	}
 

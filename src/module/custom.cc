@@ -17,66 +17,62 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
- #include "private.h"
- #include <udjat/worker.h>
+ #include <config.h>
  #include <udjat/civetweb.h>
- #include <udjat/tools/protocol.h>
- #include <udjat/tools/http/server.h>
+ #include <private/request.h>
  #include <udjat/tools/http/handler.h>
  #include <udjat/tools/http/request.h>
- #include <udjat/tools/http/mimetype.h>
+ #include <udjat/tools/intl.h>
+ #include <private/module.h>
  #include <udjat/tools/logger.h>
 
- int customWebHandler(struct mg_connection *conn, void *cbdata) {
+ using namespace Udjat;
 
-	CivetWeb::Connection connection(conn);
+ int customWebHandler(struct mg_connection *conn, void *cbdata) noexcept {
 
-	HTTP::Handler *handler = (HTTP::Handler *) cbdata;
+	HTTP::Handler &handler = *((HTTP::Handler *) cbdata);
+
+	CivetWeb::Connection connection{conn};
 
 	const struct mg_request_info *ri = connection.request_info();
-	MimeType mimetype{MimeType::custom};
-	string rsp;
 
 	debug("Using custom web handler for '",ri->local_uri,"' request");
 
 	try {
 
-		// Extract mimetype
-		string uri = ri->local_uri;
-		{
-			auto ext = uri.find_last_of('.');
-			if(ext != string::npos && ext > 1) {
-				mimetype = MimeTypeFactory(uri.c_str()+ext+1);
-			}
-		}
-
-		return handler->handle(
+		return handler.handle(
 			connection,
-			HTTP::Request(uri.c_str(),ri->request_method),
-			mimetype
+			CivetWeb::Request{conn},
+			(MimeType) connection
 		);
 
 	} catch(const HTTP::Exception &error) {
 
 		cerr << "civetweb\t" << error.what() << endl;
-		return connection.response(error);
+		HTTP::Response response{(MimeType) connection};
+		response.failed(error);
+		return connection.send(response);
 
 	} catch(const system_error &error) {
 
 		cerr << "civetweb\t" << error.what() << endl;
-		return connection.response(error);
+		HTTP::Response response{(MimeType) connection};
+		response.failed(error);
+		return connection.send(response);
 
 	} catch(const exception &error) {
 
 		cerr << "civetweb\t" << error.what() << endl;
-		return connection.response(error);
+		HTTP::Response response{(MimeType) connection};
+		response.failed(error);
+		return connection.send(response);
 
 	} catch(...) {
 
 		cerr << "civetweb\tUnexpected error" << endl;
-		connection.failed(500, "Unexpected error");
-		return 500;
-
+		HTTP::Response response{(MimeType) connection};
+		response.failed(_("Unexpected error on http handler"));
+		return connection.send(response);
 	}
 
 	return 500;

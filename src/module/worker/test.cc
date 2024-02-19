@@ -18,7 +18,7 @@
  */
 
  #include <config.h>
- #include "../private.h"
+ #include <private/module.h>
  #include <udjat/tools/configuration.h>
  #include <udjat/tools/http/exception.h>
  #include <udjat/tools/protocol.h>

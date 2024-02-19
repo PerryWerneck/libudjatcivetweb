@@ -21,13 +21,15 @@
 
  #include <udjat/defs.h>
  #include <udjat/tools/value.h>
+ #include <udjat/tools/http/mimetype.h>
  #include <map>
+ #include <ostream>
 
  namespace Udjat {
 
 	namespace HTTP {
 
-		class UDJAT_PRIVATE Value : public Udjat::Value {
+		class UDJAT_API Value : public Udjat::Value {
 		private:
 			Udjat::Value::Type type;
 			std::string value;
@@ -36,17 +38,16 @@
 		public:
 
 			Value(Udjat::Value::Type t = Udjat::Value::Undefined);
+			Value(const char *value, Udjat::Value::Type t = Udjat::Value::Undefined);
+
 			virtual ~Value();
 
+			bool empty() const noexcept override;
 			bool isNull() const override;
 
-			inline Udjat::Value::Type getType() const noexcept {
-				return this->type;
-			}
+			operator Type() const noexcept override;
 
-			void json(std::stringstream &ss) const;
-			void xml(std::stringstream &ss) const;
-			void html(std::stringstream &ss) const;
+			bool for_each(const std::function<bool(const char *name, const Udjat::Value &value)> &call) const override;
 
 			const Udjat::Value & get(std::string &value) const override;
 

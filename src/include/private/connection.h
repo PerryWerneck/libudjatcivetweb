@@ -50,6 +50,8 @@
 			Connection(struct mg_connection *c) : Udjat::HTTP::Connection(), conn(c) {
 			}
 
+			operator MimeType() const override;
+
 			int success(const char *mime_type, const char *response, size_t length) const noexcept override;
 			int failed(int code, const char *message) const noexcept override;
 			int send(const HTTP::Method method, const char *filename, bool allow_index, const char *mime_type, unsigned int max_age) const override;
@@ -64,6 +66,10 @@
 
 			inline const char * request_uri() const noexcept {
 				return mg_get_request_info(conn)->request_uri;
+			}
+
+			inline const char * request_method() const noexcept {
+				return mg_get_request_info(conn)->request_method;
 			}
 
 			inline const char * local_uri() const noexcept {
@@ -85,8 +91,10 @@
 		class Worker : public Udjat::Protocol::Worker {
 		private:
 
-			/// @brief Request headers.
-			std::list<Header> headers;
+			struct {
+				std::list<Header> request;
+				std::list<Header> response;
+			} headers;
 
 			/// @brief Connect to server, send request.
 			struct mg_connection * connect();
@@ -99,7 +107,8 @@
 
 			bool save(const char *filename, const std::function<bool(double current, double total)> &progress, bool replace) override;
 
-			Protocol::Header & header(const char *name) override;
+			Protocol::Header & request(const char *name) override;
+			const Protocol::Header & response(const char *name) override;
 
 		};
 
@@ -117,32 +126,3 @@
 
  }
 
- /// @brief Web handler.
- int webHandler(const CivetWeb::Connection &connection, function<string (const CivetWeb::Connection &connection, const char *path, const char *method, const MimeType mimetype)> worker) noexcept;
-
- /// @brief Handler for API requests.
- int apiWebHandler(struct mg_connection *conn, void *cbdata);
-
- /// @brief Handler for icon requests.
- int iconWebHandler(struct mg_connection *conn, void *cbdata);
-
- /// @brief Handler for image requests.
- int imageWebHandler(struct mg_connection *conn, void *cbdata);
-
- /// @brief Handler for state requests.
- int stateWebHandler(struct mg_connection *conn, void *cbdata);
-
- /// @brief Handler for report requests.
- //int reportWebHandler(struct mg_connection *conn, void *cbdata);
-
- /// @brief Handler for swagger request.
- int swaggerWebHandler(struct mg_connection *conn, void *cbdata);
-
- /// @brief Handler for swagger request.
- int rootWebHandler(struct mg_connection *conn, void *cbdata);
-
- /// @brief Handler for custom requests.
- int customWebHandler(struct mg_connection *conn, void *cbdata);
-
- /// @brief Send error page.
- int http_error( struct mg_connection *conn, int status, const char *msg );

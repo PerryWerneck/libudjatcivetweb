@@ -19,7 +19,27 @@
 
  #include <config.h>
  #include <udjat/civetweb.h>
- #include <udjat/tools/http/request.h>
+ #include <udjat/tools/response.h>
+ #include <udjat/tools/http/response.h>
+ #include <udjat/tools/http/value.h>
+ #include <udjat/tools/http/value.h>
+ #include <udjat/tools/http/layouts.h>
+ #include <udjat/tools/http/exception.h>
+ #include <udjat/tools/http/mimetype.h>
+ #include <udjat/tools/http/template.h>
+ #include <udjat/tools/intl.h>
+ #include <udjat/tools/logger.h>
+ #include <udjat/tools/http/icon.h>
+ #include <udjat/tools/file.h>
+ #include <udjat/tools/configuration.h>
+ #include <udjat/tools/string.h>
+ #include <udjat/tools/application.h>
+ #include <udjat/tools/http/timestamp.h>
+
+ #ifdef HAVE_UNISTD_H
+	#include <unistd.h>
+ #endif // HAVE_UNISTD_H
+
  #include <iostream>
  #include <sstream>
 
@@ -27,68 +47,140 @@
 
  namespace Udjat {
 
-	HTTP::Response::Response(Udjat::MimeType type) {
-		this->type = type;
-		this->value = new HTTP::Value();
+	int HTTP::Response::status_code() const noexcept {
+		return HTTP::Exception::code(Abstract::Response::status_code());
 	}
 
-	HTTP::Response::~Response() {
-		delete this->value;
+	void HTTP::Response::for_each(const std::function<void(const char *header_name, const char *header_value)> &call) const noexcept {
+
+		Abstract::Response::for_each(call);
+
+		// https://stackoverflow.com/questions/3715981/what-s-the-best-restful-method-to-return-total-number-of-items-in-an-object
+		if(total_count) {
+			call("X-Total-Count",std::to_string(total_count).c_str());
+		}
+
+		if(range.total) {
+			call("Content-Range",Udjat::String{"items ",range.from,"-",range.to,"/",range.total}.c_str());
+		}
+
 	}
 
-	bool HTTP::Response::isNull() const {
-		return this->value->isNull();
+	void HTTP::Response::count(size_t value) noexcept {
+		total_count = value;
 	}
 
-	std::string HTTP::Response::to_string() const {
+	void HTTP::Response::content_range(size_t from, size_t to, size_t total) noexcept {
+		range.from = from;
+		range.to = to;
+		range.total = total;
+	}
 
-		std::stringstream ss;
+	std::string HTTP::Response::to_string() const noexcept {
 
-		switch(type) {
-		case Udjat::MimeType::xml:
-			// Format as XML
-			ss << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
-			ss << "<response>";
-			this->value->xml(ss);
-			ss << "</response>";
-			break;
+		int code = status_code();
 
-		case Udjat::MimeType::json:
-			// Format as JSON
-			this->value->json(ss);
-			break;
+		debug("Request status code is ",code);
 
-		case Udjat::MimeType::html:
-			// Format as HTML.
-			this->value->html(ss);
-			break;
+		if(code >= 400 && code <= 599 && empty() && Config::Value<bool>("http","use-error-templates",true)) {
 
-		default:
-			throw runtime_error("Invalid mymetype");
+			// Process error templates.
+			debug("--------------> Checking template for code ",code," ",(empty() ? "(Empty response)" : "(Non-empty response)"));
+
+			try {
+
+				HTTP::Template text{"error", (MimeType) *this};
+
+				if(text) {
+
+					text.expand([code,this](const char *key, std::string &value){
+
+						if(!strcasecmp(key,"code")) {
+
+							value = std::to_string(code);
+
+						} else if(!strcasecmp(key,"message")) {
+
+							value = this->message();
+
+						} else if(!strcasecmp(key,"body")) {
+
+							value = this->body();
+#ifdef DEBUG
+							if(!*this->body()) {
+								value = "No body on this error (DEBUG)";
+							}
+#endif // DEBUG
+						} else if(!strcasecmp(key,"syscode")) {
+
+							value = std::to_string(this->status_code());
+
+						} else {
+
+							return false;
+
+						}
+
+						return true;
+
+					});
+
+					return text;
+
+				}
+
+			} catch(const std::exception &e) {
+
+				Logger::String{e.what()}.error("http");
+
+			}
+		}
+
+		try {
+
+			if(mimetype == MimeType::svg) {
+
+				// It's an svg
+				HTTP::Icon icon;
+
+				Response::Object::for_each([&icon](const char *, const Udjat::Value &value){
+					if(value == Udjat::Value::Icon) {
+						icon = HTTP::Icon::getInstance(value.to_string());
+						return (bool) icon;
+					}
+					return false;
+
+				});
+
+				if(!icon) {
+					throw system_error(ENOENT,system_category(),"No icon here");
+				}
+
+				debug("Sending icon '",icon.c_str(),"'");
+
+				return string{File::Text{icon.c_str()}.c_str()};
+
+			}
+
+			return Udjat::Response::Value::to_string();
+
+		} catch(const std::exception &e) {
+
+			Logger::String{e.what()}.error("http");
+			const_cast<HTTP::Response *>(this)->failed(e);
+			return e.what();
+
+		} catch(...) {
+
+			Logger::String message{_( "Unexpected error processing response text" )};
+			message.error("http");
+			const_cast<HTTP::Response *>(this)->failed(-1,message.c_str());
+			return message;
 
 		}
 
-		return ss.str();
-	}
+		return "";
 
-	Udjat::Value & HTTP::Response::operator[](const char *name) {
-		return (*this->value)[name];
-	}
-
-	Udjat::Value & HTTP::Response::append(const Type type) {
-		return this->value->append(type);
-	}
-
-	Udjat::Value & HTTP::Response::reset(const Type type) {
-		return this->value->reset(type);
-	}
-
-	Udjat::Value & HTTP::Response::set(const Value &value) {
-		return this->value->set(value);
-	}
-
-	Udjat::Value & HTTP::Response::set(const char *value, const Type type) {
-		return this->value->set(value,type);
 	}
 
  }

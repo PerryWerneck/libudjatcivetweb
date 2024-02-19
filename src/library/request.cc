@@ -18,39 +18,111 @@
  */
 
  #include <config.h>
+
  #include <udjat/civetweb.h>
- #include <udjat/request.h>
+ #include <udjat/tools/request.h>
+ #include <udjat/tools/application.h>
  #include <udjat/tools/http/request.h>
+ #include <udjat/tools/http/timestamp.h>
+ #include <udjat/tools/http/keypair.h>
+ #include <udjat/tools/logger.h>
+ #include <udjat/tools/configuration.h>
+ #include <udjat/tools/intl.h>
+
+ #include <stdexcept>
 
  using namespace std;
 
  namespace Udjat {
 
-	HTTP::Request::Request(const string &u, const char *t)
-		: Udjat::Request(t) {
+	HTTP::Request::Request(const char *path, HTTP::Method method) : Udjat::Request{path, method} {
 
-		this->path = u;
-		this->method = pop();
+		if(reqpath && *reqpath && !strncasecmp(reqpath,"/api/",5)) {
+
+			// Is an standard API request, extract version.
+
+			reqpath += 5;
+			while(*reqpath && *reqpath != '/') {
+				if(isdigit(*reqpath)) {
+					apiver *= 10;
+					apiver += ('0' - *reqpath);
+				}
+				reqpath++;
+			}
+
+		}
 
 	}
 
-	std::string HTTP::Request::pop() {
+	const char * HTTP::Request::c_str() const noexcept {
+		if(reqpath && *reqpath) {
+			return reqpath;
+		}
+		return Udjat::Request::path();
+	}
 
-		if(path.empty()) {
-			throw system_error(ENODATA,system_category(),"Not enough arguments");
+	const char * HTTP::Request::header(const char *) const noexcept {
+		return "";
+	}
+
+	bool HTTP::Request::getProperty(const char *key, std::string &value) const {
+
+		if(!strcasecmp(key,"client-address")) {
+			value = address();
+			return true;
 		}
 
-		size_t pos = path.find('/');
-		if(pos == string::npos) {
-			string rc = path;
-			path.clear();
-			return rc;
+		return Udjat::Request::getProperty(key,value);
+	}
+
+	bool HTTP::Request::for_each(const std::function<bool(const char *name, const char *value)> &call) const {
+
+		if(call("client-address",address().c_str())) {
+			return true;
 		}
 
-		string rc{path.c_str(),pos};
-		path.erase(0,pos+1);
+		return Udjat::Request::for_each(call);
+	}
 
-		return rc;
+	bool HTTP::Request::decrypt(HTTP::Request::Token &token) const {
+
+		memset(&token,0,sizeof(token));
+
+		// Check for authorization header.
+		{
+			String b64 = header("Authorization");
+			if(!b64.empty() && b64.has_prefix("Bearer ",true) && HTTP::KeyPair::getInstance().decrypt(b64.c_str()+7,&token,sizeof(token))) {
+				debug("Got authentication from header");
+				return true;
+			}
+		}
+
+		// Check for cookie.
+		{
+			String b64 = cookie((Application::Name() + "-session").c_str());
+			if(!b64.empty() && HTTP::KeyPair::getInstance().decrypt(b64.c_str(),&token,sizeof(token))) {
+				debug("Got authentication from cookie");
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	bool HTTP::Request::authenticated() const noexcept {
+		Token token;
+		return get(token);
+	}
+
+	bool HTTP::Request::cached(const Udjat::TimeStamp &timestamp) const {
+
+		HTTP::TimeStamp	reqtime{header("If-Modified-Since")};
+
+		if(reqtime && ((time_t) reqtime) >= ((time_t) timestamp)) {
+			return true;
+		}
+
+		return Udjat::Request::cached(timestamp);
 	}
 
  }

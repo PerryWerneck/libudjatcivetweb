@@ -1,7 +1,7 @@
 /* SPDX-License-Identifier: LGPL-3.0-or-later */
 
 /*
- * Copyright (C) 2021 Perry Werneck <perry.werneck@gmail.com>
+ * Copyright (C) 2024 Perry Werneck <perry.werneck@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published
@@ -17,31 +17,31 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
- #include <config.h>
- #include <udjat/tools/http/icon.h>
- #include <udjat/tools/configuration.h>
- #include <udjat/tools/string.h>
- #include <udjat/tools/application.h>
- #include <fcntl.h>
+ /**
+  * @brief Brief description of this source.
+  */
 
- using namespace std;
+ #pragma once
+ #include <udjat/defs.h>
+ #include <udjat/tools/string.h>
+ #include <udjat/tools/http/mimetype.h>
 
  namespace Udjat {
 
 	namespace HTTP {
 
-		Icon::Icon(const char *name) {
+		/// @brief HTTP Template page.
+		class UDJAT_API Template : public String {
+		public:
 
-			Application::DataDir file{"icons"};
+			/// @brief Build a template page for mimetyppe.
+			Template(const char *name, const MimeType type = MimeType::html);
 
-			if(file.find((string{name} + ".svg").c_str(),true)) {
-				assign(file);
-				return;
+			inline operator bool() const noexcept {
+				return !empty();
 			}
 
-			throw system_error(ENOENT,system_category(),string{"Can't find icon '"} + name + "'");
-
-		}
+		};
 
 	}
 

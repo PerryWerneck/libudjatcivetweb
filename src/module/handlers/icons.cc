@@ -26,34 +26,46 @@
   *
   */
 
- #include "private.h"
+ #include <config.h>
+ #include <udjat/defs.h>
+ #include <private/module.h>
  #include <udjat/tools/http/icon.h>
  #include <udjat/tools/http/exception.h>
  #include <udjat/tools/http/mimetype.h>
  #include <udjat/tools/configuration.h>
+ #include <udjat/tools/logger.h>
+ #include <udjat/tools/intl.h>
 
 #ifndef _WIN32
 	#include <unistd.h>
 #endif // _WIN32
 
+ using namespace Udjat;
+
  int iconWebHandler(struct mg_connection *conn, void UDJAT_UNUSED(*cbdata)) {
+
+ 	debug("Searching for icon",mg_get_request_info(conn)->local_uri);
 
 	try {
 
-		const char *path = mg_get_request_info(conn)->local_uri;
-		while(*path && *path == '/') {
+		const char *path = strrchr(mg_get_request_info(conn)->local_uri,'/');
+		if(path) {
 			path++;
 		}
 
-		const char *ptr = strchr(path,'/');
-
-		if(ptr) {
-			path = ptr+1;
+		if(!(path && *path)) {
+			mg_send_http_error(conn, 400, "Unable to handle icon %s", mg_get_request_info(conn)->local_uri);
+			return 400;
 		}
 
+		debug("path='",path,"'");
 		Udjat::HTTP::Icon icon = Udjat::HTTP::Icon::getInstance(path);
 
-		CivetWeb::Connection(conn).send(
+		if(icon.empty()) {
+			return http_error(conn, 404, _("Not available"));
+		}
+
+		return CivetWeb::Connection(conn).send(
 			HTTP::Get,
 			icon.c_str(),
 			false,
@@ -61,30 +73,18 @@
 			Config::Value<unsigned int>("theme","icon-max-age",604800)
 		);
 
-	} catch(const HTTP::Exception &error) {
-
-		mg_send_http_error(conn, error.codes().http, "%s", error.what());
-		return error.codes().http;
+	} catch(const HTTP::Exception &e) {
+		return send(conn, HTTP::Response{MimeTypeFactory(conn)}.failed(e));
 
 	} catch(const system_error &e) {
-
-		int code = HTTP::Exception::translate(e);
-		mg_send_http_error(conn, code, "%s", e.what());
-		return code;
+		return send(conn, HTTP::Response{MimeTypeFactory(conn)}.failed(e));
 
 	} catch(const exception &e) {
-
-		mg_send_http_error(conn, 500, "%s", e.what());
-		return 500;
+		return send(conn, HTTP::Response{MimeTypeFactory(conn)}.failed(e));
 
 	} catch(...) {
-
-		mg_send_http_error(conn, 500, "%s", "Unexpected error");
-		return 500;
+		return send(conn, HTTP::Response{MimeTypeFactory(conn)}.failed(_("Unexpected error")));
 
 	}
-
-	mg_send_http_error(conn, 404, "Not available");
-	return 404;
 
  }

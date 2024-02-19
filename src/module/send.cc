@@ -17,15 +17,25 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
- #include "private.h"
+ #include <private/module.h>
  #include <sys/types.h>
  #include <sys/stat.h>
  #include <udjat/version.h>
  #include <udjat/tools/http/timestamp.h>
  #include <udjat/tools/http/mimetype.h>
+ #include <udjat/tools/http/connection.h>
  #include <udjat/tools/file.h>
  #include <udjat/tools/logger.h>
+ #include <udjat/tools/configuration.h>
+ #include <udjat/tools/application.h>
+ #include <udjat/tools/intl.h>
+ #include <udjat/tools/exception.h>
  #include <sstream>
+ #include <fcntl.h>
+
+ #ifdef HAVE_UNISTD_H
+	#include <unistd.h>
+ #endif // HAVE_UNISTD_H
 
  using namespace std;
 
@@ -104,16 +114,13 @@
 				//
 				cerr << "civetweb\tClient has requested directory '" << filename << "' without an ending '/'" << endl;
 
-				/*
 				//
 				// Redirect to correct url.
 				//
-				mg_response_header_start(conn, 301);
-				mg_response_header_add(conn, "Location", (string{name} + '/').c_str(), -1);
-				mg_response_header_send(conn);
-
-				return 301;
-				*/
+				// mg_response_header_start(conn, 301);
+				// mg_response_header_add(conn, "Location", (string{name} + '/').c_str(), -1);
+				// mg_response_header_send(conn);
+				// return 301;
 
 				mg_response_header_start(conn, 400);
 				mg_response_header_send(conn);
@@ -213,5 +220,125 @@
 		return 200;
 	}
 
+ }
+
+ int send(struct mg_connection *conn, const Udjat::Abstract::Response &response) noexcept {
+
+	int code = HTTP::Exception::code(response.status_code());
+	const struct mg_request_info *request_info = mg_get_request_info(conn);
+	string message;
+
+	if(response.not_modified()) {
+
+		debug("------------------------------------> NOT MODIFIED");
+
+		// Not modified
+		if(Logger::enabled(Logger::Trace)) {
+			Logger::String{
+				request_info->remote_addr," ",
+				request_info->request_method," ",
+				request_info->local_uri," Not Modified - 304"
+			}.info("civetweb");
+		}
+
+		mg_response_header_start(conn, 304);
+		response.for_each([conn](const char *header_name, const char *header_value){
+			debug(header_name,"='",header_value,"'");
+			mg_response_header_add(conn, header_name, header_value, -1);
+		});
+		mg_response_header_send(conn);
+
+		return 304;
+	}
+
+	try {
+
+		string text{response.to_string()};
+
+		// Build and send header
+		mg_response_header_start(conn, code);
+
+		if(code < 200 || code > 299) {
+
+			// It's an error, log it
+			Logger::String{
+				request_info->remote_addr," ",
+				request_info->request_method," ",
+				request_info->local_uri," HTTP Error ",
+				std::to_string(code)," - ",response.message()," (Error ",std::to_string(response.status_code()),")"
+			}.warning("civetweb");
+
+		}
+
+		// Setup headers
+		response.for_each([conn](const char *header_name, const char *header_value){
+			debug(header_name,"='",header_value,"'");
+			mg_response_header_add(conn, header_name, header_value, -1);
+		});
+
+		if(text.empty()) {
+
+			mg_response_header_send(conn);
+
+		} else {
+
+			mg_response_header_add(conn, "Content-Length", std::to_string(text.size()).c_str(), -1);
+			mg_response_header_send(conn);
+			mg_write(conn, text.c_str(), text.size());
+
+		}
+
+		return code;
+
+	} catch( const Udjat::Exception &e ) {
+		debug("-----> ",__FUNCTION__,": ",e.what());
+		message = e.what();
+		code = e.syscode();
+
+	} catch( const std::system_error &e ) {
+		debug("-----> ",__FUNCTION__,": ",e.what());
+		message = e.what();
+		code = e.code().value();
+
+	} catch( const std::exception &e ) {
+		debug("-----> ",__FUNCTION__,": ",e.what());
+		message = e.what();
+		code = -1;
+
+	} catch( ... ) {
+		debug("-----> ",__FUNCTION__,": ","Unexpected error");
+		message = _("Unexpected error");
+		code = -1;
+
+	}
+
+	int http_error_code = HTTP::Exception::code(code);
+
+	Logger::String{
+		"Standard 'send' method has failed with exception '",
+		message.c_str(),
+		"', sending empty HTTP error ",
+		http_error_code,
+		" to ",
+		request_info->remote_addr
+	}.error("civetweb");
+
+	if(Logger::enabled(Logger::Trace)) {
+		Logger::String{
+			request_info->remote_addr," ",
+			request_info->request_method," ",
+			request_info->local_uri," ",
+			http_error_code, " - ", message.c_str()," (syserror ",code,")"
+		}.trace("civetweb");
+	}
+
+	mg_response_header_start(conn, http_error_code);
+	mg_response_header_add(conn, "Cache-Control", "no-cache, no-store, must-revalidate, private, max-age=0", -1);
+	mg_response_header_add(conn, "Expires", "0", -1);
+	mg_response_header_send(conn);
+
+	debug("Returning error ",http_error_code);
+
+	return http_error_code;
  }
 

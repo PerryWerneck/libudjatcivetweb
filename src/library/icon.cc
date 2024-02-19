@@ -18,13 +18,15 @@
  */
 
  #include <config.h>
+ #include <udjat/ui/icon.h>
  #include <udjat/tools/http/icon.h>
  #include <map>
  #include <mutex>
+ #include <udjat/tools/logger.h>
 
-#ifndef _WIN32
+#ifdef HAVE_UNISTD_H
 	#include <unistd.h>
-#endif // _WIN32
+#endif // HAVE_UNISTD_H
 
  #include <iostream>
 
@@ -39,7 +41,7 @@
 			map<std::string,Icon> cache;
 
 		public:
-			Icon find(const char *name) {
+			const Icon & find(const char *name) {
 
 				static mutex guard;
 				lock_guard<mutex> lock(guard);
@@ -55,16 +57,26 @@
 				}
 
 				// Not found, create new icon.
+				debug("Appending icon '",name,"'");
 				auto inserted = cache.emplace(make_pair(std::string{name},Icon(name)));
 
-				cout << "icons\tCaching " << inserted.first->second << " as " << name << endl;
+				if(!inserted.first->second.empty()) {
+					cout << "civetweb\tCaching " << inserted.first->second << " as " << name << endl;
+				}
 				return inserted.first->second;
 
 			}
 
 		};
 
-		Icon Icon::getInstance(const char *name) {
+		Icon::Icon(const char *n) : std::string{Udjat::Icon{n}.filename()} {
+		}
+
+		const Icon & Icon::getInstance(const std::string &name) {
+			return getInstance(name.c_str());
+		}
+
+		const Icon & Icon::getInstance(const char *name) {
 
 			static Controller controller;
 			return controller.find(name);

@@ -20,7 +20,7 @@
  #pragma once
 
  #include <udjat/defs.h>
- #include <udjat/request.h>
+ #include <udjat/tools/report.h>
  #include <udjat/tools/http/value.h>
  #include <list>
 
@@ -28,46 +28,45 @@
 
 	namespace HTTP {
 
-		class UDJAT_API Report : public Udjat::Report {
+		class UDJAT_API Report : public Udjat::Response::Table {
 		private:
-
-			/// @brief Report format.
-			const MimeType mimetype;
-
-			/// @brief Report contents
 			std::list<HTTP::Value> values;
 
-			void to_json(std::stringstream &ss) const;
-			void to_html(std::stringstream &ss) const;
-			void to_xml(std::stringstream &ss) const;
+			/// @brief Value for X-Total-Count header.
+			size_t total_count = 0;
 
-		 public:
-		 	Report();
-			Report(const char *uri, const MimeType mimetype);
+			/// @brief Values for Content-Range header.
+			struct {
+				size_t from = 0;
+				size_t to = 0;
+				size_t total = 0;
+			} range;
+
+		public:
+			Report(Udjat::MimeType mimetype);
 			virtual ~Report();
 
-			std::string to_string() const;
+			bool empty() const override;
 
-			Udjat::Report & push_back(const char *str) override;
+			/// @brief Enumerate headers.
+			void for_each(const std::function<void(const char *header_name, const char *header_value)> &call) const noexcept override;
 
-			Udjat::Report & push_back(const std::string &value) override;
+			void for_each(const std::function<void(const Value::Type type, const char *value)> &func) const override;
 
-			Udjat::Report & push_back(const short value) override;
-			Udjat::Report & push_back(const unsigned short value) override;
+			Udjat::Response::Table & push_back(const char *str, Udjat::Value::Type type) override;
 
-			Udjat::Report & push_back(const int value) override;
-			Udjat::Report & push_back(const unsigned int value) override;
+			/// @brief Set item count for this response.
+			/// @param value The item count (for X-Total-Count http header).
+			void count(size_t value) noexcept override;
 
-			Udjat::Report & push_back(const long value) override;
-			Udjat::Report & push_back(const unsigned long value) override;
-
-			Udjat::Report & push_back(const Udjat::TimeStamp value) override;
-			Udjat::Report & push_back(const bool value) override;
-
-			Udjat::Report & push_back(const float value) override;
-			Udjat::Report & push_back(const double value) override;
+			/// @brief Set range for this response (Content-Range http header).
+			/// @param from First item.
+			/// @param to Last item.
+			/// @param total Item count.
+			void content_range(size_t from, size_t to, size_t total) noexcept override;
 
 		};
+
 
 	}
 

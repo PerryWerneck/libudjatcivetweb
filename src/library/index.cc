@@ -69,11 +69,11 @@
 			if(root) {
 
 				page	<< "<h2>" << _("Active agents") << "</h2><ul>"
-						<< "<li><a href=\"/api/1.0/agent.html\">";
+						<< "<li><a href=\"/api/1.0/htmlagent.html\">";
 
 				{
-					auto icon = std::to_string(Abstract::Agent::root()->state()->level());
-					if(HTTP::Icon{icon}) {
+					auto icon = HTTP::Icon::getInstance(std::to_string(Abstract::Agent::root()->state()->level()));
+					if(icon) {
 						page << "<img src=\"icon/" << icon << ".svg\" height=\"16\" style=\"vertical-align:bottom\"/>&nbsp;";
 					}
 				}
@@ -99,8 +99,8 @@
 					page << "<li><a href=\"/api/1.0/agent" << agent.path() << ".html\">";
 
 					{
-						auto icon = std::to_string(agent.state()->level());
-						if(HTTP::Icon{icon}) {
+						auto icon = HTTP::Icon::getInstance(std::to_string(agent.state()->level()));
+						if(icon) {
 							page << "<img src=\"icon/" << icon << ".svg\" height=\"16\" style=\"vertical-align:bottom\"/>&nbsp;";
 						}
 					}
@@ -168,7 +168,7 @@
 
 		page << "</body></html>";
 
-		return success(
+		return send(
 				to_string(MimeType::html),
 				page.str().c_str(),
 				page.str().size()
@@ -204,6 +204,6 @@
 
 	}
 
-	return failed(404, strerror(ENOENT));
+	return send(ENOENT, strerror(ENOENT));
 
  }

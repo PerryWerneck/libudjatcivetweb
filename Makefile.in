@@ -7,12 +7,15 @@ SONAME=@SONAME@
 
 LIBRARY_SOURCES= \
 	$(wildcard src/library/*.cc) \
+	$(wildcard src/library/oauth2/*.cc) \
 	$(wildcard src/library/os/@OSNAME@/*.cc) \
 	$(wildcard src/library/layout/*.cc)
 
 MODULE_SOURCES= \
 	$(wildcard src/module/*.cc) \
-	$(wildcard src/module/worker/*.cc)
+	$(wildcard src/module/worker/*.cc) \
+	$(wildcard src/module/handlers/*.cc) \
+	$(wildcard src/module/oauth2/*.cc)
 
 TEST_SOURCES= \
 	$(wildcard src/testprogram/*.cc)
@@ -70,7 +73,7 @@ CFLAGS= \
 	-DBUILD_DATE=`date +%Y%m%d` \
 	-DLOCALEDIR=$(localedir) \
 	@UDJAT_CFLAGS@ \
-	@PUGIXML_CFLAGS@
+	@LIBSSL_CFLAGS@
 
 LDFLAGS=\
 	@LDFLAGS@
@@ -78,8 +81,9 @@ LDFLAGS=\
 LIBS= \
 	@LIBS@ \
 	@UDJAT_LIBS@ \
-	@PUGIXML_LIBS@ \
+	@LIBSSL_LIBS@ \
 	@INTL_LIBS@ \
+	@PAM_LIBS@ \
 	-lcivetweb
 
 #---[ Debug Rules ]----------------------------------------------------------------------
@@ -262,8 +266,8 @@ install-module: \
 
 install-dev: \
 	install-@OSNAME@-dev \
-	install-@OSNAME@-static 
-	
+	install-@OSNAME@-static
+		
 	@$(MKDIR) \
 		$(DESTDIR)$(includedir)/udjat/tools/http
 

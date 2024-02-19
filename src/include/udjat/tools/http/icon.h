@@ -31,8 +31,6 @@
 			class Controller;
 			friend class Controller;
 
-		public:
-
 			/// @param name Icon name.
 			Icon(const char *name);
 
@@ -43,12 +41,18 @@
 			Icon(const T &name) : Icon(std::to_string(name)) {
 			}
 
+		public:
+
+			Icon() {
+			}
+
 			inline operator bool() const {
 				return !empty();
 			}
 
 			/// @brief Get cached icon instance, load it if necessary.
-			static Icon getInstance(const char *name);
+			static const Icon & getInstance(const char *name);
+			static const Icon & getInstance(const std::string &name);
 
 		};
 	}

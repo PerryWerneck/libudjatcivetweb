@@ -1,4 +1,48 @@
 -------------------------------------------------------------------
+Wed Dec 20 23:05:34 UTC 2023 - perry.werneck@gmail.com
+
+- Update to version 1.0+git20230529:
+  * Adding mingw package.
+  * Adding http alias.
+  * Fixing ci-build.
+  * Fixing CodeQL alerts.
+  * Fixing abend when the agent subsystem is down.
+  * Fixing package build.
+  * Updating win32 package.
+  * Fixing win32 package.
+  * Fixing CodeQL alerts.
+  * Fixing build with latest libudjat.
+  * Adding 'deb' control files.
+  * Getting favicon from OS.
+  * Adding path and verb in trace for request failed.
+  * Error template and responses are now debug/trace messages.
+  * Icon search paths are now configurable.
+  * Fixing custom request handler.
+  * Fixing build after libudjat updates.
+  * Logging some available URLs on httpd startup.
+  * Improving icon class, fixing locale.
+  * Small adjustments in package generation.
+  * Adding icon search using branding default path.
+  * Fixing segfault on empty array.
+  * Implementing http test method.
+  * Adding service url on debug log.
+  * Refactoring http client module.
+  * Moving default index page to library.
+  * Adding translation file.
+  * Adding '%' for 'fraction' values on HTML response.
+  * Adding 'workers' to default index page.
+  * Improving index page.
+  * Adding service option.
+  * Fixing conflicts with the latest libudjat trace engine.
+  * Working on HTML exporter.
+  * Adding simple index page.
+  * Fixing search for error page templates.
+  * Adding xml report.
+  * Updating 'link' script.
+  * Updating sources.
+  * Adding package control files.
+
+-------------------------------------------------------------------
 Mon Sep 12 18:46:37 UTC 2022 - perry.werneck@gmail.com
 
 - Update to version 1.0+git20220829:
@@ -13,6 +57,6 @@ Mon Sep 12 18:46:37 UTC 2022 - perry.werneck@gmail.com
   * Fixing civetweb settings parser.
 
 -------------------------------------------------------------------
-Sun Apr 18 03:12:30 UTC 2021 - Perry Werneck <perry.werneck@gmail.com>
+Sun Apr 18 03:12:30 UTC 2021 - perry.werneck@gmail.com
 
 - First build on OBS. 

@@ -26,18 +26,24 @@
   *
   */
 
- #include "private.h"
+ #include <config.h>
+ #include <udjat/defs.h>
  #include <udjat/tools/http/image.h>
  #include <udjat/tools/http/exception.h>
  #include <udjat/tools/http/mimetype.h>
  #include <udjat/tools/configuration.h>
+ #include <udjat/tools/intl.h>
  #include <udjat/tools/http/connection.h>
+ #include <udjat/tools/logger.h>
 
-#ifndef _WIN32
+ #include <private/module.h>
+ #include <civetweb.h>
+
+ #ifdef HAVE_UNISTD_H
 	#include <unistd.h>
-#endif // _WIN32
+ #endif // HAVE_UNISTD_H
 
- int imageWebHandler(struct mg_connection *conn, void UDJAT_UNUSED(*cbdata)) {
+ int imageWebHandler(struct mg_connection *conn, void *) {
 
 	try {
 
@@ -52,40 +58,47 @@
 			path = ptr+1;
 		}
 
-		Udjat::HTTP::Image image{path};
+		debug("searching for image '",path,"'");
 
-		CivetWeb::Connection(conn).send(
+
+		Udjat::HTTP::Image filename{path};
+
+		if(filename) {
+
+			Logger::String{"Sending static file '", filename.c_str(),"'"}.trace("http");
+			mg_send_file(conn,filename.c_str());
+			return 200;
+
+		} else {
+
+			Logger::String{"Cant find static file '", filename.c_str(),"'"}.error("http");
+
+		}
+
+		/*
+		return CivetWeb::Connection(conn).send(
 			HTTP::Get,
 			image.c_str(),
 			false,
 			"image/svg+xml",
 			Config::Value<unsigned int>("theme","image-max-age",604800)
 		);
+		*/
 
-	} catch(const HTTP::Exception &error) {
-
-		mg_send_http_error(conn, error.codes().http, "%s", error.what());
-		return error.codes().http;
+	} catch(const HTTP::Exception &e) {
+		return send(conn, HTTP::Response{MimeTypeFactory(conn)}.failed(e));
 
 	} catch(const system_error &e) {
-
-		int code = HTTP::Exception::translate(e);
-		mg_send_http_error(conn, code, "%s", e.what());
-		return code;
+		return send(conn, HTTP::Response{MimeTypeFactory(conn)}.failed(e));
 
 	} catch(const exception &e) {
-
-		mg_send_http_error(conn, 500, "%s",  e.what());
-		return 500;
+		return send(conn, HTTP::Response{MimeTypeFactory(conn)}.failed(e));
 
 	} catch(...) {
-
-		mg_send_http_error(conn, 500, "Unexpected error");
-		return 500;
+		return send(conn, HTTP::Response{MimeTypeFactory(conn)}.failed(_("Unexpected error")));
 
 	}
 
-	mg_send_http_error(conn, 404, "Not available");
-	return 404;
+	return http_error(conn, 404, _("Not available"));
 
  }

@@ -18,7 +18,7 @@
  */
 
  #include <config.h>
- #include "../private.h"
+ #include <private/module.h>
  #include <udjat/version.h>
  #include <udjat/tools/configuration.h>
  #include <udjat/tools/http/exception.h>
@@ -36,7 +36,7 @@
 
 		Worker::Worker(const char *url, const HTTP::Method method, const char *payload) : Udjat::Protocol::Worker(url,method,payload) {
 
-			header("Connection") = "close";
+			request("Connection") = "close";
 
 			{
 #ifdef _WIN32
@@ -52,7 +52,7 @@
 
 				debug("useragent=",useragent);
 
-				header("User-Agent") = useragent.c_str();
+				request("User-Agent") = useragent.c_str();
 
 			}
 
@@ -61,18 +61,18 @@
 		struct mg_connection * Worker::connect() {
 
 			URL::Components components = url().ComponentsFactory();
-			header("Host") = components.hostname;
+			request("Host") = components.hostname;
 
 			Config::for_each(
 				(components.scheme + "-default-headers").c_str(),
 				[this](const char *key, const char *value) {
-					header(key) = value;
+					request(key) = value;
 					return true;
 				}
 			);
 
 			string hdr;
-			for(Protocol::Header &header : headers) {
+			for(Protocol::Header &header : headers.request) {
 				hdr += header.name();
 				hdr += ":";
 				hdr += header.value();
@@ -125,15 +125,26 @@
 			return *this;
 		}
 
-		Protocol::Header & Worker::header(const char *name) {
+		Protocol::Header & Worker::request(const char *name) {
 
-			auto it = std::find(headers.begin(),headers.end(),name);
-			if(it != headers.end()) {
+			auto it = std::find(headers.request.begin(),headers.request.end(),name);
+			if(it != headers.request.end()) {
 				return *it;
 			}
 
-			headers.emplace_back(name);
-			return headers.back();
+			headers.request.emplace_back(name);
+			return headers.request.back();
+		}
+
+		const Protocol::Header & Worker::response(const char *name) {
+
+			auto it = std::find(headers.response.begin(),headers.response.end(),name);
+			if(it != headers.response.end()) {
+				return *it;
+			}
+
+			headers.response.emplace_back(name);
+			return headers.response.back();
 		}
 
 		bool Worker::save(const char *filename, const std::function<bool(double current, double total)> &progress, bool replace) {
@@ -220,7 +231,7 @@
 
 					cout << "civetweb\tServer response was '" << info->status_code << " " << info->status_text << "'" << endl;
 
-					throw HTTP::Exception(info->status_code, url().c_str(), info->status_text);
+					throw HTTP::Exception(info->status_code, info->status_text);
 
 				}
 

@@ -21,6 +21,7 @@
  #include <udjat/civetweb.h>
  #include <udjat/tools/value.h>
  #include <udjat/tools/http/value.h>
+ #include <udjat/tools/logger.h>
  #include <iostream>
  #include <iomanip>
 
@@ -28,11 +29,33 @@
 
  namespace Udjat {
 
-	HTTP::Value::Value(Udjat::Value::Type t) : type(t) {
+	HTTP::Value::Value(Udjat::Value::Type t) : type{t} {
+	}
+
+	HTTP::Value::Value(const char *v, Udjat::Value::Type t) : type{t}, value{v} {
 	}
 
 	HTTP::Value::~Value() {
 		reset(Udjat::Value::Undefined);
+	}
+
+	bool HTTP::Value::empty() const noexcept {
+		return children.empty();
+	}
+
+	HTTP::Value::operator Value::Type() const noexcept {
+		return this->type;
+	}
+
+	bool HTTP::Value::for_each(const std::function<bool(const char *name, const Udjat::Value &value)> &call) const {
+
+		for(const auto & [key, value] : children)	{
+			if(call(key.c_str(),*value)) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	Value & HTTP::Value::reset(const Udjat::Value::Type type) {

@@ -28,29 +28,29 @@
 
  namespace Udjat {
 
-	HTTP::Handler::Handler(const char *u) : uri(u) {
+	HTTP::Handler::Handler(const char *p) : path{p} {
 
-		if(!(u && *u)) {
+		if(!(path && *path)) {
 			throw system_error(EINVAL,system_category(),"http-handler attribute is required");
 		}
 
-		if(u[0] != '/') {
+		if(path[0] != '/') {
 			throw system_error(EINVAL,system_category(),"http-handler should start with '/'");
 		}
 
-		if(u[strlen(u)-1] != '/') {
+		if(path[strlen(path)-1] != '/') {
 			throw system_error(EINVAL,system_category(),"http-handler should end with '/'");
 		}
 
+		HTTP::Server::getInstance().push_back(this);
+
 	}
 
-	HTTP::Handler::Handler(const pugi::xml_node &node, const char *tagname) : HTTP::Handler(Quark(node,tagname,"").c_str()) {
+	HTTP::Handler::Handler(const pugi::xml_node &node, const char *tagname) : HTTP::Handler{Quark{node,tagname,""}.c_str()} {
 	}
 
 	HTTP::Handler::~Handler() {
-		if(server) {
-			server->remove(this);
-		}
+		HTTP::Server::getInstance().remove(this);
 	}
 
  }

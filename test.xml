@@ -8,8 +8,7 @@
 
 	</agent>
 	
-	<random name='random' />
-
+	<agent name='random' type='random' />
 
 </config>
 

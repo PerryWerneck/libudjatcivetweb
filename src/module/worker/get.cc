@@ -18,7 +18,7 @@
  */
 
  #include <config.h>
- #include "../private.h"
+ #include <private/module.h>
  #include <udjat/tools/configuration.h>
  #include <udjat/tools/http/exception.h>
  #include <udjat/tools/protocol.h>
@@ -47,7 +47,7 @@
 
 				if(info->status_code < 200 || info->status_code > 299) {
 
-					throw HTTP::Exception(info->status_code, url().c_str(), info->status_text);
+					throw HTTP::Exception(info->status_code, info->status_text);
 
 				} else if((unsigned int) info->content_length >= response.max_size()) {
 

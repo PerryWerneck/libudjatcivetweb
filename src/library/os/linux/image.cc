@@ -18,7 +18,7 @@
  */
 
  #include <config.h>
- #include <udjat/tools/http/image.h>	
+ #include <udjat/tools/http/image.h>
  #include <udjat/tools/configuration.h>
  #include <udjat/tools/string.h>
  #include <udjat/tools/file.h>
@@ -60,6 +60,9 @@
 			}
 
 			// Then search paths
+			string filter{"*/"};
+			filter += name;
+
 			for(string &path : paths) {
 
 				try {

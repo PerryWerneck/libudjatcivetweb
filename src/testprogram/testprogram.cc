@@ -47,7 +47,7 @@
 
 		public:
 			RandomAgent(const pugi::xml_node &node) : Agent<unsigned int>(node) {
-				cout << "Creating random Agent" << endl;
+				cout << "Building random Agent" << endl;
 			}
 
 			bool refresh() override {
@@ -55,7 +55,7 @@
 				return true;
 			}
 
-			void get(const Request UDJAT_UNUSED(&request), Report &report) {
+			void get(const Request &, Response::Table &report) {
 
 				report.start("sample","row","a","b","c",nullptr);
 
@@ -68,7 +68,6 @@
 						report << (r + "." + std::to_string(col) + "." + std::to_string(((unsigned int) rand()) % limit));
 					}
 				}
-
 
 			}
 
@@ -86,6 +85,8 @@
 	Logger::redirect();
 
  	udjat_module_init();
+ 	RandomFactory rfactory;
+
 	auto rc = Application{}.run(argc,argv,"./test.xml");
 
 	debug("Application exits with rc=",rc);

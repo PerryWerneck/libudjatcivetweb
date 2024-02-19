@@ -6,7 +6,7 @@ AC_PREREQ(2.59)
 
 dnl Initialise automake with the package name, version and
 dnl bug-reporting address.
-AC_INIT([udjat-module-civetweb], [1.0], [perry.werneck@gmail.com],[udjat-module-civetweb],[https://github.com/PerryWerneck/udjat-module-civetweb])
+AC_INIT([udjat-module-civetweb], [1.2], [perry.werneck@gmail.com],[udjat-module-civetweb],[https://github.com/PerryWerneck/udjat-module-civetweb])
 
 dnl Place auxilliary scripts here.
 AC_CONFIG_AUX_DIR([scripts])
@@ -106,7 +106,7 @@ AS_IF([test x"AS_VAR_GET(CACHEVAR)" = xyes],
 AS_VAR_POPDEF([CACHEVAR])dnl
 ])dnl AX_CHECK_COMPILE_FLAGS
 
-AX_CHECK_COMPILE_FLAG([-std=c++17], [CPPFLAGS="$CPPFLAGS -std=c++17"], [AC_MSG_ERROR(["C++ 17 is required"])])
+AX_CHECK_COMPILE_FLAG([-std=c++1z], [CXXFLAGS="$CXXFLAGS -std=c++1z"], [AC_MSG_ERROR(["C++ 17 is required"])])
 
 dnl ---------------------------------------------------------------------------
 dnl Set the ELF symbol visibility support
@@ -221,13 +221,69 @@ AC_DEFINE_UNQUOTED(MODULE_PATH, $app_cv_module_path, [The path for module instal
 AC_SUBST(MODULE_PATH,$app_cv_module_path)
 
 dnl ---------------------------------------------------------------------------
-dnl test for pugixml
+dnl test for libssl
 dnl ---------------------------------------------------------------------------
 
-PKG_CHECK_MODULES(PUGIXML, pugixml, AC_DEFINE(HAVE_PUGIXML,[],[Do we have PUGIXML?]),AC_MSG_ERROR(pugixml is required))
+PKG_CHECK_MODULES( [LIBSSL], [libssl libcrypto], AC_DEFINE(HAVE_LIBSSL,[],[Do we have libssl?]), AC_MSG_NOTICE([libssl not present.]) )
 
-AC_SUBST(PUGIXML_LIBS)
-AC_SUBST(PUGIXML_CFLAGS)
+AC_SUBST(LIBSSL_LIBS)
+AC_SUBST(LIBSSL_CFLAGS)
+
+dnl ---------------------------------------------------------------------------
+dnl Check for PAM
+dnl ---------------------------------------------------------------------------
+
+AC_ARG_ENABLE([pam],
+        AS_HELP_STRING([--disable-pam],[Disable optional PAM support]),
+                [case "${enableval}" in
+                        yes) have_pam=yes ;;
+                        no) have_pam=no ;;
+                        *) AC_MSG_ERROR(bad value ${enableval} for --disable-pam) ;;
+                esac],
+                [have_pam=auto])
+
+if test "x${have_pam}" != xno ; then
+        AC_CHECK_HEADERS(
+                [security/pam_modules.h security/pam_modutil.h security/pam_ext.h],
+                [have_pam=yes],
+                [if test "x$have_pam" = xyes ; then
+                        AC_MSG_ERROR([PAM headers not found.])
+                fi])
+
+        AC_CHECK_LIB(
+                [pam],
+                [pam_syslog],
+                [have_pam=yes],
+                [if test "x$have_pam" = xyes ; then
+                        AC_MSG_ERROR([libpam not found.])
+                fi])
+
+        if test "x$have_pam" = xyes ; then
+
+                PAM_LIBS="-lpam -lpam_misc"
+                AC_DEFINE(HAVE_PAM, 1, [PAM available])
+                M4_DEFINES="$M4_DEFINES -DHAVE_PAM"
+
+        else
+
+                have_pam=no
+
+        fi
+
+else
+        PAM_LIBS=
+fi
+
+AC_SUBST(PAM_LIBS)
+
+dnl ---------------------------------------------------------------------------
+dnl test for pugixml
+dnl ---------------------------------------------------------------------------
+dnl 
+dnl PKG_CHECK_MODULES(PUGIXML, pugixml, AC_DEFINE(HAVE_PUGIXML,[],[Do we have PUGIXML?]),AC_MSG_ERROR(pugixml is required))
+dnl 
+dnl AC_SUBST(PUGIXML_LIBS)
+dnl AC_SUBST(PUGIXML_CFLAGS)
 
 dnl ---------------------------------------------------------------------------
 dnl Test for jsoncpp
@@ -245,6 +301,7 @@ AC_SUBST(DLL_LDFLAGS)
 AC_SUBST(BASEDIR,$ac_pwd)
 AC_CONFIG_FILES(Makefile)
 AC_CONFIG_FILES(locale/Makefile)
+AC_CONFIG_FILES(debian/shlibs)
 
 dnl ---------------------------------------------------------------------------
 dnl Output the generated config.status script.

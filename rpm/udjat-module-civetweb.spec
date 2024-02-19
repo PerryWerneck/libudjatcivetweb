@@ -1,5 +1,5 @@
 #
-# spec file for package libudjathttpd
+# spec file for package udjat-module-civetweb
 #
 # Copyright (c) 2015 SUSE LINUX GmbH, Nuernberg, Germany.
 # Copyright (C) <2008> <Banco do Brasil S.A.>
@@ -21,7 +21,7 @@
 
 Summary:		CivetWEB HTTP exporter for %{product_name} 
 Name:			udjat-module-civetweb
-Version:		1.0
+Version:		1.0+git20230529
 Release:		0
 License:		LGPL-3.0
 Source:			%{name}-%{version}.tar.xz
@@ -44,10 +44,15 @@ BuildRequires:	gcc-c++
 
 BuildRequires:	pkgconfig(libudjat)
 BuildRequires:	pkgconfig(pugixml)
+BuildRequires:	pkgconfig(libssl)
 BuildRequires:	civetweb-devel >= 1.15
+BuildRequires:	gettext-devel
+BuildRequires:	make
 
 Provides:		udjat-module-httpd
 Conflicts:		otherproviders(udjat-module-httpd)
+
+Recommends:		udjat-branding-http
 
 Provides:		udjat-module-http
 
@@ -107,7 +112,7 @@ make all
 %defattr(-,root,root)
 %{_includedir}/udjat/tools/http/*.h
 %{_libdir}/*.so
-%{_libdir}/*.a
+%exclude %{_libdir}/*.a
 %{_libdir}/pkgconfig/*.pc
 
 %pre -n libudjathttpd%{_libvrs} -p /sbin/ldconfig
