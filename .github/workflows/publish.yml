@@ -21,7 +21,7 @@ jobs:
         with:
           msystem: mingw64
           update: true
-          install: dos2unix xz mingw-w64-x86_64-gcc automake autoconf make git pkgconf mingw-w64-x86_64-gettext gettext-devel libtool mingw-w64-x86_64-pugixml
+          install: dos2unix xz mingw-w64-x86_64-gcc automake autoconf make git pkgconf mingw-w64-x86_64-gettext gettext-devel libtool mingw-w64-x86_64-pugixml mingw-w64-x86_64-civetweb
       - uses: robinraju/release-downloader@v1.7
         with:
           repository: "PerryWerneck/libudjat"
@@ -35,7 +35,7 @@ jobs:
       - uses: ncipollo/release-action@v1
         with:
           tag: ${{ steps.gettag.outputs.tag }}
-          artifacts: "udjat-module-*.pkg.tar.zst"
+          artifacts: "*-module-*.pkg.tar.zst"
           allowUpdates: true
           draft: false
           makeLatest: true
