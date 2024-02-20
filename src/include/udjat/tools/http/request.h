@@ -84,6 +84,9 @@
 			/// @brief The client address.
 			virtual String address() const = 0;
 
+			/// @brief The response mime-type.
+			MimeType mimetype() const noexcept;
+
 			bool for_each(const std::function<bool(const char *name, const char *value)> &call) const override;
 
 			/// @brief HTTP cookie.

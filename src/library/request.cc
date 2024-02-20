@@ -125,4 +125,27 @@
 		return Udjat::Request::cached(timestamp);
 	}
 
+	MimeType HTTP::Request::mimetype() const noexcept {
+
+		// Legacy header.
+		const char *remote_request = header("X-RemoteRequest");
+		if(remote_request && *remote_request) {
+			auto mime = MimeTypeFactory(remote_request);
+			if(mime != MimeType::custom) {
+				return mime;
+			}
+		}
+
+		// Use 'accept' header to identify response type.
+		for(const String &value : String{header("accept")}.split(",")) {
+			auto mime = MimeTypeFactory(value.c_str(),MimeType::custom);
+			if(mime != MimeType::custom) {
+				return mime;
+			}
+		}
+
+		return MimeType::custom;
+	}
+
+
  }
