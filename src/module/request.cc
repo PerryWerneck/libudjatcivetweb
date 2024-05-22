@@ -44,6 +44,18 @@
 		Request::Request(struct mg_connection *c)
 			: HTTP::Request{mg_get_request_info(c)->local_uri,mg_get_request_info(c)->request_method}, conn{c}, info{mg_get_request_info(c)} {
 
+			debug("request_uri='",mg_get_request_info(c)->request_uri,"'");
+			debug("local_uri_raw='",mg_get_request_info(c)->local_uri_raw,"'");
+			debug("local_uri='",mg_get_request_info(c)->local_uri,"'");
+
+#ifdef DEBUG
+			{
+				for(int header = 0; header < info->num_headers; header++) {
+					debug("header(",info->http_headers[header].name,")='",info->http_headers[header].value,"'");
+				}
+			}
+#endif // DEBUG
+
 			// https://github.com/civetweb/civetweb/blob/master/examples/embedded_c/embedded_c.c
 			if(!strcasecmp(header("Content-Type"),"application/x-www-form-urlencoded")) {
 

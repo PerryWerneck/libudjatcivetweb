@@ -155,49 +155,32 @@
 						<< basename
 						<< "</h1><hr /><pre>";
 
-#if UDJAT_CORE_BUILD < 22122217
-			File::Path::for_each(filename.c_str(),[&response](const char *name, const File::Stat &st) {
+			File::Path{filename.c_str()}.for_each([&response](const File::Path &path, const File::Stat &st) {
 
-				name = strrchr(name,'/');
+				const char *name = strrchr(path.c_str(),'/');
+
 				if(!name) {
-					return true;
+					return false;
 				}
 				name++;
 
 				if(name[0] == '.') {
-					return true;
+					return false;
 				}
 
 				response << "<a href=\"" << name;
 				if((st.st_mode & S_IFMT) == S_IFDIR) {
-					response << '/';
+					response	<< "/\">"
+								<< name
+								<< "/";
+				} else {
+					response	<< "\">"
+								<< name;
 				}
-				response	<< "\">"
-							<< name
-							<< "</a>" << endl;
-
-				return true;
-			});
-#else
-			File::Path{filename}.for_each([&response](const File::Path &file) {
-
-				const char *name = strrchr(file.c_str(),'/');
-				if(!name) {
-					return true;
-				}
-				name++;
-
-				response << "<a href=\"" << name;
-				if(file.dir()) {
-					response << '/';
-				}
-				response	<< "\">"
-							<< name
-							<< "</a>" << endl;
+				response << "</a>" << endl;
 
 				return false;
 			});
-#endif // UDJAT_CORE_BUILD
 
 			response << "</pre><hr /></body></html>";
 
