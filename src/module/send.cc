@@ -160,8 +160,10 @@
 				const char *name = strrchr(path.c_str(),'/');
 
 				if(!name) {
+					clog << "httpd\tUnexpected filename '" << path.c_str() << "'" << endl;
 					return false;
 				}
+
 				name++;
 
 				if(name[0] == '.') {
