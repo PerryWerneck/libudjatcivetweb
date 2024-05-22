@@ -24,6 +24,7 @@
  #include <udjat/module.h>
  #include <udjat/tools/logger.h>
  #include <udjat/factory.h>
+ #include <udjat/tools/http/handler.h>
 
  using namespace std;
  using namespace Udjat;
@@ -41,12 +42,12 @@
 
 	std::shared_ptr<Abstract::Agent> AgentFactory(const Abstract::Object &, const pugi::xml_node &node) const override {
 
-		class RandomAgent : public Agent<unsigned int> {
+		class RandomAgent : public Agent<unsigned int>, public Udjat::HTTP::Handler {
 		private:
 			unsigned int limit = 5;
 
 		public:
-			RandomAgent(const pugi::xml_node &node) : Agent<unsigned int>(node) {
+			RandomAgent(const pugi::xml_node &node) : Agent<unsigned int>(node), Udjat::HTTP::Handler{node} {
 				cout << "Building random Agent" << endl;
 			}
 
@@ -69,6 +70,13 @@
 					}
 				}
 
+			}
+
+			int handle(const Udjat::HTTP::Connection &conn, const Udjat::HTTP::Request &request, const Udjat::MimeType mimetype) override {
+
+				debug("Handling request '",request.c_str(),"'");
+
+				return conn.send(HTTP::Get,"./",true);
 			}
 
 		};

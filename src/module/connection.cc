@@ -56,6 +56,7 @@
 				}
 			}
 
+			/*
 			Logger::String{"Rejecting request ",request_uri()," from ",info->remote_addr}.error("civetweb");
 			throw system_error(
 						ENOENT,system_category(),
@@ -64,6 +65,7 @@
 							Config::Value<string>{"http","apiver","[APIVER]"}.c_str()
 						}
 					);
+			*/
 
 		}
 

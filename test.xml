@@ -8,7 +8,7 @@
 
 	</agent>
 	
-	<agent name='random' type='random' />
+	<agent name='random' type='random' http-handler='/files/' />
 
 </config>
 
