@@ -116,6 +116,7 @@
 			Config::for_each("civetweb-options",[&optionlist](const char *key, const char *value){
 				optionlist.emplace_back(key);
 				optionlist.emplace_back(value);
+				debug(key,"='",value,"'");
 				return true;
 			});
 
@@ -142,10 +143,17 @@
 			// Use configured options.
 			clog << "civetweb\tFound civetweb configuration, using it" << endl;
 
-			for(size_t ix = 0; ix < optionlist.size(); ix++) {
-				if(!strcasecmp(optionlist[ix].c_str(),"listening_ports")) {
-					break;
+//			for(size_t ix = 0; ix < optionlist.size(); ix++) {
+//				if(!strcasecmp(optionlist[ix].c_str(),"listening_ports")) {
+//					break;
+//				}
+//			}
+
+			if(Logger::enabled(Logger::Debug)) {
+				for(size_t ix = 0; ix < optionlist.size(); ix += 2) {
+					clog << optionlist[ix] << "='" << optionlist[ix+1] << "'" << endl;
 				}
+
 			}
 
 			const char **options = new const char *[optionlist.size()+1];
@@ -177,6 +185,7 @@
 		unsigned int init = 0;
 
 		{
+			debug("--------------------------------------------");
 			string info{"civetweb\tFeatures:"};
 			for(size_t ix = 0; ix < (sizeof(features)/sizeof(features[0]));ix++) {
 
@@ -214,6 +223,7 @@
 
  		unsigned int init = 0;
 
+		debug("--------------------------------------------");
 		{
 			string info{"civetweb\tFeatures:"};
 			for(size_t ix = 0; ix < (sizeof(features)/sizeof(features[0]));ix++) {

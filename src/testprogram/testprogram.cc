@@ -91,6 +91,7 @@
 
  	Logger::verbosity(9);
 	Logger::redirect();
+	Logger::console(true);
 
  	udjat_module_init();
  	RandomFactory rfactory;
