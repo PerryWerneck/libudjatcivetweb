@@ -85,7 +85,7 @@
 		if(code >= 400 && code <= 599 && empty() && Config::Value<bool>("http","use-error-templates",true)) {
 
 			// Process error templates.
-			debug("--------------> Checking template for code ",code," ",(empty() ? "(Empty response)" : "(Non-empty response)"));
+			// debug("--------------> Checking template for code ",code," ",(empty() ? "(Empty response)" : "(Non-empty response)"));
 
 			try {
 

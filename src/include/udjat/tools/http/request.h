@@ -60,6 +60,15 @@
 				} ip;
 #endif // _WIN32
 
+				inline void clear() noexcept {
+					type = 0x10;
+					scope = 0x000F;
+					expiration_time = 0;
+					uid = (uint64_t) -1;
+					memset(username,0,sizeof(username));
+					memset(&ip,0,sizeof(ip));
+				}
+
 			};
 			#pragma pack()
 

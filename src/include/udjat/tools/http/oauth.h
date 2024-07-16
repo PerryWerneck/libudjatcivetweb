@@ -76,7 +76,7 @@
 
 			#pragma pack(1)
 			struct Cookie {
-				uint8_t type;
+				uint8_t type = 0;
 				time_t expiration_time = 0;
 				uint32_t scopes = 7;
 #ifdef _WIN32
@@ -91,6 +91,13 @@
 					struct in6_addr v6;
 				} ip;
 #endif // _WIN32
+
+				inline void clear() noexcept {
+					type = 0;
+					expiration_time = 0;
+					scopes = 7;
+					memset(&ip,0,sizeof(ip));
+				}
 
 			} data;
 			#pragma pack()
@@ -120,7 +127,7 @@
 
 			#pragma pack(1)
 			struct Token {
-				uint8_t type;
+				uint8_t type = 0;
 				time_t expiration_time = 0;
 				uint16_t scope = 0x000F;
 				char username[40] = "";
@@ -136,6 +143,14 @@
 					struct in6_addr v6;
 				} ip;
 #endif // _WIN32
+
+				inline void clear() noexcept {
+					type = 0;
+					expiration_time = 0;
+					scope = 0x000F;
+					memset(username,0,sizeof(username));
+					memset(&ip,0,sizeof(ip));
+				}
 
 			} data;
 			#pragma pack()

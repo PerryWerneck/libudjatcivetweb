@@ -23,6 +23,7 @@
  #include <udjat/tools/http/connection.h>
  #include <udjat/tools/http/exception.h>
  #include <udjat/tools/http/response.h>
+ #include <udjat/tools/intl.h>
 
  using namespace std;
 
@@ -36,6 +37,14 @@
 
 	int HTTP::Connection::send(int code, const char *message, const char *body) const noexcept {
 		return send(HTTP::Response{(MimeType) *this}.failed(code,message,body));
+	}
+
+	int HTTP::Connection::failed(int code, const char *message) const noexcept {
+		return send(code,_("Operation failed"), message);
+	}
+
+	int HTTP::Connection::success(const char *mime_type, const char *response, size_t length) const noexcept {
+		return send(mime_type,response,length);
 	}
 
  }

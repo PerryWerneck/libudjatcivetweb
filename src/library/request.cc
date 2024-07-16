@@ -86,7 +86,7 @@
 
 	bool HTTP::Request::decrypt(HTTP::Request::Token &token) const {
 
-		memset(&token,0,sizeof(token));
+		token.clear();
 
 		// Check for authorization header.
 		{
