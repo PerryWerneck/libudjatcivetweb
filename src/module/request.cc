@@ -44,10 +44,17 @@
 		Request::Request(struct mg_connection *c)
 			: HTTP::Request{mg_get_request_info(c)->local_uri,mg_get_request_info(c)->request_method}, conn{c}, info{mg_get_request_info(c)} {
 
-			// debug("Request path set to '",path(),"', type set to ",to_string(((HTTP::Method) *this)));
-			// debug("Content-type: ",getProperty("Content-Type"));
-			// debug("Accept: ",getProperty("Accept"));
-			// debug("Authorization:",getProperty("Authorization"));
+			debug("request_uri='",mg_get_request_info(c)->request_uri,"'");
+			debug("local_uri_raw='",mg_get_request_info(c)->local_uri_raw,"'");
+			debug("local_uri='",mg_get_request_info(c)->local_uri,"'");
+
+#ifdef DEBUG
+			{
+				for(int header = 0; header < info->num_headers; header++) {
+					debug("header(",info->http_headers[header].name,")='",info->http_headers[header].value,"'");
+				}
+			}
+#endif // DEBUG
 
 			// https://github.com/civetweb/civetweb/blob/master/examples/embedded_c/embedded_c.c
 			if(!strcasecmp(header("Content-Type"),"application/x-www-form-urlencoded")) {
@@ -132,18 +139,6 @@
 			return HTTP::Request::cookie(name);
 		}
 
-		MimeType Request::mimetype() const noexcept {
-
-			for(String &value : String{header("accept")}.split(",")) {
-				auto mime = MimeTypeFactory(value.c_str(),MimeType::custom);
-				if(mime != MimeType::custom) {
-					return mime;
-				}
-			}
-
-			return MimeType::custom;
-		}
-
 		const char * Request::header(const char *name) const noexcept {
 
 			for(int header = 0; header < info->num_headers; header++) {
@@ -191,31 +186,6 @@
 
 			return HTTP::Request::getProperty(key,value);
 		}
-
-		/*
- 		String Request::getProperty(const char *name, const char *def) const {
-
- 			for(int header = 0; header < info->num_headers; header++) {
-				if(!strcasecmp(info->http_headers[header].name,name)) {
-					return info->http_headers[header].value;
-				}
-			}
-
-			return Udjat::Request::getProperty(name,def);
- 		}
-
-		String Request::getArgument(const char *name, const char *def) const {
-
-			if(!values.empty()) {
-				auto it = values.find(name);
-				if(it != values.end()) {
-					return it->second;
-				}
-			}
-			return HTTP::Request::getArgument(name,def);
-
-		}
-		*/
 
 	}
 

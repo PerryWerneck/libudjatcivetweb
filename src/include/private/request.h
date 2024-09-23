@@ -50,7 +50,6 @@
 
 			const char * header(const char *name) const noexcept override;
 
-			MimeType mimetype() const noexcept;
 
 			/// @brief The client address.
 			String address() const override;

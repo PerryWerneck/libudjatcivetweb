@@ -36,7 +36,7 @@
  namespace Udjat {
 
 	OAuth::User::User() {
-		memset(&data,0,sizeof(data));
+		data.clear();
 		data.expiration_time = time(0) + Config::Value<time_t>("oauth2","expiration-time",86400);
 		data.type = 0x20;
 		data.scope = 0x0f;	// Default scope.

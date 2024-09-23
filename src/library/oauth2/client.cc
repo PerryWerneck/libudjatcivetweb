@@ -46,7 +46,7 @@
 
 
 		// Setup token from request.
-		memset(&data,0,sizeof(data));
+		data.clear();
 		data.expiration_time = time(0) + Config::Value<time_t>("oauth2","expiration-time",86400);
 		data.type = 0x10;
 

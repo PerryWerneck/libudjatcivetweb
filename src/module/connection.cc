@@ -56,15 +56,6 @@
 				}
 			}
 
-			Logger::String{"Rejecting request ",request_uri()," from ",info->remote_addr}.error("civetweb");
-			throw system_error(
-						ENOENT,system_category(),
-						Logger::Message{
-							_("Request path should be /api/{}/[REQUEST]"),
-							Config::Value<string>{"http","apiver","[APIVER]"}.c_str()
-						}
-					);
-
 		}
 
 		// Get mimetype from request header.

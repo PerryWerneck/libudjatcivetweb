@@ -60,6 +60,15 @@
 				} ip;
 #endif // _WIN32
 
+				inline void clear() noexcept {
+					type = 0x10;
+					scope = 0x000F;
+					expiration_time = 0;
+					uid = (uint64_t) -1;
+					memset(username,0,sizeof(username));
+					memset(&ip,0,sizeof(ip));
+				}
+
 			};
 			#pragma pack()
 
@@ -83,6 +92,9 @@
 
 			/// @brief The client address.
 			virtual String address() const = 0;
+
+			/// @brief The response mime-type.
+			MimeType mimetype() const noexcept;
 
 			bool for_each(const std::function<bool(const char *name, const char *value)> &call) const override;
 

@@ -27,6 +27,7 @@
  #include <private/module.h>
  #include <udjat/tools/logger.h>
  #include <udjat/tools/application.h>
+ #include <udjat/tools/intl.h>
  #include <stdexcept>
 
  #ifdef HAVE_UNISTD_H
