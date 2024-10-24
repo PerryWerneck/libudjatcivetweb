@@ -110,7 +110,7 @@ Development files for %{product_name}'s HTTP server abstraction library.
 %defattr(-,root,root)
 %{_includedir}/udjat/tools/http/*.h
 %{_libdir}/*.so
-%exclude %{_libdir}/*.a
+%{_libdir}/*.a
 %{_libdir}/pkgconfig/*.pc
 
 %pre -n libudjathttpd%{_libvrs} -p /sbin/ldconfig
