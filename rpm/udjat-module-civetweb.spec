@@ -1,8 +1,7 @@
 #
 # spec file for package udjat-module-civetweb
 #
-# Copyright (c) 2015 SUSE LINUX GmbH, Nuernberg, Germany.
-# Copyright (C) <2008> <Banco do Brasil S.A.>
+# Copyright (C) <2024> Perry Werneck <perry.werneck@gmail.com>
 #
 # All modifications and additions to the file contributed by third parties
 # remain the property of their copyright owners, unless otherwise agreed
@@ -13,7 +12,7 @@
 # license that conforms to the Open Source Definition (Version 1.9)
 # published by the Open Source Initiative.
 
-# Please submit bugfixes or comments via http://bugs.opensuse.org/
+# Please submit bugfixes or comments via https://github.com/PerryWerneck/udjat-module-civetweb/issues
 #
 
 %define product_name %(pkg-config --variable=product_name libudjat)
@@ -36,18 +35,14 @@ BuildRoot:		/var/tmp/%{name}-%{version}
 %define MINOR_VERSION %(echo %{version} | cut -d. -f2 | cut -d+ -f1)
 %define _libvrs %{MAJOR_VERSION}_%{MINOR_VERSION}
 
-BuildRequires:	autoconf >= 2.61
-BuildRequires:	automake
-BuildRequires:	libtool
 BuildRequires:	binutils
 BuildRequires:	coreutils
 BuildRequires:	gcc-c++
 
 BuildRequires:	pkgconfig(libudjat) >= 1.2
 BuildRequires:	pkgconfig(pugixml)
-BuildRequires:	civetweb-devel >= 1.15
+BuildRequires:	pkgconfig(civetweb) >= 1.15
 BuildRequires:	gettext-devel
-BuildRequires:	make
 
 # Required to allow ouauth authentication
 BuildRequires:  pam-devel
@@ -60,6 +55,12 @@ Provides:		udjat%{product_version}-module-httpd
 Conflicts:		otherproviders(udjat%{product_version}-module-httpd)
 
 Recommends:		udjat-branding-http
+
+%if 0%{?suse_version} == 01500
+BuildRequires:  meson = 0.61.4
+%else
+BuildRequires:  meson
+%endif
 
 %description
 HTTP exporter module for %{product_name} based on CivetWEB library.
@@ -74,46 +75,38 @@ HTTP Server abstraction library for %{product_name}
 
 #---[ Development ]---------------------------------------------------------------------------------------------------
 
-%package -n udjat-httpd-devel
-Summary:	Development files for %{name}
+%package -n libudjathttpd-devel
+Summary:	HTTP server libraries for %{product_name}.
+
 Requires:	pkgconfig(libudjat)
 Requires:	libudjathttpd%{_libvrs} = %{version}
+Provides:	udjat-httpd-devel = %{version}
 
-%description -n udjat-httpd-devel
+%description -n libudjathttpd-devel
 
 Development files for %{product_name}'s HTTP server abstraction library.
-
-%lang_package -n libudjathttpd%{_libvrs}
 
 #---[ Build & Install ]-----------------------------------------------------------------------------------------------
 
 %prep
-%setup
-
-NOCONFIGURE=1 \
-	./autogen.sh
-
-%configure
+%autosetup
+%meson
 
 %build
-make all
+%meson_build
 
 %install
-%makeinstall
-%find_lang libudjathttpd-%{MAJOR_VERSION}.%{MINOR_VERSION} langfiles
+%meson_install
 
 %files
 %defattr(-,root,root)
 %{module_path}/*.so
-%config %{_sysconfdir}/%{product_name}.conf.d/*.conf
 
 %files -n libudjathttpd%{_libvrs}
 %defattr(-,root,root)
 %{_libdir}/libudjathttpd.so.%{MAJOR_VERSION}.%{MINOR_VERSION}
 
-%files -n libudjathttpd%{_libvrs}-lang -f langfiles
-
-%files -n udjat-httpd-devel
+%files -n libudjathttpd-devel
 %defattr(-,root,root)
 %{_includedir}/udjat/tools/http/*.h
 %{_libdir}/*.so
