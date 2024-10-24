@@ -1,0 +1,10 @@
+prefix=@prefix@
+includedir=${prefix}/include
+libdir=${prefix}/@libdir@
+
+Name: udjatcivetweb
+Description: @PACKAGE_DESCRIPTION@
+Version: @PACKAGE_VERSION@
+Requires: civetweb
+Libs: -ludjatcivetweb
+

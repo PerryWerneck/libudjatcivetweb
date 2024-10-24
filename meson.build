@@ -239,6 +239,13 @@ configure_file(
   configuration : sdk_conf
 )
 
+configure_file(
+  input : 'sdk/module.pc.in',
+  output : 'udjatcivetweb.pc',
+  install: true,
+  install_dir: get_option('libdir') + '/pkgconfig',
+  configuration : sdk_conf
+)
 
 #
 # Common targets
