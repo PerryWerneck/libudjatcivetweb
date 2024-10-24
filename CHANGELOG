@@ -1,4 +1,137 @@
 -------------------------------------------------------------------
+Thu Sep 19 14:03:21 UTC 2024 - perry.werneck@gmail.com
+
+- Update to version 1.2+git20240919:
+  * Adding missing include.
+  * Fixing legacy application build and a few warnings.
+  * Disabling URL decoder to avoid problem reported in issue https://github.com/civetweb/civetweb/issues/1258
+  * Debugging file list.
+  * Debugging custom handlers.
+  * Debugging file list output.
+  * Using legacy header to identify request mime-type.
+  * Debugging publisher.
+  * Fixing publish script.
+  * Updating workflows.
+  * Fixing segfault, updating to latest libudjat.
+  * Updating package control files.
+  * The default branding is now on udjat-branding-upstream package.
+  * Moving templates do branding package.
+  * Debugging image handler. minifying templates.
+  * Better error page.
+  * Updating translation.
+  * Visual adjustments on login page.
+  * Debugging oauth2 dialog.
+  * Debugging error management, adding http page templates and css support.
+  * Debugging win32 package.
+  * Splitting windows/linux authentication in separated sources.
+  * Updating to latest libudjat, better property handling.
+  * Fixing value on newest libudjat.
+  * Better tracing for available services.
+  * Using reference type to avoid object copy.
+  * Testing for 'not modified'
+  * Renaming configuratio option due to changes on libudjat.
+  * Implementing response '304'.
+  * Better HTTP & exception handling.
+  * Better logging of base urls.
+  * Moving exec() to http::request to allow using on non civetweb modules.
+  * Fixing build with latest libudjat.
+  * Auto adding 'value' child when response has a single child.
+  * Cleaning code, updating package info.
+  * Updating package control file.
+  * Debugging package build.
+  * Moving error parser to library.
+  * Better html error message.
+  * Adjusting log messages.
+  * Better exception handling.
+  * Debugging exception handlers.
+  * Debugging error/exception management.
+  * Better error management.
+  * Adding simple svg response.
+  * Fixing error management.
+  * Refactoring error message system.
+  * Refactoring error page and response output.
+  * Debugging cache headers.
+  * Better headers.
+  * Better response headers and data.
+  * Removing debug message.
+  * Better error message.
+  * Refactoring http handler engine.
+  * Better error responses.
+  * Fixing build without openssl.
+  * Updating version due to new features.
+  * Implementing authentication token.
+  * Implementing basic oauth2 engine.
+  * Debugging oauth2 data flow.
+  * Better error handling.
+  * Better error messages.
+  * Better error handling.
+  * Working on oauth2.
+  * Working on authentication.
+  * Working on authentication headers.
+  * Implementing oauth2 conversation.
+  * Adding bitmask for scopes.
+  * Refactoring authentication engine.
+  * Refactoring oauth2 engine.
+  * Refactoring authentication engine.
+  * Refactoring oauth2.
+  * Fixing form parser, starting test client.
+  * Better authentication token.
+  * Implementing authentication.
+  * Working on login page.
+  * Storing session data.
+  * Working on form parser.
+  * Working on form parser.
+  * Better trace/debug
+  * Working on authentication engine.
+  * Working on 'post' methods.
+  * Working on 'post' requests.
+  * Implementing a basic login dialog.
+  * Implementing oauth.
+  * Working on oauth2.
+  * Playing with OAuth2.
+  * Adding http method to get internal pubkey.
+  * Implementing keypair.
+  * Small adjustments.
+  * Workers can now change the favicon.
+  * Implementing favicon.
+  * Implementing favicon handler.
+  * Fixing array response.
+  * Allowing type change on http::Response.
+  * Refactoring 'table' output.
+  * Implementing csv exporter.
+  * Implementing xml table.
+  * Working on table export.
+  * Still refactoring.
+  * Fixing image search.
+  * Fixing icon search.
+  * Extracting the first array of the response for csv output.
+  * Implementing csv output.
+  * Refactoring yaml output.
+  * Refactoring xml output.
+  * Refactoring HTML output.
+  * Refactoring HTML query.
+  * Refactoring layouts.
+  * Basic functionallity is back after refactor.
+  * Refactoring request engine.
+  * Better responses.
+  * Better error messages.
+  * Refactoring icon engine.
+  * Fixing script output.
+  * Fixing deb package.
+  * Formatting yaml arrays.
+  * Better json & yaml response.
+  * Implementing basic yaml output.
+  * Refactoring.
+  * Refactoring.
+  * Refactoring to new Request class.
+  * Detecting mime-type from header.
+  * Refactoring to new Request class.
+  * Refactoring request.
+  * Fixing report.
+  * Updating to new worker engine.
+  * Fixing build with latest libudjat.
+
+-------------------------------------------------------------------
 Wed Dec 20 23:05:34 UTC 2023 - perry.werneck@gmail.com
 
 - Update to version 1.0+git20230529:

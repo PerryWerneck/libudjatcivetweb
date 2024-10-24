@@ -1,4 +1,4 @@
 <servicedata>
 <service name="tar_scm">
                 <param name="url">https://github.com/PerryWerneck/udjat-module-civetweb</param>
-              <param name="changesrevision">489706c8b03f56607cfc12ca1a2f133a41b84f7f</param></service></servicedata>
+              <param name="changesrevision">976a6b061372a67093b11eb072f381d20d9951b6</param></service></servicedata>

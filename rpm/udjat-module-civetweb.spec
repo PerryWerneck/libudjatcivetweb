@@ -18,10 +18,11 @@
 
 %define product_name %(pkg-config --variable=product_name libudjat)
 %define module_path %(pkg-config --variable=module_path libudjat)
+%define product_version %(pkg-config --variable=product_version libudjat)
 
 Summary:		CivetWEB HTTP exporter for %{product_name} 
 Name:			udjat-module-civetweb
-Version:		1.0+git20230529
+Version:		1.2+git20240919
 Release:		0
 License:		LGPL-3.0
 Source:			%{name}-%{version}.tar.xz
@@ -42,19 +43,23 @@ BuildRequires:	binutils
 BuildRequires:	coreutils
 BuildRequires:	gcc-c++
 
-BuildRequires:	pkgconfig(libudjat)
+BuildRequires:	pkgconfig(libudjat) >= 1.2
 BuildRequires:	pkgconfig(pugixml)
-BuildRequires:	pkgconfig(libssl)
 BuildRequires:	civetweb-devel >= 1.15
 BuildRequires:	gettext-devel
 BuildRequires:	make
 
-Provides:		udjat-module-httpd
-Conflicts:		otherproviders(udjat-module-httpd)
+# Required to allow ouauth authentication
+BuildRequires:  pam-devel
+
+# Should be 1.1 because of civetweb
+BuildRequires:	libopenssl-1_1-devel
+
+Provides:		udjat%{product_version}-module-http
+Provides:		udjat%{product_version}-module-httpd
+Conflicts:		otherproviders(udjat%{product_version}-module-httpd)
 
 Recommends:		udjat-branding-http
-
-Provides:		udjat-module-http
 
 %description
 HTTP exporter module for %{product_name} based on CivetWEB library.
