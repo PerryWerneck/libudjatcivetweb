@@ -62,38 +62,23 @@ Thu Sep 19 14:03:21 UTC 2024 - perry.werneck@gmail.com
   * Implementing authentication token.
   * Implementing basic oauth2 engine.
   * Debugging oauth2 data flow.
-  * Better error handling.
-  * Better error messages.
-  * Better error handling.
-  * Working on oauth2.
-  * Working on authentication.
-  * Working on authentication headers.
+  * Better error handling & messages.
   * Implementing oauth2 conversation.
   * Adding bitmask for scopes.
-  * Refactoring authentication engine.
   * Refactoring oauth2 engine.
-  * Refactoring authentication engine.
-  * Refactoring oauth2.
   * Fixing form parser, starting test client.
   * Better authentication token.
   * Implementing authentication.
   * Working on login page.
   * Storing session data.
   * Working on form parser.
-  * Working on form parser.
   * Better trace/debug
-  * Working on authentication engine.
-  * Working on 'post' methods.
-  * Working on 'post' requests.
+  * Working on 'post' methods & requests.
   * Implementing a basic login dialog.
-  * Implementing oauth.
-  * Working on oauth2.
-  * Playing with OAuth2.
   * Adding http method to get internal pubkey.
   * Implementing keypair.
   * Small adjustments.
   * Workers can now change the favicon.
-  * Implementing favicon.
   * Implementing favicon handler.
   * Fixing array response.
   * Allowing type change on http::Response.
@@ -101,7 +86,6 @@ Thu Sep 19 14:03:21 UTC 2024 - perry.werneck@gmail.com
   * Implementing csv exporter.
   * Implementing xml table.
   * Working on table export.
-  * Still refactoring.
   * Fixing image search.
   * Fixing icon search.
   * Extracting the first array of the response for csv output.
@@ -111,23 +95,16 @@ Thu Sep 19 14:03:21 UTC 2024 - perry.werneck@gmail.com
   * Refactoring HTML output.
   * Refactoring HTML query.
   * Refactoring layouts.
-  * Basic functionallity is back after refactor.
   * Refactoring request engine.
-  * Better responses.
-  * Better error messages.
+  * Better responses & error messages.
   * Refactoring icon engine.
   * Fixing script output.
   * Fixing deb package.
   * Formatting yaml arrays.
   * Better json & yaml response.
   * Implementing basic yaml output.
-  * Refactoring.
-  * Refactoring.
   * Refactoring to new Request class.
   * Detecting mime-type from header.
-  * Refactoring to new Request class.
-  * Refactoring request.
-  * Fixing report.
   * Updating to new worker engine.
   * Fixing build with latest libudjat.
 
