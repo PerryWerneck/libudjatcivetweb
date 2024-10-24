@@ -18,7 +18,6 @@
  */
 
  #include <config.h>
- #include <udjat/civetweb.h>
  #include <private/request.h>
  #include <udjat/tools/http/handler.h>
  #include <udjat/tools/http/request.h>

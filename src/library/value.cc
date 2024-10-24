@@ -18,7 +18,6 @@
  */
 
  #include <config.h>
- #include <udjat/civetweb.h>
  #include <udjat/tools/value.h>
  #include <udjat/tools/http/value.h>
  #include <udjat/tools/logger.h>

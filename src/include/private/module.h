@@ -31,7 +31,6 @@
  #include <string>
  #include <stdexcept>
  #include <civetweb.h>
- #include <udjat/civetweb.h>
  #include <iostream>
  #include <list>
  #include <cstring>
