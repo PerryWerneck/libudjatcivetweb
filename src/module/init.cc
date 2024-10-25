@@ -47,6 +47,10 @@
 
  const Udjat::ModuleInfo udjat_module_info{ "CivetWEB " CIVETWEB_VERSION " HTTP module for " STRINGIZE_VALUE_OF(PRODUCT_NAME) };
 
+ Udjat::Module * udjat_module_init() {
+	return udjat_module_init_from_xml(XML::Node{});
+ }
+
  Udjat::Module * udjat_module_init_from_xml(const pugi::xml_node &node) {
 
 	class Module : public Udjat::Module, public Udjat::CivetWeb::Service { 

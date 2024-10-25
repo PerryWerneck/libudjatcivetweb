@@ -71,8 +71,21 @@
  
  namespace Udjat {
 
+	CivetWeb::Service * CivetWeb::Service::instance = nullptr;
+
+	CivetWeb::Service & CivetWeb::Service::get_instance() {
+		if(instance) {
+			throw runtime_error("HTTP server is undefined");
+		}
+		return *instance;
+	}
+
  	CivetWeb::Service::Service(const ModuleInfo &info, const pugi::xml_node &node) 
 		: Udjat::Service{String{node,"name",info.name}.as_quark(), info} {
+
+		if(instance) {
+			throw runtime_error("HTTP server is already defined");
+		}
 
 		// Init library from XML definitions
 		{
@@ -169,6 +182,7 @@
  	CivetWeb::Service::~Service() {
 
 		Logger::String{"Stopping service"}.trace(name());
+		instance = nullptr;
 
 		if(ctx) {
 			mg_stop(ctx);

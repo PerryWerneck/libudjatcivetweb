@@ -34,10 +34,15 @@
 	namespace CivetWeb {
 
 		class UDJAT_API Service : public Udjat::Service, public HTTP::Server {
+		private:
+			static Service *instance;
+
 		protected:
 			struct mg_context *ctx = nullptr;
 
 		public:
+
+			static Service & get_instance();
 
 			Service(const ModuleInfo &info, const pugi::xml_node &node);
 			Service(const ModuleInfo &info, const char *name = "httpd");

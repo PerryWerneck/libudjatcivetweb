@@ -71,6 +71,7 @@ app_conf.set_quoted('PACKAGE_DESCRIPTION', project_description)
 app_conf.set('PACKAGE_VERSION_MAJOR', pkg_major_version)
 app_conf.set('PACKAGE_VERSION_MINOR', pkg_minor_version)
 app_conf.set('PACKAGE_VERSION_MICRO', pkg_micro_version)
+app_conf.set('PRODUCT_NAME',libudjat.get_variable('product_name'))
 
 if cxx.compiles('#include <unistd.h>', name : 'unistd.h')
   app_conf.set('HAVE_UNISTD_H', 1)
