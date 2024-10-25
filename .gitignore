@@ -55,3 +55,4 @@ po
 *.pc
 .pot
 
+.vscode

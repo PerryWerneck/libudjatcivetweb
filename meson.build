@@ -135,6 +135,7 @@ module_src = [
   'src/module/custom.cc',
   'src/module/init.cc',
   'src/module/protocol.cc',
+  'src/module/service.cc',
 ]
 
 test_src = [

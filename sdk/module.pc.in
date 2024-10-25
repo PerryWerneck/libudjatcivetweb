@@ -6,5 +6,6 @@ Name: udjatcivetweb
 Description: @PACKAGE_DESCRIPTION@
 Version: @PACKAGE_VERSION@
 Requires: civetweb
+Cflags: -DUDJAT_ENABLE_CIVETWEB=1
 Libs: -ludjatcivetweb
 
