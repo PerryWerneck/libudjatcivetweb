@@ -51,8 +51,6 @@ Makefile
 *.[0-9]
 ABOUT-NLS
 intl
-po
 *.pc
-.pot
 
 .vscode
