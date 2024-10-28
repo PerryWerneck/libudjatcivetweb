@@ -21,6 +21,7 @@
 
  #define UDJAT_ENABLE_CIVETWEB
  #include <udjat/tools/civetweb/service.h>
+ #include <udjat/tools/civetweb/protocol.h>
 
  #include <udjat/defs.h>
  #include <udjat/module.h>
@@ -54,6 +55,12 @@
  Udjat::Module * udjat_module_init_from_xml(const pugi::xml_node &node) {
 
 	class Module : public Udjat::Module, public Udjat::CivetWeb::Service { 
+	private:
+		struct {
+			CivetWeb::Protocol http{"http",udjat_module_info};
+			CivetWeb::Protocol https{"https",udjat_module_info};
+		} protocols;
+
 	public:
 
 		Module(const pugi::xml_node &node) : Udjat::Module{"http",udjat_module_info}, Udjat::CivetWeb::Service(udjat_module_info,node) {

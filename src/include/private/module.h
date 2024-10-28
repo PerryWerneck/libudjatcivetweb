@@ -114,16 +114,6 @@
 
 		};
 
-		/// @brief Base class for HTTP Protocol
-		class Protocol : public Udjat::Protocol {
-		public:
-			Protocol(const char *name, const ModuleInfo &info);
-			virtual ~Protocol();
-
-			std::shared_ptr<Worker> WorkerFactory() const override;
-
-		};
-
 	}
 
  }

@@ -19,42 +19,24 @@
 
  #pragma once
 
- #ifdef UDJAT_ENABLE_CIVETWEB
-
  #include <udjat/defs.h>
+ 
  #include <udjat/module/abstract.h>
  #include <udjat/module/info.h>
  #include <udjat/tools/service.h>
  #include <udjat/tools/protocol.h>
- #include <udjat/tools/http/server.h>
  
- #include <civetweb.h>
-
  namespace Udjat {
 
 	namespace CivetWeb {
 
-		class UDJAT_API Service : public Udjat::Service, public HTTP::Server {
-		private:
-			static Service *instance;
-
-		protected:
-			struct mg_context *ctx = nullptr;
-
+		/// @brief Base class for HTTP Protocol
+		class Protocol : public Udjat::Protocol {
 		public:
+			Protocol(const char *name, const ModuleInfo &info);
+			virtual ~Protocol();
 
-			static Service & get_instance();
-
-			Service(const ModuleInfo &info, const pugi::xml_node &node);
-			Service(const ModuleInfo &info, const char *name = "httpd");
-
-			virtual ~Service();
-
-			void start() noexcept override;
-			void stop() noexcept override;
-
-			bool push_back(HTTP::Handler *handler) override;
-			bool remove(HTTP::Handler *handler) override;
+			std::shared_ptr<Worker> WorkerFactory() const override;
 
 		};
 
@@ -62,4 +44,3 @@
 
  }
 
- #endif // UDJAT_ENABLE_CIVETWEB

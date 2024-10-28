@@ -9,6 +9,15 @@ project(
 project_description = 'CivetWeb based HTTP module and library for udjat'
 
 #
+# i18n
+#
+# https://mesonbuild.com/i18n-module.html
+# https://mesonbuild.com/Porting-from-autotools.html
+#
+i18n = import('i18n')
+i18n.gettext(meson.project_name())
+
+#
 # Versioning
 #
 pkg_version = meson.project_version()
@@ -22,7 +31,8 @@ libversion = '@0@.@1@'.format(pkg_major_version,pkg_minor_version)
 #
 # LibUdjat
 #
-libudjat = dependency('libudjat') 
+libudjat = dependency('libudjat')
+
 
 lib_deps = [
   libudjat,
@@ -68,6 +78,7 @@ add_project_arguments(global_cxxflags, language: 'cpp')
 #
 app_conf = configuration_data()
 app_conf.set_quoted('PACKAGE_NAME', meson.project_name())
+app_conf.set_quoted('GETTEXT_PACKAGE', meson.project_name())
 app_conf.set_quoted('PACKAGE_VERSION', meson.project_version())
 app_conf.set_quoted('PACKAGE_DESCRIPTION', project_description)
 app_conf.set('PACKAGE_VERSION_MAJOR', pkg_major_version)

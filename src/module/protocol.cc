@@ -20,6 +20,7 @@
  #include <private/module.h>
  #include <udjat/tools/protocol.h>
  #include <udjat/tools/http/exception.h>
+ #include <udjat/tools/civetweb/protocol.h>
 
  using namespace Udjat;
 
