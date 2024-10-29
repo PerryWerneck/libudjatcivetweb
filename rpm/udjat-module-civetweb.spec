@@ -73,6 +73,8 @@ Summary:	%{product_name} httpd library
 %description -n libudjathttpd%{_libvrs}
 HTTP Server abstraction library for %{product_name}
 
+%lang_package -n libudjathttpd%{_libvrs}
+
 #---[ Development ]---------------------------------------------------------------------------------------------------
 
 %package -n libudjathttpd-devel
@@ -97,6 +99,7 @@ Development files for %{product_name}'s HTTP server abstraction library.
 
 %install
 %meson_install
+%find_lang libudjathttpd-%{MAJOR_VERSION}.%{MINOR_VERSION} langfiles
 
 %files
 %defattr(-,root,root)
@@ -106,9 +109,16 @@ Development files for %{product_name}'s HTTP server abstraction library.
 %defattr(-,root,root)
 %{_libdir}/libudjathttpd.so.%{MAJOR_VERSION}.%{MINOR_VERSION}
 
+%files -n libudjathttpd%{_libvrs}-lang -f langfiles
+
 %files -n libudjathttpd-devel
 %defattr(-,root,root)
+
 %{_includedir}/udjat/tools/http/*.h
+
+%dir %{_includedir}/udjat/tools/civetweb
+%{_includedir}/udjat/tools/civetweb/*.h
+
 %{_libdir}/*.so
 %{_libdir}/*.a
 %{_libdir}/pkgconfig/*.pc
