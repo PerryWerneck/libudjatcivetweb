@@ -1,5 +1,24 @@
+# Maintainer: Perry Werneck <perry.werneck@gmail.com>
+
+# SPDX-License-Identifier: LGPL-3.0-or-later 
+
+# Copyright (C) 2024 Perry Werneck <perry.werneck@gmail.com>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published
+# by the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 project(
-	'udjatcivetweb', 
+	'udjathttpd', 
 	['cpp'],
 	version: '1.3.1',
 	default_options : ['c_std=c11', 'cpp_std=c++17'],
@@ -21,20 +40,12 @@ libversion = '@0@.@1@'.format(pkg_major_version,pkg_minor_version)
 
 #
 # i18n
-#
-# https://mesonbuild.com/i18n-module.html
-# https://mesonbuild.com/Porting-from-autotools.html
-#
-gettext_package = 'libudjathttpd-' + libversion
-add_project_arguments('-DGETTEXT_PACKAGE="' + gettext_package + '"', language: 'cpp')
-i18n = import('i18n')
 subdir('po')
 
 #
 # LibUdjat
 #
 libudjat = dependency('libudjat')
-
 
 lib_deps = [
   libudjat,
@@ -193,7 +204,7 @@ config_src = [
 ]
 
 dynamic = shared_library(
-  'udjathttpd', 
+  meson.project_name(), 
   config_src + lib_src,
   install: true,
   version : libversion,
@@ -204,7 +215,7 @@ dynamic = shared_library(
 )
 
 static_library(
-  'udjathttpd', 
+  meson.project_name(), 
   config_src + lib_src,
   install: true,
   dependencies: lib_deps,
@@ -233,7 +244,7 @@ module = shared_library(
 )
 
 executable(
-  'httptest',
+  'httpdtest',
   config_src + test_src,
   install: false,
   link_with : [ dynamic, module ],
@@ -243,7 +254,7 @@ executable(
 
 configure_file(
   input : 'sdk/dynamic.pc.in',
-  output : 'udjathttpd.pc',
+  output : meson.project_name() +'.pc',
   install: true,
   install_dir: get_option('libdir') + '/pkgconfig',
   configuration : sdk_conf
@@ -251,7 +262,7 @@ configure_file(
 
 configure_file(
   input : 'sdk/static.pc.in',
-  output : 'udjathttpd-static.pc',
+  output : meson.project_name() + '-static.pc',
   install: true,
   install_dir: get_option('libdir') + '/pkgconfig',
   configuration : sdk_conf
