@@ -55,6 +55,7 @@ Provides:		udjat%{product_version}-module-httpd
 Conflicts:		otherproviders(udjat%{product_version}-module-httpd)
 
 Recommends:		udjat-branding-http
+Supplements:	udjat-devel 
 
 %if 0%{?suse_version} == 01500
 BuildRequires:  meson = 0.61.4
