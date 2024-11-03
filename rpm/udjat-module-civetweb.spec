@@ -21,7 +21,7 @@
 
 Summary:		CivetWEB HTTP exporter for %{product_name} 
 Name:			udjat-module-civetweb
-Version:		1.2+git20240919
+Version: 1.3.1
 Release:		0
 License:		LGPL-3.0
 Source:			%{name}-%{version}.tar.xz

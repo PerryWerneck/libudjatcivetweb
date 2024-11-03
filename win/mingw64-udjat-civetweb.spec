@@ -18,7 +18,7 @@
 
 Summary:		Windows http exporter for udjat
 Name:			mingw64-udjat-civetweb
-Version:		1.0
+Version: 1.3.1
 Release:		0
 License:		LGPL-3.0
 Source:			udjat-module-civetweb-%{version}.tar.xz
