@@ -25,7 +25,7 @@ project(
 	license: 'GPL-3.0-or-later',
 )
 
-project_description = 'CivetWeb based HTTP module and library for udjat'
+project_description = 'CivetWeb based HTTP server library for udjat'
 
 #
 # Versioning
@@ -247,7 +247,8 @@ executable(
   'httpdtest',
   config_src + test_src,
   install: false,
-  link_with : [ dynamic, module ],
+  link_with: [ dynamic, module ],
+  link_args: [ '-l:libudjat-testing.a' ],
   dependencies: [ libudjat ],
   include_directories: includes_dir
 )
