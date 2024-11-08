@@ -40,10 +40,11 @@ libversion = '@0@.@1@'.format(pkg_major_version,pkg_minor_version)
 
 #
 # i18n
+#
 subdir('po')
 
 #
-# LibUdjat
+# Required libraries
 #
 libudjat = dependency('libudjat')
 
@@ -65,7 +66,6 @@ compiler_flags_common = [
   '-ffat-lto-objects',
   '-fvisibility=hidden',
   '-fPIC',
-  '-DBUILD_DATE='+run_command('date','+%Y%m%d').stdout().strip(),
 ]
 
 if enable_debug
@@ -104,19 +104,7 @@ if cxx.compiles('#include <unistd.h>', name : 'unistd.h')
   app_conf.set('HAVE_UNISTD_H', 1)
 endif
 
-#
-# SDK
-#
-sdk_conf = configuration_data()
-sdk_conf.set('PACKAGE_NAME', 'udjatcivetweb')
-sdk_conf.set('PACKAGE_VERSION', meson.project_version())
-sdk_conf.set('PACKAGE_DESCRIPTION', project_description)
-sdk_conf.set('prefix',get_option('prefix'))
-sdk_conf.set('exec_prefix',get_option('prefix'))
-sdk_conf.set('includedir',get_option('includedir'))
-sdk_conf.set('libdir',get_option('libdir'))
-
-includes_dir = include_directories('../src/include')
+includes_dir = include_directories('src/include')
 
 #
 # Sources
@@ -171,27 +159,60 @@ test_src = [
 ]
 
 #
+# SDK
+#
+# https://mesonbuild.com/Pkgconfig-module.html
+#
+pkg = import('pkgconfig')
+
+#
 # OS dependencies
 #
 if host_machine.system() == 'windows'
-  sdk_conf.set('REQUIRES','')
-  sdk_conf.set('DYNLIBS','-ludjathttpd.dll')
-  sdk_conf.set('STATICLIBS','-ludjathttpd')
-  app_conf.set('HAVE_WINHTTP', 1)
+
+  pkg.generate(
+    name: 'lib' + meson.project_name(),
+    description: project_description,
+    libraries: [ '-l' + meson.project_name() + '.dll' ]
+  )
+
   lib_src += [
     'src/library/os/windows/image.cc',
     'src/library/os/windows/oauth2user.cc',
   ]
+
 else
-  sdk_conf.set('REQUIRES','libcurl')
-  sdk_conf.set('DYNLIBS','-ludjathttpd')
-  sdk_conf.set('STATICLIBS','-l:libudjathttpd.a')
-  app_conf.set('HAVE_CURL', 1)
+
+  pkg.generate(
+    name: 'lib' + meson.project_name(),
+    description: project_description,
+    libraries: [ '-l' + meson.project_name() ]
+  )
+
   lib_src += [
     'src/library/os/linux/image.cc',
     'src/library/os/linux/oauth2user.cc',
   ]
+
 endif
+
+pkg.generate(
+  name: 'lib' + meson.project_name() + '-static',
+  description: project_description,
+  requires: lib_deps,
+  libraries: [ 
+    '-l:lib' + meson.project_name() + '.a',
+  ]
+)
+
+pkg.generate(
+  name: 'udjatcivetweb',
+  description: project_description,
+  requires: lib_deps,
+  libraries: [ 
+    '-l:libudjatcivetweb.a',
+  ]
+)
 
 #
 # Targets
@@ -253,31 +274,27 @@ executable(
   include_directories: includes_dir
 )
 
-configure_file(
-  input : 'sdk/dynamic.pc.in',
-  output : meson.project_name() +'.pc',
-  install: true,
-  install_dir: get_option('libdir') + '/pkgconfig',
-  configuration : sdk_conf
+install_headers(
+  'src/include/udjat/tools/http/connection.h',
+  'src/include/udjat/tools/http/handler.h',
+  'src/include/udjat/tools/http/icon.h',
+  'src/include/udjat/tools/http/image.h',
+  'src/include/udjat/tools/http/keypair.h',
+  'src/include/udjat/tools/http/layouts.h',
+  'src/include/udjat/tools/http/oauth.h',
+  'src/include/udjat/tools/http/report.h',
+  'src/include/udjat/tools/http/request.h',
+  'src/include/udjat/tools/http/response.h',
+  'src/include/udjat/tools/http/server.h',
+  'src/include/udjat/tools/http/template.h',
+  'src/include/udjat/tools/http/value.h',
+  subdir: 'udjat/tools/http'  
 )
 
-configure_file(
-  input : 'sdk/static.pc.in',
-  output : meson.project_name() + '-static.pc',
-  install: true,
-  install_dir: get_option('libdir') + '/pkgconfig',
-  configuration : sdk_conf
+install_headers(
+  'src/include/udjat/tools/civetweb/protocol.h',
+  'src/include/udjat/tools/civetweb/service.h',
+  subdir: 'udjat/tools/http/civetweb'  
 )
 
-configure_file(
-  input : 'sdk/module.pc.in',
-  output : 'udjatcivetweb.pc',
-  install: true,
-  install_dir: get_option('libdir') + '/pkgconfig',
-  configuration : sdk_conf
-)
 
-#
-# Common targets
-#
-install_subdir('src/include/udjat', install_dir : get_option('includedir'))
