@@ -61,11 +61,17 @@ lib_deps = [
 cxx = meson.get_compiler('cpp')
 enable_debug = get_option('debug') or get_option('buildtype').contains('debug')
 
+time_epoch = run_command('sh', '-c', 'echo "$SOURCE_DATE_EPOCH"', check : true).stdout().strip()
+if time_epoch == ''
+  time_epoch = run_command('date','+%Y%m%d', check: true).stdout().strip()
+endif
+
 compiler_flags_common = [
   '-ggdb3',
   '-ffat-lto-objects',
   '-fvisibility=hidden',
   '-fPIC',
+  '-DBUILD_DATE=' + time_epoch,
 ]
 
 if enable_debug

@@ -22,6 +22,7 @@
  #include <udjat/tests.h>
  #include <udjat/moduleinfo.h>
  #include <udjat/module.h>
+ #include <udjat/tools/application.h>
  
  using namespace std;
  using namespace Udjat;
@@ -30,7 +31,7 @@
 
 	static const ModuleInfo info{"civetweb-tester"};
 	
-	return Testing::run(argc,argv,info,[](){
+	return Testing::run(argc,argv,info,[](Application &){
 
 	 	udjat_module_init();
 
