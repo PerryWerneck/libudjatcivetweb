@@ -61,17 +61,11 @@ lib_deps = [
 cxx = meson.get_compiler('cpp')
 enable_debug = get_option('debug') or get_option('buildtype').contains('debug')
 
-time_epoch = run_command('sh', '-c', 'echo "$SOURCE_DATE_EPOCH"', check : true).stdout().strip()
-if time_epoch == ''
-  time_epoch = run_command('date','+%Y%m%d', check: true).stdout().strip()
-endif
-
 compiler_flags_common = [
   '-ggdb3',
   '-ffat-lto-objects',
   '-fvisibility=hidden',
   '-fPIC',
-  '-DBUILD_DATE=' + time_epoch,
 ]
 
 if enable_debug
@@ -102,7 +96,9 @@ app_conf.set_quoted('PACKAGE_DESCRIPTION', project_description)
 app_conf.set('PACKAGE_VERSION_MAJOR', pkg_major_version)
 app_conf.set('PACKAGE_VERSION_MINOR', pkg_minor_version)
 app_conf.set('PACKAGE_VERSION_MICRO', pkg_micro_version)
-app_conf.set('PRODUCT_NAME',libudjat.get_variable('product_name'))
+
+app_conf.set('PRODUCT_NAME', libudjat.get_variable('product_name'))
+app_conf.set('PRODUCT_VERSION', libudjat.version())
 
 app_conf.set('HAVE_LIBSSL',1)
 
@@ -211,15 +207,6 @@ pkg.generate(
   ]
 )
 
-pkg.generate(
-  name: 'udjatcivetweb',
-  description: project_description,
-  requires: lib_deps,
-  libraries: [ 
-    '-l:libudjatcivetweb.a',
-  ]
-)
-
 #
 # Targets
 #
@@ -230,16 +217,75 @@ config_src = [
   )
 ]
 
-dynamic = shared_library(
-  meson.project_name(), 
-  config_src + lib_src,
-  install: true,
-  version : libversion,
-  soversion : libversion,
-  gnu_symbol_visibility: 'hidden',
-  dependencies: lib_deps,
-  include_directories: includes_dir
-)
+if host_machine.system() == 'windows'
+
+  # https://mesonbuild.com/Windows-module.html
+  windows = import('windows')
+  resources = windows.compile_resources(
+    configure_file(
+      input : 'src/library/os/windows/resources.rc.in',
+      output : 'resources.rc',
+      configuration : app_conf
+    )
+  )
+  
+  dynamic = shared_library(
+    meson.project_name(), 
+    config_src + lib_src + resources,
+    install: true,
+    version : libversion,
+    soversion : libversion,
+    gnu_symbol_visibility: 'hidden',
+    dependencies: lib_deps,
+    include_directories: includes_dir,
+    link_args: [
+      '-lintl'
+    ],
+  )
+
+  # https://mesonbuild.com/Reference-manual_functions.html#shared_library
+  module = shared_library(
+    'civetweb', 
+    config_src + module_src + [ 'src/module/init.cc' ] + resources,
+    name_prefix: 'udjat-module-',
+    install: true,
+    link_with: dynamic,
+    install_dir: libudjat.get_variable('module_path'),
+    gnu_symbol_visibility: 'hidden',
+    dependencies: lib_deps,
+    include_directories: includes_dir,
+    link_args: [
+      '-lintl'
+    ],
+  )
+
+else
+
+  dynamic = shared_library(
+    meson.project_name(), 
+    config_src + lib_src,
+    install: true,
+    version : libversion,
+    soversion : libversion,
+    gnu_symbol_visibility: 'hidden',
+    dependencies: lib_deps,
+    include_directories: includes_dir
+  )
+
+  # https://mesonbuild.com/Reference-manual_functions.html#shared_library
+  module = shared_library(
+    'civetweb', 
+    config_src + module_src + [ 'src/module/init.cc' ],
+    name_prefix: 'udjat-module-',
+    install: true,
+    link_with: dynamic,
+    install_dir: libudjat.get_variable('module_path'),
+    gnu_symbol_visibility: 'hidden',
+    dependencies: lib_deps,
+    include_directories: includes_dir
+  )
+
+endif
 
 static_library(
   meson.project_name(), 
@@ -257,19 +303,6 @@ static_library(
   include_directories: includes_dir
 )
 
-# https://mesonbuild.com/Reference-manual_functions.html#shared_library
-module = shared_library(
-  'civetweb', 
-  config_src + module_src + [ 'src/module/init.cc' ],
-  name_prefix: 'udjat-module-',
-  install: true,
-  link_with: dynamic,
-  install_dir: libudjat.get_variable('module_path'),
-  gnu_symbol_visibility: 'hidden',
-  dependencies: lib_deps,
-  include_directories: includes_dir
-)
-
 executable(
   'httpdtest',
   config_src + test_src,
@@ -280,27 +313,8 @@ executable(
   include_directories: includes_dir
 )
 
-install_headers(
-  'src/include/udjat/tools/http/connection.h',
-  'src/include/udjat/tools/http/handler.h',
-  'src/include/udjat/tools/http/icon.h',
-  'src/include/udjat/tools/http/image.h',
-  'src/include/udjat/tools/http/keypair.h',
-  'src/include/udjat/tools/http/layouts.h',
-  'src/include/udjat/tools/http/oauth.h',
-  'src/include/udjat/tools/http/report.h',
-  'src/include/udjat/tools/http/request.h',
-  'src/include/udjat/tools/http/response.h',
-  'src/include/udjat/tools/http/server.h',
-  'src/include/udjat/tools/http/template.h',
-  'src/include/udjat/tools/http/value.h',
-  subdir: 'udjat/tools/http'  
-)
 
-install_headers(
-  'src/include/udjat/tools/civetweb/protocol.h',
-  'src/include/udjat/tools/civetweb/service.h',
-  subdir: 'udjat/tools/http/civetweb'  
-)
-
-
+#
+# Common targets
+#
+install_subdir('src/include/udjat', install_dir : get_option('includedir'))
