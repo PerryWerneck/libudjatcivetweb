@@ -106,7 +106,10 @@ app_conf.set('PRODUCT_VERSION', libudjat.version())
 
 ssl = dependency('libssl', required: false)
 if ssl.found()
-  lib_deps += ssl
+  lib_deps += [ 
+      ssl,
+      dependency('libcrypto')
+  ]
   app_conf.set('HAVE_LIBSSL',1)
 endif
 

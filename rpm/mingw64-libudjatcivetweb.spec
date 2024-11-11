@@ -59,14 +59,20 @@ Provides:	mingw64-libudjat%{module_name}
 Provides:	mingw64(lib:udjat%{module_name}.dll)
 Provides:	mingw64(lib:udjat%{module_name})
 
+Provides:	mingw64-libudjathttpd
+Provides:	mingw64(lib:udjathttpd.dll)
+Provides:	mingw64(lib:udjathttpd)
+
 %description -n mingw64-libudjat%{module_name}%{_libvrs}
 C++ library to identify when the system is running in a virtual machine.
 
 %package devel
 Summary:	C++ development files for {name}
-Requires:	mingw64-libudjat%{module_name}%{_libvrs} = %{version}
-Provides:	mingw64(lib::libudjat%{module_name}.a)
 Group:		Development/Libraries/C and C++
+Requires:	mingw64-libudjat%{module_name}%{_libvrs} = %{version}
+
+Provides:	mingw64(lib::libudjat%{module_name}.a)
+Provides:	mingw64(lib::libudjathttpd.a)
 
 %description devel
 Header files for %{name}.
@@ -88,7 +94,7 @@ Summary: HTTP server module for %{name}
 
 %install
 %_mingw64_meson_install
-%_mingw64_find_lang libudjat%{module_name}-%{MAJOR_VERSION}.%{MINOR_VERSION} langfiles
+%_mingw64_find_lang libudjathttpd-%{MAJOR_VERSION}.%{MINOR_VERSION} langfiles
 
 %files -n mingw64-libudjat%{module_name}%{_libvrs} -f langfiles
 %defattr(-,root,root)
@@ -108,9 +114,11 @@ Summary: HTTP server module for %{name}
 %{_mingw64_libdir}/pkgconfig/*.pc
 %{_mingw64_libdir}/*.a
 
-#%dir %{_mingw64_includedir}/udjat/tools/http
-#%{_mingw64_includedir}/udjat/tools/http/*.h
+%dir %{_mingw64_includedir}/udjat/tools/civetweb
+%{_mingw64_includedir}/udjat/tools/civetweb/*.h
 
+%dir %{_mingw64_includedir}/udjat/tools/http/
+%{_mingw64_includedir}/udjat/tools/http/*.h
 
 %changelog
 
