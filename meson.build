@@ -51,8 +51,6 @@ libudjat = dependency('libudjat')
 lib_deps = [
   libudjat,
   dependency('civetweb'),
-  dependency('libssl'),
-  dependency('libcrypto')
 ]
 
 #
@@ -106,7 +104,11 @@ app_conf.set('PACKAGE_VERSION_MICRO', pkg_micro_version)
 app_conf.set('PRODUCT_NAME', libudjat.get_variable('product_name'))
 app_conf.set('PRODUCT_VERSION', libudjat.version())
 
-app_conf.set('HAVE_LIBSSL',1)
+ssl = dependency('libssl', required: false)
+if ssl.found()
+  lib_deps += ssl
+  app_conf.set('HAVE_LIBSSL',1)
+endif
 
 if cxx.compiles('#include <unistd.h>', name : 'unistd.h')
   app_conf.set('HAVE_UNISTD_H', 1)
