@@ -61,11 +61,17 @@ lib_deps = [
 cxx = meson.get_compiler('cpp')
 enable_debug = get_option('debug') or get_option('buildtype').contains('debug')
 
+time_epoch = run_command('sh', '-c', 'echo "$SOURCE_DATE_EPOCH"', check : true).stdout().strip()
+if time_epoch == ''
+  time_epoch = run_command('date','+%Y%m%d', check: true).stdout().strip()
+endif
+
 compiler_flags_common = [
   '-ggdb3',
   '-ffat-lto-objects',
   '-fvisibility=hidden',
   '-fPIC',
+  '-DBUILD_DATE='+time_epoch,
 ]
 
 if enable_debug
@@ -178,10 +184,23 @@ if host_machine.system() == 'windows'
     libraries: [ '-l' + meson.project_name() + '.dll' ]
   )
 
+  # https://mesonbuild.com/Windows-module.html
+  windows = import('windows')
+  resources = windows.compile_resources(
+    configure_file(
+      input : 'src/library/os/windows/resources.rc.in',
+      output : 'resources.rc',
+      configuration : app_conf
+    )
+  )
+  
   lib_src += [
     'src/library/os/windows/image.cc',
     'src/library/os/windows/oauth2user.cc',
   ]
+
+  lib_src += resources
+  module_src += resources
 
 else
 
@@ -219,19 +238,9 @@ config_src = [
 
 if host_machine.system() == 'windows'
 
-  # https://mesonbuild.com/Windows-module.html
-  windows = import('windows')
-  resources = windows.compile_resources(
-    configure_file(
-      input : 'src/library/os/windows/resources.rc.in',
-      output : 'resources.rc',
-      configuration : app_conf
-    )
-  )
-  
   dynamic = shared_library(
     meson.project_name(), 
-    config_src + lib_src + resources,
+    config_src + lib_src,
     install: true,
     version : libversion,
     soversion : libversion,
@@ -246,7 +255,7 @@ if host_machine.system() == 'windows'
   # https://mesonbuild.com/Reference-manual_functions.html#shared_library
   module = shared_library(
     'civetweb', 
-    config_src + module_src + [ 'src/module/init.cc' ] + resources,
+    config_src + module_src + [ 'src/module/init.cc' ],
     name_prefix: 'udjat-module-',
     install: true,
     link_with: dynamic,
@@ -313,8 +322,25 @@ executable(
   include_directories: includes_dir
 )
 
+install_headers(
+  'src/include/udjat/tools/http/connection.h',
+  'src/include/udjat/tools/http/handler.h',
+  'src/include/udjat/tools/http/icon.h',
+  'src/include/udjat/tools/http/image.h',
+  'src/include/udjat/tools/http/keypair.h',
+  'src/include/udjat/tools/http/layouts.h',
+  'src/include/udjat/tools/http/oauth.h',
+  'src/include/udjat/tools/http/report.h',
+  'src/include/udjat/tools/http/request.h',
+  'src/include/udjat/tools/http/response.h',
+  'src/include/udjat/tools/http/server.h',
+  'src/include/udjat/tools/http/template.h',
+  'src/include/udjat/tools/http/value.h',
+  subdir: 'udjat/tools/http'  
+)
 
-#
-# Common targets
-#
-install_subdir('src/include/udjat', install_dir : get_option('includedir'))
+install_headers(
+  'src/include/udjat/tools/civetweb/protocol.h',
+  'src/include/udjat/tools/civetweb/service.h',
+  subdir: 'udjat/tools/civetweb'  
+)
