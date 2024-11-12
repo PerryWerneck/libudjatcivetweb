@@ -46,6 +46,11 @@ subdir('po')
 #
 # Required libraries
 #
+sdk_deps = [
+  'libudjat',
+  'civetweb'
+]
+
 libudjat = dependency('libudjat')
 
 lib_deps = [
@@ -106,6 +111,10 @@ app_conf.set('PRODUCT_VERSION', libudjat.version())
 
 ssl = dependency('libssl', required: false)
 if ssl.found()
+  sdk_deps += [
+    'libssl',
+    'libcrypto'
+  ]
   lib_deps += [ 
       ssl,
       dependency('libcrypto')
@@ -225,7 +234,7 @@ endif
 pkg.generate(
   name: 'lib' + meson.project_name() + '-static',
   description: project_description,
-  requires: lib_deps,
+  requires: sdk_deps,
   libraries: [ 
     '-l:lib' + meson.project_name() + '.a',
   ]
