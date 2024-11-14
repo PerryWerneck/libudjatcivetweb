@@ -174,6 +174,7 @@ module_src = [
   'src/module/init.cc',
   'src/module/protocol.cc',
   'src/module/service.cc',
+  'src/module/factory.cc',
 ]
 
 test_src = [
@@ -357,4 +358,9 @@ install_headers(
   'src/include/udjat/tools/civetweb/protocol.h',
   'src/include/udjat/tools/civetweb/service.h',
   subdir: 'udjat/tools/civetweb'  
+)
+
+install_headers(
+  'src/include/udjat/module/civetweb.h',
+  subdir: 'udjat/module'  
 )

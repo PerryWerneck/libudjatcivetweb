@@ -1,7 +1,7 @@
 /* SPDX-License-Identifier: LGPL-3.0-or-later */
 
 /*
- * Copyright (C) 2021 Perry Werneck <perry.werneck@gmail.com>
+ * Copyright (C) 2023 Perry Werneck <perry.werneck@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published
@@ -19,40 +19,27 @@
 
  #pragma once
 
+ #include <config.h>
  #include <udjat/defs.h>
  #include <udjat/module/abstract.h>
  #include <udjat/module/info.h>
- #include <udjat/tools/service.h>
- #include <udjat/tools/protocol.h>
- #include <udjat/tools/http/server.h>
+ #include <udjat/tools/xml.h>
+ #include <udjat/tools/civetweb/service.h>
  
- #include <civetweb.h>
-
  namespace Udjat {
 
 	namespace CivetWeb {
 
-		class UDJAT_API Service : public Udjat::Service, public HTTP::Server {
-		private:
-			static Service *instance;
-
-		protected:
-			struct mg_context *ctx = nullptr;
-
+		/// @brief Generic http module.
+		class UDJAT_API Module : public Udjat::Module, public Service {
 		public:
 
-			static Service & get_instance();
+			static Udjat::Module * Factory(const ModuleInfo &info, const char *name = "httpd", bool client = true);
+			static Udjat::Module * Factory(const ModuleInfo &info, const XML::Node &node);
 
-			Service(const ModuleInfo &info, const pugi::xml_node &node);
-			Service(const ModuleInfo &info, const char *name = "httpd");
-
-			virtual ~Service();
-
-			void start() noexcept override;
-			void stop() noexcept override;
-
-			bool push_back(HTTP::Handler *handler) override;
-			bool remove(HTTP::Handler *handler) override;
+			Module(const ModuleInfo &info, const XML::Node &node);
+			Module(const ModuleInfo &info, const char *name = "httpd");
+			virtual ~Module();
 
 		};
 

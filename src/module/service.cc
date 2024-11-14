@@ -19,7 +19,6 @@
 
  #include <config.h>
 
- #define UDJAT_ENABLE_CIVETWEB
  #include <udjat/tools/civetweb/service.h>
 
  #include <udjat/defs.h>
