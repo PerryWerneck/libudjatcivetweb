@@ -47,44 +47,37 @@
  namespace Udjat {
 
 	int HTTP::Response::status_code() const noexcept {
-		return HTTP::Exception::code(Abstract::Response::status_code());
+		return HTTP::Exception::code(Udjat::Response::status_code());
 	}
 
 	void HTTP::Response::for_each(const std::function<void(const char *header_name, const char *header_value)> &call) const noexcept {
 
-		Abstract::Response::for_each(call);
-
 		// https://stackoverflow.com/questions/3715981/what-s-the-best-restful-method-to-return-total-number-of-items-in-an-object
-		if(total_count) {
-			call("X-Total-Count",std::to_string(total_count).c_str());
+		if(range.count) {
+			call("X-Total-Count",std::to_string(range.count).c_str());
 		}
 
 		if(range.total) {
 			call("Content-Range",Udjat::String{"items ",range.from,"-",range.to,"/",range.total}.c_str());
 		}
 
-	}
+		/*
+		if(timestamp.expires) {
 
-	void HTTP::Response::count(size_t value) noexcept {
-		total_count = value;
-	}
+		}
+		*/
 
-	void HTTP::Response::content_range(size_t from, size_t to, size_t total) noexcept {
-		range.from = from;
-		range.to = to;
-		range.total = total;
 	}
 
 	std::string HTTP::Response::to_string() const noexcept {
 
-		int code = status_code();
+		// TODO: FIX-IT
 
+		/*
+		int code = status_code();
 		debug("Request status code is ",code);
 
 		if(code >= 400 && code <= 599 && empty() && Config::Value<bool>("http","use-error-templates",true)) {
-
-			// Process error templates.
-			// debug("--------------> Checking template for code ",code," ",(empty() ? "(Empty response)" : "(Non-empty response)"));
 
 			try {
 
@@ -100,7 +93,7 @@
 
 						} else if(!strcasecmp(key,"message")) {
 
-							value = this->message();
+							value = this->status.message;
 
 						} else if(!strcasecmp(key,"body")) {
 
@@ -134,6 +127,7 @@
 
 			}
 		}
+		*/
 
 		try {
 
@@ -142,7 +136,7 @@
 				// It's an svg
 				HTTP::Icon icon;
 
-				Response::Object::for_each([&icon](const char *, const Udjat::Value &value){
+				Udjat::Response::for_each([&icon](const char *, const Udjat::Value &value){
 					if(value == Udjat::Value::Icon) {
 						icon = HTTP::Icon::getInstance(value.to_string());
 						return (bool) icon;
@@ -161,24 +155,20 @@
 
 			}
 
-			return Udjat::Response::Value::to_string();
-
 		} catch(const std::exception &e) {
 
 			Logger::String{e.what()}.error("http");
 			const_cast<HTTP::Response *>(this)->failed(e);
-			return e.what();
 
 		} catch(...) {
 
 			Logger::String message{_( "Unexpected error processing response text" )};
 			message.error("http");
-			const_cast<HTTP::Response *>(this)->failed(-1,message.c_str());
-			return message;
+			const_cast<HTTP::Response *>(this)->failed(message.c_str());
 
 		}
 
-		return "";
+		return Udjat::Response::to_string();
 
 	}
 

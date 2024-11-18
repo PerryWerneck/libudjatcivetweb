@@ -19,6 +19,7 @@
 
  #pragma once
 
+/*
  #include <udjat/defs.h>
  #include <udjat/tools/report.h>
  #include <udjat/tools/http/value.h>
@@ -71,3 +72,4 @@
 	}
 
  }
+*/

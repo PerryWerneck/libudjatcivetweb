@@ -109,19 +109,43 @@ app_conf.set('PACKAGE_VERSION_MICRO', pkg_micro_version)
 app_conf.set('PRODUCT_NAME', libudjat.get_variable('product_name'))
 app_conf.set('PRODUCT_VERSION', libudjat.version())
 
-ssl = dependency('libssl', required: false)
-if ssl.found()
+#
+# Crypto APIs
+#
+
+# libkcapi - https://www.chronox.de/libkcapi/
+cryptolib = dependency('libkcapi', required: false)
+if cryptolib.found()
+
+  # Found Kernel crypto API, use it
   sdk_deps += [
-    'libssl',
-    'libcrypto'
+    cryptolib,
   ]
   lib_deps += [ 
-      ssl,
-      dependency('libcrypto')
+    cryptolib,
   ]
-  app_conf.set('HAVE_LIBSSL',1)
-endif
+  app_conf.set('HAVE_LIBKCAPI',1)
 
+else
+
+  # No libkcapi, use libssl
+  ssl = dependency('libssl', required: false)
+  if ssl.found()
+    sdk_deps += [
+      'libssl',
+      'libcrypto'
+    ]
+    lib_deps += [ 
+        ssl,
+        dependency('libcrypto')
+    ]
+    app_conf.set('HAVE_LIBSSL',1)
+  endif
+
+endif
+#
+# Linux standards
+#
 if cxx.compiles('#include <unistd.h>', name : 'unistd.h')
   app_conf.set('HAVE_UNISTD_H', 1)
 endif

@@ -21,6 +21,13 @@
   * @brief Implements keypair singleton.
   */
 
+ // TODO:
+ //
+ //	References: 
+ //		https://blog.cloudflare.com/pt-br/the-linux-crypto-api-for-user-applications/
+ //		https://github.com/smuellerDD/libkcapi
+ //
+
  #include <config.h>
  #include <udjat/defs.h>
  #include <udjat/tools/http/keypair.h>

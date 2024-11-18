@@ -18,32 +18,16 @@
  */
 
  #pragma once
-
  #include <udjat/defs.h>
- #include <udjat/tools/abstract/response.h>
- #include <udjat/tools/response/object.h>
- #include <udjat/tools/http/value.h>
- #include <map>
+ #include <udjat/tools/response.h>
 
  namespace Udjat {
 
 	namespace HTTP {
 
-		class UDJAT_API Response : public Udjat::Response::Object {
-		private:
-
-			/// @brief Value for X-Total-Count header.
-			size_t total_count = 0;
-
-			/// @brief Values for Content-Range header.
-			struct {
-				size_t from = 0;
-				size_t to = 0;
-				size_t total = 0;
-			} range;
-
+		class UDJAT_API Response : public Udjat::Response {
 		public:
-			Response(Udjat::MimeType mimetype) : Udjat::Response::Object{mimetype} {
+			Response(Udjat::MimeType mimetype) : Udjat::Response{mimetype} {
 			}
 
 			int status_code() const noexcept;
@@ -51,21 +35,26 @@
 			std::string to_string() const noexcept override;
 
 			/// @brief Enumerate headers.
-			void for_each(const std::function<void(const char *header_name, const char *header_value)> &call) const noexcept;
-
-			/// @brief Set item count for this response.
-			/// @param value The item count (for X-Total-Count http header).
-			void count(size_t value) noexcept override;
-
-			/// @brief Set range for this response (Content-Range http header).
-			/// @param from First item.
-			/// @param to Last item.
-			/// @param total Item count.
-			void content_range(size_t from, size_t to, size_t total) noexcept override;
+			virtual void for_each(const std::function<void(const char *header_name, const char *header_value)> &call) const noexcept;
 
 		};
+
+	}	
+ }
+ 
+
+
+/*
+ #include <udjat/tools/http/value.h>
+ #include <map>
+
+ namespace Udjat {
+
+	namespace HTTP {
+
 
 	}
 
  }
+*/
 
