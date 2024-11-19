@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udjat-module-httpd 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-11-11 12:47-0300\n"
+"POT-Creation-Date: 2024-11-19 19:59-0300\n"
 "PO-Revision-Date: 2024-01-30 20:11-0300\n"
 "Last-Translator: Perry Werneck <perry.werneck@gmail.com>\n"
 "Language-Team: Brazilian Portuguese <perry.werneck@gmail.com>\n"
@@ -57,22 +57,18 @@ msgstr "Informe o nome de usuário"
 msgid "Please, inform password"
 msgstr "Informe a senha de acesso"
 
-#: src/library/connection.cc:43
-msgid "Operation failed"
-msgstr ""
-
-#: src/library/response.cc:174
+#: src/library/response.cc:170
 msgid "Unexpected error processing response text"
 msgstr "Erro inesperado ao processar o texto da resposta"
 
 #: src/module/handlers/favicon.cc:119 src/module/handlers/icons.cc:65
-#: src/module/handlers/images.cc:102 src/module/handlers/product.cc:89
+#: src/module/handlers/images.cc:98 src/module/handlers/product.cc:89
 msgid "Not available"
 msgstr "Não disponível"
 
-#: src/module/handlers/icons.cc:86 src/module/handlers/images.cc:98
-#: src/module/handlers/pubkey.cc:72 src/module/handlers/root.cc:56
-#: src/module/oauth2/handler.cc:290 src/module/send.cc:295
+#: src/module/handlers/icons.cc:82 src/module/handlers/images.cc:94
+#: src/module/handlers/pubkey.cc:71 src/module/handlers/root.cc:56
+#: src/module/oauth2/handler.cc:290 src/module/send.cc:300
 msgid "Unexpected error"
 msgstr "Erro inesperado"
 
