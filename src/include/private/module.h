@@ -53,7 +53,7 @@
 			operator MimeType() const override;
 
 			/// @brief Send response.
-			int send(const Abstract::Response &response) const noexcept override;
+			int send(const Udjat::Response &response) const noexcept override;
 
 			int send(const char *mime_type, const char *response, size_t length) const noexcept override;
 			int send(const HTTP::Method method, const char *filename, bool allow_index, const char *mime_type, unsigned int max_age) const override;
@@ -154,7 +154,7 @@
  Udjat::MimeType MimeTypeFactory(struct mg_connection *conn, const Udjat::MimeType def = Udjat::MimeType::json) noexcept;
 
  /// @brief Send response.
- int send(struct mg_connection *conn, const Abstract::Response &response) noexcept;
+ int send(struct mg_connection *conn, const Udjat::Response &response) noexcept;
 
  /// @brief Send error page.
  int http_error(struct mg_connection *conn, int code, const char *message) noexcept;

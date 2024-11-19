@@ -53,11 +53,11 @@
 			/// @param response Response to.
 			/// @param mimetype The mimetype for response.
 			/// @return true if the string
-			static std::string get(const Udjat::Abstract::Response &response, const MimeType mimetype);
+			static std::string get(const Udjat::Response &response, const MimeType mimetype);
 
 			/// @brief Send response.
 			/// @return http error response.
-			virtual int send(const Abstract::Response &response) const noexcept = 0;
+			virtual int send(const Udjat::Response &response) const noexcept = 0;
 
 			/// @brief Send string.
 			/// @return http error response (200).

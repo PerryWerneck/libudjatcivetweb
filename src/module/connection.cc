@@ -21,7 +21,7 @@
  #include <sys/types.h>
  #include <sys/stat.h>
  #include <private/module.h>
- #include <udjat/tools/abstract/response.h>
+ #include <udjat/tools/response.h>
  #include <udjat/tools/http/response.h>
  #include <udjat/tools/http/timestamp.h>
  #include <udjat/tools/http/exception.h>

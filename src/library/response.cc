@@ -74,7 +74,7 @@
 		// TODO: FIX-IT
 
 		/*
-		int code = status_code();
+		int code = status_code();	
 		debug("Request status code is ",code);
 
 		if(code >= 400 && code <= 599 && empty() && Config::Value<bool>("http","use-error-templates",true)) {
