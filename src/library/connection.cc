@@ -36,6 +36,10 @@
 	HTTP::Connection::~Connection() {
 	}
 
+	int HTTP::Connection::success(const char *mime_type, const char *response, size_t length) const noexcept {
+		return send(mime_type,response,length);
+	}
+
 	/*
 	int HTTP::Connection::send(int code, const char *message, const char *body) const noexcept {
 		return send(HTTP::Response{(MimeType) *this}.failed(code,message,body));
@@ -45,9 +49,6 @@
 		return send(code,_("Operation failed"), message);
 	}
 
-	int HTTP::Connection::success(const char *mime_type, const char *response, size_t length) const noexcept {
-		return send(mime_type,response,length);
-	}
 	*/
 
  }

@@ -118,6 +118,7 @@
 	MimeType mimetype{MimeTypeFactory(conn)};
 
 	const struct mg_request_info *request_info = mg_get_request_info(conn);
+
 	Logger::String{
 		request_info->remote_addr," ",
 		request_info->request_method," ",
@@ -151,11 +152,15 @@
 
 		return ::send(conn,Response{mimetype,code,message,body});
 
- 	} catch(...) {
+ 	} catch(const std::exception &e) {
+
+		Logger::String{"Error sending standard response: ",e.what()}.warning("civetweb");
+
+	} catch(...) {
+
+		Logger::String{"Unexpected error sending standard response"}.warning("civetweb");
 
 	}
-
-	const struct mg_request_info *request_info = mg_get_request_info(conn);
 
 	// Send error without body.
 	mg_response_header_start(conn, code);
