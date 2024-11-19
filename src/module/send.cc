@@ -24,6 +24,7 @@
  #include <udjat/tools/http/timestamp.h>
  #include <udjat/tools/http/mimetype.h>
  #include <udjat/tools/http/connection.h>
+ #include <udjat/tools/response.h>
  #include <udjat/tools/file.h>
  #include <udjat/tools/logger.h>
  #include <udjat/tools/configuration.h>
@@ -207,7 +208,7 @@
 
  }
 
- int send(struct mg_connection *conn, const Udjat::Abstract::Response &response) noexcept {
+ int send(struct mg_connection *conn, const Udjat::Response &response) noexcept {
 
 	int code = HTTP::Exception::code(response.status_code());
 	const struct mg_request_info *request_info = mg_get_request_info(conn);

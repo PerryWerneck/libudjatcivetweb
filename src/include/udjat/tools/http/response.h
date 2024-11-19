@@ -30,7 +30,7 @@
 			Response(Udjat::MimeType mimetype) : Udjat::Response{mimetype} {
 			}
 
-			int status_code() const noexcept;
+			virtual int status_code() const noexcept;
 
 			std::string to_string() const noexcept override;
 

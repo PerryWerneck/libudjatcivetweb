@@ -22,6 +22,7 @@
  #include <udjat/tools/http/server.h>
  #include <udjat/tools/http/connection.h>
  #include <udjat/tools/http/exception.h>
+ #include <udjat/tools/response.h>
  #include <udjat/tools/http/response.h>
  #include <udjat/tools/intl.h>
 
@@ -35,6 +36,7 @@
 	HTTP::Connection::~Connection() {
 	}
 
+	/*
 	int HTTP::Connection::send(int code, const char *message, const char *body) const noexcept {
 		return send(HTTP::Response{(MimeType) *this}.failed(code,message,body));
 	}
@@ -46,6 +48,7 @@
 	int HTTP::Connection::success(const char *mime_type, const char *response, size_t length) const noexcept {
 		return send(mime_type,response,length);
 	}
+	*/
 
  }
 

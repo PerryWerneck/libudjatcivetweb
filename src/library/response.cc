@@ -34,6 +34,8 @@
  #include <udjat/tools/string.h>
  #include <udjat/tools/application.h>
  #include <udjat/tools/http/timestamp.h>
+ #include <string.h>
+ #include <errno.h>
 
  #ifdef HAVE_UNISTD_H
 	#include <unistd.h>
@@ -61,11 +63,19 @@
 			call("Content-Range",Udjat::String{"items ",range.from,"-",range.to,"/",range.total}.c_str());
 		}
 
-		/*
-		if(timestamp.expires) {
+		// Check for caching.
+		// https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
+		{
+			time_t now = time(0);
+			time_t expires = ((time_t) timestamp.expires);
+
+			if(expires > now) {
+				unsigned int max_age = (now - expires);
+				call("Cache-Control",Udjat::String{"max-age=",max_age,", private"}.c_str());
+				call("Expires",HTTP::TimeStamp{expires}.to_string().c_str());
+			}
 
 		}
-		*/
 
 	}
 
@@ -73,11 +83,10 @@
 
 		// TODO: FIX-IT
 
-		/*
 		int code = status_code();	
 		debug("Request status code is ",code);
 
-		if(code >= 400 && code <= 599 && empty() && Config::Value<bool>("http","use-error-templates",true)) {
+		if(code >= 400 && code <= 599 && Config::Value<bool>("http","use-error-templates",true)) {
 
 			try {
 
@@ -97,15 +106,11 @@
 
 						} else if(!strcasecmp(key,"body")) {
 
-							value = this->body();
-#ifdef DEBUG
-							if(!*this->body()) {
-								value = "No body on this error (DEBUG)";
-							}
-#endif // DEBUG
+							value = this->status.details;
+
 						} else if(!strcasecmp(key,"syscode")) {
 
-							value = std::to_string(this->status_code());
+							value = std::to_string(this->status.code);
 
 						} else {
 
@@ -127,7 +132,6 @@
 
 			}
 		}
-		*/
 
 		try {
 

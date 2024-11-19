@@ -76,7 +76,7 @@
 		return 200;
 	}
 
-	int CivetWeb::Connection::send(const Abstract::Response &response) const noexcept {
+	int CivetWeb::Connection::send(const Udjat::Response &response) const noexcept {
 		return ::send(conn,response);
 	}
 
@@ -117,22 +117,45 @@
 
 	MimeType mimetype{MimeTypeFactory(conn)};
 
- 	try {
-
-		return ::send(conn,HTTP::Response{mimetype}.failed(code,message,body));
-
- 	} catch(...) {
-
-	}
-
 	const struct mg_request_info *request_info = mg_get_request_info(conn);
-
 	Logger::String{
 		request_info->remote_addr," ",
 		request_info->request_method," ",
 		request_info->local_uri," ",
 		code," ",message," (",std::to_string(mimetype),")"
 	}.error("civetweb");
+
+	/// @brief Customized error response.
+	class Response : public HTTP::Response {
+	private:
+		int code;
+
+	public:
+		Response(MimeType mimetype, int c, const char *message, const char *details)
+			: HTTP::Response{mimetype}, code{c} {
+			failed(message,details);
+		}
+
+		int status_code() const noexcept override {
+			return code;
+		}
+
+		void for_each(const std::function<void(const char *header_name, const char *header_value)> &call) const noexcept override {
+			call("Cache-Control","no-cache, no-store, must-revalidate, private, max-age=0");
+			call("Expires", "0");
+		}
+
+	};
+
+ 	try {
+
+		return ::send(conn,Response{mimetype,code,message,body};
+
+ 	} catch(...) {
+
+	}
+
+	const struct mg_request_info *request_info = mg_get_request_info(conn);
 
 	// Send error without body.
 	mg_response_header_start(conn, code);

@@ -77,13 +77,13 @@
 			/// @param title The error message.
 			/// @param body Text explaining the failure
 			/// @return Error code.
-			virtual int send(int code, const char *title, const char *body = "") const noexcept;
+			// virtual int send(int code, const char *title, const char *body = "") const noexcept;
 
 			/// @brief Send 'operation failed' response.
 			/// @param code The HTTP status code (see HTTP standard).
 			/// @param message The message.
 			/// @return code.
-			virtual int failed(int code, const char *message) const noexcept;
+			// virtual int failed(int code, const char *message) const noexcept;
 
 			/// @brief Send response.
 			/// @param mime_type The content type to be sent.

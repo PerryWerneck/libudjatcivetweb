@@ -30,7 +30,7 @@
  #include <udjat/tools/http/report.h>
  #include <udjat/tools/http/mimetype.h>
  #include <udjat/tools/http/exception.h>
- #include <udjat/tools/worker.h>
+ #include <udjat/tools/method.h>
  #include <udjat/tools/logger.h>
  #include <udjat/tools/intl.h>
  #include <string>
@@ -41,6 +41,13 @@
 
 	int HTTP::Request::exec(HTTP::Connection &connection) {
 
+		HTTP::Response response{(MimeType) connection};
+
+		Udjat::Method::call(pop().c_str(),*this,response);
+
+		return connection.send(response);
+		
+		/*
 		Worker::ResponseType response_type = Worker::None;
 		const Worker *worker = nullptr;
 
@@ -131,6 +138,7 @@
 			Logger::String("Request has failed with error ",response.status_code()).trace("civetweb");
 			return connection.send(response);
 		}
+		*/
 
 	}
 
