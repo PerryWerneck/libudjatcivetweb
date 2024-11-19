@@ -210,9 +210,12 @@
 
  int send(struct mg_connection *conn, const Udjat::HTTP::Response &response) noexcept {
 
-	int code = HTTP::Exception::code(response.status_code());
+	int http_error_code = response.status_code();
+
+	debug("-----------> HTTP RESPONSE ",http_error_code);
+
 	const struct mg_request_info *request_info = mg_get_request_info(conn);
-	string message;
+	string message{response.message()};
 
 	if(response.not_modified()) {
 
@@ -241,17 +244,19 @@
 
 		string text{response.to_string()};
 
-		// Build and send header
-		mg_response_header_start(conn, code);
+		debug(text.c_str());
 
-		if(code < 200 || code > 299) {
+		// Build and send header
+		mg_response_header_start(conn, http_error_code);
+
+		if(http_error_code < 200 || http_error_code > 299) {
 
 			// It's an error, log it
 			Logger::String{
 				request_info->remote_addr," ",
 				request_info->request_method," ",
 				request_info->local_uri," HTTP Error ",
-				std::to_string(code)," - ",response.message()," (Error ",std::to_string(response.status_code()),")"
+				http_error_code," - ",response.message()
 			}.warning("civetweb");
 
 		}
@@ -274,31 +279,27 @@
 
 		}
 
-		return code;
+		return http_error_code;
 
 	} catch( const Udjat::Exception &e ) {
 		debug("-----> ",__FUNCTION__,": ",e.what());
 		message = e.what();
-		code = e.syscode();
+		http_error_code = HTTP::Exception::code(e.syscode());
 
 	} catch( const std::system_error &e ) {
 		debug("-----> ",__FUNCTION__,": ",e.what());
 		message = e.what();
-		code = e.code().value();
+		http_error_code = HTTP::Exception::code(e.code().value());
 
 	} catch( const std::exception &e ) {
 		debug("-----> ",__FUNCTION__,": ",e.what());
 		message = e.what();
-		code = -1;
-
+		http_error_code = 500;
 	} catch( ... ) {
 		debug("-----> ",__FUNCTION__,": ","Unexpected error");
 		message = _("Unexpected error");
-		code = -1;
-
+		http_error_code = 500;
 	}
-
-	int http_error_code = HTTP::Exception::code(code);
 
 	Logger::String{
 		"Standard 'send' method has failed with exception '",
@@ -314,7 +315,7 @@
 			request_info->remote_addr," ",
 			request_info->request_method," ",
 			request_info->local_uri," ",
-			http_error_code, " - ", message.c_str()," (syserror ",code,")"
+			http_error_code, " - ", message.c_str()
 		}.trace("civetweb");
 	}
 

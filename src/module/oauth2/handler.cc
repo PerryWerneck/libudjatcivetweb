@@ -292,8 +292,29 @@
 	}
 
 	debug("OAuth handler exit with error ",code);
+	/// @brief Customized error response.
+	class Response : public HTTP::Response {
+	private:
+		int code;
 
-	return ::send(conn,HTTP::Response{mimetype}.failed(HTTP::Exception::syscode(code),context.message.c_str()));
+	public:
+		Response(MimeType mimetype, int c, const char *message)
+			: HTTP::Response{mimetype}, code{c} {
+			failed(message);
+		}
+
+		int status_code() const noexcept override {
+			return code;
+		}
+
+		void for_each(const std::function<void(const char *header_name, const char *header_value)> &call) const noexcept override {
+			call("Cache-Control","no-cache, no-store, must-revalidate, private, max-age=0");
+			call("Expires", "0");
+		}
+
+	};
+
+	return ::send(conn,Response{mimetype,code,context.message.c_str()});
 
  }
 

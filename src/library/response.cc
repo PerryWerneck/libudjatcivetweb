@@ -49,6 +49,7 @@
  namespace Udjat {
 
 	int HTTP::Response::status_code() const noexcept {
+		debug("Converting syscode ",Udjat::Response::status_code()," to ",HTTP::Exception::code(Udjat::Response::status_code()));
 		return HTTP::Exception::code(Udjat::Response::status_code());
 	}
 

@@ -112,37 +112,20 @@ app_conf.set('PRODUCT_VERSION', libudjat.version())
 #
 # Crypto APIs
 #
-
-# libkcapi - https://www.chronox.de/libkcapi/
-cryptolib = dependency('libkcapi', required: false)
-if cryptolib.found()
-
-  # Found Kernel crypto API, use it
+# No libkcapi, use libssl
+ssl = dependency('libssl', required: false)
+if ssl.found()
   sdk_deps += [
-    cryptolib,
+    'libssl',
+    'libcrypto'
   ]
   lib_deps += [ 
-    cryptolib,
+      ssl,
+      dependency('libcrypto')
   ]
-  app_conf.set('HAVE_LIBKCAPI',1)
-
-else
-
-  # No libkcapi, use libssl
-  ssl = dependency('libssl', required: false)
-  if ssl.found()
-    sdk_deps += [
-      'libssl',
-      'libcrypto'
-    ]
-    lib_deps += [ 
-        ssl,
-        dependency('libcrypto')
-    ]
-    app_conf.set('HAVE_LIBSSL',1)
-  endif
-
+  app_conf.set('HAVE_LIBSSL',1)
 endif
+
 #
 # Linux standards
 #
