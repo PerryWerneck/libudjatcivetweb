@@ -48,13 +48,13 @@
 		return CivetWeb::Request{conn}.exec(connection);
 
 	} catch(const exception &e) {
-		debug("-----> ",__FUNCTION__,": ",e.what());
-		return send(conn, HTTP::Response{MimeTypeFactory(conn)}.failed(e));
-
+		HTTP::Response response{MimeTypeFactory(conn)};
+		response.failed(e);
+		return send(conn,response);
 	} catch(...) {
-		debug("-----> ",__FUNCTION__,": ","Unexpected error");
-		return send(conn, HTTP::Response{MimeTypeFactory(conn)}.failed(_("Unexpected error")));
-
+		HTTP::Response response{MimeTypeFactory(conn)};
+		response.failed(_("Unexpected error"));
+		return send(conn,response);
 	}
 
  }

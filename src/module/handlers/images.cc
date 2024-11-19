@@ -85,18 +85,14 @@
 		);
 		*/
 
-	} catch(const HTTP::Exception &e) {
-		return send(conn, HTTP::Response{MimeTypeFactory(conn)}.failed(e));
-
-	} catch(const system_error &e) {
-		return send(conn, HTTP::Response{MimeTypeFactory(conn)}.failed(e));
-
 	} catch(const exception &e) {
-		return send(conn, HTTP::Response{MimeTypeFactory(conn)}.failed(e));
-
+		HTTP::Response response{MimeTypeFactory(conn)};
+		response.failed(e);
+		return send(conn,response);
 	} catch(...) {
-		return send(conn, HTTP::Response{MimeTypeFactory(conn)}.failed(_("Unexpected error")));
-
+		HTTP::Response response{MimeTypeFactory(conn)};
+		response.failed(_("Unexpected error"));
+		return send(conn,response);
 	}
 
 	return http_error(conn, 404, _("Not available"));

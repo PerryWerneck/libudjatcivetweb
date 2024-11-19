@@ -204,8 +204,8 @@
 
 	}
 
-	return send(Udjat::Response{
-		(MimeType) *this
-	}.failed(system_error(ENOENT,system_category())));
+	HTTP::Response response{(MimeType) *this};
+	response.failed(system_error(ENOENT,system_category()));
+	return send(response);
 
  }

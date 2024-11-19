@@ -49,7 +49,7 @@
 			/// @retval 404 No index page.
 			int info(const char *path);
 
-			/// @brief Get text for response..
+			/// @brief Get text for response.
 			/// @param response Response to.
 			/// @param mimetype The mimetype for response.
 			/// @return true if the string
@@ -57,7 +57,7 @@
 
 			/// @brief Send response.
 			/// @return http error response.
-			virtual int send(const Udjat::Response &response) const noexcept = 0;
+			virtual int send(const Udjat::HTTP::Response &response) const noexcept = 0;
 
 			/// @brief Send string.
 			/// @return http error response (200).

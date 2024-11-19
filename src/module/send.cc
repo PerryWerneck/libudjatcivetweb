@@ -208,7 +208,7 @@
 
  }
 
- int send(struct mg_connection *conn, const Udjat::Response &response) noexcept {
+ int send(struct mg_connection *conn, const Udjat::HTTP::Response &response) noexcept {
 
 	int code = HTTP::Exception::code(response.status_code());
 	const struct mg_request_info *request_info = mg_get_request_info(conn);

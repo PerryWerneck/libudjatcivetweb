@@ -76,7 +76,7 @@
 		return 200;
 	}
 
-	int CivetWeb::Connection::send(const Udjat::Response &response) const noexcept {
+	int CivetWeb::Connection::send(const Udjat::HTTP::Response &response) const noexcept {
 		return ::send(conn,response);
 	}
 
@@ -149,7 +149,7 @@
 
  	try {
 
-		return ::send(conn,Response{mimetype,code,message,body};
+		return ::send(conn,Response{mimetype,code,message,body});
 
  	} catch(...) {
 
