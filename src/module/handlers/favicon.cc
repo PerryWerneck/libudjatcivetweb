@@ -32,7 +32,6 @@
  #include <udjat/tools/worker.h>
  #include <udjat/tools/configuration.h>
  #include <udjat/tools/http/icon.h>
- #include <udjat/tools/http/value.h>
  #include <fcntl.h>
 
  #ifdef HAVE_UNISTD_H
@@ -49,7 +48,7 @@
 
 		// Search workers for favicon.
 		{
-			HTTP::Value properties{Udjat::Value::Object};
+			Udjat::Value properties{Udjat::Value::Object};
 
 			if(Worker::for_each([&properties](const Worker &worker){
 				return worker.getProperty("favicon",properties);

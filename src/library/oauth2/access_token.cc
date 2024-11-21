@@ -27,18 +27,18 @@
  #include <udjat/tools/http/request.h>
  #include <udjat/tools/http/oauth.h>
  #include <udjat/tools/logger.h>
- #include <udjat/tools/http/value.h>
+ #include <udjat/tools/value.h>
  #include <stdexcept>
 
  using namespace std;
 
  namespace Udjat {
 
- 	int OAuth::access_token(HTTP::Request &request, Context &context, HTTP::Value &response) {
+ 	int OAuth::access_token(HTTP::Request &request, Context &context, Udjat::Value &response) {
 
 		OAuth::User user{request};
 
-		if(user.code(request["code"].c_str())) {
+		if(user.code(to_string(request["code"]).c_str())) {
 
 			// Update context
 			context.token = user.encrypt();

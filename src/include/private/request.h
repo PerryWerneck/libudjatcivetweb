@@ -50,11 +50,10 @@
 
 			const char * header(const char *name) const noexcept override;
 
-
 			/// @brief The client address.
-			String address() const override;
+			Udjat::String address() const override;
 
-			String cookie(const char *name) const override;
+			Udjat::String cookie(const char *name) const override;
 
 		};
 

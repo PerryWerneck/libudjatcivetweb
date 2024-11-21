@@ -20,8 +20,7 @@
  #include <config.h>
  #include <udjat/tools/response.h>
  #include <udjat/tools/http/response.h>
- #include <udjat/tools/http/value.h>
- #include <udjat/tools/http/value.h>
+ #include <udjat/tools/value.h>
  #include <udjat/tools/http/layouts.h>
  #include <udjat/tools/http/exception.h>
  #include <udjat/tools/http/mimetype.h>

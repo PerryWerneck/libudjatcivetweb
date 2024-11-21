@@ -70,7 +70,7 @@
 				return false;
 			}
 
-			String req_addr{address()};
+			Udjat::String req_addr{address()};
 			sockaddr_storage addr;
 
 			if(inet_pton(AF_INET,req_addr.c_str(),&((struct sockaddr_in *) &addr)->sin_addr) == 1) {

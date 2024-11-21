@@ -79,6 +79,8 @@
 			Request(const char *path, const char * method) : Request{path,HTTP::MethodFactory(method)} {
 			}
 
+			virtual ~Request();
+
 			const char *c_str() const noexcept override;
 			bool cached(const Udjat::TimeStamp &timestamp) const override;
 
@@ -91,7 +93,7 @@
 			bool authenticated() const noexcept override;
 
 			/// @brief The client address.
-			virtual String address() const = 0;
+			virtual Udjat::String address() const = 0;
 
 			/// @brief The response mime-type.
 			MimeType mimetype() const noexcept;
@@ -99,13 +101,9 @@
 			bool for_each(const std::function<bool(const char *name, const char *value)> &call) const override;
 
 			/// @brief HTTP cookie.
-			virtual String cookie(const char *name) const;
+			virtual Udjat::String cookie(const char *name) const;
 
 			bool getProperty(const char *key, std::string &value) const override;
-
-			/// @brief Get HTTP header value.
-			virtual const char * header(const char *name) const noexcept = 0;
-
 
 		};
 

@@ -26,7 +26,7 @@
  #include <udjat/defs.h>
  #include <udjat/tools/request.h>
  #include <udjat/tools/http/request.h>
- #include <udjat/tools/http/value.h>
+ #include <udjat/tools/value.h>
  #include <udjat/tools/string.h>
  #include <udjat/tools/logger.h>
  #include <map>
@@ -68,7 +68,7 @@
 		/// @param response The response data.
 		/// @return 0 if the response was set.
 		/// @retval EPERM The authentication code is invalid.
-		UDJAT_API int access_token(HTTP::Request &request, Context &context, HTTP::Value &response);
+		UDJAT_API int access_token(HTTP::Request &request, Context &context, Udjat::Value &response);
 
 		/// @brief OAuth2 API client
 		class UDJAT_API Client {

@@ -201,7 +201,7 @@
 		case 3: // access_token
 			debug("---> access_token");
 			{
-				HTTP::Value response{Value::Object};
+				Udjat::Value response{Value::Object};
 
 				if(!OAuth::access_token(request,context,response)) {
 
@@ -236,7 +236,7 @@
 
 		case 4:	// userinfo.
 			{
-				HTTP::Value response{Value::Object};
+				Udjat::Value response{Value::Object};
 				HTTP::Request::Token token;
 
 				if(!request.get(token)) {

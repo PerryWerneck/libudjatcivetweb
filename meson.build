@@ -357,7 +357,6 @@ install_headers(
   'src/include/udjat/tools/http/response.h',
   'src/include/udjat/tools/http/server.h',
   'src/include/udjat/tools/http/template.h',
-  'src/include/udjat/tools/http/value.h',
   subdir: 'udjat/tools/http'  
 )
 

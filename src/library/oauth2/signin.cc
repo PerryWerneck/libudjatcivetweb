@@ -49,12 +49,12 @@
 		user.get(context);	// This will update response with the authentication info.
 
 		// Mount redirect URI
-		context.location = request["redirect_uri"];
+		context.location = request["redirect_uri"].c_str();
 		context.location += "?";
 		context.location += "state=";
-		context.location += request["state"];
+		context.location += request["state"].c_str();
 
-		switch(request["response_type"].select("code","token",nullptr)) {
+		switch(String{request["response_type"].c_str()}.select("code","token",nullptr)) {
 		case 0:	// Code flow
 			context.location += "&code=";
 			context.location += user.code().escape();

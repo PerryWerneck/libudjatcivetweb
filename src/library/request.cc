@@ -59,10 +59,6 @@
 		return Udjat::Request::path();
 	}
 
-	const char * HTTP::Request::header(const char *) const noexcept {
-		return "";
-	}
-
 	bool HTTP::Request::getProperty(const char *key, std::string &value) const {
 
 		if(!strcasecmp(key,"client-address")) {
@@ -88,7 +84,7 @@
 
 		// Check for authorization header.
 		{
-			String b64 = header("Authorization");
+			Udjat::String b64 = header("Authorization");
 			if(!b64.empty() && b64.has_prefix("Bearer ",true) && HTTP::KeyPair::getInstance().decrypt(b64.c_str()+7,&token,sizeof(token))) {
 				debug("Got authentication from header");
 				return true;
@@ -97,7 +93,7 @@
 
 		// Check for cookie.
 		{
-			String b64 = cookie((Application::Name() + "-session").c_str());
+			Udjat::String b64 = cookie((Application::Name() + "-session").c_str());
 			if(!b64.empty() && HTTP::KeyPair::getInstance().decrypt(b64.c_str(),&token,sizeof(token))) {
 				debug("Got authentication from cookie");
 				return true;
@@ -135,7 +131,7 @@
 		}
 
 		// Use 'accept' header to identify response type.
-		for(const String &value : String{header("accept")}.split(",")) {
+		for(const Udjat::String &value : Udjat::String{header("accept")}.split(",")) {
 			auto mime = MimeTypeFactory(value.c_str(),MimeType::custom);
 			if(mime != MimeType::custom) {
 				return mime;
