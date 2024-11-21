@@ -52,6 +52,9 @@
 
 	}
 
+	HTTP::Request::~Request() {
+	}
+
 	const char * HTTP::Request::c_str() const noexcept {
 		if(reqpath && *reqpath) {
 			return reqpath;

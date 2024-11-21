@@ -110,7 +110,7 @@
 
 			for(int header = 0; header < info->num_headers; header++) {
 				if(!strcasecmp(info->http_headers[header].name,"X-Forwarded-For")) {
-					String proxy{info->http_headers[header].value};
+					Udjat::String proxy{info->http_headers[header].value};
 					auto separator = proxy.find(',');
 					if(separator != string::npos) {
 						proxy.resize(separator);
