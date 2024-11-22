@@ -20,12 +20,12 @@
  #pragma once
 
  #include <udjat/defs.h>
- #include <udjat/tools/method.h>
  #include <udjat/tools/value.h>
  #include <udjat/tools/http/exception.h>
  #include <udjat/tools/http/response.h>
  #include <udjat/tools/http/report.h>
  #include <udjat/tools/http/mimetype.h>
+ #include <udjat/tools/http/method.h>
  #include <stdexcept>
  #include <system_error>
  #include <map>
