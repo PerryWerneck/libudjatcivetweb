@@ -27,9 +27,10 @@
  #include <udjat/tools/http/image.h>
  #include <udjat/tools/intl.h>
  #include <udjat/tools/logger.h>
- #include <udjat/worker.h>
  #include <udjat/agent/state.h>
  #include <udjat/module.h>
+ #include <udjat/tools/worker.h>
+ #include <udjat/tools/interface.h>
  #include <cstring>
  #include <udjat/tools/configuration.h>
  #include <udjat/tools/application.h>
@@ -128,6 +129,25 @@
 						<< worker.c_str()
 						<< ".html\">"
 						<< worker.c_str()
+						<< "</a>";
+
+				return false;
+
+			});
+
+			page << "</ul>";
+		}
+
+		// Interfaces
+		{
+			page << "<h2>" << _("Interfaces") << "</h2><ul>";
+
+			Udjat::Interface::for_each([&page](const Interface &intf){
+
+				page 	<< "<li><a href=\"" << "/api/1.0/"
+						<< intf.name()
+						<< ".html\">"
+						<< intf.name()
 						<< "</a>";
 
 				return false;

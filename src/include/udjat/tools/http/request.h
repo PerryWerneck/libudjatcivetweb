@@ -95,7 +95,7 @@
 			/// @brief The client address.
 			virtual Udjat::String address() const = 0;
 
-			/// @brief The response mime-type.
+			/// @brief The request mime-type.
 			MimeType mimetype() const noexcept;
 
 			bool for_each(const std::function<bool(const char *name, const char *value)> &call) const override;

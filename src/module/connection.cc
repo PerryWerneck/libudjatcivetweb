@@ -42,22 +42,6 @@
 
 	CivetWeb::Connection::operator MimeType() const {
 
-		const struct mg_request_info *info{mg_get_request_info(conn)};
-
-		if(strncasecmp(info->local_uri,"/api/",5) && Config::Value<bool>("httpd","allow-legacy-path",true)) {
-
-			// Path doesn't start with /api/ and the legacy mode is enabled. Do the path starts with mimetype?
-			const char * ptr = strchr(info->local_uri+1,'/');
-			if(ptr) {
-				string prefix{info->local_uri+1,((size_t)(ptr-info->local_uri))-1};
-				auto mime = MimeTypeFactory(prefix.c_str(),MimeType::custom);
-				if(mime != MimeType::custom) {
-					return mime;
-				}
-			}
-
-		}
-
 		// Get mimetype from request header.
 		return MimeTypeFactory(conn,MimeType::json);
 
@@ -84,14 +68,26 @@
 
  Udjat::MimeType MimeTypeFactory(struct mg_connection *conn, const Udjat::MimeType def) noexcept {
 
+	//
+	// Check for 'format=' on query
+	//
+	for(const auto &arg : String{mg_get_request_info(conn)->query_string}.split("&")) {
+		if(!strncasecmp(arg.c_str(),"format=",7)) {
+			auto mime = MimeTypeFactory(arg.c_str()+7,MimeType::custom);
+			if(mime != MimeType::custom) {
+				return mime;
+			}
+		}
+	}
+
+	//
+	// Check headers
+	//
 	static const char *headers[] = { "Content-Type", "Accept" };
 
 	for(const char *header : headers) {
 
-		// Check 'accept' header.
 		const char *hdr = mg_get_header(conn, header);
-
-//		debug("header[",header,"]='",hdr,"'");
 
 		if(hdr && *hdr) {
 
