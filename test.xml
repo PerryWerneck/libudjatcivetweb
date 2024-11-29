@@ -10,5 +10,11 @@
 	
 	<agent name='random' type='random' http-handler='/files/' />
 
+	<interface type='http' name='api'>
+		<handler name='echo'>
+			<arg name="text" direction='both' type="string" />
+		</handler>
+	</interface>
+
 </config>
 

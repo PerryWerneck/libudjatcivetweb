@@ -84,8 +84,6 @@
 			const char *c_str() const noexcept override;
 			bool cached(const Udjat::TimeStamp &timestamp) const override;
 
-			int exec(Connection &connection);
-
 			/// @brief Get Authentication token.
 			/// @return true if the token has valid authentication.
 			bool get(Request::Token &token) const noexcept;

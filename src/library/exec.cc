@@ -39,14 +39,6 @@
 
  namespace Udjat {
 
-	int HTTP::Request::exec(HTTP::Connection &connection) {
-
-		HTTP::Response response{(MimeType) connection};
-		Udjat::Interface::call(pop().c_str(),*this,response);
-		return connection.send(response);
-		
-	}
-
 	String HTTP::Request::cookie(const char *) const {
 		return "";
 	}

@@ -44,8 +44,7 @@
 
 	try {
 
-		CivetWeb::Connection connection{conn};
-		return CivetWeb::Request{conn}.exec(connection);
+		throw runtime_error("Not supported");
 
 	} catch(const exception &e) {
 		HTTP::Response response{MimeTypeFactory(conn)};
