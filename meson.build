@@ -183,6 +183,7 @@ module_src = [
   'src/module/protocol.cc',
   'src/module/service.cc',
   'src/module/factory.cc',
+  'src/module/interface.cc',
 ]
 
 test_src = [

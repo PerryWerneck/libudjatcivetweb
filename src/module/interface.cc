@@ -17,43 +17,47 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
- /**
-  * @brief Implements the default http handler.
-  *
-  */
-
- #include <config.h>
- #include <udjat/defs.h>
- #include <stdexcept>
- #include <udjat/tools/http/exception.h>
- #include <udjat/tools/logger.h>
- #include <udjat/tools/http/response.h>
- #include <udjat/tools/http/mimetype.h>
  #include <private/module.h>
- #include <udjat/tools/intl.h>
+ #include <udjat/tools/protocol.h>
+ #include <udjat/tools/string.h>
+ #include <udjat/module/civetweb.h>
+ #include <udjat/tools/civetweb/service.h>
  #include <udjat/tools/civetweb/interface.h>
+ #include <udjat/tools/logger.h>
+ #include <civetweb.h>
 
- using namespace std;
  using namespace Udjat;
 
- int rootWebHandler(struct mg_connection *conn, void *) noexcept {
+ Udjat::Interface & CivetWeb::Module::InterfaceFactory(const XML::Node &node) {
 
-	try {
+	/*
+	class Interface : public CivetWeb::Interface {
+	private:
 
-		const char *path = mg_get_request_info(conn)->local_uri;
-		debug("Handling '",path,"'");
+		std::vector<Handler> handlers;
+
+	public:
+		Interface(const XML::Node &node);
+		virtual ~Interface();
 
 
-		return 0; // 0 to run internal civetweb handler.
+	};
+	*/
 
-	} catch(const exception &e) {
-		HTTP::Response response{MimeTypeFactory(conn)};
-		response.failed(e);
-		return send(conn,response);
-	} catch(...) {
-		HTTP::Response response{MimeTypeFactory(conn)};
-		response.failed(_("Unexpected error"));
-		return send(conn,response);
+ }
+
+ CivetWeb::Interface::Interface(const XML::Node &node) : Udjat::Interface{node}, path{String{node,"path"}.as_quark()} {
+
+	if(!(path && *path)) {
+		path = String("/",Udjat::Interface::c_str(),"/").as_quark();
+	}
+
+	if(path[0] != '/' || strlen(path) < 2 || path[strlen(path)-1] != '/') {
+		throw runtime_error(String{"Path '",path,"' is invalid, it should start and end with '/'"});
 	}
 
  }
+
+ CivetWeb::Interface::~Interface() {
+ }
+

@@ -1,7 +1,7 @@
 /* SPDX-License-Identifier: LGPL-3.0-or-later */
 
 /*
- * Copyright (C) 2023 Perry Werneck <perry.werneck@gmail.com>
+ * Copyright (C) 2021 Perry Werneck <perry.werneck@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published
@@ -19,31 +19,40 @@
 
  #pragma once
 
- #include <config.h>
  #include <udjat/defs.h>
  #include <udjat/module/abstract.h>
  #include <udjat/module/info.h>
- #include <udjat/tools/xml.h>
- #include <udjat/tools/civetweb/service.h>
+ #include <udjat/tools/service.h>
+ #include <udjat/tools/protocol.h>
+ #include <udjat/tools/http/server.h>
  #include <udjat/tools/interface.h>
- #include <vector>
- 
+
+ #include <civetweb.h>
+
  namespace Udjat {
 
 	namespace CivetWeb {
 
-		/// @brief Generic http module.
-		class UDJAT_API Module : public Udjat::Module, public Service, private Interface::Factory {
+		class Interface : public Udjat::Interface {
+		private:
+
+			const char *path = nullptr;
+
+			class Handler : public Udjat::Interface::Handler {
+			private:
+				HTTP::Method method;
+
+			public:
+				Handler(const XML::Node &node) 
+					: Udjat::Interface::Handler{node}, method{HTTP::MethodFactory(node)} {
+				}					
+			};
+
+			std::vector<Handler> handlers;
+
 		public:
-
-			static Udjat::Module * Factory(const ModuleInfo &info, const char *name = "httpd", bool client = true);
-			static Udjat::Module * Factory(const ModuleInfo &info, const XML::Node &node);
-
-			Module(const ModuleInfo &info, const XML::Node &node);
-			Module(const ModuleInfo &info, const char *name = "httpd");
-			virtual ~Module();
-
-			Udjat::Interface & InterfaceFactory(const XML::Node &node) override;
+			Interface(const XML::Node &node);
+			virtual ~Interface();
 
 		};
 

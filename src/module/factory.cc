@@ -70,12 +70,16 @@
 	}
 
 	CivetWeb::Module::Module(const ModuleInfo &info, const XML::Node &node) 
-		: Udjat::Module{String{node,"name","httpd"}.as_quark(),udjat_module_info}, Udjat::CivetWeb::Service(udjat_module_info,node) {
-	}
+		: Udjat::Module{String{node,"name","httpd"}.as_quark(),udjat_module_info}, 
+			Udjat::CivetWeb::Service(udjat_module_info,node),
+			Udjat::Interface::Factory{String{node,"interface-type","web"}.as_quark()} 
+		{ }
 
 	CivetWeb::Module::Module(const ModuleInfo &info, const char *name)
-		: Udjat::Module{name,udjat_module_info}, Udjat::CivetWeb::Service(udjat_module_info,XML::Node{}) {
-	}
+		: Udjat::Module{name,udjat_module_info}, 
+			Udjat::CivetWeb::Service{udjat_module_info,XML::Node{}},
+			Udjat::Interface::Factory{name}
+		{ }
 
 	CivetWeb::Module::~Module() {
 
