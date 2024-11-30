@@ -23,16 +23,13 @@
  #include <udjat/module/civetweb.h>
  #include <udjat/tools/civetweb/service.h>
  #include <udjat/tools/logger.h>
+ #include <udjat/tools/interface.h>
  #include <udjat/tools/intl.h>
  #include <civetweb.h>
 
  using namespace Udjat;
 
- CivetWeb::Service::Interface::Interface(const XML::Node &node) : Udjat::Interface{node}, path{String{node,"path"}.as_quark()} {
-
-	if(!(path && *path)) {
-		path = String("/",Udjat::Interface::c_str(),"/").as_quark();
-	}
+ CivetWeb::Service::Interface::Interface(const XML::Node &node, const char *p) : Udjat::Interface{node}, path{p} {
 
 	if(path[0] != '/' || strlen(path) < 2 || path[strlen(path)-1] != '/') {
 		throw runtime_error(String{"Path '",path,"' is invalid, it should start and end with '/'"});
@@ -43,13 +40,29 @@
  CivetWeb::Service::Interface::~Interface() {
  }
 
+ void CivetWeb::Service::Interface::build_handlers(const XML::Node &node) {
+	for(auto child = node.child("handler"); child; child = child.next_sibling("handler")) {
+		emplace_back(child);
+	}
+	if(empty()) {
+		emplace_back("get",node);
+	}
+ }
+
  int CivetWeb::Service::request_handler(struct mg_connection *conn, CivetWeb::Service *srvc) noexcept {
 
 	try {
 
-		const char *path = mg_get_request_info(conn)->local_uri;
+		const mg_request_info *info = mg_get_request_info(conn); 
+		const char *path = info->local_uri;
+
 		debug("Handling '",path,"'");
 
+		HTTP::Response response{MimeTypeFactory(conn)};
+
+		//
+		// Check for interfaces
+		//
 		for(auto &interface : srvc->interfaces) {
 
 			size_t szpath = strlen(interface.c_str());
@@ -60,10 +73,23 @@
 			}
 
 			path += (szpath-1);
-			debug("---------------> '",path,"'");
-			
+			debug("---------------> ",info->request_method,"(",path,")");
+
+			/*
+			for(auto &handler : interface) {
+				if(strcasecmp(info->request_method,handler.c_str())) {
+					continue;
+				}
+
+
+
+			}
+			*/
+
 		}
 
+		response.failed(ENOENT);
+		return send(conn,response);
 
 	} catch(const exception &e) {
 		HTTP::Response response{MimeTypeFactory(conn)};
@@ -75,6 +101,5 @@
 		return send(conn,response);
 	}
 
-	return 0; // 0 to run internal civetweb handler.
 
  }

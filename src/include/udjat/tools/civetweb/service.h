@@ -41,19 +41,20 @@
 
 			static int request_handler(struct mg_connection *conn, CivetWeb::Service *srvc) noexcept;
 
-			class Interface : public Udjat::Interface {
+			class Interface : public Udjat::Interface, public std::vector<Udjat::Interface::Handler> {
 			private:
 				const char *path = nullptr;
-
+				
 			public:
 
-				Interface(const XML::Node &node);
+				Interface(const XML::Node &node, const char *path);
 				virtual ~Interface();
 
 				inline const char * c_str() const {
 					return path;
 				}
 
+				void build_handlers(const XML::Node &node);
 			};
 
 			std::vector<Interface> interfaces;

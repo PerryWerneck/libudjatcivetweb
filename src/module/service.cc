@@ -260,7 +260,7 @@
 
 		} else {
 
-			Logger::String{"No input ports (mg_get_server_ports has returned ",count,")"}.error("civetweb");
+			Logger::String{"No input ports (mg_get_server_ports has returned ",count,")"}.error();
 
 		}
 
@@ -301,7 +301,7 @@
 			}
 
 		} else {
-			Logger::String{"Custom handler for '",handler->c_str(),"' added"}.info("civetweb");
+			Logger::String{"Custom handler for '",handler->c_str(),"' added"}.info();
 		}
 
 		return true;
@@ -317,14 +317,29 @@
 		}
 
 		mg_set_request_handler(ctx, uri.c_str(), NULL, NULL);
-		Logger::String{"Custom handler for '",handler->c_str(),"' removed"}.info("civetweb");
+		Logger::String{"Custom handler for '",handler->c_str(),"' removed"}.info();
 
 		return true;
 
 	}
 
 	Udjat::Interface & CivetWeb::Service::InterfaceFactory(const XML::Node &node) {
-		interfaces.emplace_back(node);
+
+		const char * path{String{node,"path"}.as_quark()};
+
+		if(!(path && *path)) {
+			path = String{"/",String{node,"name"}.c_str(),"/"}.as_quark();
+		}
+
+		for(Interface &interface : interfaces) {
+			if(!strcasecmp(path,interface.c_str())) {
+				Logger::String{"Reusing interface '",path,"'"}.trace();
+				interface.build_handlers(node);
+				return interface;
+			}
+		}
+
+		interfaces.emplace_back(node,path);
 		return interfaces.back();
 	}
 
