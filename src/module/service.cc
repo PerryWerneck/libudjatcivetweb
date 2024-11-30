@@ -73,14 +73,15 @@
 	CivetWeb::Service * CivetWeb::Service::instance = nullptr;
 
 	CivetWeb::Service & CivetWeb::Service::get_instance() {
-		if(instance) {
+		if(!instance) {
 			throw runtime_error("HTTP server is undefined");
 		}
 		return *instance;
 	}
 
  	CivetWeb::Service::Service(const ModuleInfo &info, const pugi::xml_node &node) 
-		: Udjat::Service{String{node,"name",info.name}.as_quark(), info} {
+		: Udjat::Service{String{node,"name",info.name}.as_quark(), info},
+			Interface::Factory{String{node,"interface-name","web"}.as_quark()} {
 
 		if(instance) {
 			throw runtime_error("HTTP server is already defined");
@@ -159,6 +160,7 @@
 				throw runtime_error("mg_start failed.");
 			}
 
+			// TODO: Refactor as interfaces.
 			mg_set_request_handler(ctx, "/icon/", iconWebHandler, 0);
 			mg_set_request_handler(ctx, "/" STRINGIZE_VALUE_OF(PRODUCT_NAME) "/", productWebHandler, 0);
 			mg_set_request_handler(ctx, "/image/", imageWebHandler, 0);
@@ -171,8 +173,8 @@
 			}
 #endif // HAVE_LIBSSL
 
-			// All other requests goes to rootwebhandler
-			mg_set_request_handler(ctx, "/", rootWebHandler, 0);
+			// All other requests goes to service default handler
+			mg_set_request_handler(ctx, "/", (mg_request_handler) request_handler, this);
 
 		}
 
@@ -223,6 +225,15 @@
 					}
 #endif // HAVE_LIBSSL
 
+					if(interfaces.empty()) {
+						Logger::String{"The interface list is empty"}.write(Logger::Trace,"civetweb");
+					} else {
+						for(auto &interface : interfaces) {
+							Logger::String{"Interface ",baseref,interface.c_str()}.write(Logger::Trace,"civetweb");
+						}
+					}
+
+					/*
 					baseref += "/api/";
 					baseref += Config::Value<string>{"http","apiversion",PACKAGE_VERSION};
 					baseref += "/";
@@ -240,6 +251,8 @@
 						return false;
 					});
 
+
+					*/
 
 				}
 
@@ -308,6 +321,11 @@
 
 		return true;
 
+	}
+
+	Udjat::Interface & CivetWeb::Service::InterfaceFactory(const XML::Node &node) {
+		interfaces.emplace_back(node);
+		return interfaces.back();
 	}
 
  }

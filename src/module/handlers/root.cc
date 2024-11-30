@@ -22,6 +22,7 @@
   *
   */
 
+/*
  #include <config.h>
  #include <udjat/defs.h>
  #include <stdexcept>
@@ -57,3 +58,4 @@
 	}
 
  }
+*/

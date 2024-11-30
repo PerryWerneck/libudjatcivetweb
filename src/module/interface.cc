@@ -22,31 +22,13 @@
  #include <udjat/tools/string.h>
  #include <udjat/module/civetweb.h>
  #include <udjat/tools/civetweb/service.h>
- #include <udjat/tools/civetweb/interface.h>
  #include <udjat/tools/logger.h>
+ #include <udjat/tools/intl.h>
  #include <civetweb.h>
 
  using namespace Udjat;
 
- Udjat::Interface & CivetWeb::Module::InterfaceFactory(const XML::Node &node) {
-
-	/*
-	class Interface : public CivetWeb::Interface {
-	private:
-
-		std::vector<Handler> handlers;
-
-	public:
-		Interface(const XML::Node &node);
-		virtual ~Interface();
-
-
-	};
-	*/
-
- }
-
- CivetWeb::Interface::Interface(const XML::Node &node) : Udjat::Interface{node}, path{String{node,"path"}.as_quark()} {
+ CivetWeb::Service::Interface::Interface(const XML::Node &node) : Udjat::Interface{node}, path{String{node,"path"}.as_quark()} {
 
 	if(!(path && *path)) {
 		path = String("/",Udjat::Interface::c_str(),"/").as_quark();
@@ -58,6 +40,41 @@
 
  }
 
- CivetWeb::Interface::~Interface() {
+ CivetWeb::Service::Interface::~Interface() {
  }
 
+ int CivetWeb::Service::request_handler(struct mg_connection *conn, CivetWeb::Service *srvc) noexcept {
+
+	try {
+
+		const char *path = mg_get_request_info(conn)->local_uri;
+		debug("Handling '",path,"'");
+
+		for(auto &interface : srvc->interfaces) {
+
+			size_t szpath = strlen(interface.c_str());
+
+			if(strncasecmp(interface.c_str(),path,szpath)) {
+				debug("Ignoring '",interface.c_str(),"'");
+				continue;
+			}
+
+			path += (szpath-1);
+			debug("---------------> '",path,"'");
+			
+		}
+
+
+	} catch(const exception &e) {
+		HTTP::Response response{MimeTypeFactory(conn)};
+		response.failed(e);
+		return send(conn,response);
+	} catch(...) {
+		HTTP::Response response{MimeTypeFactory(conn)};
+		response.failed(_("Unexpected error"));
+		return send(conn,response);
+	}
+
+	return 0; // 0 to run internal civetweb handler.
+
+ }

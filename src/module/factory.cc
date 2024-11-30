@@ -71,57 +71,16 @@
 
 	CivetWeb::Module::Module(const ModuleInfo &info, const XML::Node &node) 
 		: Udjat::Module{String{node,"name","httpd"}.as_quark(),udjat_module_info}, 
-			Udjat::CivetWeb::Service(udjat_module_info,node),
-			Udjat::Interface::Factory{String{node,"interface-type","web"}.as_quark()} 
+			Udjat::CivetWeb::Service(udjat_module_info,node) 
 		{ }
 
 	CivetWeb::Module::Module(const ModuleInfo &info, const char *name)
 		: Udjat::Module{name,udjat_module_info}, 
-			Udjat::CivetWeb::Service{udjat_module_info,XML::Node{}},
-			Udjat::Interface::Factory{name}
+			Udjat::CivetWeb::Service{udjat_module_info,XML::Node{}}
 		{ }
 
 	CivetWeb::Module::~Module() {
 
 	}
 
-
  }
-
- /*
- #include <private/module.h>
-
- using namespace Udjat;
- using namespace std;
-
- const Udjat::ModuleInfo udjat_module_info{ "CivetWEB " CIVETWEB_VERSION " HTTP module for " STRINGIZE_VALUE_OF(PRODUCT_NAME) };
-
- Udjat::Module * udjat_module_init() {
-	return udjat_module_init_from_xml(XML::Node{});
- }
-
- Udjat::Module * udjat_module_init_from_xml(const pugi::xml_node &node) {
-
-	class Module : public Udjat::Module, public Udjat::CivetWeb::Service { 
-	private:
-		struct {
-			CivetWeb::Protocol http{"http",udjat_module_info};
-			CivetWeb::Protocol https{"https",udjat_module_info};
-		} protocols;
-
-	public:
-
-		Module(const pugi::xml_node &node) : Udjat::Module{"http",udjat_module_info}, Udjat::CivetWeb::Service(udjat_module_info,node) {
-		}
-
-		virtual ~Module() {
-		}
-
-
-	};
-
-	return new Module(node);
- }
-*/
-
-

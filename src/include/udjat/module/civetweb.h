@@ -33,7 +33,7 @@
 	namespace CivetWeb {
 
 		/// @brief Generic http module.
-		class UDJAT_API Module : public Udjat::Module, public Service, private Interface::Factory {
+		class UDJAT_API Module : public Udjat::Module, public Service {
 		public:
 
 			static Udjat::Module * Factory(const ModuleInfo &info, const char *name = "httpd", bool client = true);
@@ -42,8 +42,6 @@
 			Module(const ModuleInfo &info, const XML::Node &node);
 			Module(const ModuleInfo &info, const char *name = "httpd");
 			virtual ~Module();
-
-			Udjat::Interface & InterfaceFactory(const XML::Node &node) override;
 
 		};
 

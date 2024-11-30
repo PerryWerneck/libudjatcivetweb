@@ -71,11 +71,14 @@
 	//
 	// Check for 'format=' on query
 	//
-	for(const auto &arg : String{mg_get_request_info(conn)->query_string}.split("&")) {
-		if(!strncasecmp(arg.c_str(),"format=",7)) {
-			auto mime = MimeTypeFactory(arg.c_str()+7,MimeType::custom);
-			if(mime != MimeType::custom) {
-				return mime;
+	const char *query = mg_get_request_info(conn)->query_string;
+	if(query && *query) {
+		for(const auto &arg : String{query}.split("&")) {
+			if(!strncasecmp(arg.c_str(),"format=",7)) {
+				auto mime = MimeTypeFactory(arg.c_str()+7,MimeType::custom);
+				if(mime != MimeType::custom) {
+					return mime;
+				}
 			}
 		}
 	}

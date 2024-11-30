@@ -140,7 +140,7 @@
  //int swaggerWebHandler(struct mg_connection *conn, void *cbdata);
 
  /// @brief Handler for '/' request.
- int rootWebHandler(struct mg_connection *conn, void *cbdata) noexcept;
+ // int rootWebHandler(struct mg_connection *conn, void *cbdata) noexcept;
 
  /// @brief Handler for '/favicon.ico' request.
  int faviconWebHandler(struct mg_connection *conn, void *cbdata) noexcept;

@@ -25,6 +25,8 @@
  #include <udjat/tools/service.h>
  #include <udjat/tools/protocol.h>
  #include <udjat/tools/http/server.h>
+ #include <udjat/tools/interface.h>
+ #include <vector>
  
  #include <civetweb.h>
 
@@ -32,9 +34,29 @@
 
 	namespace CivetWeb {
 
-		class UDJAT_API Service : public Udjat::Service, public HTTP::Server {
+		class UDJAT_API Service : public Udjat::Service, public HTTP::Server, private Interface::Factory {
 		private:
+
 			static Service *instance;
+
+			static int request_handler(struct mg_connection *conn, CivetWeb::Service *srvc) noexcept;
+
+			class Interface : public Udjat::Interface {
+			private:
+				const char *path = nullptr;
+
+			public:
+
+				Interface(const XML::Node &node);
+				virtual ~Interface();
+
+				inline const char * c_str() const {
+					return path;
+				}
+
+			};
+
+			std::vector<Interface> interfaces;
 
 		protected:
 			struct mg_context *ctx = nullptr;
@@ -53,6 +75,8 @@
 
 			bool push_back(HTTP::Handler *handler) override;
 			bool remove(HTTP::Handler *handler) override;
+
+			Udjat::Interface & InterfaceFactory(const XML::Node &node) override;
 
 		};
 
