@@ -242,7 +242,12 @@
 
 	try {
 
-		string text{response.to_string()};
+		string text;
+		{
+			stringstream ss;
+			response.serialize(ss);
+			text = ss.str();
+		}
 
 		debug(text.c_str());
 
