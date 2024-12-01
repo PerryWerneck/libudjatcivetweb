@@ -41,9 +41,32 @@
 
 	namespace CivetWeb {
 
-		Request::Request(struct mg_connection *c)
-			: HTTP::Request{mg_get_request_info(c)->local_uri,mg_get_request_info(c)->request_method}, conn{c}, info{mg_get_request_info(c)} {
+		Request::Request(struct mg_connection *c) : Request(c,mg_get_request_info(c)->local_uri, (unsigned int) ((PACKAGE_VERSION_MAJOR * 100) + PACKAGE_VERSION_MINOR)) {
 
+			if(reqpath && *reqpath && !strncasecmp(reqpath,"/api/",5)) {
+				reqpath += 4;
+				if(isdigit(reqpath[1])) {
+					apiver = 0;
+					reqpath++;
+					while(*reqpath && *reqpath != '/') {
+						if(isdigit(*reqpath)) {
+							apiver *= 10;
+							apiver += (*reqpath - '0');
+						}
+						reqpath++;
+					}
+				}
+			}
+
+		}
+
+		Request::Request(struct mg_connection *c, const char *path, unsigned int ver)
+			: HTTP::Request{path,mg_get_request_info(c)->request_method}, conn{c}, info{mg_get_request_info(c)} {
+
+			apiver = ver;
+
+			debug("request_path='",Udjat::Request::c_str(),"' (",path,")");
+			
 			debug("request_uri='",mg_get_request_info(c)->request_uri,"'");
 			debug("local_uri_raw='",mg_get_request_info(c)->local_uri_raw,"'");
 			debug("local_uri='",mg_get_request_info(c)->local_uri,"'");
@@ -63,7 +86,7 @@
 				struct InputParser {
 
 					string name;
-					std::map<std::string,std::string> &values;
+					Udjat::Value &values;
 
 					static int field_found(const char *key,const char *,char *,size_t ,void *user_data) {
 						debug("Field name : '", key , "'");
@@ -74,7 +97,7 @@
 					static int field_get(const char *, const char *value, size_t valuelen, void *user_data) {
 						if(valuelen) {
 							debug("   [",string{value,valuelen},"]");
-							((InputParser *) user_data)->values[((InputParser *) user_data)->name] += Udjat::String{value,valuelen}.unescape();
+							((InputParser *) user_data)->values[((InputParser *) user_data)->name.c_str()] = Udjat::String{value,valuelen}.unescape().c_str();
 						}
 						return MG_FORM_FIELD_HANDLE_GET;
 					}
@@ -85,12 +108,12 @@
 
 					struct mg_form_data_handler fdh;
 
-					InputParser(std::map<std::string,std::string> &v) : values{v}, fdh{field_found, field_get, field_stored, this} {
+					InputParser(Udjat::Value &v) : values{v}, fdh{field_found, field_get, field_stored, this} {
 					}
 
 				};
 
-				InputParser input{values};
+				InputParser input{*this};
 
 				mg_handle_form_request(c, &input.fdh);
 
@@ -98,11 +121,7 @@
 
 		}
 
-  		const char * Request::c_str() const noexcept {
-			return info->local_uri;
-  		}
-
-		const char * Request::query(const char *) const {
+ 		const char * Request::query(const char *) const {
 			return info->query_string;
 		}
 
@@ -148,43 +167,6 @@
 			}
 
 			return "";
-		}
-
-		bool Request::for_each(const std::function<bool(const char *name, const char *value)> &call) const {
-
-			// First check parsed value (from post, put & cia.
-			if(!values.empty()) {
-				for(const auto& [name, value] : values) {
-					if(call(name.c_str(),value.c_str())) {
-						return true;
-					}
-				}
-			}
-
-			// Then, check parent values
-			if(HTTP::Request::for_each(call)) {
-				return true;
-			}
-
-			// Last, check for headers.
-			for(int header = 0; header < info->num_headers; header++) {
-				if(call(info->http_headers[header].name,info->http_headers[header].value)) {
-					return true;
-				}
-			}
-
-			return false;
-		}
-
-		bool Request::getProperty(const char *key, std::string &value) const {
-
-			auto it = values.find(key);
-			if(it != values.end()) {
-				value = it->second;
-				return true;
-			}
-
-			return HTTP::Request::getProperty(key,value);
 		}
 
 	}

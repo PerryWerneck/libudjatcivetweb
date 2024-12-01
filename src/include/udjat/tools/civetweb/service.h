@@ -26,6 +26,8 @@
  #include <udjat/tools/protocol.h>
  #include <udjat/tools/http/server.h>
  #include <udjat/tools/interface.h>
+ #include <udjat/tools/http/request.h>
+ #include <udjat/tools/http/response.h>
  #include <vector>
  
  #include <civetweb.h>
@@ -55,6 +57,8 @@
 				}
 
 				void build_handlers(const XML::Node &node);
+				
+				void call(const char *method, HTTP::Request &request, HTTP::Response &response);
 			};
 
 			std::vector<Interface> interfaces;

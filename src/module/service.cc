@@ -229,7 +229,7 @@
 						Logger::String{"The interface list is empty"}.write(Logger::Trace,"civetweb");
 					} else {
 						for(auto &interface : interfaces) {
-							Logger::String{"Interface ",baseref,interface.c_str()}.write(Logger::Trace,"civetweb");
+							Logger::String{"Interface ",baseref,"/api/",((unsigned int) ((PACKAGE_VERSION_MAJOR * 100) + PACKAGE_VERSION_MINOR)),"/",interface.c_str()}.write(Logger::Trace,"civetweb");
 						}
 					}
 
@@ -328,7 +328,7 @@
 		const char * path{String{node,"path"}.as_quark()};
 
 		if(!(path && *path)) {
-			path = String{"/",String{node,"name"}.c_str(),"/"}.as_quark();
+			path = String{node,"name"}.as_quark();
 		}
 
 		for(Interface &interface : interfaces) {

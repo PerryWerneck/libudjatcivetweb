@@ -10,7 +10,7 @@
 	
 	<agent name='random' type='random' http-handler='/files/' />
 
-	<interface type='web' name='api'>
+	<interface type='web' name='echo'>
 		<handler name='get'>
 			<arg name="text" direction='both' type="string" />
 		</handler>

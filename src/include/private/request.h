@@ -34,19 +34,22 @@
 			const struct mg_connection *conn;
 			const struct mg_request_info *info;
 
-			/// @brief Values from form.
-			std::map<std::string,std::string> values;
-
 		public:
+
+			/// @brief Build request, process path and apiver.
+			/// @param conn The connection for this request.
 			Request(struct mg_connection *conn);
 
-			const char *c_str() const noexcept override;
+			/// @brief Build request with pre-processed path and apiver
+			/// @param conn The connection for this request.
+			/// @param path The request path with api and version prefix stripped.
+			/// @param apiver The API version for this request.
+			Request(struct mg_connection *conn, const char *path, unsigned int apiver);
 
 			const char * query(const char *def = "") const override;
 
-			bool for_each(const std::function<bool(const char *name, const char *value)> &call) const override;
-
-			bool getProperty(const char *key, std::string &value) const override;
+			// bool for_each(const std::function<bool(const char *name, const char *value)> &call) const override;
+			// bool getProperty(const char *key, std::string &value) const override;
 
 			const char * header(const char *name) const noexcept override;
 

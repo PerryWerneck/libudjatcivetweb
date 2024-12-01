@@ -45,20 +45,6 @@
 			(MimeType) connection
 		);
 
-	} catch(const HTTP::Exception &error) {
-
-		cerr << "civetweb\t" << error.what() << endl;
-		HTTP::Response response{(MimeType) connection};
-		response.failed(error);
-		return connection.send(response);
-
-	} catch(const system_error &error) {
-
-		cerr << "civetweb\t" << error.what() << endl;
-		HTTP::Response response{(MimeType) connection};
-		response.failed(error);
-		return connection.send(response);
-
 	} catch(const exception &error) {
 
 		cerr << "civetweb\t" << error.what() << endl;

@@ -25,19 +25,30 @@
  #include <udjat/tools/logger.h>
  #include <udjat/tools/interface.h>
  #include <udjat/tools/intl.h>
+ #include <udjat/tools/http/request.h>
+ #include <udjat/tools/http/response.h>
  #include <civetweb.h>
+ #include <private/request.h>
 
  using namespace Udjat;
 
  CivetWeb::Service::Interface::Interface(const XML::Node &node, const char *p) : Udjat::Interface{node}, path{p} {
-
-	if(path[0] != '/' || strlen(path) < 2 || path[strlen(path)-1] != '/') {
-		throw runtime_error(String{"Path '",path,"' is invalid, it should start and end with '/'"});
+	if(path[0] == '/' || (strlen(path)>1 && path[strlen(path)-1] == '/')) {
+		throw runtime_error(String{"Path '",path,"' is invalid, cant start or end with '/'"});
 	}
-
  }
 
  CivetWeb::Service::Interface::~Interface() {
+ }
+
+ void CivetWeb::Service::Interface::call(const char *method, HTTP::Request &request, HTTP::Response &response) {
+	debug(method,"(",request.c_str(),")");
+	for(auto &handler : *this) {
+		if(strcasecmp(method,handler.c_str())) {
+			continue;
+		}
+		handler.call(request,response);
+	}
  }
 
  void CivetWeb::Service::Interface::build_handlers(const XML::Node &node) {
@@ -53,10 +64,24 @@
 
 	try {
 
+		unsigned int apiver = (PACKAGE_VERSION_MAJOR * 100) + PACKAGE_VERSION_MINOR;
 		const mg_request_info *info = mg_get_request_info(conn); 
 		const char *path = info->local_uri;
 
-		debug("Handling '",path,"'");
+		if(path && *path && !strncasecmp(path,"/api/",5)) {
+			path += 4;
+			if(isdigit(path[1])) {
+				path++;
+				apiver = 0;
+				while(*path && *path != '/') {
+					if(isdigit(*path)) {
+						apiver *= 10;
+						apiver += (*path - '0');
+					}
+					path++;
+				}
+			}
+		}
 
 		HTTP::Response response{MimeTypeFactory(conn)};
 
@@ -67,24 +92,25 @@
 
 			size_t szpath = strlen(interface.c_str());
 
-			if(strncasecmp(interface.c_str(),path,szpath)) {
+			if(strncasecmp(interface.c_str(),path+1,szpath)) {
 				debug("Ignoring '",interface.c_str(),"'");
 				continue;
 			}
 
-			path += (szpath-1);
-			debug("---------------> ",info->request_method,"(",path,")");
-
-			/*
-			for(auto &handler : interface) {
-				if(strcasecmp(info->request_method,handler.c_str())) {
-					continue;
-				}
-
-
-
+			path += (szpath+1);
+			if(*path && *path != '/') {
+				debug("Ignoring '",interface.c_str(),"'");
+				continue;
 			}
-			*/
+
+			if(Logger::enabled(Logger::Debug)) {
+				Logger::String{"Handling ",info->request_method,"(",path,") with interface '", interface.c_str(),"' version ",apiver}.trace();
+			}
+
+			CivetWeb::Request request{conn,path,apiver};
+			interface.call(info->request_method,request,response);
+
+			return send(conn,response);
 
 		}
 

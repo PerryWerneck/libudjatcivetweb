@@ -29,37 +29,16 @@
 
  #include <stdexcept>
 
- using namespace std;
+ using namespace std; 
 
  namespace Udjat {
 
 	HTTP::Request::Request(const char *path, HTTP::Method method) : Udjat::Request{path, method} {
-
-		if(reqpath && *reqpath && !strncasecmp(reqpath,"/api/",5)) {
-
-			// Is an standard API request, extract version.
-
-			reqpath += 5;
-			while(*reqpath && *reqpath != '/') {
-				if(isdigit(*reqpath)) {
-					apiver *= 10;
-					apiver += ('0' - *reqpath);
-				}
-				reqpath++;
-			}
-
-		}
-
+		debug("PATH-------------> ",path);
+		debug("REQPATH----------> ",reqpath);
 	}
 
 	HTTP::Request::~Request() {
-	}
-
-	const char * HTTP::Request::c_str() const noexcept {
-		if(reqpath && *reqpath) {
-			return reqpath;
-		}
-		return Udjat::Request::path();
 	}
 
 	bool HTTP::Request::getProperty(const char *key, std::string &value) const {

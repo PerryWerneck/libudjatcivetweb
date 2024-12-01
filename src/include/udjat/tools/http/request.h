@@ -81,7 +81,6 @@
 
 			virtual ~Request();
 
-			const char *c_str() const noexcept override;
 			bool cached(const Udjat::TimeStamp &timestamp) const override;
 
 			/// @brief Get Authentication token.
