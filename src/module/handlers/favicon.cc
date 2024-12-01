@@ -26,6 +26,7 @@
  #include <udjat/defs.h>
  #include <private/module.h>
  #include <udjat/tools/http/exception.h>
+ #include <udjat/tools/civetweb/service.h>
  #include <udjat/tools/http/image.h>
  #include <udjat/tools/intl.h>
  #include <udjat/tools/logger.h>
@@ -40,8 +41,8 @@
 
  using namespace Udjat;
 
- int faviconWebHandler(struct mg_connection *conn, void *) noexcept {
-
+ int CivetWeb::Service::favicon_handler(struct mg_connection *conn, CivetWeb::Service *) noexcept {
+ 
 	try {
 
 		Config::Value<unsigned int> max_age{"theme","icon-max-age",604800};
@@ -50,7 +51,7 @@
 		{
 			Udjat::Value properties{Udjat::Value::Object};
 
-			if(Worker::for_each([&properties](const Worker &worker){
+			if(Udjat::Worker::for_each([&properties](const Udjat::Worker &worker){
 				return worker.getProperty("favicon",properties);
 			})) {
 

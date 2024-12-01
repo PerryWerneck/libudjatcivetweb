@@ -18,17 +18,14 @@
  */
 
  /**
-  * @brief Implements the swagger.json output.
-  *
-  * References:
-  *
-  * https://samanthaneilen.github.io/2018/12/08/Using-and-extending-swagger.json-for-API-documentation.html
+  * @brief Implements the handler for icons.
   *
   */
 
  #include <config.h>
  #include <udjat/defs.h>
  #include <private/module.h>
+ #include <udjat/tools/civetweb/service.h>
  #include <udjat/tools/http/icon.h>
  #include <udjat/tools/http/exception.h>
  #include <udjat/tools/http/mimetype.h>
@@ -42,7 +39,7 @@
 
  using namespace Udjat;
 
- int iconWebHandler(struct mg_connection *conn, void UDJAT_UNUSED(*cbdata)) {
+ int CivetWeb::Service::icon_handler(struct mg_connection *conn, CivetWeb::Service *) noexcept {
 
  	debug("Searching for icon",mg_get_request_info(conn)->local_uri);
 

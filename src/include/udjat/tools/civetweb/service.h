@@ -40,8 +40,19 @@
 		private:
 
 			static Service *instance;
-
 			static int request_handler(struct mg_connection *conn, CivetWeb::Service *srvc) noexcept;
+
+			/// @brief Handle /icon/ requests
+			static int icon_handler(struct mg_connection *conn, CivetWeb::Service *srvc) noexcept;
+
+			/// @brief Handle /PRODUCT_NAME/ requests
+			static int product_handler(struct mg_connection *conn, CivetWeb::Service *srvc) noexcept;
+
+			/// @brief Handle /image/ requests.
+			static int image_handler(struct mg_connection *conn, CivetWeb::Service *srvc) noexcept;
+
+			/// @brief Handle favicon requests.
+			static int favicon_handler(struct mg_connection *conn, CivetWeb::Service *srvc) noexcept;
 
 		protected:
 			struct mg_context *ctx = nullptr;

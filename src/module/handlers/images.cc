@@ -35,6 +35,7 @@
  #include <udjat/tools/intl.h>
  #include <udjat/tools/http/connection.h>
  #include <udjat/tools/logger.h>
+ #include <udjat/tools/civetweb/service.h>
 
  #include <private/module.h>
  #include <civetweb.h>
@@ -43,7 +44,7 @@
 	#include <unistd.h>
  #endif // HAVE_UNISTD_H
 
- int imageWebHandler(struct mg_connection *conn, void *) {
+ int CivetWeb::Service::image_handler(struct mg_connection *conn, CivetWeb::Service *) noexcept {
 
 	try {
 
@@ -60,7 +61,6 @@
 
 		debug("searching for image '",path,"'");
 
-
 		Udjat::HTTP::Image filename{path};
 
 		if(filename) {
@@ -74,16 +74,6 @@
 			Logger::String{"Cant find static file '", filename.c_str(),"'"}.error("http");
 
 		}
-
-		/*
-		return CivetWeb::Connection(conn).send(
-			HTTP::Get,
-			image.c_str(),
-			false,
-			"image/svg+xml",
-			Config::Value<unsigned int>("theme","image-max-age",604800)
-		);
-		*/
 
 	} catch(const exception &e) {
 		HTTP::Response response{MimeTypeFactory(conn)};

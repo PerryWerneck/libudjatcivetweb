@@ -29,6 +29,7 @@
  #include <udjat/tools/application.h>
  #include <udjat/tools/intl.h>
  #include <stdexcept>
+ #include <udjat/tools/civetweb/service.h>
 
  #ifdef HAVE_UNISTD_H
 	#include <unistd.h>
@@ -37,7 +38,7 @@
  using namespace Udjat;
  using namespace std;
 
- int productWebHandler(struct mg_connection *conn, void *) noexcept {
+ int CivetWeb::Service::product_handler(struct mg_connection *conn, CivetWeb::Service *) noexcept {
 
 	try {
 
