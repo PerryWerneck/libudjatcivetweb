@@ -158,6 +158,7 @@ lib_src = [
   'src/library/connection.cc',
   'src/library/request.cc',
   'src/library/response.cc',
+  'src/library/interface.cc',
 ]
 
 module_src = [
@@ -183,7 +184,6 @@ module_src = [
   'src/module/protocol.cc',
   'src/module/service.cc',
   'src/module/factory.cc',
-  'src/module/interface.cc',
 ]
 
 test_src = [

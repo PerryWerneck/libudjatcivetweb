@@ -38,7 +38,7 @@
 		throw runtime_error("The HTTP service is unavailable");
 	}
 
-	HTTP::Server::Server() {
+	HTTP::Server::Server(const char *name) : Interface::Factory{name} {
 
 		// Check for secondary instance.
 		if(instance) {
@@ -46,6 +46,9 @@
 		} else {
 			instance = this;
 		}
+	}
+
+	HTTP::Server::Server(const XML::Node &node) : Server{String{node,"interface-name","web"}.as_quark()} {
 	}
 
 	HTTP::Server::~Server() {
@@ -57,27 +60,25 @@
 		}
 	}
 
-	/*
-	bool HTTP::Server::push_back(HTTP::Handler *handler) {
+	Udjat::Interface & HTTP::Server::InterfaceFactory(const XML::Node &node) {
 
-		if(Logger::enabled(Logger::Trace)) {
-			Logger::String{"Adding handler for '",handler->c_str(),"'"}.write(Logger::Trace,"httpd");
+		const char * path{String{node,"path"}.as_quark()};
+
+		if(!(path && *path)) {
+			path = String{node,"name"}.as_quark();
 		}
 
-		return false;
-	}
-
-	/// @brief Remove request handler.
-	/// @param uri the URI for the handler.
-	bool HTTP::Server::remove(HTTP::Handler *handler) {
-
-		if(Logger::enabled(Logger::Trace)) {
-			Logger::String{"Removing handler for '",handler->c_str(),"'"}.write(Logger::Trace,"civetweb");
+		for(Interface &interface : interfaces) {
+			if(!strcasecmp(path,interface.c_str())) {
+				Logger::String{"Reusing interface '",path,"'"}.trace();
+				interface.build_handlers(node);
+				return interface;
+			}
 		}
 
-		return true;
+		interfaces.emplace_back(node,path);
+		return interfaces.back();
 	}
-	*/
 
  }
 

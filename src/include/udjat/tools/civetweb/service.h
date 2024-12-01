@@ -36,32 +36,12 @@
 
 	namespace CivetWeb {
 
-		class UDJAT_API Service : public Udjat::Service, public HTTP::Server, private Interface::Factory {
+		class UDJAT_API Service : public Udjat::Service, public HTTP::Server {
 		private:
 
 			static Service *instance;
 
 			static int request_handler(struct mg_connection *conn, CivetWeb::Service *srvc) noexcept;
-
-			class Interface : public Udjat::Interface, public std::vector<Udjat::Interface::Handler> {
-			private:
-				const char *path = nullptr;
-				
-			public:
-
-				Interface(const XML::Node &node, const char *path);
-				virtual ~Interface();
-
-				inline const char * c_str() const {
-					return path;
-				}
-
-				void build_handlers(const XML::Node &node);
-				
-				void call(const char *method, HTTP::Request &request, HTTP::Response &response);
-			};
-
-			std::vector<Interface> interfaces;
 
 		protected:
 			struct mg_context *ctx = nullptr;
@@ -80,8 +60,6 @@
 
 			bool push_back(HTTP::Handler *handler) override;
 			bool remove(HTTP::Handler *handler) override;
-
-			Udjat::Interface & InterfaceFactory(const XML::Node &node) override;
 
 		};
 

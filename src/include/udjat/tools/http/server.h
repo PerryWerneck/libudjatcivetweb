@@ -23,6 +23,11 @@
  #include <udjat/tools/value.h>
  #include <udjat/tools/http/connection.h>
  #include <udjat/tools/http/mimetype.h>
+ #include <udjat/tools/http/request.h>
+ #include <udjat/tools/http/response.h>
+ #include <udjat/tools/interface.h>
+ #include <udjat/tools/xml.h>
+ #include <udjat/tools/interface.h>
  #include <map>
 
  namespace Udjat {
@@ -31,12 +36,36 @@
 
 		class Handler;
 
-		class UDJAT_API Server {
+		class UDJAT_API Server : private Interface::Factory {
 		private:
 			static Server *instance;
 
 		protected:
-			Server();
+
+			class Interface : public Udjat::Interface, public std::vector<Udjat::Interface::Handler> {
+			private:
+				const char *path = nullptr;
+				
+			public:
+
+				Interface(const XML::Node &node, const char *path);
+				virtual ~Interface();
+
+				inline const char * c_str() const {
+					return path;
+				}
+
+				void build_handlers(const XML::Node &node);
+				
+				void call(const char *method, HTTP::Request &request, HTTP::Response &response);
+			};
+
+			std::vector<Interface> interfaces;
+
+			Server(const char *name = "web");
+			Server(const XML::Node &node);
+
+			Udjat::Interface & InterfaceFactory(const XML::Node &node) override;
 
 		public:
 

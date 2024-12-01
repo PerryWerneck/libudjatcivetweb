@@ -32,11 +32,13 @@
  #include <udjat/tools/worker.h>
  #include <udjat/tools/configuration.h>
  #include <udjat/tools/http/handler.h>
+ #include <udjat/tools/intl.h>
  #include <string>
 
  #include <civetweb.h>
 
  #include <private/module.h>
+ #include <private/request.h>
 
  using namespace std;
 
@@ -80,8 +82,7 @@
 	}
 
  	CivetWeb::Service::Service(const ModuleInfo &info, const pugi::xml_node &node) 
-		: Udjat::Service{String{node,"name",info.name}.as_quark(), info},
-			Interface::Factory{String{node,"interface-name","web"}.as_quark()} {
+		: Udjat::Service{String{node,"name",info.name}.as_quark(), info} {
 
 		if(instance) {
 			throw runtime_error("HTTP server is already defined");
@@ -323,24 +324,73 @@
 
 	}
 
-	Udjat::Interface & CivetWeb::Service::InterfaceFactory(const XML::Node &node) {
+	int CivetWeb::Service::request_handler(struct mg_connection *conn, CivetWeb::Service *srvc) noexcept {
 
-		const char * path{String{node,"path"}.as_quark()};
+		try {
 
-		if(!(path && *path)) {
-			path = String{node,"name"}.as_quark();
-		}
+			unsigned int apiver = (PACKAGE_VERSION_MAJOR * 100) + PACKAGE_VERSION_MINOR;
+			const mg_request_info *info = mg_get_request_info(conn); 
+			const char *path = info->local_uri;
 
-		for(Interface &interface : interfaces) {
-			if(!strcasecmp(path,interface.c_str())) {
-				Logger::String{"Reusing interface '",path,"'"}.trace();
-				interface.build_handlers(node);
-				return interface;
+			if(path && *path && !strncasecmp(path,"/api/",5)) {
+				path += 4;
+				if(isdigit(path[1])) {
+					path++;
+					apiver = 0;
+					while(*path && *path != '/') {
+						if(isdigit(*path)) {
+							apiver *= 10;
+							apiver += (*path - '0');
+						}
+						path++;
+					}
+				}
 			}
+
+			HTTP::Response response{MimeTypeFactory(conn)};
+
+			//
+			// Check for interfaces
+			//
+			for(auto &interface : srvc->interfaces) {
+
+				size_t szpath = strlen(interface.c_str());
+
+				if(strncasecmp(interface.c_str(),path+1,szpath)) {
+					debug("Ignoring '",interface.c_str(),"'");
+					continue;
+				}
+
+				path += (szpath+1);
+				if(*path && *path != '/') {
+					debug("Ignoring '",interface.c_str(),"'");
+					continue;
+				}
+
+				if(Logger::enabled(Logger::Debug)) {
+					Logger::String{"Handling ",info->request_method,"(",path,") with interface '", interface.c_str(),"' version ",apiver}.trace();
+				}
+
+				CivetWeb::Request request{conn,path,apiver};
+				interface.call(info->request_method,request,response);
+
+				return send(conn,response);
+
+			}
+
+			response.failed(ENOENT);
+			return send(conn,response);
+
+		} catch(const exception &e) {
+			HTTP::Response response{MimeTypeFactory(conn)};
+			response.failed(e);
+			return send(conn,response);
+		} catch(...) {
+			HTTP::Response response{MimeTypeFactory(conn)};
+			response.failed(_("Unexpected error"));
+			return send(conn,response);
 		}
 
-		interfaces.emplace_back(node,path);
-		return interfaces.back();
 	}
 
  }
