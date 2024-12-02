@@ -22,6 +22,7 @@
  #include <udjat/tools/http/server.h>
  #include <udjat/tools/http/handler.h>
  #include <udjat/tools/logger.h>
+ #include <udjat/tools/configuration.h>
  #include <iostream>
 
  using namespace std;
@@ -38,7 +39,7 @@
 		throw runtime_error("The HTTP service is unavailable");
 	}
 
-	HTTP::Server::Server(const char *name) : Interface::Factory{name} {
+	HTTP::Server::Server(const char *name) : Interface::Factory{name}, apiver{100} {
 
 		// Check for secondary instance.
 		if(instance) {
@@ -49,6 +50,7 @@
 	}
 
 	HTTP::Server::Server(const XML::Node &node) : Server{String{node,"interface-name","web"}.as_quark()} {
+		apiver = XML::AttributeFactory(node,"api-version").as_uint(apiver);
 	}
 
 	HTTP::Server::~Server() {

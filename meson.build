@@ -159,9 +159,11 @@ lib_src = [
   'src/library/request.cc',
   'src/library/response.cc',
   'src/library/interface.cc',
+  'src/library/apicall.cc',
 ]
 
 module_src = [
+  'src/module/handlers/api.cc',
   'src/module/handlers/favicon.cc',
   'src/module/handlers/icons.cc',
   'src/module/handlers/images.cc',

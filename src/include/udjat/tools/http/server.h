@@ -41,6 +41,7 @@
 			static Server *instance;
 
 		protected:
+			unsigned int apiver;	///< @brief The default api version.
 
 			class Interface : public Udjat::Interface, public std::vector<Udjat::Interface::Handler> {
 			private:
@@ -66,6 +67,14 @@
 			Server(const XML::Node &node);
 
 			Udjat::Interface & InterfaceFactory(const XML::Node &node) override;
+
+			/// @brief Execute API call.
+			/// @param method The method name.
+			/// @param request The request data.
+			/// @param response The response data.
+			/// @return The http return code
+			/// @retval 0 No error, result is in response.
+			int call(const char *method, Request &request, Response &response);
 
 		public:
 

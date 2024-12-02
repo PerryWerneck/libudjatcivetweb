@@ -161,6 +161,8 @@
 				throw runtime_error("mg_start failed.");
 			}
 
+			mg_set_request_handler(ctx, "/api/", (mg_request_handler) api_handler, this);
+
 			// TODO: Refactor as interfaces.
 			mg_set_request_handler(ctx, "/icon/", (mg_request_handler) icon_handler, this);
 			mg_set_request_handler(ctx, "/" STRINGIZE_VALUE_OF(PRODUCT_NAME) "/", (mg_request_handler) product_handler, this);
@@ -175,7 +177,7 @@
 #endif // HAVE_LIBSSL
 
 			// All other requests goes to service default handler
-			mg_set_request_handler(ctx, "/", (mg_request_handler) request_handler, this);
+			// mg_set_request_handler(ctx, "/", (mg_request_handler) request_handler, this);
 
 		}
 
@@ -230,7 +232,7 @@
 						Logger::String{"The interface list is empty"}.write(Logger::Trace,"civetweb");
 					} else {
 						for(auto &interface : interfaces) {
-							Logger::String{"Interface ",baseref,"/api/",((unsigned int) ((PACKAGE_VERSION_MAJOR * 100) + PACKAGE_VERSION_MINOR)),"/",interface.c_str()}.write(Logger::Trace,"civetweb");
+							Logger::String{"Interface ",baseref,"/api/",apiver,"/",interface.c_str()}.write(Logger::Trace,"civetweb");
 						}
 					}
 
@@ -321,75 +323,6 @@
 		Logger::String{"Custom handler for '",handler->c_str(),"' removed"}.info();
 
 		return true;
-
-	}
-
-	int CivetWeb::Service::request_handler(struct mg_connection *conn, CivetWeb::Service *srvc) noexcept {
-
-		try {
-
-			unsigned int apiver = (PACKAGE_VERSION_MAJOR * 100) + PACKAGE_VERSION_MINOR;
-			const mg_request_info *info = mg_get_request_info(conn); 
-			const char *path = info->local_uri;
-
-			if(path && *path && !strncasecmp(path,"/api/",5)) {
-				path += 4;
-				if(isdigit(path[1])) {
-					path++;
-					apiver = 0;
-					while(*path && *path != '/') {
-						if(isdigit(*path)) {
-							apiver *= 10;
-							apiver += (*path - '0');
-						}
-						path++;
-					}
-				}
-			}
-
-			HTTP::Response response{MimeTypeFactory(conn)};
-
-			//
-			// Check for interfaces
-			//
-			for(auto &interface : srvc->interfaces) {
-
-				size_t szpath = strlen(interface.c_str());
-
-				if(strncasecmp(interface.c_str(),path+1,szpath)) {
-					debug("Ignoring '",interface.c_str(),"'");
-					continue;
-				}
-
-				path += (szpath+1);
-				if(*path && *path != '/') {
-					debug("Ignoring '",interface.c_str(),"'");
-					continue;
-				}
-
-				if(Logger::enabled(Logger::Debug)) {
-					Logger::String{"Handling ",info->request_method,"(",path,") with interface '", interface.c_str(),"' version ",apiver}.trace();
-				}
-
-				CivetWeb::Request request{conn,path,apiver};
-				interface.call(info->request_method,request,response);
-
-				return send(conn,response);
-
-			}
-
-			response.failed(ENOENT);
-			return send(conn,response);
-
-		} catch(const exception &e) {
-			HTTP::Response response{MimeTypeFactory(conn)};
-			response.failed(e);
-			return send(conn,response);
-		} catch(...) {
-			HTTP::Response response{MimeTypeFactory(conn)};
-			response.failed(_("Unexpected error"));
-			return send(conn,response);
-		}
 
 	}
 
