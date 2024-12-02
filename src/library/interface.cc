@@ -37,6 +37,7 @@
 	if(path[0] == '/' || (strlen(path)>1 && path[strlen(path)-1] == '/')) {
 		throw runtime_error(String{"Path '",path,"' is invalid, cant start or end with '/'"});
 	}
+	build_handlers(node);
  }
 
  HTTP::Server::Interface::~Interface() {
@@ -48,29 +49,12 @@
 
 	if(empty()) {
 
-		Logger::String{"Empty interface, echoing request properties"}.info(Udjat::Interface::c_str());
-		response.merge(request);
+		Logger::String{"Empty interface, using default handler"}.info(c_str());
+		Interface::Handler{c_str()}.call(request,response);
 
 	} else {
 
 		for(auto &handler : *this) {
-			if(strcasecmp(method,handler.c_str())) {
-				continue;
-			}
-			if(request.verb() == HTTP::Get) {
-				// Get method, extract arguments from path.
-				request.rewind();
-				handler.for_each([&](const Handler::Introspection &intr){
-					if(intr.direction == intr.Both || intr.direction == intr.Input) {
-						string vlr;
-						request.pop(vlr);
-						debug(intr.name,"='",vlr,"'");
-						request[intr.name].set(vlr,intr.type);
-					}
-					return false;
-				});
-			}
-			request.rewind();
 			handler.call(request,response);
 		}
 

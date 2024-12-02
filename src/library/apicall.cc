@@ -23,6 +23,7 @@
  #include <udjat/tools/http/server.h>
  #include <udjat/tools/http/request.h>
  #include <udjat/tools/http/response.h>
+ #include <udjat/tools/logger.h>
  #include <udjat/tools/interface.h>
 
  #include <udjat/tools/logger.h>
@@ -35,7 +36,7 @@
 
  namespace Udjat {
 
-	int HTTP::Server::call(const char *method, HTTP::Request &request, HTTP::Response &response) {
+	int HTTP::Server::call(const char *name, const char *method, HTTP::Request &request, HTTP::Response &response) {
 
 		try {
 
@@ -44,18 +45,13 @@
 			//
 			for(auto &interface : interfaces) {
 
-				request.rewind();
-
-				if(!request.pop(interface.c_str())) {
+				if(strcasecmp(name,interface.c_str())) {
 					debug("Ignoring '",interface.c_str(),"'");
 					continue;
 				}
 
-				if(Logger::enabled(Logger::Debug)) {
-					Logger::String{"Handling ",to_string(request.verb()),"(",request.path(),") with interface '", interface.c_str(),"' version ",apiver}.trace();
-				}
-
 				interface.call(method,request,response);
+
 				return 0;
 
 			}

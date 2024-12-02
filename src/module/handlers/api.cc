@@ -60,11 +60,27 @@
 				}
 			}
 
+			string interface;
+			{
+				if(*path == '/') {
+					path++;
+				}
+				const char *ptr = strchr(path,'/');
+				if(ptr) {
+					interface.assign(path,(ptr-path));
+					path = ptr;
+				} else {
+					interface.assign(path);
+					path = "";
+				}
+			}
+
+			debug("Interface='",interface.c_str(),"' path='",path,"'");
 			CivetWeb::Request request{conn,path,apiver};
 
-			int rc = srvc->HTTP::Server::call(info->request_method,request,response);
+			int rc = srvc->call(interface.c_str(),info->request_method,request,response);
 			if(rc) {
-				response.failed(_("Unexpected error"));
+				response.failed(Logger::Message{_("Unexpected error '{}' calling backend"),rc});
 			}
 
 		} catch(const exception &e) {

@@ -12,7 +12,7 @@
 
 	<interface type='web' name='echo'>
 		<handler name='get'>
-			<arg name="text" direction='both' type="string" />
+			<arg name="text" direction='both' type='string' value-from='path' />
 		</handler>
 	</interface>
 

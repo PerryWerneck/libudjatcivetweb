@@ -69,12 +69,13 @@
 			Udjat::Interface & InterfaceFactory(const XML::Node &node) override;
 
 			/// @brief Execute API call.
+			/// @param interface The interface name.
 			/// @param method The method name.
 			/// @param request The request data.
 			/// @param response The response data.
 			/// @return The http return code
 			/// @retval 0 No error, result is in response.
-			int call(const char *method, Request &request, Response &response);
+			int call(const char *interface, const char *method, Request &request, Response &response);
 
 		public:
 
