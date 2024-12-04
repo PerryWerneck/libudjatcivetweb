@@ -20,7 +20,7 @@
  #include <config.h>
  #include <stdexcept>
  #include <udjat/tools/http/server.h>
- #include <udjat/tools/http/handler.h>
+ #include <udjat/tools/http/request.h>
  #include <udjat/tools/interface.h>
  #include <udjat/tools/request.h>
  #include <udjat/tools/logger.h>
@@ -37,7 +37,13 @@
 	bool HTTP::Server::Handler::operator==(const HTTP::Request &request) const {
 
 		if(request.verb() != method) {
+			debug("Method '",std::to_string(request.verb()),"' mismatch");
 			return false;
+		}
+
+		if(!strcasecmp(c_str(),std::to_string(request.verb()))) {
+			debug("Handler name match request action, accepting it");
+			return true;
 		}
 
 		const char *ptr = request.path();
@@ -46,6 +52,9 @@
 		}
 
 		ptr++;
+
+		debug("checking for name '",ptr,"'");
+
 		
 		return false;
 	}

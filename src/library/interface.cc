@@ -56,6 +56,11 @@
 			if(handler == request) {
 				handler.call(request,response);
 			}
+#ifdef DEBUG
+			else {
+				debug("Ignoring handler '",handler.c_str(),"'");
+			}
+#endif 
 		}
 
 	}

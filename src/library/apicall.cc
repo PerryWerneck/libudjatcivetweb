@@ -50,6 +50,7 @@
 					continue;
 				}
 
+				debug("Calling interface '",name,"'");
 				interface.call(request,response);
 
 				return 0;
