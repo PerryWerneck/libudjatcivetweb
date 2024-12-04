@@ -152,7 +152,6 @@ lib_src = [
   'src/library/oauth2/client.cc',
   'src/library/oauth2/user.cc',
   'src/library/report.cc',
-  'src/library/server.cc',
   'src/library/template.cc',
   'src/library/value.cc',
   'src/library/connection.cc',
@@ -160,6 +159,8 @@ lib_src = [
   'src/library/response.cc',
   'src/library/interface.cc',
   'src/library/apicall.cc',
+  'src/library/server/construct.cc',
+  'src/library/server/handler.cc',
 ]
 
 module_src = [

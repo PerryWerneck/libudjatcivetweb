@@ -35,7 +35,7 @@
 	namespace HTTP {
 
 		class Handler;
-
+		
 		class UDJAT_API Server : private Interface::Factory {
 		private:
 			static Server *instance;
@@ -43,7 +43,21 @@
 		protected:
 			unsigned int apiver;	///< @brief The default api version.
 
-			class Interface : public Udjat::Interface, public std::vector<Udjat::Interface::Handler> {
+			class Handler : public Udjat::Interface::Handler {
+			private:
+				const HTTP::Method method;	///< @brief The HTTP request method for this handler.
+
+			public:
+				Handler(const HTTP::Method m, const XML::Node &node) : Udjat::Interface::Handler{node}, method{m} {
+				}
+
+				Handler(const XML::Node &node);
+
+				bool operator==(const HTTP::Request &request) const;
+
+			};
+			
+			class Interface : public Udjat::Interface, public std::vector<Handler> {
 			private:
 				const char *path = nullptr;
 				
@@ -58,7 +72,7 @@
 
 				void build_handlers(const XML::Node &node);
 				
-				void call(const char *method, HTTP::Request &request, HTTP::Response &response);
+				void call(HTTP::Request &request, HTTP::Response &response);
 			};
 
 			std::vector<Interface> interfaces;
@@ -70,23 +84,22 @@
 
 			/// @brief Execute API call.
 			/// @param interface The interface name.
-			/// @param method The method name.
 			/// @param request The request data.
 			/// @param response The response data.
 			/// @return The http return code
 			/// @retval 0 No error, result is in response.
-			int call(const char *interface, const char *method, Request &request, Response &response);
+			int call(const char *interface, Request &request, Response &response);
 
 		public:
 
 			/// @brief Add request handler.
 			/// @param uri the URI for the handler.
 			/// @param handler The request handler.
-			virtual bool push_back(Handler *handler) = 0;
+			virtual bool push_back(HTTP::Handler *handler) = 0;
 
 			/// @brief Remove request handler.
 			/// @param uri the URI for the handler.
-			virtual bool remove(Handler *handler) = 0;
+			virtual bool remove(HTTP::Handler *handler) = 0;
 
 			/// @brief Get active HTTP server.
 			static Server & getInstance();

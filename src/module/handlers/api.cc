@@ -78,16 +78,14 @@
 			debug("Interface='",interface.c_str(),"' path='",path,"'");
 			CivetWeb::Request request{conn,path,apiver};
 
-			int rc = srvc->call(interface.c_str(),info->request_method,request,response);
+			int rc = srvc->call(interface.c_str(),request,response);
 			if(rc) {
 				response.failed(Logger::Message{_("Unexpected error '{}' calling backend"),rc});
 			}
 
 		} catch(const exception &e) {
-			HTTP::Response response{MimeTypeFactory(conn)};
 			response.failed(e);
 		} catch(...) {
-			HTTP::Response response{MimeTypeFactory(conn)};
 			response.failed(_("Unexpected error"));
 		}
 

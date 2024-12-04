@@ -43,19 +43,19 @@
  HTTP::Server::Interface::~Interface() {
  }
 
- void HTTP::Server::Interface::call(const char *method, HTTP::Request &request, HTTP::Response &response) {
-
-	debug(method,"(",request.c_str(),")");
+ void HTTP::Server::Interface::call(HTTP::Request &request, HTTP::Response &response) {
 
 	if(empty()) {
 
 		Logger::String{"Empty interface, using default handler"}.info(c_str());
-		Interface::Handler{c_str()}.call(request,response);
+		Udjat::Interface::Handler{c_str()}.call(request,response);
 
 	} else {
 
 		for(auto &handler : *this) {
-			handler.call(request,response);
+			if(handler == request) {
+				handler.call(request,response);
+			}
 		}
 
 	}
@@ -67,7 +67,7 @@
 		emplace_back(child);
 	}
 	if(empty()) {
-		emplace_back("get",node);
+		emplace_back(HTTP::Get,node);
 	}
  }
 

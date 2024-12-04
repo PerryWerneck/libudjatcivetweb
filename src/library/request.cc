@@ -22,21 +22,19 @@
  #include <udjat/tools/application.h>
  #include <udjat/tools/http/request.h>
  #include <udjat/tools/http/timestamp.h>
+ #include <udjat/tools/logger.h>
  #include <udjat/tools/http/keypair.h>
  #include <udjat/tools/logger.h>
  #include <udjat/tools/configuration.h>
  #include <udjat/tools/intl.h>
+ #include <udjat/tools/string.h>
+ #include <cstring>
 
  #include <stdexcept>
 
  using namespace std; 
 
  namespace Udjat {
-
-	HTTP::Request::Request(const char *path, HTTP::Method method) : Udjat::Request{path, method} {
-		debug("PATH-------------> ",path);
-		debug("REQPATH----------> ",reqpath);
-	}
 
 	HTTP::Request::~Request() {
 	}
@@ -123,5 +121,26 @@
 		return MimeType::custom;
 	}
 
+	void HTTP::Request::parse_query(const char *query) {
+
+		if(!(query && *query)) {
+			return;
+		}
+
+		debug("Parsing query '",query,"'");
+
+		for(const Udjat::String &value : Udjat::String{query}.unescape().split("&")) {
+			debug(value.c_str());
+			const char *ptr = strchr(value.c_str(),'=');
+			if(ptr) {
+				debug("request[",string{value.c_str(),(size_t) (ptr-value.c_str())}.c_str(),"]='",(ptr+1),"'");
+				(*this)[string{value.c_str(),(size_t) (ptr-value.c_str())}.c_str()] = (const char *) (ptr+1);
+			} else {
+				debug("request[",value.c_str(),"]='true'");
+				(*this)[value.c_str()] = true;
+			}
+		}
+
+	}
 
  }

@@ -43,8 +43,11 @@
 
 		Request::Request(struct mg_connection *c) : Request(c,mg_get_request_info(c)->local_uri, (unsigned int) ((PACKAGE_VERSION_MAJOR * 100) + PACKAGE_VERSION_MINOR)) {
 
-			if(reqpath && *reqpath && !strncasecmp(reqpath,"/api/",5)) {
-				reqpath += 4;
+			if(pop("/api")) {
+				const char *reqpath = path();
+				if(*reqpath != '/') {
+					throw runtime_error(Logger::String{"Unexpected path: '",reqpath,"', requests should be in the format /api/[",apiver,"]/interface"});
+				}
 				if(isdigit(reqpath[1])) {
 					apiver = 0;
 					reqpath++;
@@ -55,8 +58,11 @@
 						}
 						reqpath++;
 					}
-				}
+					reset(reqpath);
+				}				
 			}
+
+			debug("Request path set to '",path(),"'");
 
 		}
 
@@ -81,6 +87,10 @@
 
 			// https://github.com/civetweb/civetweb/blob/master/examples/embedded_c/embedded_c.c
 			if(!strcasecmp(header("Content-Type"),"application/x-www-form-urlencoded")) {
+				
+				//
+				// It's a form, get values
+				//
 
 				// https://github.com/civetweb/civetweb/blob/master/examples/embedded_c/embedded_c.c#L466
 				struct InputParser {
@@ -119,6 +129,8 @@
 
 			}
 
+			parse_query(info->query_string);
+			
 		}
 
  		const char * Request::query(const char *) const {

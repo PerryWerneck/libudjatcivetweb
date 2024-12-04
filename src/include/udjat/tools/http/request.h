@@ -38,6 +38,16 @@
 	namespace HTTP {
 
 		class UDJAT_API Request : public Udjat::Request {
+		private:
+			/// @brief Request method.
+			const HTTP::Method method = HTTP::Get;
+
+		protected:
+
+			/// @brief Parse URL query into named values.
+			/// @param query The query string.
+			void parse_query(const char *query);
+
 		public:
 
 			#pragma pack(1)
@@ -74,12 +84,25 @@
 
 			bool decrypt(HTTP::Request::Token &token) const;
 
-			Request(const char *path = "", HTTP::Method m = HTTP::Get);
+			constexpr Request(const char *path = "", HTTP::Method m = HTTP::Get) : Udjat::Request{path}, method{m} {
+			}
 
-			Request(const char *path, const char * method) : Request{path,HTTP::MethodFactory(method)} {
+			Request(const char *path, const char *method) : Request{path,HTTP::MethodFactory(method)} {
 			}
 
 			virtual ~Request();
+
+			inline operator HTTP::Method() const noexcept {
+				return this->method;
+			}
+
+			inline HTTP::Method verb() const noexcept {
+				return this->method;
+			}
+
+			inline bool operator==(HTTP::Method method) const noexcept {
+				return this->method == method;
+			}
 
 			bool cached(const Udjat::TimeStamp &timestamp) const override;
 
