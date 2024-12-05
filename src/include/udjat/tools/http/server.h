@@ -48,6 +48,10 @@
 				const HTTP::Method method;	///< @brief The HTTP request method for this handler.
 
 			public:
+
+				Handler(const HTTP::Method m, const char *name) : Udjat::Interface::Handler{name}, method{m} {
+				}
+
 				Handler(const HTTP::Method m, const XML::Node &node) : Udjat::Interface::Handler{node}, method{m} {
 				}
 
@@ -73,6 +77,9 @@
 				void build_handlers(const XML::Node &node);
 				
 				void call(HTTP::Request &request, HTTP::Response &response);
+
+				bool push_back(const XML::Node &node, std::shared_ptr<Action> action) override;
+
 			};
 
 			std::vector<Interface> interfaces;

@@ -45,8 +45,8 @@
 			//
 			for(auto &interface : interfaces) {
 
-				if(strcasecmp(name,interface.c_str())) {
-					debug("Ignoring '",interface.c_str(),"'");
+				if(strcasecmp(name,interface.name())) {
+					debug("Ignoring '",interface.name(),"'");
 					continue;
 				}
 

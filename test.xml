@@ -16,5 +16,7 @@
 		</handler>
 	</interface>
 
+	<interface type='*' action-name='agent' />
+
 </config>
 

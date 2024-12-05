@@ -229,33 +229,18 @@
 #endif // HAVE_LIBSSL
 
 					if(interfaces.empty()) {
-						Logger::String{"The interface list is empty"}.write(Logger::Trace,"civetweb");
+						Logger::String{"The interface list is empty"}.trace();
 					} else {
 						for(auto &interface : interfaces) {
-							Logger::String{"Interface ",baseref,"/api/",apiver,"/",interface.c_str()}.write(Logger::Trace,"civetweb");
+							const char *name = interface.name();
+							if(name && *name) {
+								Logger::String{"Interface ",baseref,"/api/",apiver,"/",interface.name()}.trace();
+							} else {
+								Logger::String("Ignoring unnamed interface").warning();
+							}
+
 						}
 					}
-
-					/*
-					baseref += "/api/";
-					baseref += Config::Value<string>{"http","apiversion",PACKAGE_VERSION};
-					baseref += "/";
-
-					Udjat::Worker::for_each([this,&baseref](const Udjat::Worker &worker){
-						if(!strcasecmp(worker.c_str(),"agent")) {
-							Logger::String{"Application state available on ",baseref,"agent"}.trace(name());
-							return true;
-						}
-						return false;
-					});
-
-					Udjat::Module::for_each([&baseref](const Udjat::Module &module){
-						module.trace_paths(baseref.c_str());
-						return false;
-					});
-
-
-					*/
 
 				}
 

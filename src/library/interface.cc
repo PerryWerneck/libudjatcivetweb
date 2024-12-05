@@ -76,3 +76,10 @@
 	}
  }
 
+ bool HTTP::Server::Interface::push_back(const XML::Node &node, std::shared_ptr<Action> action) {
+	Handler &handler = emplace_back(HTTP::Get,"get");
+	handler.push_back(action);
+	debug("Adding action handler on interface '",name(),"'");
+	return true;
+ }
+

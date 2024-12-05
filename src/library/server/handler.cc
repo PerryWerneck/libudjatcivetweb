@@ -55,6 +55,7 @@
 
 		debug("checking for name '",ptr,"'");
 
+		// TODO: Pending implementation.
 		
 		return false;
 	}
