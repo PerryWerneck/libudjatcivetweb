@@ -160,6 +160,7 @@ lib_src = [
   'src/library/server/call.cc',
   'src/library/server/construct.cc',
   'src/library/server/handler.cc',
+  'src/library/handlers/favicon.cc',
 ]
 
 module_src = [

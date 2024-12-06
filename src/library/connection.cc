@@ -40,16 +40,29 @@
 		return send(mime_type,response,length);
 	}
 
-	/*
-	int HTTP::Connection::send(int code, const char *message, const char *body) const noexcept {
-		return send(HTTP::Response{(MimeType) *this}.failed(code,message,body));
+	int HTTP::Connection::send(const std::exception &e) {
+		HTTP::Response response{(MimeType) *this};
+		response.failed(e);
+		return send(response);
 	}
 
-	int HTTP::Connection::failed(int code, const char *message) const noexcept {
-		return send(code,_("Operation failed"), message);
-	}
+	int HTTP::Connection::exec(const std::function<int(HTTP::Connection &connection)> &call) noexcept {
 
-	*/
+		try {
+
+			return call(*this);
+
+		} catch(const std::exception &e) {
+			return send(e);
+
+		} catch(...) {
+			HTTP::Response response{*this};
+			response.failed(_("Unexpected error"));
+			return send(response);
+
+		}
+
+	}
 
  }
 

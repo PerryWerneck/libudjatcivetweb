@@ -43,6 +43,8 @@
 			Module(const ModuleInfo &info, const char *name = "httpd");
 			virtual ~Module();
 
+			void finalize() override;
+
 		};
 
 	}

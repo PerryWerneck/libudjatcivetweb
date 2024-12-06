@@ -39,6 +39,10 @@
 			Connection();
 			virtual ~Connection();
 
+			/// @brief Run method, handle exceptions.
+			/// @return HTTP error code;
+			int exec(const std::function<int(HTTP::Connection &connection)> &call) noexcept;
+
 			/// @brief Get the active mimetype for this connection.
 			virtual operator MimeType() const = 0;
 
@@ -63,6 +67,9 @@
 			/// @return http error response (200).
 			virtual int send(const char *mime_type, const char *response, size_t length) const noexcept = 0;
 
+			/// @brief Send exception.
+			int send(const std::exception &e);
+
 			/// @brief Send file.
 			/// @param Method The HTTP method from client.
 			/// @param filename The filename to send.
@@ -71,19 +78,6 @@
 			/// @param max_age File cache time, in seconds.
 			/// @return HTML response code.
 			virtual int send(const HTTP::Method method, const char *filename, bool allow_index = false, const char *mime_type = nullptr, unsigned int max_age = 0) const = 0;
-
-			/// @brief Send html error page.
-			/// @param code The HTTP status code (see HTTP standard).
-			/// @param title The error message.
-			/// @param body Text explaining the failure
-			/// @return Error code.
-			// virtual int send(int code, const char *title, const char *body = "") const noexcept;
-
-			/// @brief Send 'operation failed' response.
-			/// @param code The HTTP status code (see HTTP standard).
-			/// @param message The message.
-			/// @return code.
-			// virtual int failed(int code, const char *message) const noexcept;
 
 			/// @brief Send response.
 			/// @param mime_type The content type to be sent.
@@ -94,6 +88,12 @@
 			inline int success(const char *mime_type, const std::string &response) const noexcept {
 				return success(mime_type,response.c_str(),response.size());
 			}
+
+			// Standard handlers
+
+			/// @brief Send standard favicon.
+			/// @return HTTP status code.
+			int favicon() noexcept;
 
 		};
 

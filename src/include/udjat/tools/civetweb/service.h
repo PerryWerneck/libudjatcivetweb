@@ -28,6 +28,7 @@
  #include <udjat/tools/interface.h>
  #include <udjat/tools/http/request.h>
  #include <udjat/tools/http/response.h>
+ #include <functional>
  #include <vector>
  
  #include <civetweb.h>
