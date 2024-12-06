@@ -64,14 +64,18 @@
 
 	Udjat::Interface & HTTP::Server::InterfaceFactory(const XML::Node &node) {
 
-		const char * path{String{node,"path"}.as_quark()};
+		const char * path{String{node,"http-path"}.as_quark()};
+
+		if(!(path && *path)) {
+			path = String{node,"path"}.as_quark();
+		}
 
 		if(!(path && *path)) {
 			path = String{node,"name"}.as_quark();
 		}
 
 		for(Interface &interface : interfaces) {
-			if(!strcasecmp(path,interface.c_str())) {
+			if(!strcasecmp(path,interface.name())) {
 				Logger::String{"Reusing interface '",path,"'"}.trace();
 				interface.build_handlers(node);
 				return interface;

@@ -17,6 +17,7 @@
 	</interface>
 
 	<interface type='*' action-name='agent' />
+	<interface type='web' action-name='appinfo' />
 
 </config>
 

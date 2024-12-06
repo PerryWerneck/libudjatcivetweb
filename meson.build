@@ -339,7 +339,7 @@ static_library(
 )
 
 executable(
-  'httpdtest',
+  'udjat',
   config_src + test_src,
   install: false,
   link_with: [ dynamic, module ],
