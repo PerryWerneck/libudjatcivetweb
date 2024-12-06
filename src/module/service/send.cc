@@ -268,7 +268,7 @@
 
 		// Setup headers
 		response.for_each([conn](const char *header_name, const char *header_value){
-			debug(header_name,"='",header_value,"'");
+			debug("Response header '",header_name,"' is '",header_value,"'");
 			mg_response_header_add(conn, header_name, header_value, -1);
 		});
 

@@ -57,6 +57,7 @@
 
 			}
 
+			// Dont know how to handle, fail as 'not found'.
 			response.failed(ENOENT);
 			return 0;
 

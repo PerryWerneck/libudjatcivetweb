@@ -63,18 +63,21 @@
 			call("Content-Range",Udjat::String{"items ",range.from,"-",range.to,"/",range.total}.c_str());
 		}
 
+		// https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Last-Modified
+		if(timestamp.last_modified) {
+			call("last-modified",HTTP::TimeStamp{timestamp.last_modified}.to_string().c_str());
+		}
+
 		// Check for caching.
 		// https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
-		{
+		if(timestamp.expires) {
 			time_t now = time(0);
 			time_t expires = ((time_t) timestamp.expires);
-
 			if(expires > now) {
 				unsigned int max_age = (now - expires);
 				call("Cache-Control",Udjat::String{"max-age=",max_age,", private"}.c_str());
 				call("Expires",HTTP::TimeStamp{expires}.to_string().c_str());
 			}
-
 		}
 
 	}

@@ -151,14 +151,13 @@ lib_src = [
   'src/library/oauth2/signin.cc',
   'src/library/oauth2/client.cc',
   'src/library/oauth2/user.cc',
-  'src/library/report.cc',
   'src/library/template.cc',
   'src/library/value.cc',
   'src/library/connection.cc',
   'src/library/request.cc',
   'src/library/response.cc',
-  'src/library/interface.cc',
-  'src/library/apicall.cc',
+  'src/library/server/interface.cc',
+  'src/library/server/call.cc',
   'src/library/server/construct.cc',
   'src/library/server/handler.cc',
 ]
@@ -180,13 +179,13 @@ module_src = [
   'src/module/worker/worker.cc',
   'src/module/connection.cc',
   'src/module/request.cc',
-  'src/module/send.cc',
   'src/module/connection.cc',
   'src/module/custom.cc',
   'src/module/init.cc',
   'src/module/protocol.cc',
-  'src/module/service.cc',
   'src/module/factory.cc',
+  'src/module/service/send.cc',
+  'src/module/service/construct.cc',
 ]
 
 test_src = [

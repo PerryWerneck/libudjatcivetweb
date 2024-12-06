@@ -41,20 +41,3 @@
 
 	}	
  }
- 
-
-
-/*
- #include <udjat/tools/http/value.h>
- #include <map>
-
- namespace Udjat {
-
-	namespace HTTP {
-
-
-	}
-
- }
-*/
-
