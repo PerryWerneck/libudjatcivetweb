@@ -129,7 +129,7 @@
 			if(optionlist.empty()) {
 
 				// Use default options
-				Logger::String{"No civetweb configuration, using defaults"}.trace(Service::name());
+				Logger::String{"No civetweb configuration, using defaults"}.trace(name());
 
 				static const char *options[] = {
 					"listening_ports","localhost:8989",
@@ -143,7 +143,7 @@
 			} else {
 
 				// Use options
-				Logger::String{"Found civetweb configuration, using it"}.trace(Service::name());
+				Logger::String{"Found civetweb configuration, using it"}.trace(name());
 
 				const char **options = new const char *[optionlist.size()+1];
 				size_t ix = 0;

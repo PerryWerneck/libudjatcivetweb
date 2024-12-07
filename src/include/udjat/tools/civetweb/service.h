@@ -70,6 +70,10 @@
 
 			virtual ~Service();
 
+			inline const char *name() const noexcept {
+				return Udjat::Service::name();
+			}
+
 			void start() noexcept override;
 			void stop() noexcept override;
 
