@@ -161,7 +161,9 @@ lib_src = [
   'src/library/server/construct.cc',
   'src/library/server/handler.cc',
   'src/library/handlers/favicon.cc',
-]
+  'src/library/handlers/icon.cc',
+  'src/library/handlers/image.cc',
+  ]
 
 module_src = [
   'src/module/handlers/api.cc',
@@ -169,9 +171,6 @@ module_src = [
   'src/module/handlers/icons.cc',
   'src/module/handlers/images.cc',
   'src/module/handlers/pubkey.cc',
-  'src/module/handlers/report.cc',
-  'src/module/handlers/root.cc',
-  'src/module/handlers/swagger.cc',
   'src/module/handlers/product.cc',
   'src/module/oauth2/handler.cc',
   'src/module/protocol.cc',

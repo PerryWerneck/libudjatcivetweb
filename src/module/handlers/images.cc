@@ -45,46 +45,5 @@
  #endif // HAVE_UNISTD_H
 
  int CivetWeb::Service::image_handler(struct mg_connection *conn, CivetWeb::Service *) noexcept {
-
-	try {
-
-		const char *path = mg_get_request_info(conn)->local_uri;
-		while(*path && *path == '/') {
-			path++;
-		}
-
-		const char *ptr = strchr(path,'/');
-
-		if(ptr) {
-			path = ptr+1;
-		}
-
-		debug("searching for image '",path,"'");
-
-		Udjat::HTTP::Image filename{path};
-
-		if(filename) {
-
-			Logger::String{"Sending static file '", filename.c_str(),"'"}.trace("http");
-			mg_send_file(conn,filename.c_str());
-			return 200;
-
-		} else {
-
-			Logger::String{"Cant find static file '", filename.c_str(),"'"}.error("http");
-
-		}
-
-	} catch(const exception &e) {
-		HTTP::Response response{MimeTypeFactory(conn)};
-		response.failed(e);
-		return send(conn,response);
-	} catch(...) {
-		HTTP::Response response{MimeTypeFactory(conn)};
-		response.failed(_("Unexpected error"));
-		return send(conn,response);
-	}
-
-	return http_error(conn, 404, _("Not available"));
-
+	return CivetWeb::Connection(conn).image(mg_get_request_info(conn)->local_uri);
  }

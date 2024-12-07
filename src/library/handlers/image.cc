@@ -18,20 +18,19 @@
  */
 
  /**
-  * @brief Implements the handler for icons.
+  * @brief Implements the handler for images.
   *
   */
 
  #include <config.h>
  #include <udjat/defs.h>
  #include <private/module.h>
- #include <udjat/tools/civetweb/service.h>
- #include <udjat/tools/http/icon.h>
- #include <udjat/tools/http/exception.h>
+ #include <udjat/tools/http/connection.h>
+ #include <udjat/tools/http/image.h>
  #include <udjat/tools/http/mimetype.h>
- #include <udjat/tools/configuration.h>
  #include <udjat/tools/logger.h>
  #include <udjat/tools/intl.h>
+ #include <udjat/tools/configuration.h>
 
 #ifndef _WIN32
 	#include <unistd.h>
@@ -39,6 +38,38 @@
 
  using namespace Udjat;
 
- int CivetWeb::Service::icon_handler(struct mg_connection *conn, CivetWeb::Service *) noexcept {
-	return CivetWeb::Connection(conn).icon(mg_get_request_info(conn)->local_uri);
+ int HTTP::Connection::image(const char *name) noexcept {
+
+ 	return exec([&](HTTP::Connection &connection){
+
+		{
+			if(*name == '/') {
+				name++;
+			}
+			const char *ptr = strchr(name,'/');
+			if(ptr) {
+				name = ptr+1;
+			}
+		}
+
+		debug("searching for image '",name,"'");
+
+		Udjat::HTTP::Image filename{name};
+
+		if(!filename) {
+			throw HTTP::Exception(404,Logger::String{"Cant find image '",name,"'"}.c_str());
+		}
+
+		Logger::String{"Sending static file '", filename.c_str(),"'"}.trace();
+		
+		return send(
+			HTTP::Get,
+			filename.c_str(),
+			false,
+			nullptr,
+			Config::Value<unsigned int>("theme","image-max-age",604800)
+		);
+
+	});
+
  }

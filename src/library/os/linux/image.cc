@@ -46,6 +46,8 @@
 				name += ".svg";
 			}
 
+			debug("Searching for image '",name.c_str(),"'");
+
 			// First search for filenames.
 			for(string &path : paths) {
 
@@ -56,6 +58,11 @@
 					debug("Found '",c_str(),"'");
 					return;
 				}
+#ifdef DEBUG
+				else {
+					debug("Not found '",c_str(),"'");
+				}
+#endif
 
 			}
 
@@ -72,6 +79,11 @@
 						debug("Found '",c_str(),"'");
 						return;
 					}
+#ifdef DEBUG
+					else {
+						debug("Not found '",c_str(),"'");
+					}
+#endif
 				} catch(const std::exception &e) {
 					cout << "image\t" << e.what() << endl;
 				}

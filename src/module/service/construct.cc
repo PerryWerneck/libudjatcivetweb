@@ -183,10 +183,6 @@
 
 	}
 
-	void CivetWeb::Service::finalize() {
-		interfaces.clear();
-	}
-
  	CivetWeb::Service::~Service() {
 
 		Logger::String{"Stopping service"}.trace(name());

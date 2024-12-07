@@ -18,44 +18,57 @@
  */
 
  /**
-  * @brief Implements the default http handler.
+  * @brief Implements the handler for icons.
   *
   */
 
-/*
  #include <config.h>
  #include <udjat/defs.h>
- #include <stdexcept>
- #include <udjat/tools/http/exception.h>
- #include <udjat/tools/logger.h>
- #include <udjat/tools/http/response.h>
- #include <udjat/tools/http/mimetype.h>
  #include <private/module.h>
+ #include <udjat/tools/http/connection.h>
+ #include <udjat/tools/http/icon.h>
+ #include <udjat/tools/http/exception.h>
+ #include <udjat/tools/http/mimetype.h>
+ #include <udjat/tools/configuration.h>
+ #include <udjat/tools/logger.h>
  #include <udjat/tools/intl.h>
- #include <udjat/tools/civetweb/interface.h>
 
- using namespace std;
+#ifndef _WIN32
+	#include <unistd.h>
+#endif // _WIN32
+
  using namespace Udjat;
 
- int rootWebHandler(struct mg_connection *conn, void *) noexcept {
+ int HTTP::Connection::icon(const char *name) noexcept {
 
-	try {
+ 	return exec([&](HTTP::Connection &connection){
 
-		const char *path = mg_get_request_info(conn)->local_uri;
-		debug("Handling '",path,"'");
+	 	debug("Searching for icon",name);
 
+		const char *path = strrchr(name,'/');
+		if(path) {
+			path++;
+		}
 
-		return 0; // 0 to run internal civetweb handler.
+		if(!(path && *path)) {
+			throw HTTP::Exception(400,Logger::String{"Unable to handle icon '",name,"'"}.c_str());
+		}
 
-	} catch(const exception &e) {
-		HTTP::Response response{MimeTypeFactory(conn)};
-		response.failed(e);
-		return send(conn,response);
-	} catch(...) {
-		HTTP::Response response{MimeTypeFactory(conn)};
-		response.failed(_("Unexpected error"));
-		return send(conn,response);
-	}
+		debug("path='",path,"'");
+		Udjat::HTTP::Icon icon = Udjat::HTTP::Icon::getInstance(path);
+
+		if(icon.empty()) {
+			throw HTTP::Exception(404,Logger::String{"Cant find icon '",name,"'"}.c_str());
+		}
+
+		return send(
+			HTTP::Get,
+			icon.c_str(),
+			false,
+			"image/svg+xml",
+			Config::Value<unsigned int>("theme","icon-max-age",604800)
+		);
+
+	});
 
  }
-*/

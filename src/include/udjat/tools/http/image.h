@@ -29,7 +29,7 @@
 		class UDJAT_API Image : public std::string {
 		public:
 
-			/// @param name Icon name.
+			/// @param name Image name.
 			Image(const char *name);
 
 			Image(const std::string &name) : Image(name.c_str()) {

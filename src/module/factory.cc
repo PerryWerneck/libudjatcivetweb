@@ -83,4 +83,8 @@
 
 	}
 
+	void CivetWeb::Module::finalize() {
+		interfaces.clear();
+	}
+
  }

@@ -95,6 +95,16 @@
 			/// @return HTTP status code.
 			int favicon() noexcept;
 
+ 			/// @brief Send standard icon.
+ 			/// @param name The icon name.
+			/// @return HTTP status code.
+ 			int icon(const char *name) noexcept;
+
+			/// @brief Send standard image.
+ 			/// @param name The image name.
+			/// @return HTTP status code.
+ 			int image(const char *name) noexcept;
+			
 		};
 
 	}
