@@ -50,6 +50,8 @@
 
 		public:
 
+			#define TOKEN_USERNAME_LEN 40
+
 			#pragma pack(1)
 			/// @brief Authentication token
 			struct Token {
@@ -57,7 +59,7 @@
 				uint16_t scope = 0x000F;
 				time_t expiration_time = 0;
 				uint64_t uid = (uint64_t) -1;
-				char username[40] = "";	///< @brief The user name
+				char username[TOKEN_USERNAME_LEN+1] = "";	///< @brief The user name
 #ifdef _WIN32
 				union {
 					in_addr v4;		// https://learn.microsoft.com/en-us/windows/win32/api/winsock2/ns-winsock2-in_addr

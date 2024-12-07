@@ -65,8 +65,8 @@
 		token.uid = data.uid;
 #endif // _WIN32
 
-		memset(token.username,0,sizeof(token.username));
-		strncpy(token.username,data.username,sizeof(token.username)-1);
+		memset(token.username,0,TOKEN_USERNAME_LEN);
+		strncpy(token.username,data.username,TOKEN_USERNAME_LEN);
 
 		memset(&token.ip,0,sizeof(token.ip));
 		if((data.type & 0x0f) == 0x04) {
