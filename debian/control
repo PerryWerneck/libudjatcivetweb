@@ -1,0 +1,35 @@
+Source: libudjatcivetweb
+Section: unknown
+Priority: optional
+Maintainer: Perry Werneck <perry.werneck@gmail.com>
+Build-Depends: debhelper (>= 7), meson, pkg-config, libudjat2-dev, libcivetweb-dev
+
+Package: libudjatcivetweb
+Architecture: any
+Section: libs
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Provides: libudjatcivetweb (= ${binary:Version})
+Description: Udjat core library.
+ Udjat core library.
+
+Package: udjat-module-civetweb
+Architecture: any
+Section: libs
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Description: Udjat core library.
+ Udjat core library.
+
+Package: libudjatcivetweb-dev
+Architecture: any
+Provides: libudjatcivetweb-dev (= ${binary:Version})
+Section: libdevel
+Depends: ${misc:Depends}, pkg-config, libudjatcivetweb (= ${binary:Version})
+Description: Libudjat development files.
+ Development headers for libudjatcivetweb
+
+Package: libudjatcivetweb-dbg
+Architecture: any
+Depends: libudjatcivetweb (= ${binary:Version})
+Description: Debugging symbols for libudjatcivetweb
+ This package contains the debugging symbols for libudjatcivetweb.
+
