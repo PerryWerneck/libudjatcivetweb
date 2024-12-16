@@ -37,7 +37,6 @@
 	if(path[0] == '/' || (strlen(path)>1 && path[strlen(path)-1] == '/')) {
 		throw runtime_error(String{"Path '",path,"' is invalid, cant start or end with '/'"});
 	}
-	build_handlers(node);
  }
 
  HTTP::Server::Interface::~Interface() {
@@ -58,7 +57,7 @@
 			}
 #ifdef DEBUG
 			else {
-				debug("Ignoring handler '",handler.c_str(),"'");
+				debug("Ignoring handler '",handler.name(),"'");
 			}
 #endif 
 		}
@@ -67,19 +66,15 @@
 
  }
 
- void HTTP::Server::Interface::build_handlers(const XML::Node &node) {
-	for(auto child = node.child("handler"); child; child = child.next_sibling("handler")) {
-		emplace_back(child);
-	}
-	if(empty()) {
-		emplace_back(HTTP::Get,node);
-	}
+ Udjat::Interface::Handler & HTTP::Server::Interface::push_back(const XML::Node &node) {
+	return emplace_back(node);
  }
 
  bool HTTP::Server::Interface::push_back(const XML::Node &node, std::shared_ptr<Action> action) {
-	Handler &handler = emplace_back(HTTP::Get,"get");
+	HTTP::Method method{HTTP::MethodFactory(node)};
+	Handler &handler = emplace_back(method,std::to_string(method));
 	handler.push_back(action);
-	debug("Adding action handler on interface '",name(),"'");
+	debug("Adding action '",handler.name(),"' on interface '",name(),"'");
 	return true;
  }
 

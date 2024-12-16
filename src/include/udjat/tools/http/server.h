@@ -61,7 +61,7 @@
 
 			};
 			
-			class Interface : public Udjat::Interface, public std::vector<Handler> {
+			class Interface : public Udjat::Interface, public std::vector<HTTP::Server::Handler> {
 			private:
 				const char *path = nullptr;
 				
@@ -74,11 +74,10 @@
 					return path;
 				}
 
-				void build_handlers(const XML::Node &node);
-				
 				void call(HTTP::Request &request, HTTP::Response &response);
 
 				bool push_back(const XML::Node &node, std::shared_ptr<Action> action) override;
+				Handler & push_back(const XML::Node &node) override;
 
 			};
 

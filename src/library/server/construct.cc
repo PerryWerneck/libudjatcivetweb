@@ -78,7 +78,6 @@
 		for(Interface &interface : interfaces) {
 			if(!strcasecmp(path,interface.name())) {
 				Logger::String{"Reusing interface '",path,"'"}.trace();
-				interface.build_handlers(node);
 				return interface;
 			}
 		}
