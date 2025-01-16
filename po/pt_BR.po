@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udjat-module-httpd 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-11-19 19:59-0300\n"
+"POT-Creation-Date: 2025-01-15 21:51-0300\n"
 "PO-Revision-Date: 2024-01-30 20:11-0300\n"
 "Last-Translator: Perry Werneck <perry.werneck@gmail.com>\n"
 "Language-Team: Brazilian Portuguese <perry.werneck@gmail.com>\n"
@@ -21,6 +21,12 @@ msgstr ""
 "X-Poedit-SourceCharset: utf-8\n"
 "Plural-Forms: nplurals=2; plural=(n > 1)\n"
 "X-Generator: Gtranslator 41.0\n"
+
+#: src/library/connection.cc:60 src/library/server/call.cc:67
+#: src/module/handlers/pubkey.cc:71 src/module/handlers/api.cc:89
+#: src/module/oauth2/handler.cc:290 src/module/service/send.cc:305
+msgid "Unexpected error"
+msgstr "Erro inesperado"
 
 #: src/library/index.cc:55
 msgid "en"
@@ -39,7 +45,7 @@ msgid "Workers"
 msgstr "Processadores"
 
 #: src/library/oauth2/signin.cc:45 src/library/os/linux/oauth2user.cc:294
-#: src/library/os/windows/oauth2user.cc:162
+#: src/library/os/windows/oauth2user.cc:163
 msgid "Access Denied"
 msgstr "Acesso negado"
 
@@ -48,33 +54,31 @@ msgid "Invalid username"
 msgstr "Usuário inválido"
 
 #: src/library/os/linux/oauth2user.cc:299
-#: src/library/os/windows/oauth2user.cc:166
+#: src/library/os/windows/oauth2user.cc:167
 msgid "Please, inform username"
 msgstr "Informe o nome de usuário"
 
 #: src/library/os/linux/oauth2user.cc:308
-#: src/library/os/windows/oauth2user.cc:175
+#: src/library/os/windows/oauth2user.cc:176
 msgid "Please, inform password"
 msgstr "Informe a senha de acesso"
 
-#: src/library/response.cc:170
+#: src/library/response.cc:172
 msgid "Unexpected error processing response text"
 msgstr "Erro inesperado ao processar o texto da resposta"
 
-#: src/module/handlers/favicon.cc:119 src/module/handlers/icons.cc:65
-#: src/module/handlers/images.cc:98 src/module/handlers/product.cc:89
+#: src/module/handlers/product.cc:90
 msgid "Not available"
 msgstr "Não disponível"
-
-#: src/module/handlers/icons.cc:82 src/module/handlers/images.cc:94
-#: src/module/handlers/pubkey.cc:71 src/module/handlers/root.cc:56
-#: src/module/oauth2/handler.cc:290 src/module/send.cc:300
-msgid "Unexpected error"
-msgstr "Erro inesperado"
 
 #: src/module/handlers/pubkey.cc:78
 msgid "Unsupported"
 msgstr "Não suportado"
+
+#: src/module/handlers/api.cc:83
+#, fuzzy, c++-format
+msgid "Unexpected error '{}' calling backend"
+msgstr "Erro inesperado no controlador http"
 
 #: src/module/oauth2/handler.cc:104
 msgid "Access to ${client_id}"
@@ -92,7 +96,7 @@ msgstr "Usuário"
 msgid "Password"
 msgstr "Senha"
 
-#: src/module/custom.cc:73
+#: src/module/custom.cc:59
 msgid "Unexpected error on http handler"
 msgstr "Erro inesperado no controlador http"
 
