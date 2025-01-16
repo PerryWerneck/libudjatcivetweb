@@ -17,11 +17,7 @@
 
 %define module_name civetweb
 
-%define product_name %(pkg-config --variable=product_name libudjat)
-%define product_version %(pkg-config --variable=product_version libudjat)
-%define module_path %(pkg-config --variable=module_path libudjat)
-
-Summary:		HTTP server library for %{product_name}  
+Summary:		HTTP server library for %{udjat_product_name}  
 Name:			libudjat%{module_name}
 Version:		1.2.0+git20241024
 Release:		0
@@ -43,60 +39,39 @@ BuildRequires:	pkgconfig(libcrypto)
 BuildRequires:  meson >= 0.61.4
 
 %description
-HTTP server library for %{product_name}
+HTTP server library for %{udjat_product_name}
 
-C++ HTTP server classes for use with lib%{product_name}
+C++ HTTP server classes for use with lib%{udjat_product_name}
 
-#---[ Library ]-------------------------------------------------------------------------------------------------------
+%package -n libudjathttpd%{udjat_major}_%{udjat_minor}
+Summary:       httpd library fo %{udjat_product_name}
+Recommends:    %{udjat_product_name}-branding
 
-%define MAJOR_VERSION %(echo %{version} | cut -d. -f1)
-%define MINOR_VERSION %(echo %{version} | cut -d. -f2 | cut -d+ -f1)
-%define _libvrs %{MAJOR_VERSION}_%{MINOR_VERSION}
-
-%package -n libudjathttpd%{_libvrs}
-Summary:       %{product_name} httpd library
-Recommends:    %{product_name}-branding
-
-%description -n libudjathttpd%{_libvrs}
-HTTP Server abstraction library for %{product_name}
-
-%if "%{_vendor}" != "debbuild"
-%lang_package -n libudjathttpd%{_libvrs}
-%endif
-
-#---[ Development ]---------------------------------------------------------------------------------------------------
+%description -n libudjathttpd%{udjat_major}_%{udjat_minor}
+HTTP Server abstraction library for %{udjat_product_name}
 
 %package devel
 Summary: Development files for %{name}
-
-Requires: libudjathttpd%{_libvrs} = %{version}
-Provides: libudjathttpd-devel = %{version}
-
-%if "%{_vendor}" == "debbuild"
-Requires:	libudjat-dev
-Provides:	libudjathttpd-dev
-Provides:	pkgconfig(libudjathttpd)
-Provides:	pkgconfig(libudjathttpd-static)
-%endif
+Requires:	libudjathttpd%{udjat_major}_%{udjat_minor} = %{version}
+Provides:	%{name}%{udjat_major}-devel = %{version}
+Provides:	%{udjat_library}-devel = %{version}
 
 %description devel
-HTTP server library for %{product_name}
+HTTP server library for %{udjat_product_name} based on libcivetweb
 
-C++ HTTP server classes for use with lib%{product_name}
+C++ HTTP server classes for use with lib%{udjat_product_name}
 
-#---[ Module ]--------------------------------------------------------------------------------------------------------
+%lang_package -n libudjathttpd%{udjat_major}_%{udjat_minor}
 
-%package -n %{product_name}-module-%{module_name}
+%package -n %{udjat_product_name}%{udjat_module_version}-module-%{module_name}
 Summary: HTTP server module for %{name}
+%udjat_module_requires
 
 Supplements: udjat-devel
-Provides: %{product_name}-module-httpd
-Recommends: %{product_name}-branding-http
+Recommends: %{udjat_product_name}-branding-http
 
-%description -n %{product_name}-module-%{module_name}
-%{product_name} module with http server support.
-
-#---[ Build & Install ]-----------------------------------------------------------------------------------------------
+%description -n %{udjat_product_name}%{udjat_module_version}-module-%{module_name}
+Dynamic module for http server support on %{udjat_product_name}
 
 %prep
 %autosetup
@@ -107,18 +82,16 @@ Recommends: %{product_name}-branding-http
 
 %install
 %meson_install
-%find_lang libudjathttpd-%{MAJOR_VERSION}.%{MINOR_VERSION} langfiles
+%find_lang libudjathttpd-%{udjat_major}.%{udjat_minor} langfiles
 
-%files -n libudjathttpd%{_libvrs}
+%files -n libudjathttpd%{udjat_major}_%{udjat_minor}-lang -f langfiles
+
+%files -n libudjathttpd%{udjat_major}_%{udjat_minor}
 %defattr(-,root,root)
-%{_libdir}/*.so.%{MAJOR_VERSION}.%{MINOR_VERSION}
+%{_libdir}/*.so.%{udjat_major}.%{udjat_minor}
 
-%if "%{_vendor}" != "debbuild"
-%files -n libudjathttpd%{_libvrs}-lang -f langfiles
-%endif
-
-%files -n %{product_name}-module-%{module_name}
-%{module_path}/*.so
+%files -n %{udjat_product_name}%{udjat_module_version}-module-%{module_name}
+%{udjat_module_path}/*.so
 
 %files devel
 %defattr(-,root,root)
@@ -134,9 +107,9 @@ Recommends: %{product_name}-branding-http
 %{_includedir}/udjat/tools/civetweb/*.h
 %{_includedir}/udjat/module/*.h
 
-%post -n libudjathttpd%{_libvrs} -p /sbin/ldconfig
+%post -n libudjathttpd%{udjat_major}_%{udjat_minor} -p /sbin/ldconfig
 
-%postun -n libudjathttpd%{_libvrs} -p /sbin/ldconfig
+%postun -n libudjathttpd%{udjat_major}_%{udjat_minor} -p /sbin/ldconfig
 
 %changelog
 

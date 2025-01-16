@@ -75,10 +75,10 @@
 			path = String{node,"name"}.as_quark();
 		}
 
-		for(Interface &interface : interfaces) {
-			if(!strcasecmp(path,interface.name())) {
+		for(Interface &intf : interfaces) {
+			if(!strcasecmp(path,intf.name())) {
 				Logger::String{"Reusing interface '",path,"'"}.trace();
-				return interface;
+				return intf;
 			}
 		}
 

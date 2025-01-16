@@ -43,15 +43,15 @@
 			//
 			// Check for interfaces
 			//
-			for(auto &interface : interfaces) {
+			for(auto &intf : interfaces) {
 
-				if(strcasecmp(name,interface.name())) {
-					debug("Ignoring '",interface.name(),"'");
+				if(strcasecmp(name,intf.name())) {
+					debug("Ignoring '",intf.name(),"'");
 					continue;
 				}
 
 				debug("Calling interface '",name,"'");
-				interface.call(request,response);
+				intf.call(request,response);
 
 				return 0;
 

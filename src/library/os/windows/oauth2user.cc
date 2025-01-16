@@ -34,6 +34,7 @@
  #include <udjat/tools/intl.h>
  #include <cstring>
  #include <udjat/win32/exception.h>
+ #include <udjat/tools/string.h>
 
  #include <windows.h>
 
@@ -55,7 +56,7 @@
 				return false;
 			}
 
-			String req_addr{address()};
+			Udjat::String req_addr{address()};
 			sockaddr_storage addr;
 
 			// TODO: Decode win32 adresses.

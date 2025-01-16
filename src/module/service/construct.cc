@@ -231,10 +231,10 @@
 					if(interfaces.empty()) {
 						Logger::String{"The interface list is empty"}.trace();
 					} else {
-						for(auto &interface : interfaces) {
-							const char *name = interface.name();
+						for(auto &intf : interfaces) {
+							const char *name = intf.name();
 							if(name && *name) {
-								Logger::String{"Interface ",baseref,"/api/",apiver,"/",interface.name()}.trace();
+								Logger::String{"Interface ",baseref,"/api/",apiver,"/",intf.name()}.trace();
 							} else {
 								Logger::String("Ignoring unnamed interface").warning();
 							}

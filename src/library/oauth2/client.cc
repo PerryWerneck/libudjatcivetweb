@@ -51,13 +51,13 @@
 		data.type = 0x10;
 
 		String req_addr{request.address()};
-		sockaddr_storage addr;
 
 #ifdef _WIN32
 
 		// TODO: Implement win32 addr translation.
 
 #else
+		sockaddr_storage addr;
 		if(inet_pton(AF_INET,req_addr.c_str(),&((struct sockaddr_in *) &addr)->sin_addr) == 1) {
 			data.type |= 0x04;
 			data.ip.v4 = ((struct sockaddr_in *) &addr)->sin_addr.s_addr;

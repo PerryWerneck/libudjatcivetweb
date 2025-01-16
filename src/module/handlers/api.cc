@@ -60,25 +60,25 @@
 				}
 			}
 
-			string interface;
+			string intf;
 			{
 				if(*path == '/') {
 					path++;
 				}
 				const char *ptr = strchr(path,'/');
 				if(ptr) {
-					interface.assign(path,(ptr-path));
+					intf.assign(path,(ptr-path));
 					path = ptr;
 				} else {
-					interface.assign(path);
+					intf.assign(path);
 					path = "";
 				}
 			}
 
-			debug("Interface='",interface.c_str(),"' path='",path,"'");
+			debug("Interface='",intf.c_str(),"' path='",path,"'");
 			CivetWeb::Request request{conn,path,apiver};
 
-			int rc = srvc->call(interface.c_str(),request,response);
+			int rc = srvc->call(intf.c_str(),request,response);
 			if(rc) {
 				response.failed(Logger::Message{_("Unexpected error '{}' calling backend"),rc});
 			}

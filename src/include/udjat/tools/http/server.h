@@ -94,7 +94,7 @@
 			/// @param response The response data.
 			/// @return The http return code
 			/// @retval 0 No error, result is in response.
-			int call(const char *interface, Request &request, Response &response);
+			int call(const char *intf, Request &request, Response &response);
 
 		public:
 
