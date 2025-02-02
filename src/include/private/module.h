@@ -80,6 +80,7 @@
 
 		};
 
+		/*
 		class Header : public Udjat::Protocol::Header {
 		public:
 			Header(const char *name) : Protocol::Header(name) {
@@ -113,6 +114,7 @@
 			const Protocol::Header & response(const char *name) override;
 
 		};
+		*/
 
 	}
 

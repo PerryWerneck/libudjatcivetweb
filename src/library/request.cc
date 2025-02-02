@@ -105,20 +105,20 @@
 		const char *remote_request = header("X-RemoteRequest");
 		if(remote_request && *remote_request) {
 			auto mime = MimeTypeFactory(remote_request);
-			if(mime != MimeType::custom) {
+			if(mime != MimeType::none) {
 				return mime;
 			}
 		}
 
 		// Use 'accept' header to identify response type.
 		for(const Udjat::String &value : Udjat::String{header("accept")}.split(",")) {
-			auto mime = MimeTypeFactory(value.c_str(),MimeType::custom);
-			if(mime != MimeType::custom) {
+			auto mime = MimeTypeFactory(value.c_str(),MimeType::none);
+			if(mime != MimeType::none) {
 				return mime;
 			}
 		}
 
-		return MimeType::custom;
+		return MimeType::none;
 	}
 
 	void HTTP::Request::parse_query(const char *query) {

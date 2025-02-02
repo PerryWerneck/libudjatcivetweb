@@ -40,7 +40,7 @@
 
 		debug(__FUNCTION__,"(",name,",",std::to_string(mimetype),")");
 
-		if(mimetype == MimeType::custom) {
+		if(mimetype == MimeType::none) {
 			return;
 		}
 

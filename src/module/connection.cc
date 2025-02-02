@@ -75,8 +75,8 @@
 	if(query && *query) {
 		for(const auto &arg : String{query}.split("&")) {
 			if(!strncasecmp(arg.c_str(),"format=",7)) {
-				auto mime = MimeTypeFactory(arg.c_str()+7,MimeType::custom);
-				if(mime != MimeType::custom) {
+				auto mime = MimeTypeFactory(arg.c_str()+7,MimeType::none);
+				if(mime != MimeType::none) {
 					return mime;
 				}
 			}
@@ -96,8 +96,8 @@
 
 			for(String &value : String{hdr}.split(",")) {
 
-				auto mime = MimeTypeFactory(value.c_str(),MimeType::custom);
-				if(mime != MimeType::custom) {
+				auto mime = MimeTypeFactory(value.c_str(),MimeType::none);
+				if(mime != MimeType::none) {
 					return mime;
 				}
 			}

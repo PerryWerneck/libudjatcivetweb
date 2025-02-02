@@ -17,6 +17,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+/*
  #include <private/module.h>
  #include <udjat/tools/protocol.h>
  #include <udjat/tools/http/exception.h>
@@ -33,3 +34,5 @@
  std::shared_ptr<Udjat::Protocol::Worker> CivetWeb::Protocol::WorkerFactory() const {
 	return make_shared<CivetWeb::Worker>();
  }
+*/
+

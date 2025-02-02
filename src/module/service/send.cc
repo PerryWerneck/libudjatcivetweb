@@ -90,7 +90,7 @@
 					auto mtype = MimeTypeFactory(ext);
 
 					debug("Detected mime-type is '",mtype,"'");
-					if(mtype != MimeType::custom) {
+					if(mtype != MimeType::none) {
 						mg_response_header_add(conn, "Content-Type", std::to_string(mtype), -1);
 					}
 

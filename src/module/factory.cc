@@ -17,6 +17,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+/*
  #include <config.h>
  #include <udjat/defs.h>
  #include <udjat/module/abstract.h>
@@ -27,7 +28,6 @@
  #include <udjat/tools/civetweb/protocol.h>
 
  namespace Udjat {
-
 
 	/// @brief Client & server module
 	class Hybrid : public CivetWeb::Module {
@@ -88,3 +88,5 @@
 	}
 
  }
+*/
+
