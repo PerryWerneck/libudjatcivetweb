@@ -94,6 +94,7 @@
 
 	void CivetWeb::Client::send_headers(Connection &cli, const HTTP::Method method, const char *payload) {
 
+		debug(to_string(method)," ",url.path().c_str());
 		mg_printf(cli.get(), "%s %s HTTP/1.1\r\n", to_string(method),url.path().c_str());
 		for(const auto & [name,value]: headers.request) {
 			mg_printf(cli.get(), "%s: %s\r\n", name.c_str(), value.c_str());
@@ -107,8 +108,34 @@
 
 	int CivetWeb::Client::test(const HTTP::Method method, const char *payload) {
 
-		Connection cli = connect();
-		send_headers(cli, method, payload);
+		char buffer[4096];
+
+		try {
+
+			Connection cli = connect();
+			send_headers(cli, method, payload);
+
+			int ret = mg_get_response(
+					cli.get(),
+					buffer,
+					sizeof(buffer)-1,
+					(Config::Value<time_t>("http","timeout",10) * 1000)
+			);
+
+			if (ret < 0) {
+				return -1;
+			}
+
+			const struct mg_response_info *info = mg_get_response_info(cli.get());
+
+			debug("length=",info->content_length);
+
+			return info->status_code;
+
+		} catch(const exception &e) {
+			Logger::String{"Error testing ",url.c_str(),": ",e.what()}.error();
+			return -1;
+		}
 
 
 	}
@@ -137,7 +164,7 @@
 
 		progress(0,info->content_length,nullptr,0);
 
-		uint64_t current = 0;
+		long long current = 0;
 		while(current < info->content_length) {
 
 			int szRead = mg_read(cli.get(), (void *) buffer, 4096);

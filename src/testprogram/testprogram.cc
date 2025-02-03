@@ -30,6 +30,7 @@
 
  int main(int argc, char **argv) {
 
+/*
 	Udjat::Logger::console(true);
 	Udjat::Logger::verbosity(9);
 	Udjat::Logger::redirect();
@@ -40,8 +41,8 @@
 	auto response = handler->get();
 
 	cout << "-----" << endl << response << endl << "-----" << endl;
+*/
 
-/*
 	static const ModuleInfo info{"civetweb-tester"};
 	
 	return Testing::run(argc,argv,info,[](Application &){
@@ -49,6 +50,5 @@
 	 	udjat_module_init();
 
 	});
-*/
 
  }

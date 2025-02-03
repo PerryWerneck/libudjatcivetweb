@@ -25,48 +25,39 @@
  #include <udjat/module/civetweb.h>
  #include <udjat/tools/string.h>
  #include <udjat/tools/civetweb/protocol.h>
+ #include <private/client.h>
 
  namespace Udjat {
 
-	/*
 	/// @brief Client & server module
 	class Hybrid : public CivetWeb::Module {
 	private:
-		CivetWeb::Protocol *protocols[2];
-
-		void init(const ModuleInfo &info) {
-			protocols[0] = new CivetWeb::Protocol{"http",info};
-			protocols[1] = new CivetWeb::Protocol{"https",info};
-		}
+		CivetWeb::Client http{"http"};
+		CivetWeb::Client https{"https"};
 
 	public:
 		Hybrid(const ModuleInfo &info, const XML::Node &node) : CivetWeb::Module{info,node} {
-			init(info);
 		}
 
 		Hybrid(const ModuleInfo &info, const char *name) : CivetWeb::Module{info,name} {
-			init(info);
 		}
 
 		virtual ~Hybrid() {
-			delete protocols[0];
-			delete protocols[1];
 		}
 
 	};
-	*/
 
 	Udjat::Module * CivetWeb::Module::Factory(const ModuleInfo &info, const char *name, bool client) {
-		//if(client) {
-		//	return new Hybrid(info,name);
-		//}
+		if(client) {
+			return new Hybrid(info,name);
+		}
 		return new CivetWeb::Module(info,name);
 	}
 
 	Udjat::Module * CivetWeb::Module::Factory(const ModuleInfo &info, const XML::Node &node) {
-		//if(node.attribute("http-client").as_bool(true)) {
-		//	return new Hybrid(info,node);
-		//}
+		if(node.attribute("http-client").as_bool(true)) {
+			return new Hybrid(info,node);
+		}
 		return new CivetWeb::Module(info,node);
 	}
 
