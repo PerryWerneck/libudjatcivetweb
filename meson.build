@@ -20,7 +20,7 @@
 project(
 	'udjathttpd', 
 	['cpp'],
-	version: '1.4.0',
+	version: '1.4.1',
 	default_options : ['c_std=c11', 'cpp_std=c++17'],
 	license: 'GPL-3.0-or-later',
 )
@@ -43,19 +43,14 @@ libversion = '@0@.@1@'.format(pkg_major_version,pkg_minor_version)
 #
 subdir('po')
 
-#
-# Required libraries
-#
-sdk_deps = [
-  'libudjat',
-  'civetweb'
-]
-
 libudjat = dependency('libudjat')
+json_c = dependency('json-disabled', required: false)
+civetweb = dependency('civetweb')
 
 lib_deps = [
   libudjat,
-  dependency('civetweb'),
+  json_c,
+  civetweb,
 ]
 
 #
@@ -110,22 +105,27 @@ app_conf.set_quoted('LOG_DOMAIN', 'civetweb')
 app_conf.set('PRODUCT_NAME', libudjat.get_variable('product_name'))
 app_conf.set('PRODUCT_VERSION', libudjat.version())
 
+if json_c.found()
+  app_conf.set('HAVE_JSON_C', 1)
+endif
+
 #
 # Crypto APIs
 #
-# No libkcapi, use libssl
-ssl = dependency('libssl', required: false)
-if ssl.found()
-  sdk_deps += [
-    'libssl',
-    'libcrypto'
-  ]
-  lib_deps += [ 
-      ssl,
-      dependency('libcrypto')
-  ]
-  app_conf.set('HAVE_LIBSSL',1)
-endif
+# DISABLED: Need refactor to use newest libssl
+# 
+#ssl = dependency('libssl', required: false)
+#if ssl.found()
+#  sdk_deps += [
+#    'libssl',
+#    'libcrypto'
+#  ]
+#  lib_deps += [ 
+#      ssl,
+#      dependency('libcrypto')
+#  ]
+#  app_conf.set('HAVE_LIBSSL',1)
+#endif
 
 #
 # Linux standards
@@ -163,6 +163,7 @@ lib_src = [
   'src/library/handlers/favicon.cc',
   'src/library/handlers/icon.cc',
   'src/library/handlers/image.cc',
+  'src/library/client/client.cc',
   ]
 
 module_src = [
@@ -246,7 +247,8 @@ endif
 pkg.generate(
   name: 'lib' + meson.project_name() + '-static',
   description: project_description,
-  requires: sdk_deps,
+  requires: [ json_c, civetweb],
+  requires_private: [ libudjat ],
   libraries: [ 
     '-l:lib' + meson.project_name() + '.a',
   ]

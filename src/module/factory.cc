@@ -17,7 +17,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*
  #include <config.h>
  #include <udjat/defs.h>
  #include <udjat/module/abstract.h>
@@ -29,6 +28,7 @@
 
  namespace Udjat {
 
+	/*
 	/// @brief Client & server module
 	class Hybrid : public CivetWeb::Module {
 	private:
@@ -54,18 +54,19 @@
 		}
 
 	};
+	*/
 
 	Udjat::Module * CivetWeb::Module::Factory(const ModuleInfo &info, const char *name, bool client) {
-		if(client) {
-			return new Hybrid(info,name);
-		}
+		//if(client) {
+		//	return new Hybrid(info,name);
+		//}
 		return new CivetWeb::Module(info,name);
 	}
 
 	Udjat::Module * CivetWeb::Module::Factory(const ModuleInfo &info, const XML::Node &node) {
-		if(node.attribute("http-client").as_bool(true)) {
-			return new Hybrid(info,node);
-		}
+		//if(node.attribute("http-client").as_bool(true)) {
+		//	return new Hybrid(info,node);
+		//}
 		return new CivetWeb::Module(info,node);
 	}
 
@@ -88,5 +89,5 @@
 	}
 
  }
-*/
+
 
