@@ -54,12 +54,16 @@
 		return std::make_shared<CivetWeb::Client>(url);
 	}
 
-	CivetWeb::Client::Client(const URL &url) : Udjat::URL::Handler{url} {
+	CivetWeb::Client::Client(const URL &u) : url{u} {
 		headers.request["Connection"] = "close";
 		headers.request["host"] = url.hostname();
 	}
 
 	CivetWeb::Client::~Client() {
+	}
+
+	const char * CivetWeb::Client::c_str() const noexcept {
+		return url.c_str();
 	}
 
 	CivetWeb::Client::Connection CivetWeb::Client::connect(void) {

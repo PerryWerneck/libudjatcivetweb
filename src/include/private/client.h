@@ -42,6 +42,8 @@
 			Connection connect(void);
 			void send_headers(Connection &cli, const HTTP::Method method, const char *payload);
 
+			const URL url;
+
 		public:
 
 			class Factory : public Udjat::URL::Handler::Factory {
@@ -54,6 +56,8 @@
 			Client(const URL &url);
 
 			virtual ~Client();
+
+			const char * c_str() const noexcept override;
 
 			URL::Handler & header(const char *name, const char *value) override;
 
