@@ -21,7 +21,7 @@
  #include <udjat/tools/http/image.h>
  #include <udjat/tools/configuration.h>
  #include <udjat/tools/string.h>
- #include <udjat/tools/file.h>
+ #include <udjat/tools/file/text.h>
  #include <udjat/tools/logger.h>
  #include <unistd.h>
  #include <dirent.h>

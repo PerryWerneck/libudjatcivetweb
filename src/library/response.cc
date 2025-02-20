@@ -28,7 +28,7 @@
  #include <udjat/tools/intl.h>
  #include <udjat/tools/logger.h>
  #include <udjat/tools/http/icon.h>
- #include <udjat/tools/file.h>
+ #include <udjat/tools/file/text.h>
  #include <udjat/tools/configuration.h>
  #include <udjat/tools/string.h>
  #include <udjat/tools/application.h>
