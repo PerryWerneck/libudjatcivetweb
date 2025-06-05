@@ -66,7 +66,6 @@ endif
 
 compiler_flags_common = [
   '-ggdb3',
-  '-ffat-lto-objects',
   '-fvisibility=hidden',
   '-fPIC',
   '-DBUILD_DATE='+time_epoch,
@@ -300,6 +299,7 @@ else
     install: true,
     version : libversion,
     soversion : libversion,
+    cpp_args: [ '-ffat-lto-objects' ],
     gnu_symbol_visibility: 'hidden',
     dependencies: lib_deps,
     include_directories: includes_dir
@@ -324,6 +324,7 @@ endif
 static_library(
   meson.project_name(), 
   config_src + lib_src,
+  cpp_args: [ '-DSTATIC_LIBRARY', '-fno-lto' ],
   install: true,
   dependencies: lib_deps,
   include_directories: includes_dir
