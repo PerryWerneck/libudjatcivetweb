@@ -334,6 +334,7 @@ static_library(
   'udjatcivetweb', 
   config_src + module_src + lib_src,
   install: true,
+  cpp_args: [ '-DSTATIC_LIBRARY', '-fno-lto' ],
   dependencies: lib_deps,
   include_directories: includes_dir
 )
