@@ -30,7 +30,6 @@
  #include <udjat/tools/http/image.h>
  #include <udjat/tools/intl.h>
  #include <udjat/tools/logger.h>
- #include <udjat/tools/worker.h>
  #include <udjat/tools/configuration.h>
  #include <udjat/tools/http/icon.h>
  #include <fcntl.h>
@@ -46,42 +45,6 @@
 	return exec([](HTTP::Connection &connection){
 
 		Config::Value<unsigned int> max_age{"theme","icon-max-age",604800};
-
-		// Search workers for favicon.
-		{
-			Udjat::Value properties{Udjat::Value::Object};
-
-			if(Udjat::Worker::for_each([&properties](const Udjat::Worker &worker){
-				return worker.getProperty("favicon",properties);
-			})) {
-
-				// Got favicon from worker?
-				if(!properties["icon-name"].isNull()) {
-
-					Udjat::HTTP::Icon icon = Udjat::HTTP::Icon::getInstance(properties["icon-name"].to_string("favicon").c_str());
-					connection.send(
-						HTTP::Get,
-						icon.c_str(),
-						false,
-						"image/x-icon",
-						max_age
-					);
-
-				} else if(!properties["icon-file"].isNull()) {	// Is the response a filename?
-
-					// It's a filename.
-					connection.send(
-						HTTP::Get,
-						properties["filename"].to_string().c_str(),
-						false,
-						properties["mimetype"].to_string("image/x-icon").c_str(),
-						max_age
-					);
-
-				}
-
-			}
-		}
 
 		//
 		// Get default favicon

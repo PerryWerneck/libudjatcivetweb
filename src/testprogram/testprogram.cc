@@ -20,6 +20,7 @@
  #include <config.h>
  #include <udjat/defs.h>
  #include <udjat/loader.h>
+ #include <udjat/module.h>
  #include <private/client.h>
 
  #include <iostream>
@@ -36,6 +37,8 @@
 		auto response = handler->get("/tmp/style.css");
 
 		cout << "-----" << endl << response << endl << "-----" << endl;
+
+		udjat_module_init();
 
 	});
 

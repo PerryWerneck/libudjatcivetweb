@@ -30,7 +30,6 @@
  #include <udjat/tools/http/image.h>
  #include <udjat/tools/intl.h>
  #include <udjat/tools/logger.h>
- #include <udjat/tools/worker.h>
  #include <udjat/tools/configuration.h>
  #include <udjat/tools/http/icon.h>
  #include <fcntl.h>

@@ -29,7 +29,7 @@
  #include <udjat/tools/logger.h>
  #include <udjat/agent/state.h>
  #include <udjat/module.h>
- #include <udjat/tools/worker.h>
+ #include <udjat/tools/interface.h>
  #include <cstring>
  #include <udjat/tools/configuration.h>
  #include <udjat/tools/application.h>
@@ -120,8 +120,21 @@
 
 		// Workers
 		{
-			page << "<h2>" << _("Workers") << "</h2><ul>";
+			page << "<h2>" << _("Interfaces") << "</h2><ul>";
 
+			Udjat::Interface::Factory::for_each([&page](Udjat::Interface::Factory &intf) -> bool {
+
+				page 	<< "<li><a href=\"" << "/api/1.0/"
+						<< intf.name()
+						<< ".html\">"
+						<< intf.description()
+						<< "</a>";
+
+				return false;
+
+			});
+
+			/*
 			Udjat::Worker::for_each([&page](const Worker &worker){
 
 				page 	<< "<li><a href=\"" << "/api/1.0/"
@@ -133,6 +146,7 @@
 				return false;
 
 			});
+			*/
 
 			page << "</ul>";
 		}
