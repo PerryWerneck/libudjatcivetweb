@@ -340,11 +340,11 @@ static_library(
 )
 
 executable(
-  'udjat',
+  meson.project_name(),
   config_src + test_src,
   install: false,
   link_with: [ dynamic, module ],
-  link_args: [ '-l:libudjat-testing.a' ],
+  link_args: [ '-l:libudjat-loader.a' ],
   dependencies: [ libudjat ],
   include_directories: includes_dir
 )

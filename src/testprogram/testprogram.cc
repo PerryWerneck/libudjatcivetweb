@@ -19,6 +19,32 @@
 
  #include <config.h>
  #include <udjat/defs.h>
+ #include <udjat/loader.h>
+ #include <private/client.h>
+
+ #include <iostream>
+
+ using namespace Udjat;
+ using namespace std;
+ 
+ int main(int argc, char **argv) {
+	return loader(argc,argv,[](Application &app) {
+
+		Udjat::URL url{"http://127.0.0.1/udjat/css/style.css"};
+		auto handler = CivetWeb::Client::Factory{"http"}.HandlerFactory(url);
+
+		auto response = handler->get("/tmp/style.css");
+
+		cout << "-----" << endl << response << endl << "-----" << endl;
+
+	});
+
+ }
+
+ /*
+
+ #include <config.h>
+ #include <udjat/defs.h>
  #include <udjat/tests.h>
  #include <udjat/moduleinfo.h>
  #include <udjat/module.h>
@@ -41,7 +67,6 @@
 
 	cout << "-----" << endl << response << endl << "-----" << endl;
 
-/*
 	static const ModuleInfo info{"civetweb-tester"};
 	
 	return Testing::run(argc,argv,info,[](Application &){
@@ -49,6 +74,6 @@
 	 	udjat_module_init();
 
 	});
-*/
 
  }
+ */
