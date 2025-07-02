@@ -19,23 +19,11 @@
 
  #include <config.h>
  #include <udjat/defs.h>
- #include <udjat/tools/url.h>
- #include <udjat/tools/url/handler.h>
- #include <udjat/tools/intl.h>
- #include <udjat/tools/exception.h>
  #include <udjat/tools/logger.h>
  #include <udjat/tools/configuration.h>
- #include <udjat/tools/socket.h>
- #include <udjat/tools/value.h>
- #include <udjat/tools/http/mimetype.h>
- #include <udjat/tools/http/method.h>
-
  #include <private/client.h>
-
- #include <errno.h>
- #include <fcntl.h>
- #include <unistd.h>
  #include <system_error>
+ #include <udjat/tools/value.h>
 
  #if defined(HAVE_JSON_C)
 	#include <json.h>
@@ -246,7 +234,7 @@
 
 	}
 
-	bool HTTP::Handler::get(Udjat::Value &value, const HTTP::Method method, const char *payload) {
+	bool CivetWeb::Client::get(Udjat::Value &value, const HTTP::Method method, const char *payload) {
 
 		URL::Handler::set(MimeType::json);
 
@@ -268,8 +256,49 @@
 		json_object_put(jobj);
 
 		return true;
+
+	}
+
+#endif
+
+ }
+
+ /*
+ #include <config.h>
+ #include <udjat/defs.h>
+ #include <udjat/tools/url.h>
+ #include <udjat/tools/url/handler.h>
+ #include <udjat/tools/intl.h>
+ #include <udjat/tools/exception.h>
+ #include <udjat/tools/logger.h>
+ #include <udjat/tools/configuration.h>
+ #include <udjat/tools/socket.h>
+ #include <udjat/tools/http/mimetype.h>
+ #include <udjat/tools/http/method.h>
+
+ #include <private/client.h>
+
+ #include <errno.h>
+ #include <fcntl.h>
+ #include <unistd.h>
+ #include <system_error>
+
+ #if defined(HAVE_JSON_C)
+	#include <json.h>
+ #endif // HAVE_JSON_C
+
+ using namespace std;
+
+ namespace Udjat {
+
+
+
+
+	bool HTTP::Handler::get(Udjat::Value &value, const HTTP::Method method, const char *payload) {
+
 	}
 #endif // HAVE_JSON_C
 
  }
 
+ */

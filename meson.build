@@ -44,7 +44,7 @@ libversion = '@0@.@1@'.format(pkg_major_version,pkg_minor_version)
 subdir('po')
 
 libudjat = dependency('libudjat')
-json_c = dependency('json-disabled', required: false)
+json_c = dependency('json', required: false)
 civetweb = dependency('civetweb')
 
 lib_deps = [
@@ -109,24 +109,6 @@ if json_c.found()
 endif
 
 #
-# Crypto APIs
-#
-# DISABLED: Need refactor to use newest libssl
-# 
-#ssl = dependency('libssl', required: false)
-#if ssl.found()
-#  sdk_deps += [
-#    'libssl',
-#    'libcrypto'
-#  ]
-#  lib_deps += [ 
-#      ssl,
-#      dependency('libcrypto')
-#  ]
-#  app_conf.set('HAVE_LIBSSL',1)
-#endif
-
-#
 # Linux standards
 #
 if cxx.compiles('#include <unistd.h>', name : 'unistd.h')
@@ -189,8 +171,19 @@ test_src = [
 ]
 
 #
-# SDK
+# Crypto APIs
 #
+ssl = dependency('OpenSSL', required: false)
+if ssl.found()
+  lib_deps += [ 
+      ssl,
+  ]
+  app_conf.set('HAVE_SSL',1)
+endif
+
+
+#
+# SDK
 # https://mesonbuild.com/Pkgconfig-module.html
 #
 pkg = import('pkgconfig')
@@ -321,22 +314,35 @@ else
 
 endif
 
-static_library(
-  meson.project_name(), 
-  config_src + lib_src,
-  cpp_args: [ '-DSTATIC_LIBRARY', '-fno-lto' ],
-  install: true,
+static_library = declare_dependency(
+  link_with: static_library(
+    meson.project_name(), 
+    config_src + lib_src,
+    cpp_args: [ '-DSTATIC_LIBRARY', '-fno-lto' ],
+    install: true,
+    dependencies: lib_deps,
+    include_directories: includes_dir
+  ),
+  include_directories: includes_dir,
   dependencies: lib_deps,
-  include_directories: includes_dir
 )
 
-static_library(
-  'udjatcivetweb', 
-  config_src + module_src + lib_src,
-  install: true,
-  cpp_args: [ '-DSTATIC_LIBRARY', '-fno-lto' ],
+static_civetweb = declare_dependency(
+  link_with: static_library(
+    'udjatcivetweb', 
+    config_src + module_src + lib_src,
+    install: true,
+    cpp_args: [ '-DSTATIC_LIBRARY', '-fno-lto' ],
+    dependencies: lib_deps,
+    include_directories: includes_dir
+  ),
+  include_directories: includes_dir,
   dependencies: lib_deps,
-  include_directories: includes_dir
+)
+
+dynamic_library = declare_dependency(
+  link_with: dynamic,
+  include_directories: includes_dir,
 )
 
 executable(
