@@ -16,10 +16,11 @@
 #
 
 %define module_name civetweb
+%{?!udjat_module:%define udjat_module() %{udjat_product_name}%{udjat_module_version}-module-%{**}}
 
 Summary:		HTTP server library for %{udjat_product_name}  
 Name:			libudjat%{module_name}
-Version: 1.4.2
+Version:		1.2.0+git20241024
 Release:		0
 License:		LGPL-3.0
 Source:			%{name}-%{version}.tar.xz
@@ -36,24 +37,25 @@ BuildRequires:	pkgconfig(civetweb)
 BuildRequires:	pkgconfig(libudjat)
 BuildRequires:	pkgconfig(libssl)
 BuildRequires:	pkgconfig(libcrypto)
-BuildRequires:  meson >= 0.61.4
+BuildRequires:	meson
+BuildRequires:	udjat-rpm-macros
 
 %description
 HTTP server library for %{udjat_product_name}
 
 C++ HTTP server classes for use with lib%{udjat_product_name}
 
-%package -n libudjathttpd%{udjat_major}_%{udjat_minor}
-Summary:       httpd library fo %{udjat_product_name}
-Recommends:    %{udjat_product_name}-branding
+%package -n libudjathttpd%{udjat_package_major}_%{udjat_package_minor}
+Summary:	httpd library fo %{udjat_product_name}
+Recommends:	%{udjat_product_name}-branding
 
-%description -n libudjathttpd%{udjat_major}_%{udjat_minor}
+%description -n libudjathttpd%{udjat_package_major}_%{udjat_package_minor}
 HTTP Server abstraction library for %{udjat_product_name}
 
 %package devel
-Summary: Development files for %{name}
-Requires:	libudjathttpd%{udjat_major}_%{udjat_minor} = %{version}
-Provides:	%{name}%{udjat_major}-devel = %{version}
+Summary:	Development files for %{name}
+Requires:	libudjathttpd%{udjat_package_major}_%{udjat_package_minor} = %{version}
+Provides:	%{name}%{udjat_package_major}-devel = %{version}
 Provides:	%{udjat_library}-devel = %{version}
 
 %description devel
@@ -61,16 +63,16 @@ HTTP server library for %{udjat_product_name} based on libcivetweb
 
 C++ HTTP server classes for use with lib%{udjat_product_name}
 
-%lang_package -n libudjathttpd%{udjat_major}_%{udjat_minor}
+%lang_package -n libudjathttpd%{udjat_package_major}_%{udjat_package_minor}
 
-%package -n %{udjat_product_name}%{udjat_module_version}-module-%{module_name}
-Summary: HTTP server module for %{name}
+%package -n %{udjat_module civetweb}
+Summary:	HTTP server module for %{name}
 %udjat_module_requires
 
-Supplements: udjat-devel
-Recommends: %{udjat_product_name}-branding-http
+Supplements:	udjat-devel
+Recommends:		%{udjat_product_name}-branding-http
 
-%description -n %{udjat_product_name}%{udjat_module_version}-module-%{module_name}
+%description -n %{udjat_module civetweb}
 Dynamic module for http server support on %{udjat_product_name}
 
 %prep
@@ -82,15 +84,15 @@ Dynamic module for http server support on %{udjat_product_name}
 
 %install
 %meson_install
-%find_lang libudjathttpd-%{udjat_major}.%{udjat_minor} langfiles
+%find_lang libudjathttpd-%{udjat_package_major}.%{udjat_package_minor} langfiles
 
-%files -n libudjathttpd%{udjat_major}_%{udjat_minor}-lang -f langfiles
+%files -n libudjathttpd%{udjat_package_major}_%{udjat_package_minor}-lang -f langfiles
 
-%files -n libudjathttpd%{udjat_major}_%{udjat_minor}
+%files -n libudjathttpd%{udjat_package_major}_%{udjat_package_minor}
 %defattr(-,root,root)
-%{_libdir}/*.so.%{udjat_major}.%{udjat_minor}
+%{_libdir}/*.so.%{udjat_package_major}.%{udjat_package_minor}
 
-%files -n %{udjat_product_name}%{udjat_module_version}-module-%{module_name}
+%files -n  %{udjat_module civetweb}
 %{udjat_module_path}/*.so
 
 %files devel
@@ -107,9 +109,9 @@ Dynamic module for http server support on %{udjat_product_name}
 %{_includedir}/udjat/tools/civetweb/*.h
 %{_includedir}/udjat/module/*.h
 
-%post -n libudjathttpd%{udjat_major}_%{udjat_minor} -p /sbin/ldconfig
+%post -n libudjathttpd%{udjat_package_major}_%{udjat_package_minor} -p /sbin/ldconfig
 
-%postun -n libudjathttpd%{udjat_major}_%{udjat_minor} -p /sbin/ldconfig
+%postun -n libudjathttpd%{udjat_package_major}_%{udjat_package_minor} -p /sbin/ldconfig
 
 %changelog
 
