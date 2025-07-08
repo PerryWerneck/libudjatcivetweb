@@ -20,7 +20,6 @@
  #include <private/module.h>
  #include <sys/types.h>
  #include <sys/stat.h>
- #include <udjat/version.h>
  #include <udjat/tools/http/timestamp.h>
  #include <udjat/tools/http/mimetype.h>
  #include <udjat/tools/http/connection.h>
