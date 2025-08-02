@@ -29,7 +29,7 @@
  using namespace std;
  
  int main(int argc, char **argv) {
-	return loader(argc,argv,[](Application &app) {
+	return loader(argc,argv,[](Application &app) -> int {
 
 		Udjat::URL url{"http://127.0.0.1/udjat/css/style.css"};
 		auto handler = CivetWeb::Client::Factory{"http"}.HandlerFactory(url);
@@ -39,6 +39,8 @@
 		cout << "-----" << endl << response << endl << "-----" << endl;
 
 		udjat_module_init();
+
+		return 0;
 
 	});
 
