@@ -43,7 +43,13 @@ libversion = '@0@.@1@'.format(pkg_major_version,pkg_minor_version)
 #
 subdir('po')
 
-libudjat = dependency('libudjat')
+libudjat = dependency(
+  'libudjat',
+  required: true, 
+  version: '>=2.0.0',
+  fallback: ['libudjat', 'static_library'],
+)
+
 json_c = dependency('json', required: false)
 civetweb = dependency('civetweb')
 
@@ -145,6 +151,7 @@ lib_src = [
   'src/library/handlers/icon.cc',
   'src/library/handlers/image.cc',
   'src/library/client/client.cc',
+  'src/library/testprogram.cc',
   ]
 
 module_src = [
@@ -194,9 +201,10 @@ pkg = import('pkgconfig')
 if host_machine.system() == 'windows'
 
   pkg.generate(
-    name: 'lib' + meson.project_name(),
-    description: project_description,
-    libraries: [ '-l' + meson.project_name() + '.dll' ]
+  name: 'lib' + meson.project_name(),
+  description: project_description,
+  requires: [ 'libudjat' ],
+  libraries: [ '-l' + meson.project_name() + '.dll' ]
   )
 
   # https://mesonbuild.com/Windows-module.html
@@ -222,6 +230,8 @@ else
   pkg.generate(
     name: 'lib' + meson.project_name(),
     description: project_description,
+    requires: [ 'libudjat' ],
+    requires_private: [ json_c, civetweb ],
     libraries: [ '-l' + meson.project_name() ]
   )
 
@@ -232,15 +242,14 @@ else
 
 endif
 
-pkg.generate(
-  name: 'lib' + meson.project_name() + '-static',
-  description: project_description,
-  requires: [ json_c, civetweb],
-  requires_private: [ libudjat ],
-  libraries: [ 
-    '-l:lib' + meson.project_name() + '.a',
-  ]
-)
+#pkg.generate(
+#  name: 'lib' + meson.project_name() + '-static',
+#  description: project_description,
+#  requires: [ json_c, civetweb],
+#  libraries: [ 
+#    '-l:lib' + meson.project_name() + '.a',
+#  ]
+#)
 
 #
 # Targets

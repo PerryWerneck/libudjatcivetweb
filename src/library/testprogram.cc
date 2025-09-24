@@ -1,7 +1,7 @@
 /* SPDX-License-Identifier: LGPL-3.0-or-later */
 
 /*
- * Copyright (C) 2021 Perry Werneck <perry.werneck@gmail.com>
+ * Copyright (C) 2025 Perry Werneck <perry.werneck@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published
@@ -19,32 +19,28 @@
 
  #include <config.h>
  #include <udjat/defs.h>
- #include <udjat/loader.h>
- #include <udjat/module.h>
+ #include <udjat/tools/logger.h>
+ #include <udjat/module/abstract.h>
+ #include <udjat/tools/application.h>
+ #include <udjat/tools/url.h>
+ #include <string>
+ 
  #include <private/client.h>
-
- #include <iostream>
-
+ 
  using namespace Udjat;
  using namespace std;
- 
- int main(int argc, char **argv) {
-	return loader(argc,argv,[](Application &app) -> int {
 
-		/*
-		Udjat::URL url{"http://127.0.0.1/udjat/css/style.css"};
-		auto handler = CivetWeb::Client::Factory{"http"}.HandlerFactory(url);
+ #ifdef DEBUG 
+ UDJAT_API int run_udjat_unit_test(const char *name) {
 
-		auto response = handler->get("/tmp/style.css");
+	Udjat::URL url{"http://127.0.0.1/"};
+	auto handler = CivetWeb::Client::Factory{"http"}.HandlerFactory(url);
 
-		cout << "-----" << endl << response << endl << "-----" << endl;
-		*/
+	// auto response = handler->get("/tmp/style.css");
+	// cout << "-----" << endl << response << endl << "-----" << endl;
 
-		udjat_module_init();
 
-		return 0;
 
-	});
-
+	return 0;
  }
-
+ #endif // DEBUG
