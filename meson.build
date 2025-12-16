@@ -380,7 +380,6 @@ install_headers(
 )
 
 install_headers(
-  'src/include/udjat/tools/civetweb/protocol.h',
   'src/include/udjat/tools/civetweb/service.h',
   subdir: 'udjat/tools/civetweb'  
 )

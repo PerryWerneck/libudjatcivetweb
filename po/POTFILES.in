@@ -56,6 +56,5 @@ src/include/udjat/tools/http/response.h
 src/include/udjat/tools/http/template.h
 src/include/udjat/tools/http/request.h
 src/include/udjat/tools/http/server.h
-src/include/udjat/tools/civetweb/protocol.h
 src/include/udjat/tools/civetweb/service.h
 src/include/udjat/module/civetweb.h
