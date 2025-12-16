@@ -23,7 +23,6 @@
 
  #include <udjat/defs.h>
  #include <udjat/module/abstract.h>
- #include <udjat/module/info.h>
  #include <udjat/tools/service.h>
  #include <udjat/tools/http/server.h>
  #include <udjat/tools/xml.h>
@@ -80,8 +79,8 @@
 		return *instance;
 	}
 
- 	CivetWeb::Service::Service(const ModuleInfo &info, const pugi::xml_node &node) 
-		: Udjat::Service{String{node,"name",info.name}.as_quark(), info} {
+ 	CivetWeb::Service::Service(const XML::Node &node) 
+		: Udjat::Service{String{node,"name","http"}.as_quark(),String{node,"description","CivetWEB " CIVETWEB_VERSION " HTTP module for " STRINGIZE_VALUE_OF(PRODUCT_NAME)}.as_quark()} {
 
 		if(instance) {
 			throw runtime_error("HTTP server is already defined");

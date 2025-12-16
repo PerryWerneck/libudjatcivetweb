@@ -33,7 +33,7 @@
 
  namespace Udjat {
 
-	CivetWeb::Client::Factory::Factory(const char *name) : Udjat::URL::Handler::Factory{name} {
+	CivetWeb::Client::Factory::Factory(const char *name, const char *description) : Udjat::URL::Handler::Factory{name, description} {
 	}
 
 	CivetWeb::Client::Factory::~Factory() {

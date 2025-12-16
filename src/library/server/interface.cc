@@ -17,7 +17,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
- #include <udjat/tools/protocol.h>
+ #include <config.h>
+ #include <udjat/defs.h>
  #include <udjat/tools/string.h>
  #include <udjat/tools/value.h>
  #include <udjat/tools/http/server.h>

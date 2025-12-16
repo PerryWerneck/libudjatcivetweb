@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udjat-module-httpd 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-06-24 18:42-0300\n"
+"POT-Creation-Date: 2025-12-16 14:36-0300\n"
 "PO-Revision-Date: 2025-01-15 21:51-0300\n"
 "Last-Translator: Perry Werneck <perry.werneck@gmail.com>\n"
 "Language-Team: Brazilian Portuguese <perry.werneck@gmail.com>\n"
@@ -22,7 +22,7 @@ msgstr ""
 
 #: src/library/connection.cc:60 src/library/server/call.cc:67
 #: src/module/handlers/pubkey.cc:71 src/module/handlers/api.cc:89
-#: src/module/oauth2/handler.cc:290 src/module/service/send.cc:305
+#: src/module/oauth2/handler.cc:290 src/module/service/send.cc:304
 msgid "Unexpected error"
 msgstr "Erro inesperado"
 
@@ -39,8 +39,8 @@ msgid "Application"
 msgstr "Aplicação"
 
 #: src/library/index.cc:123
-msgid "Workers"
-msgstr "Processadores"
+msgid "Interfaces"
+msgstr ""
 
 #: src/library/oauth2/signin.cc:45 src/library/os/linux/oauth2user.cc:294
 #: src/library/os/windows/oauth2user.cc:163
@@ -97,6 +97,9 @@ msgstr "Senha"
 #: src/module/custom.cc:59
 msgid "Unexpected error on http handler"
 msgstr "Erro inesperado no controlador http"
+
+#~ msgid "Workers"
+#~ msgstr "Processadores"
 
 #~ msgid "Request path should be /api/[APIVER]/[REQUEST]"
 #~ msgstr "Requisições devem ser no formato /api/[VERSÃO]/RECURSO"

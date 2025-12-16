@@ -20,11 +20,9 @@
  #include <config.h>
  #include <udjat/defs.h>
  #include <udjat/module/abstract.h>
- #include <udjat/module/info.h>
  #include <udjat/tools/xml.h>
  #include <udjat/module/civetweb.h>
  #include <udjat/tools/string.h>
- #include <udjat/tools/civetweb/protocol.h>
  #include <private/client.h>
 
  namespace Udjat {
@@ -32,14 +30,14 @@
 	/// @brief Client & server module
 	class Hybrid : public CivetWeb::Module {
 	private:
-		CivetWeb::Client http{"http"};
-		CivetWeb::Client https{"https"};
+		CivetWeb::Client::Factory http{"http","CivetWEB " CIVETWEB_VERSION " HTTP module for " STRINGIZE_VALUE_OF(PRODUCT_NAME)};
+		CivetWeb::Client::Factory https{"https","CivetWEB " CIVETWEB_VERSION " HTTPS module for " STRINGIZE_VALUE_OF(PRODUCT_NAME)};
 
 	public:
-		Hybrid(const ModuleInfo &info, const XML::Node &node) : CivetWeb::Module{info,node} {
+		Hybrid(const XML::Node &node) : CivetWeb::Module{node} {
 		}
 
-		Hybrid(const ModuleInfo &info, const char *name) : CivetWeb::Module{info,name} {
+		Hybrid(const char *name) : CivetWeb::Module{name} {
 		}
 
 		virtual ~Hybrid() {
@@ -47,29 +45,29 @@
 
 	};
 
-	Udjat::Module * CivetWeb::Module::Factory(const ModuleInfo &info, const char *name, bool client) {
+	Udjat::Module * CivetWeb::Module::Factory(const char *name, bool client) {
 		if(client) {
-			return new Hybrid(info,name);
+			return new Hybrid(name);
 		}
-		return new CivetWeb::Module(info,name);
+		return new CivetWeb::Module(name);
 	}
 
-	Udjat::Module * CivetWeb::Module::Factory(const ModuleInfo &info, const XML::Node &node) {
+	Udjat::Module * CivetWeb::Module::Factory(const XML::Node &node) {
 		if(node.attribute("http-client").as_bool(true)) {
-			return new Hybrid(info,node);
+			return new Hybrid(node);
 		}
-		return new CivetWeb::Module(info,node);
+		return new CivetWeb::Module(node);
 	}
 
-	CivetWeb::Module::Module(const ModuleInfo &info, const XML::Node &node) 
-		: Udjat::Module{String{node,"name","httpd"}.as_quark(),udjat_module_info}, 
-			Udjat::CivetWeb::Service(udjat_module_info,node) 
+	CivetWeb::Module::Module(const XML::Node &node) 
+		: Udjat::Module{String{node,"name","httpd"}.as_quark()}, 
+			Udjat::CivetWeb::Service(node) 
 		{ }
 
-	CivetWeb::Module::Module(const ModuleInfo &info, const char *name)
-		: Udjat::Module{name,udjat_module_info}, 
-			Udjat::CivetWeb::Service{udjat_module_info,XML::Node{}}
-		{ }
+	CivetWeb::Module::Module(const char *name, const char *description)
+		: Udjat::Module{name,description}, Udjat::CivetWeb::Service{XML::Node{}}{ 
+
+		}
 
 	CivetWeb::Module::~Module() {
 

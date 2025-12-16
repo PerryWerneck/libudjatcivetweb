@@ -20,8 +20,8 @@
 project(
 	'udjathttpd', 
 	['cpp'],
-	version: '1.4.2',
-	default_options : ['c_std=c11', 'cpp_std=c++17'],
+	version: '1.4.3',
+	default_options : ['c_std=c11', 'cpp_std=c++17', 'buildtype=release'],
 	license: 'GPL-3.0-or-later',
 )
 

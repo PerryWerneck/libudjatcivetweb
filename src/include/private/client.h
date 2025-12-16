@@ -49,7 +49,7 @@
 
 			class Factory : public Udjat::URL::Handler::Factory {
 			public:
-				Factory(const char *name);
+				Factory(const char *name, const char *description);
 				virtual ~Factory();
 				std::shared_ptr<Udjat::URL::Handler> HandlerFactory(const URL &url) const override;
 			};

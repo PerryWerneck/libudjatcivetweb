@@ -22,7 +22,6 @@
  #include <config.h>
  #include <udjat/defs.h>
  #include <udjat/module/abstract.h>
- #include <udjat/module/info.h>
  #include <udjat/tools/xml.h>
  #include <udjat/tools/civetweb/service.h>
  #include <udjat/tools/interface.h>
@@ -36,11 +35,11 @@
 		class UDJAT_API Module : public Udjat::Module, protected Service {
 		public:
 
-			static Udjat::Module * Factory(const ModuleInfo &info, const char *name = "httpd", bool client = true);
-			static Udjat::Module * Factory(const ModuleInfo &info, const XML::Node &node);
+			static Udjat::Module * Factory(const char *name = "httpd", bool client = true);
+			static Udjat::Module * Factory(const XML::Node &node);
 
-			Module(const ModuleInfo &info, const XML::Node &node);
-			Module(const ModuleInfo &info, const char *name = "httpd");
+			Module(const XML::Node &node);
+			Module(const char *name = "httpd", const char *description = nullptr);
 			virtual ~Module();
 
 			void finalize() override;

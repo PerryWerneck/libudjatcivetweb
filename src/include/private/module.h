@@ -22,7 +22,6 @@
  #include <config.h>
  #include <udjat/defs.h>
  #include <udjat/tools/url.h>
- #include <udjat/tools/protocol.h>
  #include <udjat/tools/http/mimetype.h>
  #include <udjat/tools/http/report.h>
  #include <udjat/tools/http/connection.h>
@@ -79,42 +78,6 @@
 			}
 
 		};
-
-		/*
-		class Header : public Udjat::Protocol::Header {
-		public:
-			Header(const char *name) : Protocol::Header(name) {
-			}
-
-			Protocol::Header & assign(const Udjat::TimeStamp &value) override;
-
-		};
-
-		/// @brief CivetWeb protocol worker.
-		class Worker : public Udjat::Protocol::Worker {
-		private:
-
-			struct {
-				std::list<Header> request;
-				std::list<Header> response;
-			} headers;
-
-			/// @brief Connect to server, send request.
-			struct mg_connection * connect();
-
-		public:
-			Worker(const char *url = "", const HTTP::Method method = HTTP::Get, const char *payload = "");
-
-			Udjat::String get(const std::function<bool(double current, double total)> &progress) override;
-			int test(const std::function<bool(double current, double total)> &progress) noexcept override;
-
-			bool save(const char *filename, const std::function<bool(double current, double total)> &progress, bool replace) override;
-
-			Protocol::Header & request(const char *name) override;
-			const Protocol::Header & response(const char *name) override;
-
-		};
-		*/
 
 	}
 

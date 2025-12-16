@@ -22,13 +22,11 @@
  #include <udjat/module/civetweb.h>
  #include <udjat/tools/xml.h>
 
- const Udjat::ModuleInfo udjat_module_info{ "CivetWEB " CIVETWEB_VERSION " HTTP module for " STRINGIZE_VALUE_OF(PRODUCT_NAME) };
-
  Udjat::Module * udjat_module_init() {
-	return Udjat::CivetWeb::Module::Factory(udjat_module_info,"httpd");
+	return Udjat::CivetWeb::Module::Factory("httpd","CivetWEB " CIVETWEB_VERSION " HTTP module for " STRINGIZE_VALUE_OF(PRODUCT_NAME));
  }
 
  Udjat::Module * udjat_module_init_from_xml(const Udjat::XML::Node &node) {
-	return Udjat::CivetWeb::Module::Factory(udjat_module_info,node);
+	return Udjat::CivetWeb::Module::Factory(node);
  }
 
