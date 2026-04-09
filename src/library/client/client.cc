@@ -87,8 +87,8 @@
 
 	void CivetWeb::Client::send_headers(Connection &cli, const HTTP::Method method, const char *payload) {
 
-		debug(to_string(method)," ",url.path().c_str());
-		mg_printf(cli.get(), "%s %s HTTP/1.1\r\n", to_string(method),url.path().c_str());
+		debug(std::to_string(method)," ",url.path().c_str());
+		mg_printf(cli.get(), "%s %s HTTP/1.1\r\n", std::to_string(method),url.path().c_str());
 		for(const auto & [name,value]: headers.request) {
 			mg_printf(cli.get(), "%s: %s\r\n", name.c_str(), value.c_str());
 		}
