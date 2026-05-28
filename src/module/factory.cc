@@ -46,17 +46,26 @@
 	};
 
 	Udjat::Module * CivetWeb::Module::Factory(const char *name, bool client) {
+		Udjat::Module *module;
 		if(client) {
-			return new Hybrid(name);
+			module = new Hybrid(name);
+		} else {
+			module = new CivetWeb::Module(name);
+
 		}
-		return new CivetWeb::Module(name);
+		module->autoclean();
+		return module;
 	}
 
 	Udjat::Module * CivetWeb::Module::Factory(const XML::Node &node) {
+		Udjat::Module *module;
 		if(node.attribute("http-client").as_bool(true)) {
-			return new Hybrid(node);
+			module = new Hybrid(node);
+		} else {
+			module = new CivetWeb::Module(node);
 		}
-		return new CivetWeb::Module(node);
+		module->autoclean();
+		return module;
 	}
 
 	CivetWeb::Module::Module(const XML::Node &node) 
@@ -70,10 +79,6 @@
 		}
 
 	CivetWeb::Module::~Module() {
-
-	}
-
-	void CivetWeb::Module::finalize() {
 		interfaces.clear();
 	}
 

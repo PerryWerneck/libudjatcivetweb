@@ -42,8 +42,6 @@
 			Module(const char *name = "httpd", const char *description = nullptr);
 			virtual ~Module();
 
-			void finalize() override;
-
 		};
 
 	}
