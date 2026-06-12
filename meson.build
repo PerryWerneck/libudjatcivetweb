@@ -46,7 +46,7 @@ subdir('po')
 libudjat = dependency(
   'libudjat',
   required: true, 
-  version: '>=2.4.0',
+  version: '>=2.7.0',
   fallback: ['libudjat', 'static_library'],
 )
 
@@ -75,6 +75,7 @@ compiler_flags_common = [
   '-fvisibility=hidden',
   '-fPIC',
   '-DBUILD_DATE='+time_epoch,
+  '-Wno-overloaded-virtual',
 ]
 
 if enable_debug

@@ -26,6 +26,7 @@
  #include <udjat/tools/interface.h>
  #include <udjat/tools/http/request.h>
  #include <udjat/tools/http/response.h>
+ #include <udjat/tools/properties.h>
  #include <functional>
  #include <vector>
  
@@ -63,7 +64,7 @@
 
 			static Service & get_instance();
 
-			Service(const pugi::xml_node &node);
+			Service(const Udjat::Properties &props);
 			Service(const char *name = "httpd", const char *description = nullptr);
 
 			virtual ~Service();

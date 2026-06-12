@@ -79,8 +79,8 @@
 		return *instance;
 	}
 
- 	CivetWeb::Service::Service(const XML::Node &node) 
-		: Udjat::Service{String{node,"name","http"}.as_quark(),String{node,"description","CivetWEB " CIVETWEB_VERSION " HTTP module for " STRINGIZE_VALUE_OF(PRODUCT_NAME)}.as_quark()} {
+ 	CivetWeb::Service::Service(const Udjat::Properties &props) 
+		: Udjat::Service{props.get("name","http").as_quark(),props.get("description","CivetWEB " CIVETWEB_VERSION " HTTP module for " STRINGIZE_VALUE_OF(PRODUCT_NAME)).as_quark()} {
 
 		if(instance) {
 			throw runtime_error("HTTP server is already defined");
@@ -92,9 +92,8 @@
 			Logger::String info{"CivetWeb Features: "};
 			for(size_t ix = 0; ix < (sizeof(features)/sizeof(features[0]));ix++) {
 
-				XML::Attribute attr{XML::AttributeFactory(node,features[ix].name)};
-				if(attr) {
-					if(attr.as_bool(features[ix].def)) {
+				if(props.contains(features[ix].name)) {
+					if(props.get(features[ix].name,features[ix].def)) {
 						init |= features[ix].flag;
 						info += " ";
 						info += features[ix].name;
@@ -114,9 +113,21 @@
 			// https://github.com/civetweb/civetweb/blob/master/docs/api/mg_start.md
 			std::vector<string> optionlist;
 
-			XML::options(node, [&optionlist](const char *name, const char *value){
-				optionlist.emplace_back(name);
-				optionlist.emplace_back(value);
+			props.for_each_child("option",[&optionlist](const Properties &property){
+
+				auto name = property["name"];
+				auto value = property["value"];
+
+				Logger::String{"Option ",name.c_str(),"='",value.c_str(),"'"}.trace();
+
+				if(name.empty() || value.empty()) {
+					Logger::String{"Invalid option on '",property.path(),"'"}.warning();
+				} else {
+					optionlist.emplace_back(name);
+					optionlist.emplace_back(value);
+				}
+
+				return false;
 			});
 
 			struct mg_callbacks callbacks;

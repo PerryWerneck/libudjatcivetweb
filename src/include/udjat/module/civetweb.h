@@ -23,6 +23,7 @@
  #include <udjat/defs.h>
  #include <udjat/module/abstract.h>
  #include <udjat/tools/xml.h>
+ #include <udjat/tools/properties.h>
  #include <udjat/tools/civetweb/service.h>
  #include <udjat/tools/interface.h>
  #include <vector>
@@ -36,9 +37,9 @@
 		public:
 
 			static Udjat::Module * Factory(const char *name = "httpd", bool client = true);
-			static Udjat::Module * Factory(const XML::Node &node);
+			static Udjat::Module * Factory(const Udjat::Properties &props);
 
-			Module(const XML::Node &node);
+			Module(const Udjat::Properties &props);
 			Module(const char *name = "httpd", const char *description = nullptr);
 			virtual ~Module();
 

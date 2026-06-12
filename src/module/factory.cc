@@ -34,7 +34,7 @@
 		CivetWeb::Client::Factory https{"https","CivetWEB " CIVETWEB_VERSION " HTTPS module for " STRINGIZE_VALUE_OF(PRODUCT_NAME)};
 
 	public:
-		Hybrid(const XML::Node &node) : CivetWeb::Module{node} {
+		Hybrid(const Udjat::Properties &props) : CivetWeb::Module{props} {
 		}
 
 		Hybrid(const char *name) : CivetWeb::Module{name} {
@@ -57,24 +57,24 @@
 		return module;
 	}
 
-	Udjat::Module * CivetWeb::Module::Factory(const XML::Node &node) {
+	Udjat::Module * CivetWeb::Module::Factory(const Udjat::Properties &props) {
 		Udjat::Module *module;
-		if(node.attribute("http-client").as_bool(true)) {
-			module = new Hybrid(node);
+		if(props.get("http-client",true)) {
+			module = new Hybrid(props);
 		} else {
-			module = new CivetWeb::Module(node);
+			module = new CivetWeb::Module(props);
 		}
 		module->autoclean();
 		return module;
 	}
 
-	CivetWeb::Module::Module(const XML::Node &node) 
-		: Udjat::Module{String{node,"name","httpd"}.as_quark()}, 
-			Udjat::CivetWeb::Service(node) 
+	CivetWeb::Module::Module(const Udjat::Properties &props) 
+		: Udjat::Module{props.get("name","httpd").as_quark()}, 
+			Udjat::CivetWeb::Service(props) 
 		{ }
 
 	CivetWeb::Module::Module(const char *name, const char *description)
-		: Udjat::Module{name,description}, Udjat::CivetWeb::Service{XML::Node{}}{ 
+		: Udjat::Module{name,description}, Udjat::CivetWeb::Service{Udjat::Properties{}}{ 
 
 		}
 
