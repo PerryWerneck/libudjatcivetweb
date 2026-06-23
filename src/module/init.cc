@@ -23,7 +23,7 @@
  #include <udjat/module/civetweb.h>
  #include <udjat/tools/properties.h>
 
- Udjat::Module * udjat_module_init(const Udjat::XML::Node &node) {
-	return Udjat::CivetWeb::Module::Factory(node);
+ Udjat::Module * udjat_module_init(const Udjat::Properties &props) {
+	return Udjat::CivetWeb::Module::Factory(props);
  }
 
