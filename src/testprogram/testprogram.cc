@@ -19,7 +19,7 @@
 
  #include <config.h>
  #include <udjat/defs.h>
- #include <udjat/loader.h>
+ #include <udjat/tools/loader.h>
  #include <udjat/module.h>
  #include <private/client.h>
 
@@ -28,7 +28,7 @@
  using namespace Udjat;
  using namespace std;
  
- int main(int argc, char **argv) {
+ int main(const int argc, const char **argv) {
 	return loader(argc,argv,[](Application &app) -> int {
 
 		/*
@@ -39,8 +39,6 @@
 
 		cout << "-----" << endl << response << endl << "-----" << endl;
 		*/
-
-		udjat_module_init();
 
 		return 0;
 

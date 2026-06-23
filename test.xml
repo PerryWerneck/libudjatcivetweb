@@ -3,6 +3,7 @@
 <config>
 
 	<module name='information' required='no' />
+	<module path='.build/udjat-module-civetweb.so' required='yes' />
 
 	<agent name='intvalue' type='integer' value='0'>
 
