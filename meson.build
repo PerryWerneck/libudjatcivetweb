@@ -47,7 +47,7 @@ libudjat = dependency(
   'libudjat',
   required: true, 
   version: '>=2.7.0',
-  fallback: ['libudjat', 'static_library'],
+  fallback: ['libudjat', 'dynamic_library'],
 )
 
 json_c = dependency('json', required: false)
@@ -57,6 +57,11 @@ lib_deps = [
   libudjat,
   json_c,
   civetweb,
+  dependency(
+    'pugixml',
+    method : 'pkg-config',
+    required: true,
+  ),
 ]
 
 #
