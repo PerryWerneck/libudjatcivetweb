@@ -51,7 +51,7 @@ libudjat = dependency(
 )
 
 json_c = dependency('json', required: false)
-civetweb = dependency('civetweb')
+civetweb = dependency('civetweb', fallback: ['civetweb', 'civetweb_dep'])
 
 lib_deps = [
   libudjat,
@@ -237,7 +237,7 @@ else
     name: 'lib' + meson.project_name(),
     description: project_description,
     requires: [ 'libudjat' ],
-    requires_private: [ json_c, civetweb ],
+    requires_private: [ json_c, 'civetweb' ],
     libraries: [ '-l' + meson.project_name() ]
   )
 
@@ -247,15 +247,6 @@ else
   ]
 
 endif
-
-#pkg.generate(
-#  name: 'lib' + meson.project_name() + '-static',
-#  description: project_description,
-#  requires: [ json_c, civetweb],
-#  libraries: [ 
-#    '-l:lib' + meson.project_name() + '.a',
-#  ]
-#)
 
 #
 # Targets
@@ -364,8 +355,8 @@ executable(
   meson.project_name(),
   config_src + test_src,
   install: false,
-  link_with: [ dynamic, module ],
-  dependencies: [ libudjat ],
+  link_with: [ dynamic ],
+  dependencies: [ libudjat, civetweb ],
   include_directories: includes_dir
 )
 

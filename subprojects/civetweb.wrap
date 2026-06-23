@@ -1,0 +1,8 @@
+[wrap-git]
+url = https://github.com/civetweb/civetweb
+revision = v1.16
+depth = 1
+patch_directory = civetweb
+
+[provide]
+dependency_names = civetweb
