@@ -31,15 +31,6 @@
  int main(const int argc, const char **argv) {
 	return loader(argc,argv,[](Application &app) -> int {
 
-		/*
-		Udjat::URL url{"http://127.0.0.1/udjat/css/style.css"};
-		auto handler = CivetWeb::Client::Factory{"http"}.HandlerFactory(url);
-
-		auto response = handler->get("/tmp/style.css");
-
-		cout << "-----" << endl << response << endl << "-----" << endl;
-		*/
-
 		return 0;
 
 	});

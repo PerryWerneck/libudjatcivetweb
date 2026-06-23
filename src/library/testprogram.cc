@@ -21,8 +21,7 @@
  #include <udjat/defs.h>
  #include <udjat/tools/logger.h>
  #include <udjat/module/abstract.h>
- #include <udjat/tools/application.h>
- #include <udjat/tools/url.h>
+ #include <udjat/tools/unit-test.h>
  #include <string>
  
  #include <private/client.h>
@@ -31,6 +30,33 @@
  using namespace std;
 
  #ifdef DEBUG 
+
+ UDJAT_API void enum_udjat_unit_tests(Udjat::UnitTests &tests) noexcept {
+
+	debug(__FUNCTION__," begin -> ",tests.size());
+
+	tests.append(
+		UnitTests::Worker{
+			"httpclient", "Test HTTP client",
+			[]() {
+
+				Udjat::URL url{"http://127.0.0.1/udjat/css/style.css"};
+				auto handler = CivetWeb::Client::Factory{
+									"http",
+									"CivetWEB " CIVETWEB_VERSION " HTTP module for " STRINGIZE_VALUE_OF(PRODUCT_NAME)
+								}.HandlerFactory(url);
+
+				auto response = handler->get("/tmp/style.css");
+
+				cout << "-----" << endl << response << endl << "-----" << endl;
+
+				return true;
+			}
+		}
+	);
+ }
+
+ /*
  UDJAT_API int run_udjat_unit_test(const char *name) {
 
 	Udjat::URL url{"http://127.0.0.1/"};
@@ -43,4 +69,7 @@
 
 	return 0;
  }
- #endif // DEBUG
+*/
+ 
+
+#endif // DEBUG
