@@ -19,10 +19,12 @@
 
  #include <config.h>
 
+ #define LOG_DOMAIN "civetweb"
+
  #include <udjat/tools/civetweb/service.h>
 
  #include <udjat/defs.h>
- #include <udjat/module/abstract.h>
+ #include <udjat/module.h>
  #include <udjat/tools/service.h>
  #include <udjat/tools/http/server.h>
  #include <udjat/tools/xml.h>
@@ -44,25 +46,28 @@
 	const char *name;
 	unsigned int flag;
 	bool def;
+	const char *message;
  } features[] = {
 
-	{ "files",			MG_FEATURES_FILES,				false	},
-	{ "tls", 			MG_FEATURES_TLS,				true	},
-	{ "cgi", 			MG_FEATURES_CGI,				false	},
-	{ "ipv6", 			MG_FEATURES_IPV6,				true	},
-	{ "websocket",		MG_FEATURES_WEBSOCKET,			false	},
-	{ "lua",			MG_FEATURES_LUA,				false	},
-	{ "ssjs",			MG_FEATURES_SSJS,				false	},
-	{ "cache",			MG_FEATURES_CACHE,				true	},
-	{ "stats",			MG_FEATURES_STATS,				false	},
-	{ "compression",	MG_FEATURES_COMPRESSION,		true	},
+	// https://github.com/civetweb/civetweb/blob/master/docs/api/mg_init_library.md
+
+	{ "files",			MG_FEATURES_FILES,				false,	"This server is able to serve files."			},
+	{ "tls", 			MG_FEATURES_TLS,				true,	"Support for HTTPS is active."					},
+	{ "cgi", 			MG_FEATURES_CGI,				false,	"CGI scripts can be called by this webserver."	},
+	{ "ipv6", 			MG_FEATURES_IPV6,				true,	"Support IPv6 is active."	},
+	{ "websocket",		MG_FEATURES_WEBSOCKET,			false,	"Supporting web sockets."	},
+	{ "lua",			MG_FEATURES_LUA,				false,	"Support for Lua scripts and Lua server pages is active."	},
+	{ "ssjs",			MG_FEATURES_SSJS,				false,	"Support for server side JavaScript."	},
+	{ "cache",			MG_FEATURES_CACHE,				true,	"Support for caching is enabled."	},
+	{ "stats",			MG_FEATURES_STATS,				false,	"This web server will collect data for server statistics."	},
+	{ "compression",	MG_FEATURES_COMPRESSION,		true,	"This web server may use ZLIB for on the fly data compression."	},
 #ifdef MG_FEATURES_HTTP2
-	{ "http2",			MG_FEATURES_HTTP2,				false	},
+	{ "http2",			MG_FEATURES_HTTP2,				false,	"This web server will accept HTTP/2 connections over HTTPS."	},
 #endif // MG_FEATURES_HTTP2
 #ifdef MG_FEATURES_X_DOMAIN_SOCKET
-	{ "domain",			MG_FEATURES_X_DOMAIN_SOCKET,	false	},
+	{ "domain",			MG_FEATURES_X_DOMAIN_SOCKET,	false,	"This web server will allow to bind to domain sockets, in addition to TCP sockets."	},
 #endif // MG_FEATURES_X_DOMAIN_SOCKET
-	{ "all",			MG_FEATURES_ALL,				false	},
+	{ "all",			MG_FEATURES_ALL,				false,	nullptr	},
 
  };
 
@@ -90,21 +95,32 @@
 		{
 			unsigned int init = 0;
 			Logger::String info{"CivetWeb Features: "};
-			for(size_t ix = 0; ix < (sizeof(features)/sizeof(features[0]));ix++) {
+			for(const auto feature : features) {
 
-				if(props.contains(features[ix].name)) {
-					if(props.get(features[ix].name,features[ix].def)) {
-						init |= features[ix].flag;
+				if(props.contains(feature.name)) {
+					if(props.get(feature.name,feature.def)) {
+						init |= feature.flag;
 						info += " ";
-						info += features[ix].name;
+						info += feature.name;
 					}
-				} else if(Config::Value<bool>("civetweb-features",features[ix].name,features[ix].def)) {
-					init |= features[ix].flag;
+				} else if(Config::Value<bool>("civetweb-features",feature.name,feature.def)) {
+					init |= feature.flag;
 					info += " ";
-					info += features[ix].name;
+					info += feature.name;
+				}
+
+			}
+			auto enabled_features = mg_init_library(init);	
+			for(const auto feature : features) {
+				if((feature.flag != MG_FEATURES_ALL) && (enabled_features & feature.flag)) {
+					if(feature.message) {
+						Logger::String{feature.message}.info(name());
+					} else {
+						Logger::String{"Feature '",feature.name,"' is active"}.info(name());
+					}
 				}
 			}
-			mg_init_library(init);		
+	
 		}
 
 		// Start service
@@ -113,15 +129,15 @@
 			// https://github.com/civetweb/civetweb/blob/master/docs/api/mg_start.md
 			std::vector<string> optionlist;
 
-			props.for_each_child("option",[&optionlist](const Properties &property){
+			props.for_each_child("option",[this,&optionlist](const Properties &property){
 
 				auto name = property["name"];
 				auto value = property["value"];
 
-				Logger::String{"Option ",name.c_str(),"='",value.c_str(),"'"}.trace();
+				Logger::String{"Option ",name.c_str(),"='",value.c_str(),"'"}.trace(this->name());
 
 				if(name.empty() || value.empty()) {
-					Logger::String{"Invalid option on '",property.path(),"'"}.warning();
+					Logger::String{"Invalid option on '",property.path(),"'"}.warning(this->name());
 				} else {
 					optionlist.emplace_back(name);
 					optionlist.emplace_back(value);
@@ -138,7 +154,7 @@
 			if(optionlist.empty()) {
 
 				// Use default options
-				Logger::String{"No civetweb configuration, using defaults"}.trace(name());
+				Logger::String{"No civetweb configuration, using defaults"}.info(name());
 
 				static const char *options[] = {
 					"listening_ports","localhost:8989",

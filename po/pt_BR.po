@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udjat-module-httpd 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-22 22:22-0300\n"
-"PO-Revision-Date: 2025-01-15 21:51-0300\n"
+"POT-Creation-Date: 2026-06-23 02:18-0300\n"
+"PO-Revision-Date: 2026-06-23 09:49-0300\n"
 "Last-Translator: Perry Werneck <perry.werneck@gmail.com>\n"
 "Language-Team: Brazilian Portuguese <perry.werneck@gmail.com>\n"
 "Language: pt_BR\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "X-Poedit-SourceCharset: utf-8\n"
-"X-Generator: Poedit 3.5\n"
+"X-Generator: Poedit 3.9\n"
 
 #: src/library/connection.cc:60 src/library/server/call.cc:67
 #: src/module/handlers/pubkey.cc:71 src/module/handlers/api.cc:89
@@ -40,7 +40,7 @@ msgstr "Aplicação"
 
 #: src/library/index.cc:123
 msgid "Interfaces"
-msgstr ""
+msgstr "Interfaces"
 
 #: src/library/oauth2/signin.cc:45 src/library/os/linux/oauth2user.cc:294
 #: src/library/os/windows/oauth2user.cc:163

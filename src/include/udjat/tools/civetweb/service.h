@@ -20,7 +20,7 @@
  #pragma once
 
  #include <udjat/defs.h>
- #include <udjat/module/abstract.h>
+ #include <udjat/module.h>
  #include <udjat/tools/service.h>
  #include <udjat/tools/http/server.h>
  #include <udjat/tools/interface.h>
