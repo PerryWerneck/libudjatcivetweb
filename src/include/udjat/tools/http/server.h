@@ -27,6 +27,7 @@
  #include <udjat/tools/http/response.h>
  #include <udjat/tools/interface.h>
  #include <udjat/tools/xml.h>
+ #include <udjat/tools/properties.h>
  #include <udjat/tools/interface.h>
  #include <map>
 
@@ -52,10 +53,10 @@
 				Handler(const HTTP::Method m, const char *name) : Udjat::Interface::Handler{name}, method{m} {
 				}
 
-				Handler(const HTTP::Method m, const XML::Node &node) : Udjat::Interface::Handler{node}, method{m} {
+				Handler(const HTTP::Method m, const Properties &props) : Udjat::Interface::Handler{props}, method{m} {
 				}
 
-				Handler(const XML::Node &node);
+				Handler(const Properties &props);
 
 				bool operator==(const HTTP::Request &request) const;
 
@@ -67,7 +68,7 @@
 				
 			public:
 
-				Interface(const XML::Node &node, const char *path);
+				Interface(const Properties &props, const char *path);
 				virtual ~Interface();
 
 				inline const char * c_str() const {
@@ -76,8 +77,8 @@
 
 				void call(HTTP::Request &request, HTTP::Response &response);
 
-				bool push_back(const XML::Node &node, std::shared_ptr<Action> action) override;
-				Handler & push_back(const XML::Node &node) override;
+				bool push_back(const Udjat::Properties &props, std::shared_ptr<Action> action) override;
+				Handler & push_back(const Udjat::Properties &props) override;
 
 			};
 
@@ -86,7 +87,7 @@
 			Server(const char *name = "web");
 			Server(const XML::Node &node);
 
-			Udjat::Interface & InterfaceFactory(const XML::Node &node) override;
+			Udjat::Interface & InterfaceFactory(const Udjat::Properties &props) override;
 
 			/// @brief Execute API call.
 			/// @param interface The interface name.

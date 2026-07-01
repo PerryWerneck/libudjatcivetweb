@@ -46,7 +46,7 @@
 
 	}
 
-	HTTP::Handler::Handler(const XML::Node &node, const char *tagname) : HTTP::Handler{Quark{node,tagname,""}.c_str()} {
+	HTTP::Handler::Handler(const Properties &props, const char *tagname) : HTTP::Handler{props[tagname].as_quark()} {
 	}
 
 	HTTP::Handler::~Handler() {

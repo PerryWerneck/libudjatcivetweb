@@ -24,6 +24,7 @@
  #include <udjat/tools/http/connection.h>
  #include <udjat/tools/http/mimetype.h>
  #include <udjat/tools/http/request.h>
+ #include <udjat/tools/properties.h>
  #include <cstring>
 
  namespace Udjat {
@@ -37,7 +38,7 @@
 			/// @brief Create a new httpd handler, insert it to default server.
 			/// @param path the path for the handler.
 			Handler(const char *path);
-			Handler(const XML::Node &node, const char *tagname = "http-handler");
+			Handler(const Properties &props, const char *tagname = "http-handler");
 
 		public:
 			virtual ~Handler();

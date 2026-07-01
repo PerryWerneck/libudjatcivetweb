@@ -30,8 +30,8 @@
 
  namespace Udjat {
 
-	HTTP::Server::Handler::Handler(const XML::Node &node) 
-		: Udjat::Interface::Handler{node}, method{HTTP::MethodFactory(node)} {	
+	HTTP::Server::Handler::Handler(const Properties &props) 
+		: Udjat::Interface::Handler{props}, method{HTTP::MethodFactory(props)} {	
 	}
 
 	bool HTTP::Server::Handler::operator==(const HTTP::Request &request) const {

@@ -63,16 +63,16 @@
 		}
 	}
 
-	Udjat::Interface & HTTP::Server::InterfaceFactory(const XML::Node &node) {
+	Udjat::Interface & HTTP::Server::InterfaceFactory(const Properties &props) {
 
-		const char * path{String{node,"http-path"}.as_quark()};
+		const char * path{props["http-path"].as_quark()};
 
 		if(!(path && *path)) {
-			path = String{node,"path"}.as_quark();
+			path = props["path"].as_quark();
 		}
 
 		if(!(path && *path)) {
-			path = String{node,"name"}.as_quark();
+			path = props["name"].as_quark();
 		}
 
 		for(Interface &intf : interfaces) {
@@ -82,7 +82,7 @@
 			}
 		}
 
-		interfaces.emplace_back(node,path);
+		interfaces.emplace_back(props,path);
 		return interfaces.back();
 	}
 
