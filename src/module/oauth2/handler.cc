@@ -54,143 +54,30 @@
 
 // #ifdef HAVE_LIBSSL
 
- class Response : public HTTP::Response {
- private:
-	int code;
+//  class Response : public HTTP::Response {
+//  private:
+// 	int code;
 
- public:
-	Response(MimeType mimetype, int c, const char *message) : HTTP::Response{mimetype}, code{c} {
-		failed(message);
-	}
+//  public:
+// 	Response(MimeType mimetype, int c, const char *message) : HTTP::Response{mimetype}, code{c} {
+// 		failed(message);
+// 	}
 
-	inline int status_code() const noexcept override {
-		return code;
-	}
+// 	inline int status_code() const noexcept override {
+// 		return code;
+// 	}
 
-	inline void for_each(const std::function<void(const char *header_name, const char *header_value)> &call) const noexcept override {
-		call("Cache-Control","no-cache, no-store, must-revalidate, private, max-age=0");
-		call("Expires", "0");
-	}
+// 	inline void for_each(const std::function<void(const char *header_name, const char *header_value)> &call) const noexcept override {
+// 		call("Cache-Control","no-cache, no-store, must-revalidate, private, max-age=0");
+// 		call("Expires", "0");
+// 	}
 
- };
-
- static void header_send(struct mg_connection *conn, const OAuth::Context &context) {
-
-	time_t expires = context.authentication.expires();
-	int max_age = expires - time(0);
-
-	if(Config::Value<bool>("oauth","allow-cache",true) && max_age > 0) {
-		mg_response_header_add(conn, "Cache-Control", String{"private, max-age=",max_age}.c_str(),-1);
-		mg_response_header_add(conn, "Expires", HTTP::TimeStamp{expires}.to_string().c_str(), -1);
-	} else {
-		mg_response_header_add(conn, "Cache-Control","no-cache, no-store, must-revalidate, private, max-age=0",-1);
-		mg_response_header_add(conn, "Expires", "0", -1);
-	}
-
-	// Setup cookie
-	String cookie{
-		"oauth2-session=",
-		context.authentication.token().c_str(),
-		"; path=/oauth2; Expires=",
-		HTTP::TimeStamp::to_string(expires).c_str()
-	};
-
-	debug("Cookie='",cookie,"'");
-	mg_response_header_add(conn, "Set-Cookie", cookie.c_str(),-1);
-	mg_response_header_send(conn);
-
- }
-
- static int login_page(struct mg_connection *conn, const OAuth::Context &context) {
-
-		Udjat::HTTP::Template text{"login",Udjat::MimeType::html};
-
-        // Last, expand request arguments.
-        text.expand([](const char *key, std::string &value) {
-
-			static const struct {
-				const char *key;
-				const char *def;
-			} cfgvals[] = {
-				{ 
-					"login-message", 
-					_("Authorized use only. All activity is monitored for security.")
-				},
-				{ 
-					"domain", 
-					"" 
-				},
-				{ 
-					"login-title", 
-					_("Access to ${product-name}") 
-				},
-				{ 
-					"login-button", 
-					_("Sign in") 
-				},
-				{ 
-					"user-label", 
-					_("Username") 
-				},
-				{ 
-					"password-label",
-					_("Password") 
-				},
-				{ 
-					"product-name", 
-					STRINGIZE_VALUE_OF(PRODUCT_NAME) 
-				},
-				{ 
-					"package-version", 
-					PACKAGE_VERSION 
-				}
-
-			};
-
-			debug("[[[[",key,"]]]]");
-
-			for(const auto &cfg : cfgvals) {
-				if(!strcasecmp(key,cfg.key)) {
-					value = Config::Value<string>{LOG_DOMAIN,key,cfg.def};
-					return true;
-				}
-			}
-
-			if(!strcasecmp(key,"username")) {
-				value = ""; // FIX-ME: Get username from context.
-				return true;
-			}
-
-			Logger::String{"Ignoring unexpected template item '",key,"'"}.warning();
-
-			return false;
-        },false,false);
-
-        mg_response_header_start(conn, 200);
-        mg_response_header_add(conn, "Content-Type",std::to_string(MimeType::html),-1);
-        mg_response_header_add(conn, "Content-Length", std::to_string(text.size()).c_str(), -1);
-        header_send(conn,context);
-
-        mg_write(conn, text.c_str(), text.size());
-
-        return 200;
-
- }
-
- static int redirect(struct mg_connection *conn,const OAuth::Context &context) {
-	mg_response_header_start(conn, 303);
-	mg_response_header_add(conn, "Location",context.location.c_str(),context.location.size());
-	mg_response_header_add(conn, "Content-Length", "0", -1);
-	header_send(conn,context);
-	return 303;
- }
+//  };
 
  int oauthWebHandler(struct mg_connection *conn, void *) {
 
 	OAuth::Context context;
 	CivetWeb::Request request{conn};
-	MimeType mimetype{request.mimetype()};
-
 	request.pop();	// Remove '/oauth2'
 
 	try {
@@ -198,7 +85,7 @@
 		if(!*request.path()) {
 			Logger::String{"Empty html request, sending login page"}.info("oauth2");
 			context.authentication.set(HTTP::Authentication::LoginPage);	
-			return login_page(conn,context);
+			return context.send_html_response(conn,"login");
 		}
 
 		// Restore authentication.
@@ -223,7 +110,11 @@
 
 	} catch(const std::exception &e) {
 
-		return ::send(conn,::Response{mimetype,500,e.what()});
+		Logger::String{e.what()}.error();
+		context.authentication.reset();	
+		context.message = _("Internal error processing request");
+		context.body = e.what();
+		return context.send_html_response(conn,"error",500);
 
 	}
 

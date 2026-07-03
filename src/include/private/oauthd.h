@@ -25,6 +25,8 @@
 
  #include <udjat/defs.h>
  #include <udjat/tools/http/authentication.h>
+ #include <udjat/tools/http/request.h>
+ #include <civetweb.h>
  
  namespace Udjat {
 
@@ -33,7 +35,19 @@
 		struct Context {
 			HTTP::Authentication authentication;	///< @brief Authentication token.
 			String message;							///< @brief The Message for client.
-			String location;						///< @brief The new location.
+			String body;
+			String location;						///< @brief The new location (for redirect).
+
+			/// @brief Send HTML response using current context.
+			/// @param conn The civetweb connection.
+			/// @param tmplt The template name.
+			/// @param code The status code.
+			int send_html_response(struct mg_connection *conn, const char *tmplt, int code = 200) const;
+
+ 			int send_redirect_response(struct mg_connection *conn) const;
+
+ 			void send_header(struct mg_connection *conn) const;
+
 		};
 
 		UDJAT_API int authorize(HTTP::Request &request, Context &context);
