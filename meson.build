@@ -137,13 +137,7 @@ lib_src = [
   'src/library/handler.cc',
   'src/library/icon.cc',
   'src/library/index.cc',
-  'src/library/keypair.cc',
   'src/library/layout/csv.cc',
-  'src/library/oauth2/access_token.cc',
-  'src/library/oauth2/authorize.cc',
-  'src/library/oauth2/signin.cc',
-  'src/library/oauth2/client.cc',
-  'src/library/oauth2/user.cc',
   'src/library/template.cc',
   'src/library/value.cc',
   'src/library/connection.cc',
@@ -158,6 +152,7 @@ lib_src = [
   'src/library/handlers/image.cc',
   'src/library/client/client.cc',
   'src/library/testprogram.cc',
+  'src/library/authentication.cc',
   ]
 
 module_src = [
@@ -165,7 +160,6 @@ module_src = [
   'src/module/handlers/favicon.cc',
   'src/module/handlers/icons.cc',
   'src/module/handlers/images.cc',
-  'src/module/handlers/pubkey.cc',
   'src/module/handlers/product.cc',
   'src/module/oauth2/handler.cc',
   'src/module/connection.cc',
@@ -182,18 +176,6 @@ module_src = [
 test_src = [
   'src/testprogram/testprogram.cc'
 ]
-
-#
-# Crypto APIs
-#
-ssl = dependency('OpenSSL', required: false)
-if ssl.found()
-  lib_deps += [ 
-      ssl,
-  ]
-  app_conf.set('HAVE_SSL',1)
-endif
-
 
 #
 # SDK
@@ -225,7 +207,6 @@ if host_machine.system() == 'windows'
   
   lib_src += [
     'src/library/os/windows/image.cc',
-    'src/library/os/windows/oauth2user.cc',
   ]
 
   lib_src += resources
@@ -243,7 +224,6 @@ else
 
   lib_src += [
     'src/library/os/linux/image.cc',
-    'src/library/os/linux/oauth2user.cc',
   ]
 
 endif
@@ -365,7 +345,6 @@ install_headers(
   'src/include/udjat/tools/http/handler.h',
   'src/include/udjat/tools/http/icon.h',
   'src/include/udjat/tools/http/image.h',
-  'src/include/udjat/tools/http/keypair.h',
   'src/include/udjat/tools/http/layouts.h',
   'src/include/udjat/tools/http/oauth.h',
   'src/include/udjat/tools/http/report.h',

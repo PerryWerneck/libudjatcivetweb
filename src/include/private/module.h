@@ -92,9 +92,6 @@
  /// @brief Handler for image requests.
  int imageWebHandler(struct mg_connection *conn, void *cbdata);
 
- /// @brief Get pubkey.
- int keyWebHandler(struct mg_connection *conn, void *cbdata);
-
  /// @brief Authentication handler.
  int oauthWebHandler(struct mg_connection *conn, void *cbdata);
 

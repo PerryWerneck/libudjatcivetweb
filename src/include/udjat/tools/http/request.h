@@ -112,8 +112,6 @@
 			/// @return true if the token has valid authentication.
 			bool get(Request::Token &token) const noexcept;
 
-			bool authenticated() const noexcept override;
-
 			/// @brief The client address.
 			virtual Udjat::String address() const = 0;
 

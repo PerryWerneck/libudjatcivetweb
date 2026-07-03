@@ -24,33 +24,26 @@
  #pragma once
 
  #include <udjat/defs.h>
+ #include <udjat/tools/http/authentication.h>
  
-//  #include <udjat/tools/request.h>
-//  #include <udjat/tools/value.h>
-//  #include <udjat/tools/string.h>
-//  #include <udjat/tools/logger.h>
-//  #include <map>
-//  #include <string>
-
  namespace Udjat {
 
 	namespace OAuth {
 
-// 		struct Context {
-// 			String token;				///< @brief The authentication token.
-// 			String message;				///< @brief The Message for client.
-// 			String location;			///< @brief The new location.
-// 			time_t expiration_time;		///< @brief The expiration time.
-// 		};
+		struct Context {
+			HTTP::Authentication authentication;	///< @brief Authentication token.
+			String message;							///< @brief The Message for client.
+			String location;						///< @brief The new location.
+		};
 
-// 		UDJAT_API int authorize(HTTP::Request &request, Context &context);
+		UDJAT_API int authorize(HTTP::Request &request, Context &context);
 
-// 		/// @brief Run 'signin'
-// 		/// @param request The request info
-// 		/// @param context The current context.
-// 		/// @return 0 if the user was authenticated.
-// 		/// @retval EPERM Access denied.
-// 		UDJAT_API int signin(HTTP::Request &request, Context &context);
+		/// @brief Run 'signin'
+		/// @param request The request info
+		/// @param context The current context.
+		/// @return 0 if the user was authenticated.
+		/// @retval EPERM Access denied.
+		UDJAT_API int signin(HTTP::Request &request, Context &context);
 
 // 		/// @brief Get access token.
 // 		/// @param request The request info

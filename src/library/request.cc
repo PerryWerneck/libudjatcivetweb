@@ -23,7 +23,6 @@
  #include <udjat/tools/http/request.h>
  #include <udjat/tools/http/timestamp.h>
  #include <udjat/tools/logger.h>
- #include <udjat/tools/http/keypair.h>
  #include <udjat/tools/logger.h>
  #include <udjat/tools/configuration.h>
  #include <udjat/tools/intl.h>
@@ -56,36 +55,6 @@
 		}
 
 		return Udjat::Request::for_each(call);
-	}
-
-	bool HTTP::Request::decrypt(HTTP::Request::Token &token) const {
-
-		token.clear();
-
-		// Check for authorization header.
-		{
-			Udjat::String b64 = header("Authorization");
-			if(!b64.empty() && b64.has_prefix("Bearer ",true) && HTTP::KeyPair::getInstance().decrypt(b64.c_str()+7,&token,sizeof(token))) {
-				debug("Got authentication from header");
-				return true;
-			}
-		}
-
-		// Check for cookie.
-		{
-			Udjat::String b64 = cookie((Application::Name() + "-session").c_str());
-			if(!b64.empty() && HTTP::KeyPair::getInstance().decrypt(b64.c_str(),&token,sizeof(token))) {
-				debug("Got authentication from cookie");
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	bool HTTP::Request::authenticated() const noexcept {
-		Token token;
-		return get(token);
 	}
 
 	bool HTTP::Request::cached(const Udjat::TimeStamp &timestamp) const {

@@ -30,6 +30,7 @@
  #include <udjat/tools/intl.h>
  #include <stdexcept>
  #include <udjat/tools/civetweb/service.h>
+ #include <udjat/tools/configuration.h>
 
  #ifdef HAVE_UNISTD_H
 	#include <unistd.h>
@@ -50,13 +51,14 @@
 			throw logic_error(Logger::String{"Invalid product path '",path,"'"});
 		}
 
+
 #ifdef _WIN32
-		Application::DataFile filename{"www"};
+		Application::DataFile filename = Config::Value<string>{"httpd","root-path","www/"}.c_str();
 #else
-		Application::DataFile filename{"/srv/www/htdocs"};
+		Application::DataFile filename = Config::Value<string>{"httpd","root-path","/srv/www/htdocs/" STRINGIZE_VALUE_OF(PRODUCT_NAME) "/"}.c_str();
 #endif // _WIN32
 
-		filename += path;
+		filename += (path+strlen(prefix));
 
 		debug("Searching for '",filename.c_str(),"'");
 

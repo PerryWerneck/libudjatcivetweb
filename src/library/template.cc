@@ -44,7 +44,16 @@
 			return;
 		}
 
-		Application::DataFile filename{"templates/www/"};
+		File::Path filename = Config::Value<String>{"httpd","template-path"};
+		if(filename.empty()) {
+			filename = Config::Value<String>{"httpd","root-path"};
+			if(!filename.empty()) {
+				filename += "templates/";
+			}
+		}
+		if(filename.empty()) {
+			filename = Application::DataFile{"templates/www/"};
+		}
 
 		filename += name;
 		filename += ".";
@@ -65,15 +74,12 @@
 				return true;
  			}
 
-			if(!strcasecmp(key,"css-name")) {
+			if(!strcasecmp(key,"css-path")) {
 
-				value = Config::Value<std::string>{"theme","httpd",""};
-
-				if(value.empty()) {
-					value = "/";
-					value += Application::Name();
-					value += "/css/style.css";
-				}
+				value = String {
+					Config::Value<std::string>{"theme","http-root","/" STRINGIZE_VALUE_OF(PRODUCT_NAME) "/"}.c_str(),
+					"css/style.css"
+				};
 
 				return true;
 			}
