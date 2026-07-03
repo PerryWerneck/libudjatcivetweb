@@ -30,6 +30,7 @@
  #include <udjat/tools/logger.h>
  #include <udjat/tools/string.h>
  #include <udjat/tools/configuration.h>
+ #include <udjat/tools/http/authentication.h>
  #include <udjat/tools/url.h>
  #include <ctype.h>
 
@@ -41,8 +42,9 @@
 
 	namespace CivetWeb {
 
-		Request::Request(struct mg_connection *c) : Request(c,mg_get_request_info(c)->local_uri, (unsigned int) ((PACKAGE_VERSION_MAJOR * 100) + PACKAGE_VERSION_MINOR)) {
+		Request::Request(struct mg_connection *c) : Request{c,mg_get_request_info(c)->local_uri, (unsigned int) ((PACKAGE_VERSION_MAJOR * 100) + PACKAGE_VERSION_MINOR)} {
 
+			// Extract API version.
 			if(pop("/api")) {
 				const char *reqpath = path();
 				if(*reqpath != '/') {
@@ -77,13 +79,13 @@
 			debug("local_uri_raw='",mg_get_request_info(c)->local_uri_raw,"'");
 			debug("local_uri='",mg_get_request_info(c)->local_uri,"'");
 
-#ifdef DEBUG
-			{
-				for(int header = 0; header < info->num_headers; header++) {
-					debug("header(",info->http_headers[header].name,")='",info->http_headers[header].value,"'");
-				}
-			}
-#endif // DEBUG
+// #ifdef DEBUG
+// 			{
+// 				for(int header = 0; header < info->num_headers; header++) {
+// 					debug("header(",info->http_headers[header].name,")='",info->http_headers[header].value,"'");
+// 				}
+// 			}
+// #endif // DEBUG
 
 			// https://github.com/civetweb/civetweb/blob/master/examples/embedded_c/embedded_c.c
 			if(!strcasecmp(header("Content-Type"),"application/x-www-form-urlencoded")) {
@@ -127,10 +129,18 @@
 
 				mg_handle_form_request(c, &input.fdh);
 
+
 			}
 
 			parse_query(info->query_string);
 			
+			// Check for authentication
+			{
+				auto auth = make_shared<HTTP::Authentication>(session_cookie().c_str());
+				auth->token();
+				this->auth = auth;
+			}
+
 		}
 
  		const char * Request::query(const char *) const {

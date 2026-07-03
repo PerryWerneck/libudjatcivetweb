@@ -22,6 +22,7 @@
  #include <udjat/defs.h>
  #include <udjat/tools/request.h>
  #include <udjat/tools/http/connection.h>
+ #include <udjat/tools/string.h>
 
  #ifdef _WIN32
 	#include <winsock2.h>
@@ -52,39 +53,39 @@
 
 			#define TOKEN_USERNAME_LEN 40
 
-			#pragma pack(1)
-			/// @brief Authentication token
-			struct Token {
-				uint8_t type = 0x10;
-				uint16_t scope = 0x000F;
-				time_t expiration_time = 0;
-				uint64_t uid = (uint64_t) -1;
-				char username[TOKEN_USERNAME_LEN+1] = "";	///< @brief The user name
-#ifdef _WIN32
-				union {
-					in_addr v4;		// https://learn.microsoft.com/en-us/windows/win32/api/winsock2/ns-winsock2-in_addr
-					in6_addr v6;	// https://learn.microsoft.com/en-us/previous-versions/windows/desktop/legacy/ms738560(v=vs.85)
-				} ip;
-#else
-				union {
-					in_addr_t v4;
-					in6_addr v6;
-				} ip;
-#endif // _WIN32
+// 			#pragma pack(1)
+// 			/// @brief Authentication token
+// 			struct Token {
+// 				uint8_t type = 0x10;
+// 				uint16_t scope = 0x000F;
+// 				time_t expiration_time = 0;
+// 				uint64_t uid = (uint64_t) -1;
+// 				char username[TOKEN_USERNAME_LEN+1] = "";	///< @brief The user name
+// #ifdef _WIN32
+// 				union {
+// 					in_addr v4;		// https://learn.microsoft.com/en-us/windows/win32/api/winsock2/ns-winsock2-in_addr
+// 					in6_addr v6;	// https://learn.microsoft.com/en-us/previous-versions/windows/desktop/legacy/ms738560(v=vs.85)
+// 				} ip;
+// #else
+// 				union {
+// 					in_addr_t v4;
+// 					in6_addr v6;
+// 				} ip;
+// #endif // _WIN32
 
-				inline void clear() noexcept {
-					type = 0x10;
-					scope = 0x000F;
-					expiration_time = 0;
-					uid = (uint64_t) -1;
-					memset(username,0,sizeof(username));
-					memset(&ip,0,sizeof(ip));
-				}
+// 				inline void clear() noexcept {
+// 					type = 0x10;
+// 					scope = 0x000F;
+// 					expiration_time = 0;
+// 					uid = (uint64_t) -1;
+// 					memset(username,0,sizeof(username));
+// 					memset(&ip,0,sizeof(ip));
+// 				}
 
-			};
-			#pragma pack()
+// 			};
+// 			#pragma pack()
 
-			bool decrypt(HTTP::Request::Token &token) const;
+//			bool decrypt(HTTP::Request::Token &token) const;
 
 			constexpr Request(const char *path = "", HTTP::Method m = HTTP::Get) : Udjat::Request{path}, method{m} {
 			}
@@ -93,6 +94,10 @@
 			}
 
 			virtual ~Request();
+
+			/// @brief Get session cookie name.
+			/// @return The session cookie.
+			Udjat::String session_cookie() const;
 
 			inline operator HTTP::Method() const noexcept {
 				return this->method;
@@ -110,7 +115,7 @@
 
 			/// @brief Get Authentication token.
 			/// @return true if the token has valid authentication.
-			bool get(Request::Token &token) const noexcept;
+			// bool get(Request::Token &token) const noexcept;
 
 			/// @brief The client address.
 			virtual Udjat::String address() const = 0;

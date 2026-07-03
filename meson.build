@@ -133,7 +133,6 @@ includes_dir = include_directories('src/include')
 # Sources
 #
 lib_src = [
-  'src/library/exec.cc',
   'src/library/handler.cc',
   'src/library/icon.cc',
   'src/library/index.cc',

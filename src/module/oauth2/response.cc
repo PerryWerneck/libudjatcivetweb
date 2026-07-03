@@ -17,9 +17,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+ #include <config.h>
+
+ #undef LOG_DOMAIN
  #define LOG_DOMAIN "oauthd"
 
- #include <config.h>
  #include <udjat/defs.h>
  #include <udjat/tools/http/template.h>
  #include <udjat/tools/http/timestamp.h>
@@ -35,9 +37,9 @@
 
  namespace Udjat {
 
-	void OAuth::Context::send_header(struct mg_connection *conn) const {
+	void OAuth::Context::send_header() const {
 
-		time_t expires = authentication.expires();
+		time_t expires = authentication->expires();
 		int max_age = expires - time(0);
 
 		if(Config::Value<bool>("oauth","allow-cache",true) && max_age > 0) {
@@ -50,8 +52,8 @@
 
 		// Setup cookie
 		String cookie{
-			"oauth2-session=",
-			authentication.token().c_str(),
+			request.session_cookie().c_str(),"=",
+			authentication->token().c_str(),
 			"; path=/oauth2; Expires=",
 			HTTP::TimeStamp::to_string(expires).c_str()
 		};
@@ -62,7 +64,7 @@
 
 	}
 
-	int OAuth::Context::send_html_response(struct mg_connection *conn, const char *tmplt, int code) const {
+	int OAuth::Context::send_html_response(const char *tmplt, int code) const {
 
 		Udjat::HTTP::Template text{tmplt,Udjat::MimeType::html};
 
@@ -104,7 +106,11 @@
 				{ 
 					"package-version", 
 					PACKAGE_VERSION 
-				}
+				},
+				{ 
+					"action-signin", 
+					"oauth2/signin" 
+				},
 
 			};
 
@@ -137,6 +143,10 @@
 				return true;
 			}
 
+			if(request.getProperty(key,value)) {
+				return true;
+			}
+
 			Logger::String{"Ignoring unexpected template item '",key,"'"}.warning();
 
 			return false;
@@ -145,7 +155,7 @@
 		mg_response_header_start(conn, code);
 		mg_response_header_add(conn, "Content-Type",std::to_string(MimeType::html),-1);
 		mg_response_header_add(conn, "Content-Length", std::to_string(text.size()).c_str(), -1);
-		send_header(conn);
+		send_header();
 
 		mg_write(conn, text.c_str(), text.size());
 
@@ -153,11 +163,11 @@
 
 	}
 
- 	int OAuth::Context::send_redirect_response(struct mg_connection *conn) const {
+ 	int OAuth::Context::send_redirect_response() const {
 		mg_response_header_start(conn, 303);
 		mg_response_header_add(conn, "Location",location.c_str(),location.size());
 		mg_response_header_add(conn, "Content-Length", "0", -1);
-		send_header(conn);
+		send_header();
 		return 303;
 	}
 

@@ -17,9 +17,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+ #include <config.h>
+
+ #undef LOG_DOMAIN
  #define LOG_DOMAIN "auth"
 
- #include <config.h>
  #include <udjat/authentication.h>
  #include <udjat/tools/http/authentication.h>
  #include <udjat/tools/logger.h> 
@@ -39,15 +41,11 @@
 	};
 	#pragma pack()
 
-	/// @brief Build an empty authentication.
-	HTTP::Authentication::Authentication() {
-		reset();
-	}
+	HTTP::Authentication::Authentication(const char *b64) {
 
-	void HTTP::Authentication::token(const char *b64) {
+		reset();
 
 		if(!(b64 && *b64)) {
-			reset();
 			return;
 		}
 
@@ -66,30 +64,28 @@
 			Token *token = (Token *) buffer;
 
 			if(time(0) < token->expiration_time) {
-				Logger::String{"Authentication token is expired"}.trace();
-				reset();
-				return;
+				throw runtime_error("The authentication token is expired");
 			}
 
 			this->current_status = token->status;
 			this->level = token->level;
 			this->expiration_time = token->expiration_time;
 
-		} catch(...) {
+		} catch(const std::exception &e) {
+
 			reset();
-			throw;
+			Logger::String{e.what()}.trace();
+
 		}
 
 	}
 
-	void HTTP::Authentication::reset() {
+	void HTTP::Authentication::reset() noexcept {
 		current_status = Undefined;
 		level = None;
 		expiration_time = time(0)+86400;
 	}
 
-	/// @brief Get encrypted token.
-	/// @return 
 	std::string HTTP::Authentication::token() const {
 
 		size_t szBuffer = sizeof(Token);

@@ -17,15 +17,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
- /**
-  * @brief Dclare OAuth2 objects.
-  */
-
  #pragma once
 
  #include <udjat/defs.h>
  #include <udjat/tools/http/authentication.h>
  #include <udjat/tools/http/request.h>
+ #include <private/request.h>
  #include <civetweb.h>
  
  namespace Udjat {
@@ -33,20 +30,25 @@
 	namespace OAuth {
 
 		struct Context {
-			HTTP::Authentication authentication;	///< @brief Authentication token.
-			String message;							///< @brief The Message for client.
+			struct mg_connection *conn;
+			CivetWeb::Request request;
+			std::shared_ptr<HTTP::Authentication> authentication;	///< @brief Authentication token.
+
+			String message;											///< @brief The Message for client.
 			String body;
-			String location;						///< @brief The new location (for redirect).
+			String location;										///< @brief The new location (for redirect).
 
 			/// @brief Send HTML response using current context.
 			/// @param conn The civetweb connection.
 			/// @param tmplt The template name.
 			/// @param code The status code.
-			int send_html_response(struct mg_connection *conn, const char *tmplt, int code = 200) const;
+			int send_html_response(const char *tmplt, int code = 200) const;
 
- 			int send_redirect_response(struct mg_connection *conn) const;
+ 			int send_redirect_response() const;
 
- 			void send_header(struct mg_connection *conn) const;
+ 			void send_header() const;
+
+			Context(struct mg_connection *conn);
 
 		};
 

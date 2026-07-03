@@ -20,6 +20,7 @@
  #pragma once
 
  #include <udjat/defs.h>
+ #include <udjat/tools/http/authentication.h>
  #include <udjat/tools/request.h>
  #include <udjat/tools/http/request.h>
  #include <civetweb.h>

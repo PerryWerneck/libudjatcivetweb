@@ -35,17 +35,16 @@
 					LoginPage,
 				};
 
-				/// @brief Build an empty authentication.
-				Authentication();
+				/// @brief Build an authentication from cookie.
+				/// @param b64 Encrypted token.
+				Authentication(const char *b64 = nullptr);
 
 				/// @brief Get encrypted token.
 				/// @return String with base 64 encrypted token.
 				std::string token() const;
 
-				/// @brief Set encrypted token.
-				void token(const char *b64);
-
-				void reset();
+				/// @brief Reset authentication to empty state.
+				void reset() noexcept;
 
 				/// @brief Get expiration time.
 				inline time_t expires() const noexcept {

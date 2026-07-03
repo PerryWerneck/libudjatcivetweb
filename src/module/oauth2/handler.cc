@@ -32,6 +32,7 @@
  #include <config.h>
  #include <udjat/defs.h>
  #include <private/module.h>
+ #include <udjat/tools/request.h>
  #include <private/request.h>
  #include <udjat/tools/logger.h>
  #include <udjat/tools/intl.h>
@@ -74,24 +75,31 @@
 
 //  };
 
+
+ OAuth::Context::Context(struct mg_connection *c) : conn{c}, request{c} {
+
+	authentication = dynamic_pointer_cast<HTTP::Authentication>(request.authentication());
+
+ }
+
+
  int oauthWebHandler(struct mg_connection *conn, void *) {
 
-	OAuth::Context context;
-	CivetWeb::Request request{conn};
-	request.pop();	// Remove '/oauth2'
+	OAuth::Context context{conn};
+	context.request.pop();	// Remove '/oauth2'
 
 	try {
 
-		if(!*request.path()) {
+		// extract HTTP::Authentication from request.
+	
+		if(!*context.request.path()) {
 			Logger::String{"Empty html request, sending login page"}.info("oauth2");
-			context.authentication.set(HTTP::Authentication::LoginPage);	
-			return context.send_html_response(conn,"login");
+			context.authentication->set(HTTP::Authentication::LoginPage);	
+			return context.send_html_response("login");
 		}
 
-		// Restore authentication.
-		context.authentication.token(request.cookie("oauth2-session").c_str());
-
 		debug("--------------- Checking for options ---------------");
+		String requested_action = context.request.pop();
 
 		// switch(request.select("signin",nullptr)) {
 		// case 0: // signin
@@ -106,7 +114,8 @@
 		// 	throw runtime_error("Invalid request");
 		// }
 
-		throw runtime_error("Incomplete");
+		context.body = Logger::Message{_("The requested action '{}' is not available in this server"), requested_action.c_str()}.c_str();
+		return context.send_html_response("error",404);
 
 	} catch(const std::exception &e) {
 
@@ -114,7 +123,7 @@
 		context.authentication.reset();	
 		context.message = _("Internal error processing request");
 		context.body = e.what();
-		return context.send_html_response(conn,"error",500);
+		return context.send_html_response("error",500);
 
 	}
 

@@ -48,6 +48,14 @@
 		return Udjat::Request::getProperty(key,value);
 	}
 
+	String HTTP::Request::cookie(const char *) const {
+		return "";
+	}
+
+	Udjat::String HTTP::Request::session_cookie() const {
+		return cookie(Udjat::String{Application::Name().c_str(),"-session"}.c_str());
+	}
+
 	bool HTTP::Request::for_each(const std::function<bool(const char *name, const char *value)> &call) const {
 
 		if(call("client-address",address().c_str())) {
