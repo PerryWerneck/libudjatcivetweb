@@ -27,14 +27,17 @@
  //	https://www.tutorialspoint.com/oauth2.0/oauth2.0_obtaining_an_access_token.htm
  // https://www.freebsd.org/doc/en/articles/pam/pam-essentials.html
 
- #define LOG_DOMAIN "oauthd"
 
  #include <config.h>
+
+ #undef LOG_DOMAIN
+ #define LOG_DOMAIN "oauthd"
+ #include <udjat/tools/logger.h>
+
  #include <udjat/defs.h>
  #include <private/module.h>
  #include <udjat/tools/request.h>
  #include <private/request.h>
- #include <udjat/tools/logger.h>
  #include <udjat/tools/intl.h>
  #include <stdexcept>
  #include <udjat/tools/http/template.h>
@@ -42,76 +45,87 @@
  #include <udjat/tools/string.h>
  #include <udjat/authentication.h>
  #include <udjat/tools/http/timestamp.h>
+ #include <udjat/tools/application.h>
  #include <string>
  #include <private/oauthd.h>
 
  using namespace Udjat;
  using namespace std;
 
-// #include <udjat/tools/http/oauth.h>
-//  #include <udjat/tools/http/response.h>
-//  #include <udjat/tools/http/exception.h>
-//  #include <udjat/tools/application.h>
+ OAuth::Context::Context(struct mg_connection *c) : conn{c}, path{mg_get_request_info(c)->local_uri} {
+ 
+	while(path[0] == '/') {
+		path.erase(0,1);
+	}
 
-// #ifdef HAVE_LIBSSL
+	debug("Request path: '",path.c_str(),"'");
 
-//  class Response : public HTTP::Response {
-//  private:
-// 	int code;
-
-//  public:
-// 	Response(MimeType mimetype, int c, const char *message) : HTTP::Response{mimetype}, code{c} {
-// 		failed(message);
-// 	}
-
-// 	inline int status_code() const noexcept override {
-// 		return code;
-// 	}
-
-// 	inline void for_each(const std::function<void(const char *header_name, const char *header_value)> &call) const noexcept override {
-// 		call("Cache-Control","no-cache, no-store, must-revalidate, private, max-age=0");
-// 		call("Expires", "0");
-// 	}
-
-//  };
-
-
- OAuth::Context::Context(struct mg_connection *c) : conn{c}, request{c} {
-
-	authentication = dynamic_pointer_cast<HTTP::Authentication>(request.authentication());
+	// Get session cookie
+	{
+		cookie_name = String{"oauth-session"};
+		const char *cookie = mg_get_header(conn,"Cookie");
+		if(cookie && *cookie) {
+			char buffer[4096];
+			int length = mg_get_cookie(cookie,cookie_name.c_str(),buffer,4095);
+			if(length > 0) {
+				buffer[length] = 0;
+				Authentication::token(buffer);
+			}
+		}
+	}
 
  }
 
+ String OAuth::Context::pop() {
+
+	if(path.empty()) {
+		return "";
+	}
+
+	auto pos = path.find('/');
+	if(pos == string::npos) {
+		String rc = path;
+		path.clear();
+		return rc;
+	}
+
+	String rc = path.substr(0, pos);
+	path.erase(0,pos+1);
+
+	return rc;
+ }
 
  int oauthWebHandler(struct mg_connection *conn, void *) {
 
 	OAuth::Context context{conn};
-	context.request.pop();	// Remove '/oauth2'
+	context.pop();	// Remove '/oauth2'
 
 	try {
 
-		// extract HTTP::Authentication from request.
-	
-		if(!*context.request.path()) {
-			Logger::String{"Empty html request, sending login page"}.info("oauth2");
-			context.authentication->set(HTTP::Authentication::LoginPage);	
+		if(context.path.empty()) {
+			Logger::String{"Empty html request, sending login page"}.trace();
+			context.action = "signin";
+			context.set(HTTP::Authentication::LoginPage);
 			return context.send_html_response("login");
 		}
 
 		debug("--------------- Checking for options ---------------");
-		String requested_action = context.request.pop();
+		String requested_action = context.pop();
 
-		// switch(request.select("signin",nullptr)) {
+		debug("Requested action: '",requested_action.c_str(),"'");
+
+		// switch(context.pop().select("siXgnin",nullptr)) {
 		// case 0: // signin
 		// 	debug("---> signin");
-		// 	if(OAuth::signin(request,context)) {
+		// 	if(context.signin()) {
 		// 		// Signin failed.
-		// 		return login_page(conn,context);
+		// 		throw runtime_error("Incomplete");
+		//		message = _("Access denied");
+		// 		return context.send_html_response("login");
 		// 	}
-		// 	return redirect(conn,context);
+		// 	throw runtime_error("Incomplete");
+		// 	// return context.redirect();	// Redirect, signin already set the destination.
 
-		// default:
-		// 	throw runtime_error("Invalid request");
 		// }
 
 		context.body = Logger::Message{_("The requested action '{}' is not available in this server"), requested_action.c_str()}.c_str();
@@ -120,7 +134,7 @@
 	} catch(const std::exception &e) {
 
 		Logger::String{e.what()}.error();
-		context.authentication.reset();	
+		context.Authentication::reset();	
 		context.message = _("Internal error processing request");
 		context.body = e.what();
 		return context.send_html_response("error",500);

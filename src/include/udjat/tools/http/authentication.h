@@ -28,6 +28,9 @@
 	namespace HTTP {
 
 		class UDJAT_API Authentication : public Udjat::Authentication {
+			protected:
+				void token(const char *b64);
+
 			public:
 
 				enum Status : uint8_t {

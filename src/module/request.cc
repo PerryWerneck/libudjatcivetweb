@@ -135,11 +135,7 @@
 			parse_query(info->query_string);
 			
 			// Check for authentication
-			{
-				auto auth = make_shared<HTTP::Authentication>(session_cookie().c_str());
-				auth->token();
-				this->auth = auth;
-			}
+			this->auth = make_shared<HTTP::Authentication>(session_cookie().c_str());
 
 		}
 

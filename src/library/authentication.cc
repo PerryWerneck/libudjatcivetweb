@@ -24,6 +24,7 @@
 
  #include <udjat/authentication.h>
  #include <udjat/tools/http/authentication.h>
+ #include <udjat/tools/configuration.h>
  #include <udjat/tools/logger.h> 
  #include <stdexcept>
  #include <string>
@@ -42,7 +43,11 @@
 	#pragma pack()
 
 	HTTP::Authentication::Authentication(const char *b64) {
+		token(b64);
+	}
 
+	void HTTP::Authentication::token(const char *b64) {
+		
 		reset();
 
 		if(!(b64 && *b64)) {
@@ -83,7 +88,8 @@
 	void HTTP::Authentication::reset() noexcept {
 		current_status = Undefined;
 		level = None;
-		expiration_time = time(0)+86400;
+		expiration_time = time(0) + Config::Value<time_t>("authentication","expiration-time",86400);
+
 	}
 
 	std::string HTTP::Authentication::token() const {

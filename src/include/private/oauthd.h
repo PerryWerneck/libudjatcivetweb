@@ -29,14 +29,21 @@
 
 	namespace OAuth {
 
-		struct Context {
+		class UDJAT_PRIVATE Context : public HTTP::Authentication {
+		public:
+		
 			struct mg_connection *conn;
-			CivetWeb::Request request;
-			std::shared_ptr<HTTP::Authentication> authentication;	///< @brief Authentication token.
 
 			String message;											///< @brief The Message for client.
 			String body;
 			String location;										///< @brief The new location (for redirect).
+			String path;
+			String cookie_name;										///< @brief The authentication cookie name.
+			String action;
+
+			/// @brief Pop one element from path.
+			/// @return 
+			String pop();
 
 			/// @brief Send HTML response using current context.
 			/// @param conn The civetweb connection.
@@ -50,16 +57,17 @@
 
 			Context(struct mg_connection *conn);
 
+			/// @brief Run 'signin'
+			/// @param request The request info
+			/// @param context The current context.
+			/// @return 0 if the user was authenticated.
+			/// @retval EPERM Access denied.
+			UDJAT_API int signin();
+
 		};
 
 		UDJAT_API int authorize(HTTP::Request &request, Context &context);
 
-		/// @brief Run 'signin'
-		/// @param request The request info
-		/// @param context The current context.
-		/// @return 0 if the user was authenticated.
-		/// @retval EPERM Access denied.
-		UDJAT_API int signin(HTTP::Request &request, Context &context);
 
 // 		/// @brief Get access token.
 // 		/// @param request The request info

@@ -39,7 +39,7 @@
 
 	void OAuth::Context::send_header() const {
 
-		time_t expires = authentication->expires();
+		time_t expires = Authentication::expires();
 		int max_age = expires - time(0);
 
 		if(Config::Value<bool>("oauth","allow-cache",true) && max_age > 0) {
@@ -52,8 +52,8 @@
 
 		// Setup cookie
 		String cookie{
-			request.session_cookie().c_str(),"=",
-			authentication->token().c_str(),
+			cookie_name.c_str(),"=",
+			token().c_str(),
 			"; path=/oauth2; Expires=",
 			HTTP::TimeStamp::to_string(expires).c_str()
 		};
@@ -104,14 +104,13 @@
 					STRINGIZE_VALUE_OF(PRODUCT_NAME) 
 				},
 				{ 
+					"client_id",	// Legacy! 
+					STRINGIZE_VALUE_OF(PRODUCT_NAME) 
+				},
+				{ 
 					"package-version", 
 					PACKAGE_VERSION 
 				},
-				{ 
-					"action-signin", 
-					"oauth2/signin" 
-				},
-
 			};
 
 			debug("[[[[",key,"]]]]");
@@ -125,6 +124,12 @@
 
 			if(!strcasecmp(key,"username")) {
 				value = ""; // FIX-ME: Get username from context.
+				return true;
+			}
+
+			if(!strcasecmp(key,"action")) {
+				value = "oauth2/";
+				value += action;
 				return true;
 			}
 
@@ -143,13 +148,41 @@
 				return true;
 			}
 
-			if(request.getProperty(key,value)) {
-				return true;
+			// Extract options from request.
+			{
+ 				const struct mg_request_info *req_info = mg_get_request_info(conn);
+ 				if (req_info->query_string != NULL) {
+
+					char buffer[4096];
+					int result = mg_get_var(
+									req_info->query_string, 
+                                	strlen(req_info->query_string), 
+                                	key, 
+                                	buffer, 
+                                	sizeof(buffer)
+							);
+							
+					if(result > 0) {
+						value = buffer;
+						return true;
+					}
+
+				}
 			}
 
-			Logger::String{"Ignoring unexpected template item '",key,"'"}.warning();
+			{
+				Config::Value<std::string> config{"oauth-template-vars",key,""};
+				if(!config.empty()) {
+					value = config;
+					return true;
+				}
+			}
 
-			return false;
+			Logger::String{"Using empty string for unexpected template item '",key,"'"}.warning();
+
+			value.clear();
+			return true;
+
 		},false,false);
 
 		mg_response_header_start(conn, code);
