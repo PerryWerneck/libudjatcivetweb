@@ -76,6 +76,10 @@
 		return Udjat::Request::cached(timestamp);
 	}
 
+	bool HTTP::Request::html() const noexcept {
+		return !api_call && mimetype() == MimeType::html;		
+	}
+
 	MimeType HTTP::Request::mimetype() const noexcept {
 
 		// Legacy header.
@@ -119,5 +123,6 @@
 		}
 
 	}
+
 
  }

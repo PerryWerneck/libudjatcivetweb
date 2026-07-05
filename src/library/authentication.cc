@@ -26,6 +26,7 @@
  #include <udjat/tools/http/authentication.h>
  #include <udjat/tools/configuration.h>
  #include <udjat/tools/logger.h> 
+ #include <udjat/tools/application.h>
  #include <stdexcept>
  #include <string>
  #include <ctime>
@@ -44,6 +45,13 @@
 
 	HTTP::Authentication::Authentication(const char *b64) {
 		token(b64);
+	}
+
+	std::string HTTP::Authentication::cookie_name() noexcept {
+		return String {
+			Application::Name().c_str(),
+			"-session"
+		};
 	}
 
 	void HTTP::Authentication::token(const char *b64) {

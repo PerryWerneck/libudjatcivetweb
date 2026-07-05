@@ -114,19 +114,17 @@
 
 		debug("Requested action: '",requested_action.c_str(),"'");
 
-		// switch(context.pop().select("siXgnin",nullptr)) {
-		// case 0: // signin
-		// 	debug("---> signin");
-		// 	if(context.signin()) {
-		// 		// Signin failed.
-		// 		throw runtime_error("Incomplete");
-		//		message = _("Access denied");
-		// 		return context.send_html_response("login");
-		// 	}
-		// 	throw runtime_error("Incomplete");
-		// 	// return context.redirect();	// Redirect, signin already set the destination.
+		switch(context.pop().select("signin",nullptr)) {
+		case 0: // signin
+			debug("---> signin");
+			if(context.signin()) {
+				context.message = _("Access denied");
+				return context.send_html_response("login");
+			}
+			throw runtime_error("Incomplete");
+			// return context.redirect();	// Redirect, signin already set the destination.
 
-		// }
+		}
 
 		context.body = Logger::Message{_("The requested action '{}' is not available in this server"), requested_action.c_str()}.c_str();
 		return context.send_html_response("error",404);

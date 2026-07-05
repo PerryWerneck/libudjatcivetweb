@@ -32,8 +32,8 @@
 
 		class UDJAT_PRIVATE Request : public HTTP::Request {
 		private:
-			const struct mg_connection *conn;
-			const struct mg_request_info *info;
+			struct mg_connection *conn;
+			struct mg_request_info *info;
 
 		public:
 
@@ -57,7 +57,14 @@
 			/// @brief The client address.
 			Udjat::String address() const override;
 
+			/// @brief redirect
+			int redirect(const char *location) const;
+
 			Udjat::String cookie(const char *name) const override;
+
+			/// @brief Show login page if available.
+			/// @return the http return code.
+			int authentication_required() const;
 
 		};
 

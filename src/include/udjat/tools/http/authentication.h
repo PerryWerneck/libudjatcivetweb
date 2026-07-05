@@ -46,6 +46,9 @@
 				/// @return String with base 64 encrypted token.
 				std::string token() const;
 
+				/// @brief Get the authentication cookie name.
+				static std::string cookie_name() noexcept;
+
 				/// @brief Reset authentication to empty state.
 				void reset() noexcept;
 

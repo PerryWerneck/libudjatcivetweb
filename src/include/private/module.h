@@ -95,6 +95,9 @@
  /// @brief Authentication handler.
  int oauthWebHandler(struct mg_connection *conn, void *cbdata);
 
+ /// @brief User information handler.
+ int userWebHandler(struct mg_connection *conn, void *cbdata);
+
  /// @brief Handler for report requests.
  //int reportWebHandler(struct mg_connection *conn, void *cbdata);
 

@@ -195,12 +195,14 @@
 			mg_set_request_handler(ctx, "/image/", (mg_request_handler) image_handler, this);
 			mg_set_request_handler(ctx, "/favicon.ico", (mg_request_handler) favicon_handler, this);
 
-			if(Authentication::available() && Config::Value<bool>{"oauth2","enable-internal",false}) {
+			if(Authentication::available() && !strcasecmp(Config::Value<string>{"authentication","engine","undefined"}.c_str(),"internal")) {
 				mg_set_request_handler(ctx, "/oauth2", oauthWebHandler, 0);
 			}
 
-			// All other requests goes to service default handler
-			// mg_set_request_handler(ctx, "/", (mg_request_handler) request_handler, this);
+			mg_set_request_handler(ctx, "/user", userWebHandler, 0);
+
+			// All other requests goes to generic handler
+			// mg_set_request_handler(ctx, "/", (mg_request_handler) generic_handler, this);
 
 		}
 
@@ -244,8 +246,8 @@
 
 				if(Logger::enabled(Logger::Trace)) {
 
-					if(Config::Value<bool>{"oauth2","enable-internal",false}) {
-						Logger::String{"OAuth2 service available on ",baseref,"/oauth2"}.write(Logger::Trace,"civetweb");
+					if(Authentication::available() && !strcasecmp(Config::Value<string>{"authentication","engine","undefined"}.c_str(),"internal")) {
+						Logger::String{"Authentication service available on ",baseref,"/oauth2"}.trace();
 					}
 
 					if(interfaces.empty()) {

@@ -25,6 +25,7 @@
  #include <udjat/defs.h>
  #include <private/request.h>
  #include <udjat/tools/http/request.h>
+ #include <udjat/tools/http/timestamp.h>
  #include <udjat/tools/request.h>
  #include <udjat/tools/intl.h>
  #include <udjat/tools/logger.h>
@@ -45,7 +46,8 @@
 		Request::Request(struct mg_connection *c) : Request{c,mg_get_request_info(c)->local_uri, (unsigned int) ((PACKAGE_VERSION_MAJOR * 100) + PACKAGE_VERSION_MINOR)} {
 
 			// Extract API version.
-			if(pop("/api")) {
+			api_call = pop("/api"); 
+			if(api_call) {
 				const char *reqpath = path();
 				if(*reqpath != '/') {
 					throw runtime_error(Logger::String{"Unexpected path: '",reqpath,"', requests should be in the format /api/[",apiver,"]/interface"});
@@ -69,7 +71,7 @@
 		}
 
 		Request::Request(struct mg_connection *c, const char *path, unsigned int ver)
-			: HTTP::Request{path,mg_get_request_info(c)->request_method}, conn{c}, info{mg_get_request_info(c)} {
+			: HTTP::Request{path,mg_get_request_info(c)->request_method}, conn{c}, info{(mg_request_info *) mg_get_request_info(c)} {
 
 			apiver = ver;
 
@@ -186,6 +188,54 @@
 
 			return "";
 		}
+
+		int Request::redirect(const char *location) const {
+
+			mg_response_header_start(conn, 303);
+			mg_response_header_add(conn, "Location",c_str(),strlen(location));
+			mg_response_header_add(conn, "Content-Length", "0", -1);
+
+			auto auth = dynamic_pointer_cast<HTTP::Authentication>(authentication());
+			if(!auth) {
+				auth = make_shared<HTTP::Authentication>();
+			}
+
+			// Setup cookie
+			Udjat::String cookie{
+				HTTP::Authentication::cookie_name().c_str(),"=",
+				auth->token().c_str(),
+				"; path=/; Expires=",
+				HTTP::TimeStamp::to_string(auth->expires()).c_str()
+			};
+
+			debug("Cookie='",cookie,"'");
+			mg_response_header_add(conn, "Set-Cookie", cookie.c_str(),-1);
+			mg_response_header_send(conn);
+
+			return 303;
+		}
+
+		int Request::authentication_required() const {
+
+			if(!(html() && Authentication::available())) {
+				// Not HTML or no authentication, just return 'unauthorized'.	
+				return 401;
+			}
+
+			if(!strcasecmp(Config::Value<string>{"authentication","engine","undefined"}.c_str(),"internal")) {
+				return redirect("/oauth2");
+			}
+
+			auto url = Config::Value<string>{"authentication","entrypoint"};
+			if(url.empty()) {
+				// Missing authentication entrypoint, just return 401.
+				return 401;
+			}
+
+			return redirect(url.c_str());
+
+		}
+
 
 	}
 

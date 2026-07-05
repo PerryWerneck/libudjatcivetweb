@@ -49,6 +49,9 @@
 			/// @param query The query string.
 			void parse_query(const char *query);
 
+			/// @brief Is this request an API call?
+			bool api_call = false;
+
 		public:
 
 			#define TOKEN_USERNAME_LEN 40
@@ -129,6 +132,8 @@
 			virtual Udjat::String cookie(const char *name) const;
 
 			bool getProperty(const char *key, std::string &value) const override;
+
+			bool html() const noexcept override;
 
 		};
 
