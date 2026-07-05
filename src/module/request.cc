@@ -33,6 +33,7 @@
  #include <udjat/tools/configuration.h>
  #include <udjat/tools/http/authentication.h>
  #include <udjat/tools/url.h>
+ #include <udjat/tools/string.h>
  #include <ctype.h>
 
  #include <civetweb.h>
@@ -240,12 +241,14 @@
 				return redirect("/oauth2");
 			}
 
-			auto url = Config::Value<string>{"authentication","entrypoint"};
+			Config::Value<Udjat::String> url{"authentication","entrypoint"};
+
 			if(url.empty()) {
 				// Missing authentication entrypoint, just return 401.
 				return 401;
 			}
 
+			url.expand(*this);
 			return redirect(url.c_str());
 
 		}
