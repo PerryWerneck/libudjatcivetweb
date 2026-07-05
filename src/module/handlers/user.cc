@@ -52,6 +52,8 @@
 
  int userWebHandler(struct mg_connection *conn, void *cbdata) {
 
+	debug("------------------ ",__FUNCTION__," ------------------");
+
 	CivetWeb::Request request{conn};
 
 	if(!request.allow(Authentication::Guest)) {
@@ -60,6 +62,9 @@
 		return request.authentication_required();
 
 	}
+
+	debug("User is authenticated with level ",std::to_string(request.authentication()->level()),"(",request.authentication()->level(),")");
+
 
 	return 500;
  }

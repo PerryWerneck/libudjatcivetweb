@@ -191,12 +191,15 @@
 
 		int Request::redirect(const char *location) const {
 
+			debug("Redirecting to '",location,"'");
+
 			mg_response_header_start(conn, 303);
 			mg_response_header_add(conn, "Location",c_str(),strlen(location));
 			mg_response_header_add(conn, "Content-Length", "0", -1);
 
 			auto auth = dynamic_pointer_cast<HTTP::Authentication>(authentication());
 			if(!auth) {
+				debug("Building an empty authentication");
 				auth = make_shared<HTTP::Authentication>();
 			}
 
@@ -218,11 +221,22 @@
 		int Request::authentication_required() const {
 
 			if(!(html() && Authentication::available())) {
-				// Not HTML or no authentication, just return 'unauthorized'.	
+				// Not HTML or no authentication, just return 'unauthorized'.
+				debug("API call or not html request, returning 401");
 				return 401;
 			}
 
+			debug("HTML request, Redirecting to login page");
 			if(!strcasecmp(Config::Value<string>{"authentication","engine","undefined"}.c_str(),"internal")) {
+
+				debug("request_uri='",mg_get_request_info(conn)->request_uri,"'");
+
+				// Logger::String{"Empty html request, sending login page"}.trace();
+				// OAuth::Context context{conn};
+				// context.action = "signin";
+				// context.set(HTTP::Authentication::LoginPage);
+				// return context.send_html_response("login");
+
 				return redirect("/oauth2");
 			}
 
