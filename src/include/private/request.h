@@ -66,6 +66,10 @@
 			/// @return the http return code.
 			int authentication_required() const;
 
+			/// @brief Send response to server.
+			/// @return code
+			int send(int code, const char *text) const override;
+
 		};
 
 

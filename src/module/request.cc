@@ -219,13 +219,52 @@
 			return 303;
 		}
 
+		int Request::send(int code, const char *text) const {
+
+			auto length = strlen(text);
+
+			mg_response_header_start(conn, code);
+			mg_response_header_add(conn, "Content-Length", std::to_string(length).c_str(), -1);
+			mg_response_header_add(conn, "Content-Type",std::to_string(mimetype()),-1);
+
+			auto auth = dynamic_pointer_cast<HTTP::Authentication>(authentication());
+
+			if(auth) {
+				// Setup cookie
+				Udjat::String cookie{
+					HTTP::Authentication::cookie_name().c_str(),"=",
+					auth->token().c_str(),
+					"; path=/; Expires=",
+					HTTP::TimeStamp::to_string(auth->expires()).c_str()
+				};
+				debug("Cookie='",cookie,"'");
+				mg_response_header_add(conn, "Set-Cookie", cookie.c_str(),-1);
+			}
+#ifdef DEBUG
+			else {
+				debug("Sending response ",code," without authentication cookie");
+			}
+#endif // DEBUG
+
+			mg_response_header_add(conn, "Cache-Control","no-cache, no-store, must-revalidate, private, max-age=0",-1);
+			mg_response_header_add(conn, "Expires", "0",-1);
+
+			mg_response_header_send(conn);
+
+			mg_write(conn, text, length);
+
+			return code;
+		}
+
 		int Request::authentication_required() const {
 
 			if(!(html() && Authentication::available())) {
 				// Not HTML or no authentication, just return 'unauthorized'.
 				debug("API call or not html request, returning 401");
-				return 401;
+				return failed(401,strerror(ENOTSUP),_("Authentication required, but no authentication engine is available"));
 			}
+
+			return failed(401,"Incomplete",strerror(ENOTSUP));
 
 			debug("HTML request, Redirecting to login page");
 			if(!strcasecmp(Config::Value<string>{"authentication","engine","undefined"}.c_str(),"internal")) {

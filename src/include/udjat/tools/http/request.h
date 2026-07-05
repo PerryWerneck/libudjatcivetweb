@@ -52,6 +52,10 @@
 			/// @brief Is this request an API call?
 			bool api_call = false;
 
+			/// @brief Send response to server.
+			/// @return code
+			virtual int send(int code, const char *text) const = 0;
+
 		public:
 
 			#define TOKEN_USERNAME_LEN 40
@@ -134,6 +138,10 @@
 			bool getProperty(const char *key, std::string &value) const override;
 
 			bool html() const noexcept override;
+
+			/// @brief Show error page.
+			/// @return code;
+			int failed(int code, const char *message = "", const char *body = "") const;
 
 		};
 
