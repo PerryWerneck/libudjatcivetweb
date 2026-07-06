@@ -40,11 +40,15 @@
 			} status;
 			
 			String path;
-			String redirect_uri;
+			String uri;			///< @brief The URI who originated the authentication request.
 			String code;
+			uint16_t sequencial = 0;
 
  			/// @brief Sent HTTP header.
- 			virtual void send_header() const = 0;
+ 			virtual void send_header(bool cookie = true) const = 0;
+
+			/// @brief Do a POST request.
+			virtual String post(const char *url, const char *payload) const = 0;
 
 		public:
 
@@ -72,6 +76,10 @@
 			/// @param tmplt The template name.
 			/// @return The HTTP status code.
 			int send_template(int code, const char *action, const char *tmplt);
+
+			inline int send_template(int code, const char *tmplt) {
+				return send_template(code,"",tmplt);
+			}
 
 			/// @brief Send HTML response using current context.
 			/// @param tmplt The template name.

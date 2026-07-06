@@ -44,7 +44,9 @@
 
 			int send_redirect_response(const char *location) const override;
 
-			void send_header() const override;
+			void send_header(bool cookie = true) const override;
+
+			String post(const char *url, const char *payload) const override;
 
 		};
 

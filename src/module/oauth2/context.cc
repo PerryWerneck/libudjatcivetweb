@@ -30,7 +30,11 @@
  #include <private/oauth.h>
  #include <udjat/tools/http/timestamp.h>
  #include <udjat/tools/configuration.h>
+ #include <udjat/tools/memory.h>
+ #include <udjat/tools/url.h>
  #include <string>
+ #include <private/client.h>
+ #include <sstream>
 
  using namespace Udjat;
  using namespace std;
@@ -56,6 +60,8 @@
 
 				size_t sz = decrypt(buffer,decoded,sizeof(buffer)-1);
 				decoded[sz] = 0;
+
+				sequencial = *((uint16_t *) decoded);
 
 				char *ptr = (buffer+sizeof(uint16_t));
 				debug("Decripted state ----> '",ptr,"'");
@@ -111,11 +117,11 @@
 		mg_response_header_start(conn, 303);
 		mg_response_header_add(conn, "Location",location,-1);
 		mg_response_header_add(conn, "Content-Length", "0", -1);
-		send_header();
+		send_header(false);
 		return 303;
 	}
 
-	void CivetWeb::OAuthContext::send_header() const {
+	void CivetWeb::OAuthContext::send_header(bool cookie) const {
 
 		time_t expires = Authentication::expires();
 		int max_age = expires - time(0);
@@ -128,19 +134,45 @@
 			mg_response_header_add(conn, "Expires", "0", -1);
 		}
 
-		// Setup cookie
-		// String cookie{
-		// 	cookie_name.c_str(),"=",
-		// 	token().c_str(),
-		// 	"; path=/oauth2; Expires=",
-		// 	HTTP::TimeStamp::to_string(expires).c_str()
-		// };
-		// mg_response_header_add(conn, "Set-Cookie", cookie.c_str(),-1);
+		if(cookie) {
+			// Setup cookie
+			String str{
+				cookie_name().c_str(),"=",
+				token().c_str(),
+				"; path=/oauth2; Expires=",
+				HTTP::TimeStamp::to_string(expires).c_str()
+			};
+			mg_response_header_add(conn, "Set-Cookie", str.c_str(),-1);
+		}
 
 		mg_response_header_send(conn);
 
 	}
 
+	String CivetWeb::OAuthContext::post(const char *url, const char *payload) const {
+
+		CivetWeb::Client client{URL{url}};
+		stringstream response;
+
+		auto code = client.perform(
+			HTTP::Post, 
+			payload, 
+			[&response](uint64_t, uint64_t, const void *data, size_t len){
+				response.write((const char *) data,len);
+				return false;
+			}
+		);
+
+		debug("code=",code);
+		debug("Response=",response.str().c_str());
+
+		if(code != 200) {
+			throw runtime_error(String{"HTTP error",code," posting to ",url});
+		}
+
+		return response.str();
+
+	}
 
  }
 		

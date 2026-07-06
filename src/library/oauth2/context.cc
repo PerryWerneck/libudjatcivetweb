@@ -36,6 +36,7 @@
  #include <udjat/tools/intl.h>
  #include <udjat/tools/configuration.h>
  #include <udjat/tools/http/template.h>
+ #include <udjat/tools/http/method.h>
 
  using namespace Udjat;
  using namespace std;
@@ -88,16 +89,18 @@
 
 		if(!strcasecmp(key,"authentication-state")) {
 
-			size_t szBuffer = redirect_uri.size()+sizeof(uint16_t)+1;
+			size_t szBuffer = uri.size()+sizeof(uint16_t)+1;
 			char * buffer[szBuffer];
 			memset(buffer,0,szBuffer);
 
-			{
+			if(!this->sequencial) {
 				static uint16_t sequencial = 0;
-				*((uint16_t *) buffer) = sequencial++;
+				const_cast<OAuth::Context *>(this)->sequencial = ++sequencial;
 			}
 
-			memcpy((buffer+sizeof(uint16_t)),redirect_uri.c_str(),redirect_uri.size());
+			*((uint16_t *) buffer) = this->sequencial;
+
+			memcpy((buffer+sizeof(uint16_t)),uri.c_str(),uri.size());
 			buffer[szBuffer] = 0;			
 
 			value = encrypt(buffer,szBuffer).escape();
@@ -106,7 +109,7 @@
 		}
 
 		if(!strcasecmp(key,"redirect-uri")) {
-			value = redirect_uri;
+			value = uri;
 			return true;
 		}
 
@@ -162,6 +165,10 @@
 			if(!strcasecmp(key,cfg.key)) {
 				value = Config::Value<string>{"authentication",key,cfg.def};
 				debug(key,"='",value.c_str(),"'");
+				if(value.empty()) {
+					Logger::String{"Missing required value '",key,"' in authentication engine configuration"}.error();
+					throw runtime_error(_("Invalid authentication engine configuration. Please check server settings."));
+				}
 				return true;
 			}
 		}
@@ -171,8 +178,8 @@
 			return true;
 		}
 
-		throw runtime_error(Logger::String{"Required attribute '",key,"' is undefined"});
-		return false;
+		Logger::String{"Missing required value '",key,"' in authentication engine configuration"}.error();
+		throw runtime_error(_("Invalid authentication engine configuration. Please check server settings."));
 	}
 
 	int OAuth::Context::handle() {
@@ -190,16 +197,47 @@
 
 			debug("Requested action: '",action.c_str(),"'");
 
-			// switch(action.select("signin",nullptr)) {
-			// case 0: // signin
-			// 	debug("---> signin");
-			// 	if(signin()) {
-			// 		message(_("Access denied"));
-			// 		return send_template(200,"signin","login");
-			// 	}
-			// 	throw runtime_error("Incomplete");
+			switch(action.select("callback",nullptr)) {
+			case 0: // callback
+				debug("---> callback");
+				debug("uri=",uri.c_str())
+				debug("code=",code.c_str())
 
-			// }
+				if(code.empty()) {
+					message(strerror(EPERM),_("Invalid response from authentication server"));
+					return send_template(400,"error");
+				}
+
+				Config::Value<String> url{"authentication","get-token-url",""};
+				url.expand([this](const char *key, std::string &value) {
+					return this->getProperty(key,value);
+				});
+				if(url.empty()) {
+					Logger::String{"Missing required value for authentication attribute 'get-token-url'"}.error();
+					message(strerror(EPERM),_("Invalid authentication engine configuration. Please check server settings."));
+					return send_template(400,"error");
+				}
+
+				Config::Value<String> payload{"authentication","get-token-payload",""};
+				payload.expand([this](const char *key, std::string &value) {
+					return this->getProperty(key,value);
+				});
+
+				if(payload.empty()) {
+					Logger::String{"Missing required value for authentication attribute 'get-token-payload'"}.error();
+					message(strerror(EPERM),_("Invalid authentication engine configuration. Please check server settings."));
+					return send_template(400,"error");
+				}
+
+				HTTP::Method method = HTTP::MethodFactory(Config::Value<string>{"authentication","get-token-method","post"}.c_str());
+
+				debug("Redirect to: ",url.c_str());
+				debug("Payload: ",payload.c_str());
+				debug("Method: ",std::to_string(method));
+
+				throw runtime_error("Incomplete");
+
+			}
 
 			// Unknow request, send error page.
 			message(
@@ -213,7 +251,7 @@
 			Logger::String{e.what()}.error();
 			Authentication::reset();	
 			message(_("Internal error processing request"),e.what());
-			return send_template(404,"","error");
+			return send_template(404,"error");
 
 		}
 
@@ -229,11 +267,6 @@
 
 			if(!strcasecmp(key,"action")) {
 				value = String{"/oauth2/",action};
-				return true;
-			}
-
-			if(!strcasecmp(key,"code")) {
-				value = std::to_string(code);
 				return true;
 			}
 
