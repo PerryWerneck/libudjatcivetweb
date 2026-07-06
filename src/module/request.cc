@@ -34,6 +34,7 @@
  #include <udjat/tools/http/authentication.h>
  #include <udjat/tools/url.h>
  #include <udjat/tools/string.h>
+ #include <private/oauth.h>
  #include <ctype.h>
 
  #include <civetweb.h>
@@ -298,7 +299,8 @@
 				return failed(500,strerror(ENOTSUP),_("The authentication endpoint is undefined"));
 			}
 
-			endpoint.expand(*this);
+			endpoint.expand(CivetWeb::OAuthContext{conn});
+
 			debug("--------------------> Redirecting to '",endpoint.c_str());
 			return redirect(endpoint.c_str());
 

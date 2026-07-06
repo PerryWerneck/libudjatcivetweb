@@ -25,13 +25,14 @@
 
  #include <udjat/defs.h>
  #include <udjat/tools/string.h>
+ #include <udjat/tools/abstract/object.h>
  #include <udjat/tools/http/authentication.h>
  
  namespace Udjat {
 
 	namespace OAuth {
 
-		class UDJAT_API Context : public HTTP::Authentication {
+		class UDJAT_API Context : public HTTP::Authentication, public Abstract::Object {
 		protected:
 			struct {
 				String message;											///< @brief The Message for client.
@@ -43,12 +44,12 @@
  			/// @brief Sent HTTP header.
  			virtual void send_header() const = 0;
 
-			virtual bool getProperty(const char *key, std::string &value) const;
-
 		public:
 
 			Context(const char *path);
 			virtual ~Context();
+
+			bool getProperty(const char *key, std::string &value) const override;
 
 			inline bool empty() const noexcept {
 				return path.empty();

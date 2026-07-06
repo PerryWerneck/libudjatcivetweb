@@ -100,7 +100,7 @@
 			memcpy((buffer+sizeof(uint16_t)),redirect_uri.c_str(),redirect_uri.size());
 			buffer[szBuffer] = 0;			
 
-			value = encrypt(buffer,szBuffer);
+			value = encrypt(buffer,szBuffer).escape();
 
 			return true;
 		}
@@ -143,9 +143,13 @@
 				STRINGIZE_VALUE_OF(PRODUCT_NAME) 
 			},
 			{ 
-				"client_id",	// Legacy! 
+				"client-id",
 				STRINGIZE_VALUE_OF(PRODUCT_NAME) 
 			},
+			// { 
+			// 	"client_id",	// Legacy! 
+			// 	STRINGIZE_VALUE_OF(PRODUCT_NAME) 
+			// },
 			{ 
 				"package-version", 
 				PACKAGE_VERSION 
@@ -156,7 +160,8 @@
 
 		for(const auto &cfg : cfgvals) {
 			if(!strcasecmp(key,cfg.key)) {
-				value = Config::Value<string>{LOG_DOMAIN,key,cfg.def};
+				value = Config::Value<string>{"authentication",key,cfg.def};
+				debug(key,"='",value.c_str(),"'");
 				return true;
 			}
 		}
@@ -166,6 +171,7 @@
 			return true;
 		}
 
+		throw runtime_error(Logger::String{"Required attribute '",key,"' is undefined"});
 		return false;
 	}
 
@@ -180,11 +186,9 @@
 			}
 
 			debug("--------------- Checking for options ---------------");
-			String requested_action = pop();
+			String action = pop();
 
-			debug("Requested action: '",requested_action.c_str(),"'");
-
-			auto action = pop();
+			debug("Requested action: '",action.c_str(),"'");
 
 			// switch(action.select("signin",nullptr)) {
 			// case 0: // signin
@@ -200,7 +204,7 @@
 			// Unknow request, send error page.
 			message(
 				_("Unknonw request"),
-				Logger::Message{_("The requested action '{}' is not available in this server"), action.c_str()}.c_str()
+				Logger::Message{_("The requested action '{}' is not available on this server"), action.c_str()}.c_str()
 			);
 			return send_template(404,"","error");
 
