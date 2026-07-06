@@ -26,6 +26,7 @@
  #include <udjat/defs.h>
  #include <udjat/tools/http/oauth.h>
  #include <udjat/tools/http/mimetype.h>
+ #include <udjat/authentication.h>
  #include <private/oauth.h>
  #include <udjat/tools/http/timestamp.h>
  #include <udjat/tools/configuration.h>
@@ -38,8 +39,29 @@
 
 	CivetWeb::OAuthContext::OAuthContext(struct mg_connection *c) : OAuth::Context{mg_get_request_info(c)->local_uri}, conn{c} {
 
-		// TODO: Check for 'state' parameter.
+		auto query_string = mg_get_request_info(conn)->query_string;
+		if (query_string) {
+			char buffer[4096];
 
+			memset(buffer,0,4096);
+			if(mg_get_var(query_string,strlen(query_string), "code", buffer, sizeof(buffer)-1) >= 0) {
+				this->code = buffer;
+				debug("Code=",this->code.c_str());
+			}
+
+			memset(buffer,0,4096);
+			if(mg_get_var(query_string,strlen(query_string), "state", buffer, sizeof(buffer)-1) >= 0) {
+				char decoded[4096];
+				memset(decoded,0,sizeof(decoded));
+
+				size_t sz = decrypt(buffer,decoded,sizeof(buffer)-1);
+				decoded[sz] = 0;
+
+				char *ptr = (buffer+sizeof(uint16_t));
+				debug("Decripted state ----> '",ptr,"'");
+			}
+
+		}
 	}
 
 	CivetWeb::OAuthContext::~OAuthContext() {

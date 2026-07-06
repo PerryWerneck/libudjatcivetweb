@@ -37,15 +37,27 @@
  #include <udjat/defs.h>
  #include <private/module.h>
  #include <private/oauth.h>
+ #include <private/request.h>
+ #include <udjat/tools/intl.h>
  
  using namespace Udjat;
  
  int oauthWebHandler(struct mg_connection *conn, void *) {
 
-	debug("---- ",__FUNCTION__," ----");
- 	CivetWeb::OAuthContext context{conn};
+	try {
 
-	return context.handle();
+		debug("---- ",__FUNCTION__," ----");
+		
+		CivetWeb::OAuthContext context{conn};
+		return context.handle();
+
+	} catch(const std::exception &e) {
+
+		CivetWeb::Request request{conn};
+		return request.failed(500,_("Unexpected error during login process"),e.what());
+
+
+	}
 
  }
 

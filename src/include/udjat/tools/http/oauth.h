@@ -38,8 +38,10 @@
 				String message;											///< @brief The Message for client.
 				String body;
 			} status;
+			
 			String path;
 			String redirect_uri;
+			String code;
 
  			/// @brief Sent HTTP header.
  			virtual void send_header() const = 0;
