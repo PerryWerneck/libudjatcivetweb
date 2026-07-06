@@ -146,13 +146,11 @@
 			return info->query_string;
 		}
 
-		bool Request::getProperty(const char *key, std::string &value) const {
+		Udjat::String Request::uri() const {
+			return mg_get_request_info(conn)->local_uri;
+		}
 
-			if(!strcasecmp(key,"authentication-state")) {
-				auto auth = authentication();
-				value = auth->encrypt(Udjat::String{"P",mg_get_request_info(conn)->local_uri}.c_str());
-				return true;
-			}
+		bool Request::getProperty(const char *key, std::string &value) const {
 
 			if(!strcasecmp(key,"redirect-uri")) {
 				Udjat::String uri{

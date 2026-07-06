@@ -54,11 +54,8 @@
 			return true;
 		}
 
-		if(!strcasecmp(key,"authentication-state")) {
-			auto auth = authentication();
-			auto addr = address();
-			debug("Creating state from '",addr.c_str(),"'");
-			value = auth->encrypt(Udjat::String{"A",addr.c_str()}.c_str());
+		if(!strcasecmp(key,"redirect-uri")) {
+			value = uri();
 			return true;
 		}
 

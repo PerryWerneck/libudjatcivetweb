@@ -86,6 +86,30 @@
 			return true;
 		}
 
+		if(!strcasecmp(key,"authentication-state")) {
+
+			size_t szBuffer = redirect_uri.size()+sizeof(uint16_t)+1;
+			char * buffer[szBuffer];
+			memset(buffer,0,szBuffer);
+
+			{
+				static uint16_t sequencial = 0;
+				*((uint16_t *) buffer) = sequencial++;
+			}
+
+			memcpy((buffer+sizeof(uint16_t)),redirect_uri.c_str(),redirect_uri.size());
+			buffer[szBuffer] = 0;			
+
+			value = encrypt(buffer,szBuffer);
+
+			return true;
+		}
+
+		if(!strcasecmp(key,"redirect-uri")) {
+			value = redirect_uri;
+			return true;
+		}
+
 		static const struct {
 			const char *key;
 			const char *def;

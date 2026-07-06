@@ -1,7 +1,7 @@
 /* SPDX-License-Identifier: LGPL-3.0-or-later */
 
 /*
- * Copyright (C) 2023 Perry Werneck <perry.werneck@gmail.com>
+ * Copyright (C) 2026 Perry Werneck <perry.werneck@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published
@@ -17,35 +17,38 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
- /**
-  * @brief Implements simple oauth2 authenticator.
-  *
-  */
-
- // References:
-
- //	https://www.tutorialspoint.com/oauth2.0/oauth2.0_obtaining_an_access_token.htm
- // https://www.freebsd.org/doc/en/articles/pam/pam-essentials.html
-
-
- #include <config.h>
-
- #undef LOG_DOMAIN
- #define LOG_DOMAIN "oauthd"
- #include <udjat/tools/logger.h>
+ #pragma once
 
  #include <udjat/defs.h>
- #include <private/module.h>
- #include <private/oauth.h>
- 
- using namespace Udjat;
- 
- int oauthWebHandler(struct mg_connection *conn, void *) {
+ #include <udjat/tools/http/authentication.h>
+ #include <udjat/tools/http/oauth.h>
+ #include <civetweb.h>
 
-	debug("---- ",__FUNCTION__," ----");
- 	CivetWeb::OAuthContext context{conn};
+ namespace Udjat {
 
-	return context.handle();
+	namespace CivetWeb {
+
+		class UDJAT_PRIVATE OAuthContext : public OAuth::Context {
+
+		private:
+			struct mg_connection *conn;
+
+		public:
+			OAuthContext(struct mg_connection *c);
+			
+			~OAuthContext();
+
+			bool getProperty(const char *key, std::string &value) const override;
+
+			int send_html_response(int code, const char *text) const override;
+
+			int send_redirect_response(const char *location) const override;
+
+			void send_header() const override;
+
+		};
+
+	}
 
  }
 

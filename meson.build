@@ -163,6 +163,7 @@ module_src = [
   'src/module/handlers/product.cc',
   'src/module/handlers/user.cc',
   'src/module/oauth2/handler.cc',
+  'src/module/oauth2/context.cc',
   'src/module/connection.cc',
   'src/module/request.cc',
   'src/module/connection.cc',

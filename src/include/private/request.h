@@ -57,6 +57,9 @@
 			/// @brief The client address.
 			Udjat::String address() const override;
 
+			/// @brief The request URI.
+			Udjat::String uri() const override;
+
 			/// @brief redirect
 			int redirect(const char *location) const;
 

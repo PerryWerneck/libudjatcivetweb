@@ -127,6 +127,9 @@
 			/// @brief The client address.
 			virtual Udjat::String address() const = 0;
 
+			/// @brief The request URI.
+			virtual Udjat::String uri() const = 0;
+
 			/// @brief The request mime-type.
 			MimeType mimetype() const noexcept;
 
