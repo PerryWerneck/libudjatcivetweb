@@ -18,6 +18,11 @@
  */
 
  #include <config.h>
+
+ #undef LOG_DOMAIN
+ #define LOG_DOMAIN "httpd"
+ #include <udjat/tools/logger.h>
+
  #include <stdexcept>
  #include <udjat/tools/http/server.h>
  #include <udjat/tools/http/handler.h>
@@ -44,7 +49,7 @@
 
 		// Check for secondary instance.
 		if(instance) {
-			clog << "httpd\tBuilding a new HTTP server instance" << endl;
+			Logger::String{"Building a new HTTP server instance"}.trace();
 		} else {
 			instance = this;
 		}
@@ -57,9 +62,9 @@
 	HTTP::Server::~Server() {
 		if(instance == this) {
 			instance = nullptr;
-			cout << "httpd\tDeleting default HTTP server instance" << endl;
+			Logger::String{"Deleting default HTTP server instance"}.trace();
 		} else {
-			clog << "httpd\tDeleting non default HTTP server instance" << endl;
+			Logger::String{"Deleting non default HTTP server instance"}.trace();
 		}
 	}
 

@@ -37,6 +37,8 @@
  #include <udjat/tools/configuration.h>
  #include <udjat/tools/http/template.h>
  #include <udjat/tools/http/method.h>
+ #include <udjat/tools/url.h>
+ #include <private/client.h>
 
  using namespace Udjat;
  using namespace std;
@@ -50,6 +52,14 @@
 		pop();	// Remove '/oauth2'
 
 		debug("---- Build OAuth2 context for '",path.c_str(),"'");	
+
+#ifdef DEBUG
+		{
+			string v;
+			getProperty("client-id",v);
+			getProperty("client-secret",v);
+		}
+#endif
 
 	}
 
@@ -149,10 +159,10 @@
 				"client-id",
 				STRINGIZE_VALUE_OF(PRODUCT_NAME) 
 			},
-			// { 
-			// 	"client_id",	// Legacy! 
-			// 	STRINGIZE_VALUE_OF(PRODUCT_NAME) 
-			// },
+			{ 
+				"client-secret",
+				"" 
+			},
 			{ 
 				"package-version", 
 				PACKAGE_VERSION 
@@ -178,6 +188,11 @@
 			return true;
 		}
 
+		if(!strcasecmp(key,"authentication-code")) {
+			value = code;
+			return true;
+		}
+
 		Logger::String{"Missing required value '",key,"' in authentication engine configuration"}.error();
 		throw runtime_error(_("Invalid authentication engine configuration. Please check server settings."));
 	}
@@ -197,7 +212,7 @@
 
 			debug("Requested action: '",action.c_str(),"'");
 
-			switch(action.select("callback",nullptr)) {
+			switch(action.select("callback",NULL)) {
 			case 0: // callback
 				debug("---> callback");
 				debug("uri=",uri.c_str())
@@ -209,6 +224,7 @@
 				}
 
 				Config::Value<String> url{"authentication","get-token-url",""};
+				debug("get-token-url='",url.c_str(),"'");
 				url.expand([this](const char *key, std::string &value) {
 					return this->getProperty(key,value);
 				});
@@ -219,6 +235,7 @@
 				}
 
 				Config::Value<String> payload{"authentication","get-token-payload",""};
+				debug("get-token-payload='",payload.c_str(),"'");
 				payload.expand([this](const char *key, std::string &value) {
 					return this->getProperty(key,value);
 				});
@@ -231,9 +248,14 @@
 
 				HTTP::Method method = HTTP::MethodFactory(Config::Value<string>{"authentication","get-token-method","post"}.c_str());
 
-				debug("Redirect to: ",url.c_str());
+				debug("URL: ",url.c_str());
 				debug("Payload: ",payload.c_str());
 				debug("Method: ",std::to_string(method));
+
+				auto response = post(url.c_str(),payload.c_str());
+
+				debug("Got response '",response.c_str(),"'");
+
 
 				throw runtime_error("Incomplete");
 
@@ -241,7 +263,7 @@
 
 			// Unknow request, send error page.
 			message(
-				_("Unknonw request"),
+				_("Unrecognized request"),
 				Logger::Message{_("The requested action '{}' is not available on this server"), action.c_str()}.c_str()
 			);
 			return send_template(404,"","error");
@@ -250,7 +272,7 @@
 
 			Logger::String{e.what()}.error();
 			Authentication::reset();	
-			message(_("Internal error processing request"),e.what());
+			message(_("We're sorry, but we encountered an error while processing your request."),e.what());
 			return send_template(404,"error");
 
 		}
@@ -264,6 +286,17 @@
 
 		// Last, expand request arguments.
 		text.expand([this,code,action](const char *key, std::string &value) {
+
+			if(!strcasecmp(key,"code")) {
+				Logger::String{"Using obsolete '%{code}' on template"}.warning();
+				value = std::to_string(code);
+				return true;
+			}
+
+			if(!strcasecmp(key,"error-code")) {
+				value = std::to_string(code);
+				return true;
+			}
 
 			if(!strcasecmp(key,"action")) {
 				value = String{"/oauth2/",action};
