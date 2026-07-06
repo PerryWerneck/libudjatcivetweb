@@ -45,99 +45,122 @@
  #include <udjat/tools/string.h>
  #include <udjat/authentication.h>
  #include <udjat/tools/http/timestamp.h>
+ #include <udjat/tools/http/oauth.h>
  #include <udjat/tools/application.h>
  #include <string>
- #include <private/oauthd.h>
 
  using namespace Udjat;
  using namespace std;
 
- OAuth::Context::Context(struct mg_connection *c) : conn{c}, path{mg_get_request_info(c)->local_uri} {
- 
-	while(path[0] == '/') {
-		path.erase(0,1);
-	}
+ class UDJAT_PRIVATE Context : public OAuth::Context {
+	private:
+		struct mg_connection *conn;
 
-	debug("Request path: '",path.c_str(),"'");
+	public:
+		Context(struct mg_connection *c) : OAuth::Context{mg_get_request_info(c)->local_uri}, conn{c} {
 
-	// Get session cookie
-	{
-		cookie_name = String{"oauth-session"};
-		const char *cookie = mg_get_header(conn,"Cookie");
-		if(cookie && *cookie) {
-			char buffer[4096];
-			int length = mg_get_cookie(cookie,cookie_name.c_str(),buffer,4095);
-			if(length > 0) {
-				buffer[length] = 0;
-				Authentication::token(buffer);
-			}
+		// Get session cookie
+		// {
+		// 	cookie_name = String{"oauth-session"};
+		// 	const char *cookie = mg_get_header(conn,"Cookie");
+		// 	if(cookie && *cookie) {
+		// 		char buffer[4096];
+		// 		int length = mg_get_cookie(cookie,cookie_name.c_str(),buffer,4095);
+		// 		if(length > 0) {
+		// 		buffer[length] = 0;
+		// 		Authentication::token(buffer);
+		// 	}
+		// 
+
 		}
-	}
+		
+		~Context() override {
 
- }
+		}
 
- String OAuth::Context::pop() {
+		bool getProperty(const char *key, std::string &value) const override {
 
-	if(path.empty()) {
-		return "";
-	}
+			if(OAuth::Context::getProperty(key,value)) {
+				return true;
+			}
 
-	auto pos = path.find('/');
-	if(pos == string::npos) {
-		String rc = path;
-		path.clear();
-		return rc;
-	}
+			// Extract options from request.
+			const struct mg_request_info *req_info = mg_get_request_info(conn);
+			if (req_info->query_string != NULL) {
 
-	String rc = path.substr(0, pos);
-	path.erase(0,pos+1);
+				char buffer[4096];
+				int result = mg_get_var(
+								req_info->query_string, 
+								strlen(req_info->query_string), 
+								key, 
+								buffer, 
+								sizeof(buffer)
+						);
+						
+				if(result > 0) {
+					value = buffer;
+					return true;
+				}
 
-	return rc;
- }
+			}
+
+			return false;
+
+		}
+
+		int send_html_response(int code, const char *text) const override {
+			size_t szText = strlen(text);
+			mg_response_header_start(conn, code);
+			mg_response_header_add(conn, "Content-Type",std::to_string(MimeType::html),-1);
+			mg_response_header_add(conn, "Content-Length", std::to_string(szText).c_str(), -1);
+			send_header();
+			mg_write(conn, text, szText);
+			return code;
+		}
+
+ 		int send_redirect_response(const char *location) const override {
+			mg_response_header_start(conn, 303);
+			mg_response_header_add(conn, "Location",location,-1);
+			mg_response_header_add(conn, "Content-Length", "0", -1);
+			send_header();
+			return 303;
+		}
+
+ 		void send_header() const override {
+
+			time_t expires = Authentication::expires();
+			int max_age = expires - time(0);
+
+			if(Config::Value<bool>("oauth","allow-cache",true) && max_age > 0) {
+				mg_response_header_add(conn, "Cache-Control", String{"private, max-age=",max_age}.c_str(),-1);
+				mg_response_header_add(conn, "Expires", HTTP::TimeStamp{expires}.to_string().c_str(), -1);
+			} else {
+				mg_response_header_add(conn, "Cache-Control","no-cache, no-store, must-revalidate, private, max-age=0",-1);
+				mg_response_header_add(conn, "Expires", "0", -1);
+			}
+
+			// Setup cookie
+			// String cookie{
+			// 	cookie_name.c_str(),"=",
+			// 	token().c_str(),
+			// 	"; path=/oauth2; Expires=",
+			// 	HTTP::TimeStamp::to_string(expires).c_str()
+			// };
+			// mg_response_header_add(conn, "Set-Cookie", cookie.c_str(),-1);
+
+			mg_response_header_send(conn);
+
+		}
+
+
+ };
 
  int oauthWebHandler(struct mg_connection *conn, void *) {
 
-	OAuth::Context context{conn};
-	context.pop();	// Remove '/oauth2'
+	debug("---- ",__FUNCTION__);
+	Context context{conn};
 
-	try {
-
-		if(context.path.empty()) {
-			Logger::String{"Empty html request, sending login page"}.trace();
-			context.action = "signin";
-			context.set(HTTP::Authentication::LoginPage);
-			return context.send_html_response("login");
-		}
-
-		debug("--------------- Checking for options ---------------");
-		String requested_action = context.pop();
-
-		debug("Requested action: '",requested_action.c_str(),"'");
-
-		switch(context.pop().select("signin",nullptr)) {
-		case 0: // signin
-			debug("---> signin");
-			if(context.signin()) {
-				context.message = _("Access denied");
-				return context.send_html_response("login");
-			}
-			throw runtime_error("Incomplete");
-			// return context.redirect();	// Redirect, signin already set the destination.
-
-		}
-
-		context.body = Logger::Message{_("The requested action '{}' is not available in this server"), requested_action.c_str()}.c_str();
-		return context.send_html_response("error",404);
-
-	} catch(const std::exception &e) {
-
-		Logger::String{e.what()}.error();
-		context.Authentication::reset();	
-		context.message = _("Internal error processing request");
-		context.body = e.what();
-		return context.send_html_response("error",500);
-
-	}
+	return context.handle();
 
 	// try {
 
@@ -258,12 +281,4 @@
  	// return ::send(conn,Response{mimetype,code,message.c_str()});
 
  }
-
-// 	debug("OAuth handler exit with error ",code);
-// 	/// @brief Customized error response.
-
-
-//  }
-
-//  #endif // HAVE_LIBSSL
 

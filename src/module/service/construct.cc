@@ -195,7 +195,7 @@
 			mg_set_request_handler(ctx, "/image/", (mg_request_handler) image_handler, this);
 			mg_set_request_handler(ctx, "/favicon.ico", (mg_request_handler) favicon_handler, this);
 
-			if(Authentication::available() && !strcasecmp(Config::Value<string>{"authentication","engine","undefined"}.c_str(),"internal")) {
+			if(Authentication::available()) {
 				mg_set_request_handler(ctx, "/oauth2", oauthWebHandler, 0);
 			}
 

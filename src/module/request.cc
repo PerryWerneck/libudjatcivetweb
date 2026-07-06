@@ -146,6 +146,26 @@
 			return info->query_string;
 		}
 
+		bool Request::getProperty(const char *key, std::string &value) const {
+
+			if(!strcasecmp(key,"authentication-state")) {
+				auto auth = authentication();
+				value = auth->encrypt(Udjat::String{"P",mg_get_request_info(conn)->local_uri}.c_str());
+				return true;
+			}
+
+			if(!strcasecmp(key,"redirect-uri")) {
+				Udjat::String uri{
+					Config::Value<string>{"authentication","redirect-uri",""}.c_str(),
+					
+				};
+				value = uri.escape();
+				return true;
+			}
+
+			return HTTP::Request::getProperty(key,value);
+		}
+
 		String Request::address() const {
 
 			for(int header = 0; header < info->num_headers; header++) {
@@ -195,25 +215,8 @@
 			debug("Redirecting to '",location,"'");
 
 			mg_response_header_start(conn, 303);
-			mg_response_header_add(conn, "Location",c_str(),strlen(location));
+			mg_response_header_add(conn, "Location",location,-1);
 			mg_response_header_add(conn, "Content-Length", "0", -1);
-
-			auto auth = dynamic_pointer_cast<HTTP::Authentication>(authentication());
-			if(!auth) {
-				debug("Building an empty authentication");
-				auth = make_shared<HTTP::Authentication>();
-			}
-
-			// Setup cookie
-			Udjat::String cookie{
-				HTTP::Authentication::cookie_name().c_str(),"=",
-				auth->token().c_str(),
-				"; path=/; Expires=",
-				HTTP::TimeStamp::to_string(auth->expires()).c_str()
-			};
-
-			debug("Cookie='",cookie,"'");
-			mg_response_header_add(conn, "Set-Cookie", cookie.c_str(),-1);
 			mg_response_header_send(conn);
 
 			return 303;
@@ -258,37 +261,48 @@
 
 		int Request::authentication_required() const {
 
-			if(!(html() && Authentication::available())) {
-				// Not HTML or no authentication, just return 'unauthorized'.
-				debug("API call or not html request, returning 401");
-				return failed(401,strerror(ENOTSUP),_("Authentication required, but no authentication engine is available"));
+			if(!Authentication::available()) {
+				// Authentication is not available, return error 500.
+				return failed(503,strerror(ENOTSUP),_("Authentication required, but no authentication engine is available"));
 			}
 
-			return failed(401,"Incomplete",strerror(ENOTSUP));
+			if(!html()) {
+				// Not HTML or no authentication, just return 'forbidden'.
+				debug("API call or not html request, returning 403");
+
+				auto auth = authentication();
+				if(!auth || auth->level() == Authentication::None) {
+					return failed(403,strerror(EPERM),_("This resource requires an authenticated user"));
+				}
+
+				return failed(403,strerror(EPERM),_("You dont have access to this resource"));
+				
+			}
 
 			debug("HTML request, Redirecting to login page");
-			if(!strcasecmp(Config::Value<string>{"authentication","engine","undefined"}.c_str(),"internal")) {
+			// if(!strcasecmp(Config::Value<string>{"authentication","engine","undefined"}.c_str(),"internal")) {
 
-				debug("request_uri='",mg_get_request_info(conn)->request_uri,"'");
+			// 	debug("request_uri='",mg_get_request_info(conn)->request_uri,"'");
 
-				// Logger::String{"Empty html request, sending login page"}.trace();
-				// OAuth::Context context{conn};
-				// context.action = "signin";
-				// context.set(HTTP::Authentication::LoginPage);
-				// return context.send_html_response("login");
+			// 	// Logger::String{"Empty html request, sending login page"}.trace();
+			// 	// OAuth::Context context{conn};
+			// 	// context.action = "signin";
+			// 	// context.set(HTTP::Authentication::LoginPage);
+			// 	// return context.send_html_response("login");
 
-				return redirect("/oauth2");
+			// 	return redirect("/oauth2");
+			// }
+
+			Config::Value<Udjat::String> endpoint{"authentication","endpoint"};
+
+			if(endpoint.empty()) {
+				// Missing authentication entrypoint, error.
+				return failed(500,strerror(ENOTSUP),_("The authentication endpoint is undefined"));
 			}
 
-			Config::Value<Udjat::String> url{"authentication","entrypoint"};
-
-			if(url.empty()) {
-				// Missing authentication entrypoint, just return 401.
-				return 401;
-			}
-
-			url.expand(*this);
-			return redirect(url.c_str());
+			endpoint.expand(*this);
+			debug("--------------------> Redirecting to '",endpoint.c_str());
+			return redirect(endpoint.c_str());
 
 		}
 

@@ -24,94 +24,77 @@
  #pragma once
 
  #include <udjat/defs.h>
+ #include <udjat/tools/string.h>
+ #include <udjat/tools/http/authentication.h>
  
-//  #include <udjat/tools/request.h>
-//  #include <udjat/tools/value.h>
-//  #include <udjat/tools/string.h>
-//  #include <udjat/tools/logger.h>
-//  #include <map>
-//  #include <string>
-
  namespace Udjat {
 
 	namespace OAuth {
 
-// 		struct Context {
-// 			String token;				///< @brief The authentication token.
-// 			String message;				///< @brief The Message for client.
-// 			String location;			///< @brief The new location.
-// 			time_t expiration_time;		///< @brief The expiration time.
-// 		};
+		class UDJAT_API Context : public HTTP::Authentication {
+		protected:
+			struct {
+				String message;											///< @brief The Message for client.
+				String body;
+			} status;
+			String path;
 
-// 		UDJAT_API int authorize(HTTP::Request &request, Context &context);
+ 			/// @brief Sent HTTP header.
+ 			virtual void send_header() const = 0;
 
-// 		/// @brief Run 'signin'
-// 		/// @param request The request info
-// 		/// @param context The current context.
-// 		/// @return 0 if the user was authenticated.
-// 		/// @retval EPERM Access denied.
-// 		UDJAT_API int signin(HTTP::Request &request, Context &context);
+			virtual bool getProperty(const char *key, std::string &value) const;
 
-// 		/// @brief Get access token.
-// 		/// @param request The request info
-// 		/// @param context The current context.
-// 		/// @param response The response data.
-// 		/// @return 0 if the response was set.
-// 		/// @retval EPERM The authentication code is invalid.
-// 		UDJAT_API int access_token(HTTP::Request &request, Context &context, Udjat::Value &response);
+		public:
 
-// 		/// @brief OAuth2 API client
-// 		class UDJAT_API Client {
-// 		private:
+			Context(const char *path);
+			virtual ~Context();
 
-// 			#pragma pack(1)
-// 			struct Cookie {
-// 				uint8_t type = 0;
-// 				time_t expiration_time = 0;
-// 				uint32_t scopes = 7;
-// #ifdef _WIN32
-// 				union {
-// 					in_addr v4;		// https://learn.microsoft.com/en-us/windows/win32/api/winsock2/ns-winsock2-in_addr
-// 					in6_addr v6;	// https://learn.microsoft.com/en-us/previous-versions/windows/desktop/legacy/ms738560(v=vs.85)
-// 				} ip;
-// #else
-// 				uint32_t uid = (uint32_t) (-1);
-// 				union {
-// 					in_addr_t v4;
-// 					struct in6_addr v6;
-// 				} ip;
-// #endif // _WIN32
+			inline bool empty() const noexcept {
+				return path.empty();
+			}
 
-// 				inline void clear() noexcept {
-// 					type = 0;
-// 					expiration_time = 0;
-// 					scopes = 7;
-// 					memset(&ip,0,sizeof(ip));
-// 				}
+			inline void message(const char *msg, const char *body = "") noexcept {
+				status.message = msg;
+				status.body = body;
+			}
 
-// 			} data;
-// 			#pragma pack()
+			/// @brief Handle authentication requests.
+			/// @return The HTTP status code.
+			int handle();
 
-// 		public:
-// 			Client(HTTP::Request &request);
-// 			~Client();
+			/// @brief Send template response.
+			/// @param code The HTTP status code
+			/// @param action The action name (for template expansion)
+			/// @param tmplt The template name.
+			/// @return The HTTP status code.
+			int send_template(int code, const char *action, const char *tmplt);
 
-// 			/// @brief Update context.
-// 			void get(Context &context);
+			/// @brief Send HTML response using current context.
+			/// @param tmplt The template name.
+			/// @param code The HTTP status code.
+			/// @return The HTTP status code.
+			virtual int send_html_response(int code, const char *text) const = 0;
 
-// 			/// @brief Get authentication token for client.
-// 			String encrypt();
+ 			/// @brief Send redirect response.
+			/// @return The HTTP status code.
+ 			virtual int send_redirect_response(const char *location) const = 0;
 
-// 			/// @brief Validate authentication token for client.
-// 			bool decrypt(const char *str);
+			/// @brief Pop one element from path.
+			/// @return 
+			String pop();
 
-// 			inline time_t expires() const noexcept {
-// 				return data.expiration_time;
-// 			}
+			/// @brief Run callback from oauth server.
+			/// @return The HTTP status code.
+			int callback();
 
-// 		};
+			/// @brief Run 'signin'
+			/// @param request The request info
+			/// @param context The current context.
+			/// @return 0 if the user was authenticated.
+			/// @retval EPERM Access denied.
+			UDJAT_API int signin();
 
-
+		};
 
  	}
 

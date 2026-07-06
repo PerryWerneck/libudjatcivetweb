@@ -46,6 +46,32 @@
 			return true;
 		}
 
+		if(!strcasecmp(key,"client-id")) {
+			value = Config::Value<string>{"authentication","client-id"};
+			if(value.empty()) {
+				throw logic_error("The required client-id for authentication is empty");
+			}
+			return true;
+		}
+
+		if(!strcasecmp(key,"authentication-state")) {
+			auto auth = authentication();
+			auto addr = address();
+			debug("Creating state from '",addr.c_str(),"'");
+			value = auth->encrypt(Udjat::String{"A",addr.c_str()}.c_str());
+			return true;
+		}
+
+		if(!strcasecmp(key,"redirect-uri")) {
+			Config::Value<Udjat::String> uri{"authentication","redirect-uri"};
+			if(value.empty()) {
+				throw logic_error("The required redirect-uri for authentication is empty");
+			}
+			value = uri.escape();
+			return true;
+		}
+	
+		
 		return Udjat::Request::getProperty(key,value);
 	}
 

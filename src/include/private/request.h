@@ -50,7 +50,7 @@
 			const char * query(const char *def = "") const override;
 
 			// bool for_each(const std::function<bool(const char *name, const char *value)> &call) const override;
-			// bool getProperty(const char *key, std::string &value) const override;
+			bool getProperty(const char *key, std::string &value) const override;
 
 			const char * header(const char *name) const noexcept override;
 
