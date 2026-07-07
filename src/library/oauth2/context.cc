@@ -262,7 +262,12 @@
 
 				debug("Got response '",response.c_str(),"'");
 
+				if(response.empty()) {
+					throw runtime_error(_("Empty response from authentication server"));
+				}
 
+
+				
 				throw runtime_error("Incomplete");
 
 			}

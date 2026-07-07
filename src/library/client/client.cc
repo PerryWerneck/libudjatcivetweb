@@ -176,28 +176,47 @@
 		const struct mg_response_info *info = mg_get_response_info(cli.get());
 
 		debug("ret=",ret," status=",info->status_code," message=",info->status_text);
+
 		except(info->status_code,info->status_text);
 
-		if(info->content_length <= 0) {
-			progress(0,0,nullptr,0);
-			return info->status_code;
-		} 
-
-		progress(0,info->content_length,nullptr,0);
+		debug("content_length=",info->content_length);
 
 		long long current = 0;
-		while(current < info->content_length) {
+		if(info->content_length > 0) {
 
-			int szRead = mg_read(cli.get(), (void *) buffer, 4096);
+			// The server sent a content-lenght, use it.
+			progress(0,info->content_length,nullptr,0);
 
-			if(szRead == 0) {
-				throw system_error(ENOTCONN,system_category(),"Connection closed while downloading file");
-			} else if(szRead < 0) {
-				throw runtime_error("Download error");
-			} else if(progress(current,info->content_length,buffer,(size_t) szRead)) {
-				throw system_error(ECANCELED,system_category());
+			while(current < info->content_length) {
+
+				int szRead = mg_read(cli.get(), (void *) buffer, 4096);
+				debug("Got ",szRead," bytes");
+
+				if(szRead == 0) {
+					throw system_error(ENOTCONN,system_category(),"Connection closed while downloading file");
+				} else if(szRead < 0) {
+					throw runtime_error("Download error");
+				} else if(progress(current,info->content_length,buffer,(size_t) szRead)) {
+					throw system_error(ECANCELED,system_category());
+				}
+				current += (uint64_t) szRead;
+
 			}
-			current += (uint64_t) szRead;
+
+		} else {
+
+			// The server didnt send a content-length.
+			int szRead;
+			while((szRead = mg_read(cli.get(), (void *) buffer, 4096)) != 0) {
+
+				if(szRead < 0) {
+					throw runtime_error("Download error");
+				} else if(progress(current,0,buffer,(size_t) szRead)) {
+					throw system_error(ECANCELED,system_category());
+				}
+				current += (uint64_t) szRead;
+
+			}
 
 		}
 
