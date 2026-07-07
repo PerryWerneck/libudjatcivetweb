@@ -22,6 +22,7 @@
  #include <udjat/tools/logger.h>
  #include <udjat/tools/configuration.h>
  #include <private/client.h>
+ #include <udjat/tools/url.h>
  #include <system_error>
  #include <udjat/tools/value.h>
 
@@ -87,8 +88,27 @@
 
 	void CivetWeb::Client::send_headers(Connection &cli, const HTTP::Method method, const char *payload) {
 
-		debug(std::to_string(method)," ",url.path().c_str());
-		mg_printf(cli.get(), "%s %s HTTP/1.1\r\n", std::to_string(method),url.path().c_str());
+		string request_string{url.path().c_str()};
+
+		debug("Url=",request_string.c_str());
+		// Check for query
+		{
+			string query{url.query().c_str()};
+			debug("query=",query.c_str());
+			if(!query.empty()) {
+				request_string += "?";
+				request_string += query;
+			}
+		}
+
+		debug(std::to_string(method)," ",url.c_str());
+
+		mg_printf(cli.get(), 
+			"%s %s HTTP/1.1\r\n", 
+			std::to_string(method),
+			request_string.c_str()
+		);
+
 		for(const auto & [name,value]: headers.request) {
 			mg_printf(cli.get(), "%s: %s\r\n", name.c_str(), value.c_str());
 		}
@@ -96,6 +116,9 @@
 		mg_printf(cli.get(), "\r\n");
 
 		// TODO: Send payload.
+		if(payload && *payload) {
+			throw system_error(ENOTSUP,system_category(),"This http client is unable to handle payloads");
+		}
 		
 	}
 

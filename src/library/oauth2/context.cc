@@ -240,11 +240,11 @@
 					return this->getProperty(key,value);
 				});
 
-				if(payload.empty()) {
-					Logger::String{"Missing required value for authentication attribute 'get-token-payload'"}.error();
-					message(strerror(EPERM),_("Invalid authentication engine configuration. Please check server settings."));
-					return send_template(400,"error");
-				}
+				// if(payload.empty()) {
+				// 	Logger::String{"Missing required value for authentication attribute 'get-token-payload'"}.error();
+				// 	message(strerror(EPERM),_("Invalid authentication engine configuration. Please check server settings."));
+				// 	return send_template(400,"error");
+				// }
 
 				HTTP::Method method = HTTP::MethodFactory(Config::Value<string>{"authentication","get-token-method","post"}.c_str());
 
@@ -252,7 +252,13 @@
 				debug("Payload: ",payload.c_str());
 				debug("Method: ",std::to_string(method));
 
-				auto response = post(url.c_str(),payload.c_str());
+				auto response = URL{url.c_str()}
+					.call(
+						method,
+						payload.c_str(),
+						false
+					);
+
 
 				debug("Got response '",response.c_str(),"'");
 

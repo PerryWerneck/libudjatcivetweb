@@ -199,7 +199,7 @@
 				mg_set_request_handler(ctx, "/oauth2", oauthWebHandler, 0);
 			}
 
-			mg_set_request_handler(ctx, "/myaccount", userWebHandler, 0);
+			mg_set_request_handler(ctx, "/account", userWebHandler, 0);
 
 			// All other requests goes to generic handler
 			// mg_set_request_handler(ctx, "/", (mg_request_handler) generic_handler, this);

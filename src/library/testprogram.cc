@@ -22,6 +22,8 @@
  #include <udjat/tools/logger.h>
  #include <udjat/module.h>
  #include <udjat/tools/unit-test.h>
+ #include <udjat/tools/url.h>
+ #include <udjat/tools/url/handler.h>
  #include <string>
  
  #include <private/client.h>
@@ -41,6 +43,7 @@
 			[]() {
 
 				Udjat::URL url{"http://127.0.0.1/udjat/css/style.css"};
+
 				auto handler = CivetWeb::Client::Factory{
 									"http",
 									"CivetWEB " CIVETWEB_VERSION " HTTP module for " STRINGIZE_VALUE_OF(PRODUCT_NAME)
@@ -49,6 +52,7 @@
 				auto response = handler->get("/tmp/style.css");
 
 				cout << "-----" << endl << response << endl << "-----" << endl;
+
 
 				return true;
 			}
