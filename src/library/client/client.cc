@@ -109,7 +109,10 @@
 			request_string.c_str()
 		);
 
+		debug("Extra headers: ",headers.request.size());
+
 		for(const auto & [name,value]: headers.request) {
+			debug("Adding header ",name.c_str(),": ",value.c_str());
 			mg_printf(cli.get(), "%s: %s\r\n", name.c_str(), value.c_str());
 		}
 
@@ -176,6 +179,14 @@
 		const struct mg_response_info *info = mg_get_response_info(cli.get());
 
 		debug("ret=",ret," status=",info->status_code," message=",info->status_text);
+
+#ifdef DEBUG
+		{
+			for(int header = 0; header < info->num_headers; header++) {
+				debug(info->http_headers[header].name,"= '",info->http_headers[header].value,"'");
+			}
+		}
+#endif
 
 		except(info->status_code,info->status_text);
 

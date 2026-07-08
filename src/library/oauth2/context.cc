@@ -214,6 +214,9 @@
 
 			switch(action.select("callback",NULL)) {
 			case 0: // callback
+
+				// Reference: https://docs.github.com/pt/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps#web-application-flow
+
 				debug("---> callback");
 				debug("uri=",uri.c_str())
 				debug("code=",code.c_str())
@@ -223,51 +226,138 @@
 					return send_template(400,"error");
 				}
 
-				Config::Value<String> url{"authentication","get-token-url",""};
-				debug("get-token-url='",url.c_str(),"'");
-				url.expand([this](const char *key, std::string &value) {
-					return this->getProperty(key,value);
-				});
-				if(url.empty()) {
-					Logger::String{"Missing required value for authentication attribute 'get-token-url'"}.error();
-					message(strerror(EPERM),_("Invalid authentication engine configuration. Please check server settings."));
-					return send_template(400,"error");
+				// Get access token
+				String access_token;
+				String token_type;
+				{
+					Config::Value<String> url{"authentication","get-token-url",""};
+					debug("get-token-url='",url.c_str(),"'");
+					url.expand([this](const char *key, std::string &value) {
+						return this->getProperty(key,value);
+					});
+					if(url.empty()) {
+						Logger::Message{"Missing required value for authentication attribute '{}'","get-token-url"}.error();
+						message(strerror(EPERM),_("Invalid authentication engine configuration. Please check server settings."));
+						return send_template(400,"error");
+					}
+
+					Config::Value<String> payload{"authentication","get-token-payload",""};
+					debug("get-token-payload='",payload.c_str(),"'");
+					payload.expand([this](const char *key, std::string &value) {
+						return this->getProperty(key,value);
+					});
+
+					HTTP::Method method = HTTP::MethodFactory(Config::Value<string>{"authentication","get-token-method","post"}.c_str());
+
+					debug("URL: ",url.c_str());
+					debug("Payload: ",payload.c_str());
+					debug("Method: ",std::to_string(method));
+
+					auto response = URL{url.c_str()}
+						.call(
+							method,
+							payload.c_str(),
+							false
+						);
+
+
+					debug("Got response '",response.c_str(),"'");
+
+					if(response.empty()) {
+						throw runtime_error(_("Empty response from authentication server"));
+					}
+
+					String error;
+					String error_description;
+
+					for(const String &value : response.split("&")) {
+
+						debug("response item='",value.c_str(),"'");
+
+						if(value.has_prefix("access_token=")) {
+							access_token = value.c_str()+13;
+
+						} else if(value.has_prefix("token_type=")) {
+							token_type = value.c_str()+11;
+							if(strcasecmp(token_type.c_str(),"bearer")) {
+								throw runtime_error(Logger::Message(_("Unexpected token type: '{}'"),token_type.c_str()));
+							}
+
+						} else if(value.has_prefix("error=")) {
+							error = value.c_str()+6;
+							error.unescape();
+
+						} else if(value.has_prefix("error_description=")) {
+							error_description = value.c_str()+18;
+							error_description.unescape();
+
+						} else if(value.has_prefix("error_uri=")) {
+							String val = value.c_str()+10;
+							val.unescape();
+							Logger::String{val.c_str()}.error();
+
+						}
+						
+					}
+
+					if(!error_description.empty()) {
+						throw runtime_error(error_description);
+					}
+
+					if(!error.empty()) {
+						throw runtime_error(error);
+					}
+
+					if(access_token.empty()) {
+						throw runtime_error(_("Empty token on authentication server response"));
+					}
+
 				}
 
-				Config::Value<String> payload{"authentication","get-token-payload",""};
-				debug("get-token-payload='",payload.c_str(),"'");
-				payload.expand([this](const char *key, std::string &value) {
-					return this->getProperty(key,value);
-				});
+				debug("access_token=",access_token.c_str());
 
-				// if(payload.empty()) {
-				// 	Logger::String{"Missing required value for authentication attribute 'get-token-payload'"}.error();
-				// 	message(strerror(EPERM),_("Invalid authentication engine configuration. Please check server settings."));
-				// 	return send_template(400,"error");
-				// }
+				// Get user account
+				// GET https://api.github.com/user
+				// curl -H "Authorization: Bearer OAUTH-TOKEN" https://api.github.com/user
+				{
+					URL url{Config::Value<string>{"authentication","get-user-account"}.c_str()};
+					auto handler = url.handler();
+					
+					try {
 
-				HTTP::Method method = HTTP::MethodFactory(Config::Value<string>{"authentication","get-token-method","post"}.c_str());
+						if(url.empty()) {
+							Logger::Message{"Missing required value for authentication attribute '{}'","get-user-account"}.error();
+							message(strerror(EPERM),_("Invalid authentication engine configuration. Please check server settings."));
+							return send_template(400,"error");
+						}
+						
+						handler->header(
+							URL::Handler::AUTHORIZATION,
+							String{token_type.c_str()," ",
+							access_token.c_str()}.c_str()
+						);
+						
+						// Github requires user-agent matching with the registered application.
+						handler->header(
+							URL::Handler::USER_AGENT,
+							Config::Value<string>{"authentication","user-agent",STRINGIZE_VALUE_OF(PRODUCT_NAME)}.c_str()
+						);
 
-				debug("URL: ",url.c_str());
-				debug("Payload: ",payload.c_str());
-				debug("Method: ",std::to_string(method));
+						debug("--- Getting user info ---");
+						auto response = handler->get();
 
-				auto response = URL{url.c_str()}
-					.call(
-						method,
-						payload.c_str(),
-						false
-					);
+						debug("Got response: '",response.c_str(),"'");
 
+					} catch(const std::exception &e) {
 
-				debug("Got response '",response.c_str(),"'");
+						Logger::String{url.c_str()," returned  '",e.what(),"'"}.error();
 
-				if(response.empty()) {
-					throw runtime_error(_("Empty response from authentication server"));
+						message(e.what(),_("Failed to retrieve user information from the authentication server."));
+						return send_template(400,"error");
+
+					}
 				}
 
-
-				
 				throw runtime_error("Incomplete");
 
 			}
