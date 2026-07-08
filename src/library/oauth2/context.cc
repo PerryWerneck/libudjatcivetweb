@@ -32,6 +32,7 @@
 
  #include <udjat/defs.h>
  #include <udjat/tools/logger.h>
+ #include <udjat/tools/http/authentication.h>
  #include <udjat/tools/http/oauth.h>
  #include <udjat/tools/intl.h>
  #include <udjat/tools/configuration.h>
@@ -39,6 +40,11 @@
  #include <udjat/tools/http/method.h>
  #include <udjat/tools/url.h>
  #include <private/client.h>
+ #include <udjat/tools/memory.h>
+
+ #if defined(HAVE_JSON_C)
+	#include <json.h>
+ #endif // HAVE_JSON_C
 
  using namespace Udjat;
  using namespace std;
@@ -347,6 +353,50 @@
 						auto response = handler->get();
 
 						debug("Got response: '",response.c_str(),"'");
+						clear();
+
+#if defined(HAVE_JSON_C)
+						auto jobj = make_handle(json_tokener_parse(response.c_str()),json_object_put);
+
+						if(!jobj) {
+							throw runtime_error(_("Error parsing authentication response"));
+						}
+
+						json_object_object_foreach(jobj.get(), key, val) {
+							if(json_object_get_type(val) == json_type_string) {
+								debug(key,"='",json_object_get_string(val),"'");
+								if(!strcasecmp(key,"name")) {
+									Authentication::name(json_object_get_string(val));
+								} else if(!strcasecmp(key,"email")) {
+									login(json_object_get_string(val));
+								} else if(!strcasecmp(key,"avatar_url")) {
+									avatar_url = json_object_get_string(val);
+								}
+							}
+						}
+#else
+						throw runtime_error("Unable to process authentication response: Json parser is not available");
+#endif // HAVE_JSON_C
+
+						if(Udjat::Authentication::level() == Authentication::None) {
+							
+							const char *username = Udjat::Authentication::name();
+							clear();
+
+							if(!(username && *username)) {
+								Logger::Message{"Missing required value for authentication response '{}'","name"}.error();
+								message(
+									strerror(EPERM),
+									_("The authentication server did not provide a username.")
+								);
+								return send_template(400,"error");
+							} else {
+								Logger::Message{"Access unauthorized for '{}'","name"}.error();
+								message(strerror(EPERM),_("Access unauthorized. Please contact your system administrator if you believe this is an error."));
+								return send_template(400,"error");								
+							}
+
+						}
 
 					} catch(const std::exception &e) {
 
@@ -372,7 +422,7 @@
 		} catch(const std::exception &e) {
 
 			Logger::String{e.what()}.error();
-			Authentication::reset();	
+			clear();	
 			message(_("We're sorry, but we encountered an error while processing your request."),e.what());
 			return send_template(404,"error");
 

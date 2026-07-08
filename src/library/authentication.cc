@@ -56,9 +56,11 @@
 
 	void HTTP::Authentication::token(const char *b64) {
 		
-		reset();
+		debug(__FUNCTION__,"(",b64,")");
 
 		if(!(b64 && *b64)) {
+			debug("Ignoring empty token");
+			clear();
 			return;
 		}
 
@@ -86,18 +88,19 @@
 
 		} catch(const std::exception &e) {
 
-			reset();
+			clear();
 			Logger::String{e.what()}.trace();
 
 		}
 
 	}
 
-	void HTTP::Authentication::reset() noexcept {
+	void HTTP::Authentication::clear() noexcept {
+		Udjat::Authentication::clear();
 		current_status = Undefined;
 		level = None;
+		avatar_url.clear();
 		expiration_time = time(0) + Config::Value<time_t>("authentication","expiration-time",86400);
-
 	}
 
 	std::string HTTP::Authentication::token() const {

@@ -34,6 +34,7 @@
  #include <udjat/tools/url.h>
  #include <string>
  #include <private/client.h>
+ #include <udjat/tools/intl.h>
  #include <sstream>
 
  using namespace Udjat;
@@ -55,16 +56,27 @@
 
 			memset(buffer,0,4096);
 			if(mg_get_var(query_string,strlen(query_string), "state", buffer, sizeof(buffer)-1) >= 0) {
-				char decoded[4096];
-				memset(decoded,0,sizeof(decoded));
 
-				size_t sz = decrypt(buffer,decoded,sizeof(buffer)-1);
-				decoded[sz] = 0;
+				try {
 
-				sequencial = *((uint16_t *) decoded);
+					char decoded[4096];
+					memset(decoded,0,sizeof(decoded));
 
-				char *ptr = (buffer+sizeof(uint16_t));
-				debug("Decripted state ----> '",ptr,"'");
+					size_t sz = decrypt(buffer,decoded,sizeof(buffer)-1);
+					decoded[sz] = 0;
+
+					sequencial = *((uint16_t *) decoded);
+
+					char *ptr = (buffer+sizeof(uint16_t));
+					debug("Decripted state ----> '",ptr,"'");
+
+				} catch(const std::exception &e) {
+
+					clear();
+					Logger::String{"State '",buffer,"' is invalid: ",e.what()}.error();
+					throw logic_error(_("Invalid state received from authentication server"));
+
+				}
 			}
 
 		}

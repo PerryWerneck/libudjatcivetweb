@@ -50,7 +50,7 @@
 				static std::string cookie_name() noexcept;
 
 				/// @brief Reset authentication to empty state.
-				void reset() noexcept;
+				void clear() noexcept override;
 
 				/// @brief Get expiration time.
 				inline time_t expires() const noexcept {
@@ -64,6 +64,7 @@
 			protected:
 				time_t expiration_time = 0;
 				Status current_status = Undefined;
+				std::string avatar_url;
 				Authentication::Level level = Authentication::None;
 
 		};

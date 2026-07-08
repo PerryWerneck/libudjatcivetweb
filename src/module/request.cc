@@ -139,7 +139,20 @@
 			parse_query(info->query_string);
 			
 			// Check for authentication
-			this->auth = make_shared<HTTP::Authentication>(session_cookie().c_str());
+			try {
+
+				auto cookie = session_cookie();
+				debug("Authentication cookie: '",cookie,"'");
+				this->auth = make_shared<HTTP::Authentication>(cookie.c_str());
+
+			} catch(const std::exception &e) {
+
+				// Authentication failed, trace the message and clear it.
+				debug("*** Ignoring authentication cookie ***");
+				Logger::String{e.what()}.trace();
+				this->auth.reset();
+
+			}
 
 		}
 
