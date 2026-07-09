@@ -51,6 +51,10 @@
 
 			operator MimeType() const override;
 
+			static bool apicall(struct mg_connection *c) noexcept;
+
+			bool apicall() const noexcept override;
+
 			/// @brief Send response.
 			int send(const Udjat::HTTP::Response &response) const noexcept override;
 
@@ -126,3 +130,4 @@
 
  /// @brief Send error page.
  int http_error(struct mg_connection *conn, int code, const char *message, const char *body) noexcept;
+

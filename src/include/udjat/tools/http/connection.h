@@ -46,6 +46,9 @@
 			/// @brief Get the active mimetype for this connection.
 			virtual operator MimeType() const = 0;
 
+			/// @brief Check if this connection is asking for an API call or HTML page.
+			virtual bool apicall() const noexcept = 0;
+
 			/// @brief Send default HTML response.
 			/// @param path Local path from request.
 			/// @return Status code.
@@ -105,6 +108,9 @@
 			/// @return HTTP status code.
  			int image(const char *name) noexcept;
 			
+			/// @brief Handle generic request.
+			/// @return HTTP status code.
+			// int generic() noexcept;
 		};
 
 	}

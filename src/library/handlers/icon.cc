@@ -24,7 +24,6 @@
 
  #include <config.h>
  #include <udjat/defs.h>
- #include <private/module.h>
  #include <udjat/tools/http/connection.h>
  #include <udjat/tools/http/icon.h>
  #include <udjat/tools/http/exception.h>

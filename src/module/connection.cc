@@ -17,6 +17,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+ #define LOG_DOMAIN "civetweb"
+
  #include <private/module.h>
  #include <sys/types.h>
  #include <sys/stat.h>
@@ -30,6 +32,7 @@
  #include <udjat/tools/string.h>
  #include <udjat/tools/configuration.h>
  #include <udjat/tools/application.h>
+ #include <udjat/tools/http/template.h>
 
  #ifdef HAVE_UNISTD_H
 	#include <unistd.h>
@@ -43,8 +46,29 @@
 	CivetWeb::Connection::operator MimeType() const {
 
 		// Get mimetype from request header.
-		return MimeTypeFactory(conn,MimeType::json);
+		const struct mg_request_info *request_info = mg_get_request_info(conn);
+		if(request_info->local_uri && request_info->local_uri && !strncasecmp(request_info->local_uri,"/api/",5)) {
+			return MimeTypeFactory(conn,MimeType::json);
+		}
 
+		return MimeTypeFactory(conn,MimeType::html);
+
+	}
+
+	bool CivetWeb::Connection::apicall(struct mg_connection *conn) noexcept {
+
+		const struct mg_request_info *request_info = mg_get_request_info(conn);
+
+		if(request_info->local_uri && request_info->local_uri && !strncasecmp(request_info->local_uri,"/api/",5)) {
+			return true;
+		}
+
+		return MimeTypeFactory(conn,MimeType::html) != MimeType::html;
+
+	}
+
+	bool CivetWeb::Connection::apicall() const noexcept {
+		return apicall(conn);
 	}
 
 	int CivetWeb::Connection::send(const char *mime_type, const char *text, size_t length) const noexcept {
@@ -86,9 +110,7 @@
 	//
 	// Check headers
 	//
-	static const char *headers[] = { "Content-Type", "Accept" };
-
-	for(const char *header : headers) {
+	for(const char *header : { "Content-Type", "Accept" }) {
 
 		const char *hdr = mg_get_header(conn, header);
 
@@ -107,7 +129,7 @@
 
 	// Use default
 	const struct mg_request_info *info{mg_get_request_info(conn)};
-	Logger::String{info->remote_addr,": Unexpected mime-type on ",info->request_uri,", using ",std::to_string(def)}.warning("civetweb");
+	Logger::String{info->remote_addr,": Unexpected mime-type on ",info->request_uri,", using ",std::to_string(def)}.warning();
 	return def;
 
  }
@@ -125,39 +147,93 @@
 		code," ",message," (",std::to_string(mimetype),")"
 	}.error("civetweb");
 
-	/// @brief Customized error response.
-	class Response : public HTTP::Response {
-	private:
-		int code;
+	try {
 
-	public:
-		Response(MimeType mimetype, int c, const char *message, const char *details)
-			: HTTP::Response{mimetype}, code{c} {
-			failed(message,details);
-		}
+		if(CivetWeb::Connection::apicall(conn)) {
 
-		int status_code() const noexcept override {
+			// It's an API call, send with HTTP::Response
+
+			/// @brief Customized error response.
+			class Response : public HTTP::Response {
+			private:
+				int code;
+
+			public:
+				Response(MimeType mimetype, int c, const char *message, const char *details)
+					: HTTP::Response{mimetype}, code{c} {
+					failed(message,details);
+				}
+
+				int status_code() const noexcept override {
+					return code;
+				}
+
+				void for_each(const std::function<void(const char *header_name, const char *header_value)> &call) const noexcept override {
+					call("Cache-Control","no-cache, no-store, must-revalidate, private, max-age=0");
+					call("Expires", "0");
+				}
+
+			};
+
+			return ::send(conn,Response{mimetype,code,message,body});
+
+		} else {
+
+			// It's a HTML request, send formatted page.
+			
+			Udjat::HTTP::Template text{"error",Udjat::MimeType::html};
+
+			// Expand request arguments.
+			text.expand([code,message,body](const char *key, std::string &value) {
+
+				if(!strcasecmp(key,"code")) {
+					Logger::String{"Using obsolete '${code}' on template, change to ${error-code}"}.warning();
+					value = std::to_string(code);
+					return true;
+				}
+
+				if(!strcasecmp(key,"error-code")) {
+					value = std::to_string(code);
+					return true;
+				}
+
+				if(!strcasecmp(key,"message")) {
+					value = message;
+					return true;
+				}
+
+				if(!strcasecmp(key,"body")) {
+					value = body;
+					return true;
+				}
+
+				return false;
+
+			});
+
+			size_t length = text.size();
+
+			mg_response_header_start(conn, code);
+			mg_response_header_add(conn, "Content-Type",std::to_string(mimetype),-1);
+			mg_response_header_add(conn, "Content-Length", std::to_string(length).c_str(), -1);
+			mg_response_header_add(conn, "Cache-Control","no-cache, no-store, must-revalidate, private, max-age=0",-1);
+			mg_response_header_add(conn, "Expires", "0", -1);
+			mg_response_header_send(conn);
+
+			// Send response.
+			mg_write(conn, text.c_str(), length);
+
 			return code;
+
 		}
-
-		void for_each(const std::function<void(const char *header_name, const char *header_value)> &call) const noexcept override {
-			call("Cache-Control","no-cache, no-store, must-revalidate, private, max-age=0");
-			call("Expires", "0");
-		}
-
-	};
-
- 	try {
-
-		return ::send(conn,Response{mimetype,code,message,body});
 
  	} catch(const std::exception &e) {
 
-		Logger::String{"Error sending standard response: ",e.what()}.warning("civetweb");
+		Logger::String{"Error sending standard response: ",e.what()}.warning();
 
 	} catch(...) {
 
-		Logger::String{"Unexpected error sending standard response"}.warning("civetweb");
+		Logger::String{"Unexpected error sending standard response"}.warning();
 
 	}
 
