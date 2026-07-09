@@ -72,7 +72,7 @@
 			/// @param message The message to user.
 			/// @param body The message body.
 			/// @return The HTTP status code.
-			int failed(int code, const char *message, const char *body = "") const;
+			virtual int failed(int code, const char *message, const char *body = "") const;
 
 		public:
 

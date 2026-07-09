@@ -80,10 +80,6 @@
 		return cookie(Udjat::String{Application::Name().c_str(),"-session"}.c_str());
 	}
 
-	// int HTTP::Request::send(int code, const char *text) const {
-	// 	return code;
-	// }
-
 	bool HTTP::Request::for_each(const std::function<bool(const char *name, const char *value)> &call) const {
 
 		if(call("client-address",address().c_str())) {
@@ -152,68 +148,68 @@
 
 	}
 
-	int HTTP::Request::failed(int code, const char *message, const char *body) const {
+	// int HTTP::Request::failed(int code, const char *message, const char *body) const {
 
-		if(api_call || !Config::Value<bool>("http","use-error-templates",true)) {
+	// 	if(api_call || !Config::Value<bool>("http","use-error-templates",true)) {
 
-			// Format API call response.
-			HTTP::Response response{mimetype()};
-			response.failed(
-				Logger::Message{_("HTTP Error {}"),code}.c_str(),
-				message,
-				body
-			);
+	// 		// Format API call response.
+	// 		HTTP::Response response{mimetype()};
+	// 		response.failed(
+	// 			Logger::Message{_("HTTP Error {}"),code}.c_str(),
+	// 			message,
+	// 			body
+	// 		);
 
-			return send(code,response.to_string().c_str());
+	// 		return send(code,response.to_string().c_str());
 
-		}
+	// 	}
 
-		Template response{"error",mimetype()};
-		if(response.empty()) {
+	// 	Template response{"error",mimetype()};
+	// 	if(response.empty()) {
 
-			// Empty template, Format API call response.
-			HTTP::Response response{mimetype()};
-			response.failed(
-				Logger::Message{_("HTTP Error {}"),code}.c_str(),
-				message,
-				body
-			);
+	// 		// Empty template, Format API call response.
+	// 		HTTP::Response response{mimetype()};
+	// 		response.failed(
+	// 			Logger::Message{_("HTTP Error {}"),code}.c_str(),
+	// 			message,
+	// 			body
+	// 		);
 
-			return send(code,response.to_string().c_str());
+	// 		return send(code,response.to_string().c_str());
 
-		}
+	// 	}
 
-		response.expand([&](const char *key, std::string &value){
+	// 	response.expand([&](const char *key, std::string &value){
 
-			if(!(strcasecmp(key,"code") && strcasecmp(key,"error-code"))) {
+	// 		if(!(strcasecmp(key,"code") && strcasecmp(key,"error-code"))) {
 
-				value = std::to_string(code);
+	// 			value = std::to_string(code);
 
-			} else if(!strcasecmp(key,"message")) {
+	// 		} else if(!strcasecmp(key,"message")) {
 
-				value = message;
+	// 			value = message;
 
-			} else if(!strcasecmp(key,"body")) {
+	// 		} else if(!strcasecmp(key,"body")) {
 
-				value = body;
+	// 			value = body;
 
-			} else if(!strcasecmp(key,"syscode")) {
+	// 		} else if(!strcasecmp(key,"syscode")) {
 
-				value = body;
+	// 			value = body;
 
-			} else {
+	// 		} else {
 
-				return false;
+	// 			return false;
 
-			}
+	// 		}
 
-			return true;
-		});
+	// 		return true;
+	// 	});
 
-		response.expand(*this);
+	// 	response.expand(*this);
 
-		return send(code,response.c_str());
+	// 	return send(code,response.c_str());
 
-	}
+	// }
 
  }

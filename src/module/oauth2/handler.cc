@@ -53,8 +53,12 @@
 
 	} catch(const std::exception &e) {
 
-		CivetWeb::Request request{conn};
-		return request.failed(500,_("Unexpected error during login process"),e.what());
+		return http_error(
+			conn,
+			500,
+			_("An unexpected error occurred during the login process."),
+			e.what()
+		);
 
 
 	}

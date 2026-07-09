@@ -33,6 +33,12 @@
 		private:
 			struct mg_connection *conn;
 
+		protected:
+
+			typedef OAuth::Context super;
+
+			int failed(int code, const char *message, const char *body = "") const override;
+
 		public:
 			OAuthContext(struct mg_connection *c);
 			

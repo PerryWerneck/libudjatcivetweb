@@ -90,7 +90,7 @@
 
 	bool CivetWeb::OAuthContext::getProperty(const char *key, std::string &value) const {
 
-		if(OAuth::Context::getProperty(key,value)) {
+		if(super::getProperty(key,value)) {
 			return true;
 		}
 
@@ -118,6 +118,20 @@
 
 	}
 
+	int CivetWeb::OAuthContext::failed(int code, const char *message, const char *body) const {
+
+		const struct mg_request_info *request_info = mg_get_request_info(conn);
+
+		Logger::String{
+			request_info->remote_addr," ",
+			request_info->request_method," ",
+			request_info->local_uri," ",
+			code," ",message
+		}.error();
+
+		return super::failed(code,message,body);
+	}
+
 	int CivetWeb::OAuthContext::send_html_response(int code, const char *text) const {
 		size_t szText = strlen(text);
 		mg_response_header_start(conn, code);
@@ -141,7 +155,7 @@
 		time_t expires = Authentication::expires();
 		int max_age = expires - time(0);
 
-		if(Config::Value<bool>("authentication","allow-cache",true) && max_age > 0) {
+		if(Config::Value<bool>("authentication","allow-cache",false) && max_age > 0) {
 			mg_response_header_add(conn, "Cache-Control", String{"private, max-age=",max_age}.c_str(),-1);
 			mg_response_header_add(conn, "Expires", HTTP::TimeStamp{expires}.to_string().c_str(), -1);
 		} else {

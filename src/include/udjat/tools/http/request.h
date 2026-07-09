@@ -54,7 +54,7 @@
 
 			/// @brief Send response to server.
 			/// @return code
-			virtual int send(int code, const char *text) const = 0;
+			// virtual int send(int code, const char *text) const = 0;
 
 		public:
 
@@ -144,7 +144,7 @@
 
 			/// @brief Show error page.
 			/// @return code;
-			int failed(int code, const char *message = "", const char *body = "") const;
+			// int failed(int code, const char *message = "", const char *body = "") const;
 
 		};
 
