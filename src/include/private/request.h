@@ -20,6 +20,7 @@
  #pragma once
 
  #include <udjat/defs.h>
+ #include <udjat/tools/http/authentication.h>
  #include <udjat/tools/request.h>
  #include <udjat/tools/http/request.h>
  #include <civetweb.h>
@@ -31,8 +32,8 @@
 
 		class UDJAT_PRIVATE Request : public HTTP::Request {
 		private:
-			const struct mg_connection *conn;
-			const struct mg_request_info *info;
+			struct mg_connection *conn;
+			struct mg_request_info *info;
 
 		public:
 
@@ -49,12 +50,18 @@
 			const char * query(const char *def = "") const override;
 
 			// bool for_each(const std::function<bool(const char *name, const char *value)> &call) const override;
-			// bool getProperty(const char *key, std::string &value) const override;
+			bool getProperty(const char *key, std::string &value) const override;
 
 			const char * header(const char *name) const noexcept override;
 
 			/// @brief The client address.
 			Udjat::String address() const override;
+
+			/// @brief The request URI.
+			Udjat::String uri() const override;
+
+			/// @brief redirect
+			int redirect(const char *location) const;
 
 			Udjat::String cookie(const char *name) const override;
 

@@ -24,190 +24,100 @@
  #pragma once
 
  #include <udjat/defs.h>
- #include <udjat/tools/request.h>
- #include <udjat/tools/http/request.h>
- #include <udjat/tools/value.h>
  #include <udjat/tools/string.h>
- #include <udjat/tools/logger.h>
- #include <map>
- #include <string>
-
- #ifdef _WIN32
-	#include <winsock2.h>
-	#include <windows.h>
-	#include <in6addr.h>
- #else
-	#include <sys/types.h>
-	#include <pwd.h>
-	#include <arpa/inet.h>
- #endif // _WIN32
-
+ #include <udjat/tools/abstract/object.h>
+ #include <udjat/tools/http/authentication.h>
+ 
  namespace Udjat {
 
 	namespace OAuth {
 
-		struct Context {
-			String token;				///< @brief The authentication token.
-			String message;				///< @brief The Message for client.
-			String location;			///< @brief The new location.
-			time_t expiration_time;		///< @brief The expiration time.
-		};
-
-		UDJAT_API int authorize(HTTP::Request &request, Context &context);
-
-		/// @brief Run 'signin'
-		/// @param request The request info
-		/// @param context The current context.
-		/// @return 0 if the user was authenticated.
-		/// @retval EPERM Access denied.
-		UDJAT_API int signin(HTTP::Request &request, Context &context);
-
-		/// @brief Get access token.
-		/// @param request The request info
-		/// @param context The current context.
-		/// @param response The response data.
-		/// @return 0 if the response was set.
-		/// @retval EPERM The authentication code is invalid.
-		UDJAT_API int access_token(HTTP::Request &request, Context &context, Udjat::Value &response);
-
-		/// @brief OAuth2 API client
-		class UDJAT_API Client {
+		class UDJAT_API Context : public HTTP::Authentication, public Abstract::Object {
 		private:
 
-			#pragma pack(1)
-			struct Cookie {
-				uint8_t type = 0;
-				time_t expiration_time = 0;
-				uint32_t scopes = 7;
-#ifdef _WIN32
-				union {
-					in_addr v4;		// https://learn.microsoft.com/en-us/windows/win32/api/winsock2/ns-winsock2-in_addr
-					in6_addr v6;	// https://learn.microsoft.com/en-us/previous-versions/windows/desktop/legacy/ms738560(v=vs.85)
-				} ip;
-#else
-				uint32_t uid = (uint32_t) (-1);
-				union {
-					in_addr_t v4;
-					struct in6_addr v6;
-				} ip;
-#endif // _WIN32
+			/// @brief Handle callback from oauth server.
+			/// @return The HTTP status code.
+			int callback();
 
-				inline void clear() noexcept {
-					type = 0;
-					expiration_time = 0;
-					scopes = 7;
-					memset(&ip,0,sizeof(ip));
-				}
+		protected:
+			String path;
+			String uri;			///< @brief The URI who originated the authentication request.
+			String code;
+			bool apicall = false;
+			uint16_t sequencial = 0;
 
-			} data;
-			#pragma pack()
+ 			/// @brief Sent HTTP header.
+ 			virtual void send_header(bool cookie = true) const = 0;
+
+			/// @brief Do a POST request.
+			virtual String post(const char *url, const char *payload) const = 0;
+
+			/// @brief Send template response.
+			/// @param code The HTTP status code
+			/// @param action The action name (for template expansion)
+			/// @param tmplt The template name.
+			/// @return The HTTP status code.
+			int send_template(int code, const char *action, const char *tmplt);
+
+			inline int send_template(int code, const char *tmplt) {
+				return send_template(code,"",tmplt);
+			}
+
+			/// @brief Send HTML response using current context.
+			/// @param tmplt The template name.
+			/// @param code The HTTP status code.
+			/// @return The HTTP status code.
+			virtual int send_html_response(int code, const char *text) const = 0;
+
+ 			/// @brief Send redirect response.
+			/// @return The HTTP status code.
+ 			virtual int send_redirect_response(const char *location, bool cookie = true) const = 0;
+
+			/// @brief Format and send error page.
+			/// @param code The http status code.
+			/// @param message The message to user.
+			/// @param body The message body.
+			/// @return The HTTP status code.
+			virtual int failed(int code, const char *message, const char *body = "") const;
+
+			/// @brief Authentication complete, redirect to main page.
+			/// @return The HTTP status code.
+			int authenticated();
 
 		public:
-			Client(HTTP::Request &request);
-			~Client();
 
-			/// @brief Update context.
-			void get(Context &context);
+			Context(const char *path = nullptr);
+			virtual ~Context();
 
-			/// @brief Get authentication token for client.
-			String encrypt();
+			bool getProperty(const char *key, std::string &value) const override;
 
-			/// @brief Validate authentication token for client.
-			bool decrypt(const char *str);
-
-			inline time_t expires() const noexcept {
-				return data.expiration_time;
+			inline bool empty() const noexcept {
+				return path.empty();
 			}
+
+			/// @brief Handle authentication requests.
+			/// @return The HTTP status code.
+			int handle();
+
+			/// @brief Pop one element from path.
+			/// @return 
+			String pop();
+
+			/// @brief Start authentication flow.
+			/// @param api True if the request started from an API call.
+			/// @param target URL to redirect when the flow finished.
+			/// @return HTTP error code to forward.
+			int authenticate(const char *target = "");
+
+			/// @brief Run 'signin'
+			/// @param request The request info
+			/// @param context The current context.
+			/// @return 0 if the user was authenticated.
+			/// @retval EPERM Access denied.
+			UDJAT_API int signin();
 
 		};
 
-		/// @brief OAuth2 user
-		class UDJAT_API User {
-		private:
-
-			#pragma pack(1)
-			struct Token {
-				uint8_t type = 0;
-				time_t expiration_time = 0;
-				uint16_t scope = 0x000F;
-				char username[40] = "";
-#ifdef _WIN32
-				union {
-					in_addr v4;		// https://learn.microsoft.com/en-us/windows/win32/api/winsock2/ns-winsock2-in_addr
-					in6_addr v6;	// https://learn.microsoft.com/en-us/previous-versions/windows/desktop/legacy/ms738560(v=vs.85)
-				} ip;
-#else
-				unsigned int uid = (unsigned int) -1;
-				union {
-					in_addr_t v4;
-					struct in6_addr v6;
-				} ip;
-#endif // _WIN32
-
-				inline void clear() noexcept {
-					type = 0;
-					expiration_time = 0;
-					scope = 0x000F;
-					memset(username,0,sizeof(username));
-					memset(&ip,0,sizeof(ip));
-				}
-
-			} data;
-			#pragma pack()
-
-			void set(HTTP::Request &request);
-
-		public:
-			User();
-			User(HTTP::Request &request);
-			~User();
-
-			inline operator bool() const noexcept {
-#ifdef _WIN32
-				return false;
-#else
-				return data.uid != (unsigned int) -1;
-#endif // _WIN32
-			}
-
-			/// @brief Authenticate user.
-			bool authenticate(HTTP::Request &request, std::string &message);
-
-			/// @brief Set user info from authentication code.
-			/// @param value The authentication code.
-			/// @return true if the code is valid and user was updated.
-			/// @retval true Got user information from authentcation code.
-			/// @retval false The authentication code is not valid.
-			bool code(const char *value);
-
-			/// @brief Get authentication code.
-			/// @return The authentication code for the user.
-			String code();
-
-			/// @brief Update context with user data
-			void get(OAuth::Context &context);
-
-			/// @brief Encript user authentication token.
-			String encrypt();
-
-			/// @brief Decript user authentication token.
-			bool decrypt(const char *str);
-
-			inline time_t expires() const noexcept {
-				return data.expiration_time;
-			}
-
-			/// @brief Update request token with user data and encrypt it.
-			String encrypt(Udjat::HTTP::Request::Token &token);
-
-			/// @brief Get user info.
-			bool get(Udjat::Value &value);
-
-			static bool get(uint64_t uid, uint16_t scope, Udjat::Value &value);
-
-		};
-
-
-	}
+ 	}
 
  }

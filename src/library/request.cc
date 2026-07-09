@@ -22,8 +22,8 @@
  #include <udjat/tools/application.h>
  #include <udjat/tools/http/request.h>
  #include <udjat/tools/http/timestamp.h>
+ #include <udjat/tools/http/template.h>
  #include <udjat/tools/logger.h>
- #include <udjat/tools/http/keypair.h>
  #include <udjat/tools/logger.h>
  #include <udjat/tools/configuration.h>
  #include <udjat/tools/intl.h>
@@ -46,7 +46,38 @@
 			return true;
 		}
 
+		if(!strcasecmp(key,"client-id")) {
+			value = Config::Value<string>{"authentication","client-id"};
+			if(value.empty()) {
+				throw logic_error("The required client-id for authentication is empty");
+			}
+			return true;
+		}
+
+		if(!strcasecmp(key,"redirect-uri")) {
+			value = uri();
+			return true;
+		}
+
+		if(!strcasecmp(key,"redirect-uri")) {
+			Config::Value<Udjat::String> uri{"authentication","redirect-uri"};
+			if(value.empty()) {
+				throw logic_error("The required redirect-uri for authentication is empty");
+			}
+			value = uri.escape();
+			return true;
+		}
+	
+		
 		return Udjat::Request::getProperty(key,value);
+	}
+
+	String HTTP::Request::cookie(const char *) const {
+		return "";
+	}
+
+	Udjat::String HTTP::Request::session_cookie() const {
+		return cookie(Udjat::String{Application::Name().c_str(),"-session"}.c_str());
 	}
 
 	bool HTTP::Request::for_each(const std::function<bool(const char *name, const char *value)> &call) const {
@@ -58,36 +89,6 @@
 		return Udjat::Request::for_each(call);
 	}
 
-	bool HTTP::Request::decrypt(HTTP::Request::Token &token) const {
-
-		token.clear();
-
-		// Check for authorization header.
-		{
-			Udjat::String b64 = header("Authorization");
-			if(!b64.empty() && b64.has_prefix("Bearer ",true) && HTTP::KeyPair::getInstance().decrypt(b64.c_str()+7,&token,sizeof(token))) {
-				debug("Got authentication from header");
-				return true;
-			}
-		}
-
-		// Check for cookie.
-		{
-			Udjat::String b64 = cookie((Application::Name() + "-session").c_str());
-			if(!b64.empty() && HTTP::KeyPair::getInstance().decrypt(b64.c_str(),&token,sizeof(token))) {
-				debug("Got authentication from cookie");
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	bool HTTP::Request::authenticated() const noexcept {
-		Token token;
-		return get(token);
-	}
-
 	bool HTTP::Request::cached(const Udjat::TimeStamp &timestamp) const {
 
 		HTTP::TimeStamp	reqtime{header("If-Modified-Since")};
@@ -97,6 +98,10 @@
 		}
 
 		return Udjat::Request::cached(timestamp);
+	}
+
+	bool HTTP::Request::html() const noexcept {
+		return !api_call && mimetype() == MimeType::html;		
 	}
 
 	MimeType HTTP::Request::mimetype() const noexcept {
@@ -142,5 +147,69 @@
 		}
 
 	}
+
+	// int HTTP::Request::failed(int code, const char *message, const char *body) const {
+
+	// 	if(api_call || !Config::Value<bool>("http","use-error-templates",true)) {
+
+	// 		// Format API call response.
+	// 		HTTP::Response response{mimetype()};
+	// 		response.failed(
+	// 			Logger::Message{_("HTTP Error {}"),code}.c_str(),
+	// 			message,
+	// 			body
+	// 		);
+
+	// 		return send(code,response.to_string().c_str());
+
+	// 	}
+
+	// 	Template response{"error",mimetype()};
+	// 	if(response.empty()) {
+
+	// 		// Empty template, Format API call response.
+	// 		HTTP::Response response{mimetype()};
+	// 		response.failed(
+	// 			Logger::Message{_("HTTP Error {}"),code}.c_str(),
+	// 			message,
+	// 			body
+	// 		);
+
+	// 		return send(code,response.to_string().c_str());
+
+	// 	}
+
+	// 	response.expand([&](const char *key, std::string &value){
+
+	// 		if(!(strcasecmp(key,"code") && strcasecmp(key,"error-code"))) {
+
+	// 			value = std::to_string(code);
+
+	// 		} else if(!strcasecmp(key,"message")) {
+
+	// 			value = message;
+
+	// 		} else if(!strcasecmp(key,"body")) {
+
+	// 			value = body;
+
+	// 		} else if(!strcasecmp(key,"syscode")) {
+
+	// 			value = body;
+
+	// 		} else {
+
+	// 			return false;
+
+	// 		}
+
+	// 		return true;
+	// 	});
+
+	// 	response.expand(*this);
+
+	// 	return send(code,response.c_str());
+
+	// }
 
  }

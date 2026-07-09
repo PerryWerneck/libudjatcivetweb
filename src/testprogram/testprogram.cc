@@ -20,10 +20,14 @@
  #include <config.h>
  #include <udjat/defs.h>
  #include <udjat/tools/loader.h>
+ #include <udjat/tools/configuration.h>
  
  using namespace Udjat;
  
  int main(int argc, char **argv) {
+
+	Config::allow_user_homedir(true);
+
 	return loader(argc, argv, [](const LoaderMode mode, Application &app, const char *arg){
 		return 0;
 	});

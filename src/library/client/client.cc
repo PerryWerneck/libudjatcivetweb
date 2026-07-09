@@ -22,6 +22,7 @@
  #include <udjat/tools/logger.h>
  #include <udjat/tools/configuration.h>
  #include <private/client.h>
+ #include <udjat/tools/url.h>
  #include <system_error>
  #include <udjat/tools/value.h>
 
@@ -87,15 +88,40 @@
 
 	void CivetWeb::Client::send_headers(Connection &cli, const HTTP::Method method, const char *payload) {
 
-		debug(std::to_string(method)," ",url.path().c_str());
-		mg_printf(cli.get(), "%s %s HTTP/1.1\r\n", std::to_string(method),url.path().c_str());
+		string request_string{url.path().c_str()};
+
+		debug("Url=",request_string.c_str());
+		// Check for query
+		{
+			string query{url.query().c_str()};
+			debug("query=",query.c_str());
+			if(!query.empty()) {
+				request_string += "?";
+				request_string += query;
+			}
+		}
+
+		debug(std::to_string(method)," ",url.c_str());
+
+		mg_printf(cli.get(), 
+			"%s %s HTTP/1.1\r\n", 
+			std::to_string(method),
+			request_string.c_str()
+		);
+
+		debug("Extra headers: ",headers.request.size());
+
 		for(const auto & [name,value]: headers.request) {
+			debug("Adding header ",name.c_str(),": ",value.c_str());
 			mg_printf(cli.get(), "%s: %s\r\n", name.c_str(), value.c_str());
 		}
 
 		mg_printf(cli.get(), "\r\n");
 
 		// TODO: Send payload.
+		if(payload && *payload) {
+			throw system_error(ENOTSUP,system_category(),"This http client is unable to handle payloads");
+		}
 		
 	}
 
@@ -153,28 +179,55 @@
 		const struct mg_response_info *info = mg_get_response_info(cli.get());
 
 		debug("ret=",ret," status=",info->status_code," message=",info->status_text);
+
+#ifdef DEBUG
+		{
+			for(int header = 0; header < info->num_headers; header++) {
+				debug(info->http_headers[header].name,"= '",info->http_headers[header].value,"'");
+			}
+		}
+#endif
+
 		except(info->status_code,info->status_text);
 
-		if(info->content_length <= 0) {
-			progress(0,0,nullptr,0);
-			return info->status_code;
-		} 
-
-		progress(0,info->content_length,nullptr,0);
+		debug("content_length=",info->content_length);
 
 		long long current = 0;
-		while(current < info->content_length) {
+		if(info->content_length > 0) {
 
-			int szRead = mg_read(cli.get(), (void *) buffer, 4096);
+			// The server sent a content-lenght, use it.
+			progress(0,info->content_length,nullptr,0);
 
-			if(szRead == 0) {
-				throw system_error(ENOTCONN,system_category(),"Connection closed while downloading file");
-			} else if(szRead < 0) {
-				throw runtime_error("Download error");
-			} else if(progress(current,info->content_length,buffer,(size_t) szRead)) {
-				throw system_error(ECANCELED,system_category());
+			while(current < info->content_length) {
+
+				int szRead = mg_read(cli.get(), (void *) buffer, 4096);
+				debug("Got ",szRead," bytes");
+
+				if(szRead == 0) {
+					throw system_error(ENOTCONN,system_category(),"Connection closed while downloading file");
+				} else if(szRead < 0) {
+					throw runtime_error("Download error");
+				} else if(progress(current,info->content_length,buffer,(size_t) szRead)) {
+					throw system_error(ECANCELED,system_category());
+				}
+				current += (uint64_t) szRead;
+
 			}
-			current += (uint64_t) szRead;
+
+		} else {
+
+			// The server didnt send a content-length.
+			int szRead;
+			while((szRead = mg_read(cli.get(), (void *) buffer, 4096)) != 0) {
+
+				if(szRead < 0) {
+					throw runtime_error("Download error");
+				} else if(progress(current,0,buffer,(size_t) szRead)) {
+					throw system_error(ECANCELED,system_category());
+				}
+				current += (uint64_t) szRead;
+
+			}
 
 		}
 
@@ -263,42 +316,3 @@
 
  }
 
- /*
- #include <config.h>
- #include <udjat/defs.h>
- #include <udjat/tools/url.h>
- #include <udjat/tools/url/handler.h>
- #include <udjat/tools/intl.h>
- #include <udjat/tools/exception.h>
- #include <udjat/tools/logger.h>
- #include <udjat/tools/configuration.h>
- #include <udjat/tools/socket.h>
- #include <udjat/tools/http/mimetype.h>
- #include <udjat/tools/http/method.h>
-
- #include <private/client.h>
-
- #include <errno.h>
- #include <fcntl.h>
- #include <unistd.h>
- #include <system_error>
-
- #if defined(HAVE_JSON_C)
-	#include <json.h>
- #endif // HAVE_JSON_C
-
- using namespace std;
-
- namespace Udjat {
-
-
-
-
-	bool HTTP::Handler::get(Udjat::Value &value, const HTTP::Method method, const char *payload) {
-
-	}
-#endif // HAVE_JSON_C
-
- }
-
- */

@@ -34,6 +34,7 @@
  #include <udjat/tools/http/handler.h>
  #include <udjat/tools/intl.h>
  #include <string>
+ #include <udjat/authentication.h>
 
  #include <civetweb.h>
 
@@ -194,15 +195,14 @@
 			mg_set_request_handler(ctx, "/image/", (mg_request_handler) image_handler, this);
 			mg_set_request_handler(ctx, "/favicon.ico", (mg_request_handler) favicon_handler, this);
 
-#ifdef HAVE_LIBSSL
-			mg_set_request_handler(ctx, "/pubkey.pem", keyWebHandler, 0);
-			if(Config::Value<bool>{"oauth2","enable-internal",false}) {
+			if(Authentication::available()) {
 				mg_set_request_handler(ctx, "/oauth2", oauthWebHandler, 0);
 			}
-#endif // HAVE_LIBSSL
 
-			// All other requests goes to service default handler
-			// mg_set_request_handler(ctx, "/", (mg_request_handler) request_handler, this);
+			mg_set_request_handler(ctx, "/account", userWebHandler, 0);
+
+			// All other requests goes to generic handler
+			// mg_set_request_handler(ctx, "/", (mg_request_handler) generic_handler, this);
 
 		}
 
@@ -246,12 +246,9 @@
 
 				if(Logger::enabled(Logger::Trace)) {
 
-#ifdef HAVE_LIBSSL
-					Logger::String{"Public key available on ",baseref,"/pubkey.pem"}.write(Logger::Trace,"civetweb");
-					if(Config::Value<bool>{"oauth2","enable-internal",false}) {
-						Logger::String{"OAuth2 service available on ",baseref,"/oauth2"}.write(Logger::Trace,"civetweb");
+					if(Authentication::available() && !strcasecmp(Config::Value<string>{"authentication","engine","undefined"}.c_str(),"internal")) {
+						Logger::String{"Authentication service available on ",baseref,"/oauth2"}.trace();
 					}
-#endif // HAVE_LIBSSL
 
 					if(interfaces.empty()) {
 						Logger::String{"The interface list is empty"}.trace();

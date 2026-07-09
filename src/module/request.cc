@@ -25,12 +25,16 @@
  #include <udjat/defs.h>
  #include <private/request.h>
  #include <udjat/tools/http/request.h>
+ #include <udjat/tools/http/timestamp.h>
  #include <udjat/tools/request.h>
  #include <udjat/tools/intl.h>
  #include <udjat/tools/logger.h>
  #include <udjat/tools/string.h>
  #include <udjat/tools/configuration.h>
+ #include <udjat/tools/http/authentication.h>
  #include <udjat/tools/url.h>
+ #include <udjat/tools/string.h>
+ #include <private/oauth.h>
  #include <ctype.h>
 
  #include <civetweb.h>
@@ -41,9 +45,11 @@
 
 	namespace CivetWeb {
 
-		Request::Request(struct mg_connection *c) : Request(c,mg_get_request_info(c)->local_uri, (unsigned int) ((PACKAGE_VERSION_MAJOR * 100) + PACKAGE_VERSION_MINOR)) {
+		Request::Request(struct mg_connection *c) : Request{c,mg_get_request_info(c)->local_uri, (unsigned int) ((PACKAGE_VERSION_MAJOR * 100) + PACKAGE_VERSION_MINOR)} {
 
-			if(pop("/api")) {
+			// Extract API version.
+			api_call = pop("/api"); 
+			if(api_call) {
 				const char *reqpath = path();
 				if(*reqpath != '/') {
 					throw runtime_error(Logger::String{"Unexpected path: '",reqpath,"', requests should be in the format /api/[",apiver,"]/interface"});
@@ -67,7 +73,7 @@
 		}
 
 		Request::Request(struct mg_connection *c, const char *path, unsigned int ver)
-			: HTTP::Request{path,mg_get_request_info(c)->request_method}, conn{c}, info{mg_get_request_info(c)} {
+			: HTTP::Request{path,mg_get_request_info(c)->request_method}, conn{c}, info{(mg_request_info *) mg_get_request_info(c)} {
 
 			apiver = ver;
 
@@ -77,13 +83,13 @@
 			debug("local_uri_raw='",mg_get_request_info(c)->local_uri_raw,"'");
 			debug("local_uri='",mg_get_request_info(c)->local_uri,"'");
 
-#ifdef DEBUG
-			{
-				for(int header = 0; header < info->num_headers; header++) {
-					debug("header(",info->http_headers[header].name,")='",info->http_headers[header].value,"'");
-				}
-			}
-#endif // DEBUG
+// #ifdef DEBUG
+// 			{
+// 				for(int header = 0; header < info->num_headers; header++) {
+// 					debug("header(",info->http_headers[header].name,")='",info->http_headers[header].value,"'");
+// 				}
+// 			}
+// #endif // DEBUG
 
 			// https://github.com/civetweb/civetweb/blob/master/examples/embedded_c/embedded_c.c
 			if(!strcasecmp(header("Content-Type"),"application/x-www-form-urlencoded")) {
@@ -127,14 +133,49 @@
 
 				mg_handle_form_request(c, &input.fdh);
 
+
 			}
 
 			parse_query(info->query_string);
 			
+			// Check for authentication
+			try {
+
+				auto cookie = session_cookie();
+				debug("Authentication cookie: '",cookie,"'");
+				this->auth = make_shared<HTTP::Authentication>(cookie.c_str());
+
+			} catch(const std::exception &e) {
+
+				// Authentication failed, trace the message and clear it.
+				debug("*** Ignoring authentication cookie ***");
+				Logger::String{e.what()}.trace();
+				this->auth.reset();
+
+			}
+
 		}
 
  		const char * Request::query(const char *) const {
 			return info->query_string;
+		}
+
+		Udjat::String Request::uri() const {
+			return mg_get_request_info(conn)->local_uri;
+		}
+
+		bool Request::getProperty(const char *key, std::string &value) const {
+
+			if(!strcasecmp(key,"redirect-uri")) {
+				Udjat::String uri{
+					Config::Value<string>{"authentication","redirect-uri",""}.c_str(),
+					
+				};
+				value = uri.escape();
+				return true;
+			}
+
+			return HTTP::Request::getProperty(key,value);
 		}
 
 		String Request::address() const {
@@ -180,6 +221,93 @@
 
 			return "";
 		}
+
+		int Request::redirect(const char *location) const {
+
+			debug("Redirecting to '",location,"'");
+
+			mg_response_header_start(conn, 303);
+			mg_response_header_add(conn, "Location",location,-1);
+			mg_response_header_add(conn, "Content-Length", "0", -1);
+			mg_response_header_send(conn);
+
+			return 303;
+		}
+
+// 		int Request::send(int code, const char *text) const {
+
+// 			auto length = strlen(text);
+
+// 			mg_response_header_start(conn, code);
+// 			mg_response_header_add(conn, "Content-Length", std::to_string(length).c_str(), -1);
+// 			mg_response_header_add(conn, "Content-Type",std::to_string(mimetype()),-1);
+
+// 			auto auth = dynamic_pointer_cast<HTTP::Authentication>(authentication());
+
+// 			if(auth) {
+// 				// Setup cookie
+// 				Udjat::String cookie{
+// 					HTTP::Authentication::cookie_name().c_str(),"=",
+// 					auth->token().c_str(),
+// 					"; path=/; Expires=",
+// 					HTTP::TimeStamp::to_string(auth->expires()).c_str()
+// 				};
+// 				debug("Cookie='",cookie,"'");
+// 				mg_response_header_add(conn, "Set-Cookie", cookie.c_str(),-1);
+// 			}
+// #ifdef DEBUG
+// 			else {
+// 				debug("Sending response ",code," without authentication cookie");
+// 			}
+// #endif // DEBUG
+
+// 			mg_response_header_add(conn, "Cache-Control","no-cache, no-store, must-revalidate, private, max-age=0",-1);
+// 			mg_response_header_add(conn, "Expires", "0",-1);
+
+// 			mg_response_header_send(conn);
+
+// 			mg_write(conn, text, length);
+
+// 			return code;
+// 		}
+
+		// int Request::authentication_required() const {
+
+		// 	if(!Authentication::available()) {
+		// 		// Authentication is not available, return error 500.
+		// 		return failed(503,strerror(ENOTSUP),_("Authentication required, but no authentication engine is available"));
+		// 	}
+
+		// 	if(!html()) {
+		// 		// Not HTML or no authentication, just return 'forbidden'.
+		// 		debug("API call or not html request, returning 403");
+
+		// 		auto auth = authentication();
+		// 		if(!auth || auth->level() == Authentication::None) {
+		// 			return failed(403,strerror(EPERM),_("This resource requires an authenticated user"));
+		// 		}
+
+		// 		return failed(403,strerror(EPERM),_("You dont have access to this resource"));
+				
+		// 	}
+
+		// 	debug("HTML request, Redirecting to login page");
+		// 	// if(!strcasecmp(Config::Value<string>{"authentication","engine","undefined"}.c_str(),"internal")) {
+
+		// 	Config::Value<Udjat::String> endpoint{"authentication","endpoint"};
+
+		// 	if(endpoint.empty()) {
+		// 		// Missing authentication entrypoint, error.
+		// 		return failed(500,strerror(ENOTSUP),_("The authentication endpoint is undefined"));
+		// 	}
+
+		// 	endpoint.expand(CivetWeb::OAuthContext{conn});
+
+		// 	debug("--------------------> Redirecting to '",endpoint.c_str());
+		// 	return redirect(endpoint.c_str());
+
+		// }
+
 
 	}
 
