@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udjat-module-httpd 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-23 21:24-0300\n"
-"PO-Revision-Date: 2026-06-23 09:49-0300\n"
+"POT-Creation-Date: 2026-07-09 07:34-0300\n"
+"PO-Revision-Date: 2026-07-09 07:41-0300\n"
 "Last-Translator: Perry Werneck <perry.werneck@gmail.com>\n"
 "Language-Team: Brazilian Portuguese <perry.werneck@gmail.com>\n"
 "Language: pt_BR\n"
@@ -21,8 +21,7 @@ msgstr ""
 "X-Generator: Poedit 3.9\n"
 
 #: src/library/connection.cc:60 src/library/server/call.cc:67
-#: src/module/handlers/pubkey.cc:71 src/module/handlers/api.cc:89
-#: src/module/oauth2/handler.cc:290 src/module/service/send.cc:304
+#: src/module/handlers/api.cc:89 src/module/service/send.cc:304
 msgid "Unexpected error"
 msgstr "Erro inesperado"
 
@@ -42,14 +41,14 @@ msgstr "Aplicação"
 msgid "Interfaces"
 msgstr "Interfaces"
 
-#: src/library/oauth2/signin.cc:45 src/library/os/linux/oauth2user.cc:294
-#: src/library/os/windows/oauth2user.cc:163
-msgid "Access Denied"
-msgstr "Acesso negado"
-
 #: src/library/os/linux/oauth2user.cc:271
 msgid "Invalid username"
 msgstr "Usuário inválido"
+
+#: src/library/os/linux/oauth2user.cc:294
+#: src/library/os/windows/oauth2user.cc:163
+msgid "Access Denied"
+msgstr "Acesso negado"
 
 #: src/library/os/linux/oauth2user.cc:299
 #: src/library/os/windows/oauth2user.cc:167
@@ -65,38 +64,136 @@ msgstr "Informe a senha de acesso"
 msgid "Unexpected error processing response text"
 msgstr "Erro inesperado ao processar o texto da resposta"
 
-#: src/module/handlers/product.cc:90
-msgid "Not available"
-msgstr "Não disponível"
+#: src/library/oauth2/callback.cc:59
+msgid "Invalid response from authentication server"
+msgstr "Servidor de autenticação enviou uma resposta inválida"
 
-#: src/module/handlers/pubkey.cc:78
-msgid "Unsupported"
-msgstr "Não suportado"
+#: src/library/oauth2/callback.cc:76 src/library/oauth2/callback.cc:182
+#: src/library/oauth2/context.cc:213 src/library/oauth2/context.cc:230
+msgid ""
+"Invalid authentication engine configuration. Please check server settings."
+msgstr ""
+"A configuração do sistema de autenticação não é válida. Verifique a "
+"configuração do servidor."
+
+#: src/library/oauth2/callback.cc:104
+msgid "Empty response from authentication server"
+msgstr "Servidor de autenticação enviou uma resposta vazia"
+
+#: src/library/oauth2/callback.cc:120
+#, c++-format
+msgid "Unexpected token type: '{}'"
+msgstr "Tipo de token inválido: '{}'"
+
+#: src/library/oauth2/callback.cc:143 src/library/oauth2/callback.cc:151
+#: src/library/oauth2/callback.cc:159
+msgid "Failed to retrieve information from the authentication server."
+msgstr "Falha ao obter informações do servidor de autenticação."
+
+#: src/library/oauth2/callback.cc:160
+msgid "Empty token on authentication server response"
+msgstr "Token vazio na resposta do servidor de autenticação"
+
+#: src/library/oauth2/callback.cc:181
+msgid "Configuration error"
+msgstr "Erro de configuração"
+
+#: src/library/oauth2/callback.cc:208
+msgid "Error parsing authentication response"
+msgstr "Erro ao processar resposta de autenticação"
+
+#: src/library/oauth2/callback.cc:239
+msgid "The authentication server did not provide a username."
+msgstr "O servidor de autenticação não forneceu um nome de usuário."
+
+#: src/library/oauth2/callback.cc:246
+msgid ""
+"Access unauthorized. Please contact your system administrator if you believe "
+"this is an error."
+msgstr ""
+"Acesso negado. Contacte o administrador do sistema se você acredita que isso "
+"é um erro."
+
+#: src/library/oauth2/callback.cc:258
+msgid "Failed to retrieve user information from the authentication server."
+msgstr "Falha ao obter informações de usuário no servidor de autenticação."
+
+#: src/library/oauth2/context.cc:87 src/library/oauth2/context.cc:92
+msgid "Configuration Error"
+msgstr "Erro de configuração"
+
+#: src/library/oauth2/context.cc:87
+msgid ""
+"An authentication method has not been configured for this webpage. Please "
+"reach out to the system administrator."
+msgstr ""
+"Um método de autenticação não foi configurado para essa página. Contacte o "
+"administrador do sistema."
+
+#: src/library/oauth2/context.cc:92
+msgid ""
+"Connection failed. The system authentication endpoint is undefined or "
+"improperly configured."
+msgstr ""
+"Conexão falhou. O endpoint de autenticação não está definido ou configurado "
+"errado."
+
+#: src/library/oauth2/context.cc:165
+msgid "Authorized use only. All activity is monitored for security."
+msgstr ""
+
+#: src/library/oauth2/context.cc:173
+msgid "Access to ${product-name}"
+msgstr "Acesso ${product-name}"
+
+#: src/library/oauth2/context.cc:177
+msgid "Sign in"
+msgstr "Acessar"
+
+#: src/library/oauth2/context.cc:181
+msgid "Username"
+msgstr "Usuário"
+
+#: src/library/oauth2/context.cc:185
+msgid "Password"
+msgstr "Senha"
+
+#: src/library/oauth2/handle.cc:78
+msgid "Unrecognized request"
+msgstr "Requisição desconhecida"
+
+#: src/library/oauth2/handle.cc:79
+#, c++-format
+msgid "The requested action '{}' is not available on this server"
+msgstr "A ação '{}' não está disponível nesse servidor"
+
+#: src/library/oauth2/handle.cc:88
+msgid "We're sorry, but we encountered an error while processing your request."
+msgstr ""
 
 #: src/module/handlers/api.cc:83
 #, c++-format
 msgid "Unexpected error '{}' calling backend"
 msgstr "Erro inesperado '{}' no controlador http"
 
-#: src/module/oauth2/handler.cc:104
-msgid "Access to ${client_id}"
-msgstr "Acesso ${client_id}"
+#: src/module/handlers/product.cc:92
+msgid "Not available"
+msgstr "Não disponível"
 
-#: src/module/oauth2/handler.cc:114
-msgid "Sign in"
-msgstr "Acessar"
+#: src/module/oauth2/context.cc:80
+msgid "Invalid state received from authentication server"
+msgstr "Servidor de autenticação enviou um estado inválido"
 
-#: src/module/oauth2/handler.cc:119
-msgid "Username"
-msgstr "Usuário"
-
-#: src/module/oauth2/handler.cc:124
-msgid "Password"
-msgstr "Senha"
+#: src/module/oauth2/handler.cc:59
+msgid "An unexpected error occurred during the login process."
+msgstr "Um erro inesperado aconteceu durante o processo de login."
 
 #: src/module/custom.cc:59
 msgid "Unexpected error on http handler"
 msgstr "Erro inesperado no controlador http"
+
+#~ msgid "Unsupported"
+#~ msgstr "Não suportado"
 
 #~ msgid "Workers"
 #~ msgstr "Processadores"
