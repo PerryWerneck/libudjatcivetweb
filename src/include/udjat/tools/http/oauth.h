@@ -34,7 +34,7 @@
 
 		class UDJAT_API Context : public HTTP::Authentication, public Abstract::Object {
 		private:
-		
+
 			/// @brief Handle callback from oauth server.
 			/// @return The HTTP status code.
 			int callback();
@@ -79,6 +79,10 @@
 			/// @param body The message body.
 			/// @return The HTTP status code.
 			virtual int failed(int code, const char *message, const char *body = "") const;
+
+			/// @brief Authentication complete, redirect to main page.
+			/// @return The HTTP status code.
+			int authenticated();
 
 		public:
 

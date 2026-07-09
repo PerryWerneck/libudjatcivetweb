@@ -262,7 +262,10 @@
 			}
 		}
 
-		throw runtime_error("Incomplete");
+		// Redirect to main page.
+		debug("uri=",uri.c_str())
+
+		return authenticated();
 
 	}
 

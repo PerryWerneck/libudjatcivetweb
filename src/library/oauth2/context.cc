@@ -151,10 +151,10 @@
 			return true;
 		}
 
-		// if(!strcasecmp(key,"redirect-uri")) {
-		// 	value = uri;
-		// 	return true;
-		// }
+		if(!strcasecmp(key,"redirect-uri")) {
+			value = uri;
+			return true;
+		}
 
 		static const struct {
 			const char *key;
@@ -228,6 +228,20 @@
 
 		Logger::String{"Missing required value '",key,"' in authentication engine configuration"}.error();
 		throw runtime_error(_("Invalid authentication engine configuration. Please check server settings."));
+
+	}
+
+	int OAuth::Context::authenticated() {
+
+		if(uri.empty()) {
+			uri = Config::Value<string>{"authentication","authenticated","/"}.c_str();
+		}
+
+		// Reset expiration time.
+		expiration_time = time(0) + Config::Value<time_t>("authentication","expiration-time",86400);
+
+		// Redirect to index.
+		return send_redirect_response(uri.c_str(),true);
 
 	}
 
