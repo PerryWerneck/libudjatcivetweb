@@ -185,7 +185,7 @@
 
 		response.expand([&](const char *key, std::string &value){
 
-			if(!strcasecmp(key,"code")) {
+			if(!(strcasecmp(key,"code") && strcasecmp(key,"error-code"))) {
 
 				value = std::to_string(code);
 

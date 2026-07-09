@@ -40,6 +40,7 @@
  #include <udjat/tools/http/handler.h>
  #include <udjat/tools/http/request.h>
  #include <private/request.h>
+ #include <private/oauth.h>
  #include <udjat/authentication.h>
  #include <udjat/tools/configuration.h>
 
@@ -57,10 +58,7 @@
 	CivetWeb::Request request{conn};
 
 	if(!request.allow(Authentication::Guest)) {
-
-		// The user is not authenticated, forward to authentication service.
-		return request.authentication_required();
-
+		return CivetWeb::OAuthContext(conn).authenticate();
 	}
 
 	debug("User is authenticated with level ",std::to_string(request.authentication()->level()),"(",request.authentication()->level(),")");

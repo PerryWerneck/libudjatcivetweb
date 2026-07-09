@@ -42,7 +42,7 @@
 
 			int send_html_response(int code, const char *text) const override;
 
-			int send_redirect_response(const char *location) const override;
+			int send_redirect_response(const char *location, bool cookie = true) const override;
 
 			void send_header(bool cookie = true) const override;
 

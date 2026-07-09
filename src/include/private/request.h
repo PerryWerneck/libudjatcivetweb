@@ -67,7 +67,7 @@
 
 			/// @brief Show login page if available.
 			/// @return the http return code.
-			int authentication_required() const;
+			// int authentication_required() const;
 
 			/// @brief Send response to server.
 			/// @return code

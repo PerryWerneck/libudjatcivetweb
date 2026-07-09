@@ -153,6 +153,8 @@ lib_src = [
   'src/library/testprogram.cc',
   'src/library/authentication.cc',
   'src/library/oauth2/context.cc',
+  'src/library/oauth2/handle.cc',
+  'src/library/oauth2/responses.cc',
   ]
 
 module_src = [

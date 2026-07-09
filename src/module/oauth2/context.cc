@@ -57,6 +57,9 @@
 			memset(buffer,0,4096);
 			if(mg_get_var(query_string,strlen(query_string), "state", buffer, sizeof(buffer)-1) >= 0) {
 
+#ifdef DEBUG
+				Logger::String{"Received state ",buffer}.info();
+#endif
 				try {
 
 					char decoded[4096];
@@ -125,11 +128,11 @@
 		return code;
 	}
 
-	int CivetWeb::OAuthContext::send_redirect_response(const char *location) const {
+	int CivetWeb::OAuthContext::send_redirect_response(const char *location, bool cookie) const {
 		mg_response_header_start(conn, 303);
 		mg_response_header_add(conn, "Location",location,-1);
 		mg_response_header_add(conn, "Content-Length", "0", -1);
-		send_header(false);
+		send_header(cookie);
 		return 303;
 	}
 
@@ -151,7 +154,7 @@
 			String str{
 				cookie_name().c_str(),"=",
 				token().c_str(),
-				"; path=/oauth2; Expires=",
+				"; path=/; Expires=",
 				HTTP::TimeStamp::to_string(expires).c_str()
 			};
 			mg_response_header_add(conn, "Set-Cookie", str.c_str(),-1);

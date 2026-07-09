@@ -34,14 +34,10 @@
 
 		class UDJAT_API Context : public HTTP::Authentication, public Abstract::Object {
 		protected:
-			struct {
-				String message;											///< @brief The Message for client.
-				String body;
-			} status;
-			
 			String path;
 			String uri;			///< @brief The URI who originated the authentication request.
 			String code;
+			bool apicall = false;
 			uint16_t sequencial = 0;
 
  			/// @brief Sent HTTP header.
@@ -49,26 +45,6 @@
 
 			/// @brief Do a POST request.
 			virtual String post(const char *url, const char *payload) const = 0;
-
-		public:
-
-			Context(const char *path);
-			virtual ~Context();
-
-			bool getProperty(const char *key, std::string &value) const override;
-
-			inline bool empty() const noexcept {
-				return path.empty();
-			}
-
-			inline void message(const char *msg, const char *body = "") noexcept {
-				status.message = msg;
-				status.body = body;
-			}
-
-			/// @brief Handle authentication requests.
-			/// @return The HTTP status code.
-			int handle();
 
 			/// @brief Send template response.
 			/// @param code The HTTP status code
@@ -89,11 +65,39 @@
 
  			/// @brief Send redirect response.
 			/// @return The HTTP status code.
- 			virtual int send_redirect_response(const char *location) const = 0;
+ 			virtual int send_redirect_response(const char *location, bool cookie = true) const = 0;
+
+			/// @brief Format and send error page.
+			/// @param code The http status code.
+			/// @param message The message to user.
+			/// @param body The message body.
+			/// @return The HTTP status code.
+			int failed(int code, const char *message, const char *body = "") const;
+
+		public:
+
+			Context(const char *path = nullptr);
+			virtual ~Context();
+
+			bool getProperty(const char *key, std::string &value) const override;
+
+			inline bool empty() const noexcept {
+				return path.empty();
+			}
+
+			/// @brief Handle authentication requests.
+			/// @return The HTTP status code.
+			int handle();
 
 			/// @brief Pop one element from path.
 			/// @return 
 			String pop();
+
+			/// @brief Start authentication flow.
+			/// @param api True if the request started from an API call.
+			/// @param target URL to redirect when the flow finished.
+			/// @return HTTP error code to forward.
+			int authenticate(const char *target = "");
 
 			/// @brief Run callback from oauth server.
 			/// @return The HTTP status code.

@@ -51,25 +51,52 @@
 
  namespace Udjat {
 
-	OAuth::Context::Context(const char *p) : path{p} {
-		while(path[0] == '/') {
-			path.erase(0,1);
-		}
-		pop();	// Remove '/oauth2'
+	OAuth::Context::Context(const char *path) {
 
-		debug("---- Build OAuth2 context for '",path.c_str(),"'");	
+		if(path && *path) {
 
-#ifdef DEBUG
-		{
-			string v;
-			getProperty("client-id",v);
-			getProperty("client-secret",v);
+			while(*path == '/') {
+				path++;
+			}
+
+			if(!strncasecmp(path,"oauth2",6)) {
+				path += 6;
+			}
+
+			while(*path == '/') {
+				path++;
+			}
+
+			this->path = path;
 		}
-#endif
+
+		debug("--- Building oauth context to '",(path ? path : ""),"'");
 
 	}
 
 	OAuth::Context::~Context() {
+	}
+
+	int OAuth::Context::authenticate(const char *target) {
+
+		debug(__FUNCTION__,"(",target,")");
+
+		clear();
+
+		if(!Authentication::available()) {
+			return failed(503,_("Configuration Error"),_("An authentication method has not been configured for this webpage. Please reach out to the system administrator."));
+		}
+
+		Config::Value<Udjat::String> endpoint{"authentication","endpoint"};
+		if(endpoint.empty()) {
+			return failed(503,_("Configuration Error"),_("Connection failed. The system authentication endpoint is undefined or improperly configured."));
+		}
+
+		endpoint.expand(this);
+
+		debug("Redirecting to endpoint at '",endpoint.c_str(),"'");
+
+		return send_redirect_response(endpoint.c_str());
 	}
 
 	String OAuth::Context::pop() {
@@ -93,15 +120,15 @@
 
 	bool OAuth::Context::getProperty(const char *key, std::string &value) const {
 
-		if(!strcasecmp(key,"message")) {
-			value = this->status.message;
-			return true;
-		}
+		// if(!strcasecmp(key,"message")) {
+		// 	value = this->status.message;
+		// 	return true;
+		// }
 
-		if(!strcasecmp(key,"body")) {
-			value = this->status.body;
-			return true;
-		}
+		// if(!strcasecmp(key,"body")) {
+		// 	value = this->status.body;
+		// 	return true;
+		// }
 
 		if(!strcasecmp(key,"authentication-state")) {
 
@@ -124,10 +151,10 @@
 			return true;
 		}
 
-		if(!strcasecmp(key,"redirect-uri")) {
-			value = uri;
-			return true;
-		}
+		// if(!strcasecmp(key,"redirect-uri")) {
+		// 	value = uri;
+		// 	return true;
+		// }
 
 		static const struct {
 			const char *key;
@@ -190,7 +217,7 @@
 		}
 
 		if(!strcasecmp(key,"username")) {
-			value = ""; // FIX-ME: Get username from context.
+			value = ""; // FIX-ME: Get username.
 			return true;
 		}
 
@@ -201,264 +228,7 @@
 
 		Logger::String{"Missing required value '",key,"' in authentication engine configuration"}.error();
 		throw runtime_error(_("Invalid authentication engine configuration. Please check server settings."));
-	}
 
-	int OAuth::Context::handle() {
-
-		try {
-
-			if(empty()) {
-				Logger::String{"Empty html request, sending login page"}.trace();
-				set(HTTP::Authentication::LoginPage);
-				return send_template(200,"signin","login");
-			}
-
-			debug("--------------- Checking for options ---------------");
-			String action = pop();
-
-			debug("Requested action: '",action.c_str(),"'");
-
-			switch(action.select("callback",NULL)) {
-			case 0: // callback
-
-				// Reference: https://docs.github.com/pt/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps#web-application-flow
-
-				debug("---> callback");
-				debug("uri=",uri.c_str())
-				debug("code=",code.c_str())
-
-				if(code.empty()) {
-					message(strerror(EPERM),_("Invalid response from authentication server"));
-					return send_template(400,"error");
-				}
-
-				// Get access token
-				String access_token;
-				String token_type;
-				{
-					Config::Value<String> url{"authentication","get-token-url",""};
-					debug("get-token-url='",url.c_str(),"'");
-					url.expand([this](const char *key, std::string &value) {
-						return this->getProperty(key,value);
-					});
-					if(url.empty()) {
-						Logger::Message{"Missing required value for authentication attribute '{}'","get-token-url"}.error();
-						message(strerror(EPERM),_("Invalid authentication engine configuration. Please check server settings."));
-						return send_template(400,"error");
-					}
-
-					Config::Value<String> payload{"authentication","get-token-payload",""};
-					debug("get-token-payload='",payload.c_str(),"'");
-					payload.expand([this](const char *key, std::string &value) {
-						return this->getProperty(key,value);
-					});
-
-					HTTP::Method method = HTTP::MethodFactory(Config::Value<string>{"authentication","get-token-method","post"}.c_str());
-
-					debug("URL: ",url.c_str());
-					debug("Payload: ",payload.c_str());
-					debug("Method: ",std::to_string(method));
-
-					auto response = URL{url.c_str()}
-						.call(
-							method,
-							payload.c_str(),
-							false
-						);
-
-
-					debug("Got response '",response.c_str(),"'");
-
-					if(response.empty()) {
-						throw runtime_error(_("Empty response from authentication server"));
-					}
-
-					String error;
-					String error_description;
-
-					for(const String &value : response.split("&")) {
-
-						debug("response item='",value.c_str(),"'");
-
-						if(value.has_prefix("access_token=")) {
-							access_token = value.c_str()+13;
-
-						} else if(value.has_prefix("token_type=")) {
-							token_type = value.c_str()+11;
-							if(strcasecmp(token_type.c_str(),"bearer")) {
-								throw runtime_error(Logger::Message(_("Unexpected token type: '{}'"),token_type.c_str()));
-							}
-
-						} else if(value.has_prefix("error=")) {
-							error = value.c_str()+6;
-							error.unescape();
-
-						} else if(value.has_prefix("error_description=")) {
-							error_description = value.c_str()+18;
-							error_description.unescape();
-
-						} else if(value.has_prefix("error_uri=")) {
-							String val = value.c_str()+10;
-							val.unescape();
-							Logger::String{val.c_str()}.error();
-
-						}
-						
-					}
-
-					if(!error_description.empty()) {
-						throw runtime_error(error_description);
-					}
-
-					if(!error.empty()) {
-						throw runtime_error(error);
-					}
-
-					if(access_token.empty()) {
-						throw runtime_error(_("Empty token on authentication server response"));
-					}
-
-				}
-
-				debug("access_token=",access_token.c_str());
-
-				// Get user account
-				// GET https://api.github.com/user
-				// curl -H "Authorization: Bearer OAUTH-TOKEN" https://api.github.com/user
-				{
-					URL url{Config::Value<string>{"authentication","get-user-account"}.c_str()};
-					auto handler = url.handler();
-					
-					try {
-
-						if(url.empty()) {
-							Logger::Message{"Missing required value for authentication attribute '{}'","get-user-account"}.error();
-							message(strerror(EPERM),_("Invalid authentication engine configuration. Please check server settings."));
-							return send_template(400,"error");
-						}
-						
-						handler->header(
-							URL::Handler::AUTHORIZATION,
-							String{token_type.c_str()," ",
-							access_token.c_str()}.c_str()
-						);
-						
-						// Github requires user-agent matching with the registered application.
-						handler->header(
-							URL::Handler::USER_AGENT,
-							Config::Value<string>{"authentication","user-agent",STRINGIZE_VALUE_OF(PRODUCT_NAME)}.c_str()
-						);
-
-						debug("--- Getting user info ---");
-						auto response = handler->get();
-
-						debug("Got response: '",response.c_str(),"'");
-						clear();
-
-#if defined(HAVE_JSON_C)
-						auto jobj = make_handle(json_tokener_parse(response.c_str()),json_object_put);
-
-						if(!jobj) {
-							throw runtime_error(_("Error parsing authentication response"));
-						}
-
-						json_object_object_foreach(jobj.get(), key, val) {
-							if(json_object_get_type(val) == json_type_string) {
-								debug(key,"='",json_object_get_string(val),"'");
-								if(!strcasecmp(key,"name")) {
-									Authentication::name(json_object_get_string(val));
-								} else if(!strcasecmp(key,"email")) {
-									login(json_object_get_string(val));
-								} else if(!strcasecmp(key,"avatar_url")) {
-									avatar_url = json_object_get_string(val);
-								}
-							}
-						}
-#else
-						throw runtime_error("Unable to process authentication response: Json parser is not available");
-#endif // HAVE_JSON_C
-
-						if(Udjat::Authentication::level() == Authentication::None) {
-							
-							const char *username = Udjat::Authentication::name();
-							clear();
-
-							if(!(username && *username)) {
-								Logger::Message{"Missing required value for authentication response '{}'","name"}.error();
-								message(
-									strerror(EPERM),
-									_("The authentication server did not provide a username.")
-								);
-								return send_template(400,"error");
-							} else {
-								Logger::Message{"Access unauthorized for '{}'","name"}.error();
-								message(strerror(EPERM),_("Access unauthorized. Please contact your system administrator if you believe this is an error."));
-								return send_template(400,"error");								
-							}
-
-						}
-
-					} catch(const std::exception &e) {
-
-						Logger::String{url.c_str()," returned  '",e.what(),"'"}.error();
-
-						message(e.what(),_("Failed to retrieve user information from the authentication server."));
-						return send_template(400,"error");
-
-					}
-				}
-
-				throw runtime_error("Incomplete");
-
-			}
-
-			// Unknow request, send error page.
-			message(
-				_("Unrecognized request"),
-				Logger::Message{_("The requested action '{}' is not available on this server"), action.c_str()}.c_str()
-			);
-			return send_template(404,"","error");
-
-		} catch(const std::exception &e) {
-
-			Logger::String{e.what()}.error();
-			clear();	
-			message(_("We're sorry, but we encountered an error while processing your request."),e.what());
-			return send_template(404,"error");
-
-		}
-
-
-	}
-
-	int OAuth::Context::send_template(int code, const char *action, const char *tmplt) {
-
-		Udjat::HTTP::Template text{tmplt,Udjat::MimeType::html};
-
-		// Last, expand request arguments.
-		text.expand([this,code,action](const char *key, std::string &value) {
-
-			if(!strcasecmp(key,"code")) {
-				Logger::String{"Using obsolete '%{code}' on template"}.warning();
-				value = std::to_string(code);
-				return true;
-			}
-
-			if(!strcasecmp(key,"error-code")) {
-				value = std::to_string(code);
-				return true;
-			}
-
-			if(!strcasecmp(key,"action")) {
-				value = String{"/oauth2/",action};
-				return true;
-			}
-
-			return this->getProperty(key,value);
-
-		});
-
-		return send_html_response(code,text.c_str());
 	}
 
  }

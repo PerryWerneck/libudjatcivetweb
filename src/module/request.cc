@@ -271,53 +271,42 @@
 			return code;
 		}
 
-		int Request::authentication_required() const {
+		// int Request::authentication_required() const {
 
-			if(!Authentication::available()) {
-				// Authentication is not available, return error 500.
-				return failed(503,strerror(ENOTSUP),_("Authentication required, but no authentication engine is available"));
-			}
+		// 	if(!Authentication::available()) {
+		// 		// Authentication is not available, return error 500.
+		// 		return failed(503,strerror(ENOTSUP),_("Authentication required, but no authentication engine is available"));
+		// 	}
 
-			if(!html()) {
-				// Not HTML or no authentication, just return 'forbidden'.
-				debug("API call or not html request, returning 403");
+		// 	if(!html()) {
+		// 		// Not HTML or no authentication, just return 'forbidden'.
+		// 		debug("API call or not html request, returning 403");
 
-				auto auth = authentication();
-				if(!auth || auth->level() == Authentication::None) {
-					return failed(403,strerror(EPERM),_("This resource requires an authenticated user"));
-				}
+		// 		auto auth = authentication();
+		// 		if(!auth || auth->level() == Authentication::None) {
+		// 			return failed(403,strerror(EPERM),_("This resource requires an authenticated user"));
+		// 		}
 
-				return failed(403,strerror(EPERM),_("You dont have access to this resource"));
+		// 		return failed(403,strerror(EPERM),_("You dont have access to this resource"));
 				
-			}
+		// 	}
 
-			debug("HTML request, Redirecting to login page");
-			// if(!strcasecmp(Config::Value<string>{"authentication","engine","undefined"}.c_str(),"internal")) {
+		// 	debug("HTML request, Redirecting to login page");
+		// 	// if(!strcasecmp(Config::Value<string>{"authentication","engine","undefined"}.c_str(),"internal")) {
 
-			// 	debug("request_uri='",mg_get_request_info(conn)->request_uri,"'");
+		// 	Config::Value<Udjat::String> endpoint{"authentication","endpoint"};
 
-			// 	// Logger::String{"Empty html request, sending login page"}.trace();
-			// 	// OAuth::Context context{conn};
-			// 	// context.action = "signin";
-			// 	// context.set(HTTP::Authentication::LoginPage);
-			// 	// return context.send_html_response("login");
+		// 	if(endpoint.empty()) {
+		// 		// Missing authentication entrypoint, error.
+		// 		return failed(500,strerror(ENOTSUP),_("The authentication endpoint is undefined"));
+		// 	}
 
-			// 	return redirect("/oauth2");
-			// }
+		// 	endpoint.expand(CivetWeb::OAuthContext{conn});
 
-			Config::Value<Udjat::String> endpoint{"authentication","endpoint"};
+		// 	debug("--------------------> Redirecting to '",endpoint.c_str());
+		// 	return redirect(endpoint.c_str());
 
-			if(endpoint.empty()) {
-				// Missing authentication entrypoint, error.
-				return failed(500,strerror(ENOTSUP),_("The authentication endpoint is undefined"));
-			}
-
-			endpoint.expand(CivetWeb::OAuthContext{conn});
-
-			debug("--------------------> Redirecting to '",endpoint.c_str());
-			return redirect(endpoint.c_str());
-
-		}
+		// }
 
 
 	}
