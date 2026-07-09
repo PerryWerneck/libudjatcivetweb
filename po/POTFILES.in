@@ -24,7 +24,6 @@ src/library/oauth2/handle.cc
 src/library/oauth2/responses.cc
 src/library/request.cc
 src/library/template.cc
-src/module/connection.cc
 src/module/handlers/favicon.cc
 src/module/handlers/icons.cc
 src/module/handlers/images.cc
@@ -39,6 +38,7 @@ src/module/factory.cc
 src/module/service/send.cc
 src/module/service/construct.cc
 src/module/request.cc
+src/module/connection.cc
 src/include/private/client.h
 src/include/private/module.h
 src/include/private/oauth.h

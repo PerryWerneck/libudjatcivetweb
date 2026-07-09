@@ -165,12 +165,12 @@ module_src = [
   'src/module/handlers/images.cc',
   'src/module/handlers/product.cc',
   'src/module/handlers/user.cc',
+  'src/module/handlers/custom.cc',
   'src/module/oauth2/handler.cc',
   'src/module/oauth2/context.cc',
   'src/module/connection.cc',
   'src/module/request.cc',
   'src/module/connection.cc',
-  'src/module/custom.cc',
   'src/module/init.cc',
 
   'src/module/factory.cc',

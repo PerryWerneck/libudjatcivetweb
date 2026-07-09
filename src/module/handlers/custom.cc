@@ -17,10 +17,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+ #define LOG_DOMAIN "civetweb"
+
  #include <config.h>
  #include <private/request.h>
  #include <udjat/tools/http/handler.h>
  #include <udjat/tools/http/request.h>
+ #include <udjat/tools/http/connection.h>
  #include <udjat/tools/intl.h>
  #include <private/module.h>
  #include <udjat/tools/logger.h>
@@ -32,35 +35,45 @@
 	HTTP::Handler &handler = *((HTTP::Handler *) cbdata);
 
 	CivetWeb::Connection connection{conn};
+	CivetWeb::Request request{conn};
 
-	const struct mg_request_info *ri = connection.request_info();
-
-	debug("Using custom web handler for '",ri->local_uri,"' request");
+	// const struct mg_request_info *ri = connection.request_info();
+	// debug("Using custom web handler for '",ri->local_uri,"' request");
 
 	try {
 
-		return handler.handle(
-			connection,
-			CivetWeb::Request{conn},
-			(MimeType) connection
+		return handler.handle(connection,request,(MimeType) connection);
+
+	} catch(const exception &e) {
+
+		Logger::String{e.what()}.error();
+		if(connection.apicall()) {
+			HTTP::Response response{(MimeType) connection};
+			response.failed(e);
+			return connection.send(response);
+		}
+
+		return http_error(
+			conn,
+			500,
+			_("An unexpected error occurred in the HTTP handler."),
+			e.what()
 		);
 
-	} catch(const exception &error) {
+	}
 
-		cerr << "civetweb\t" << error.what() << endl;
+	Logger::String{"Unexpected error in HTTP handler"}.error();
+	if(connection.apicall()) {
 		HTTP::Response response{(MimeType) connection};
-		response.failed(error);
-		return connection.send(response);
-
-	} catch(...) {
-
-		cerr << "civetweb\tUnexpected error" << endl;
-		HTTP::Response response{(MimeType) connection};
-		response.failed(_("Unexpected error on http handler"));
+		response.failed(_("An unexpected error occurred in the HTTP handler."));
 		return connection.send(response);
 	}
 
-	return 500;
+	return http_error(
+		conn,
+		500,
+		_("An unexpected error occurred in the HTTP handler.")
+	);
 
  }
 
