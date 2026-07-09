@@ -155,6 +155,7 @@ lib_src = [
   'src/library/oauth2/context.cc',
   'src/library/oauth2/handle.cc',
   'src/library/oauth2/responses.cc',
+  'src/library/oauth2/callback.cc',
   ]
 
 module_src = [

@@ -33,6 +33,12 @@
 	namespace OAuth {
 
 		class UDJAT_API Context : public HTTP::Authentication, public Abstract::Object {
+		private:
+		
+			/// @brief Handle callback from oauth server.
+			/// @return The HTTP status code.
+			int callback();
+
 		protected:
 			String path;
 			String uri;			///< @brief The URI who originated the authentication request.
@@ -98,10 +104,6 @@
 			/// @param target URL to redirect when the flow finished.
 			/// @return HTTP error code to forward.
 			int authenticate(const char *target = "");
-
-			/// @brief Run callback from oauth server.
-			/// @return The HTTP status code.
-			int callback();
 
 			/// @brief Run 'signin'
 			/// @param request The request info
