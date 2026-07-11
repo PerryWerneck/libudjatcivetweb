@@ -45,40 +45,14 @@
 
 	namespace CivetWeb {
 
-		Request::Request(struct mg_connection *c) : Request{c,mg_get_request_info(c)->local_uri, (unsigned int) ((PACKAGE_VERSION_MAJOR * 100) + PACKAGE_VERSION_MINOR)} {
+		Request::Request(struct mg_connection *c) {
 
-			// Extract API version.
-			api_call = pop("/api"); 
-			if(api_call) {
-				const char *reqpath = path();
-				if(*reqpath != '/') {
-					throw runtime_error(Logger::String{"Unexpected path: '",reqpath,"', requests should be in the format /api/[",apiver,"]/interface"});
-				}
-				if(isdigit(reqpath[1])) {
-					apiver = 0;
-					reqpath++;
-					while(*reqpath && *reqpath != '/') {
-						if(isdigit(*reqpath)) {
-							apiver *= 10;
-							apiver += (*reqpath - '0');
-						}
-						reqpath++;
-					}
-					reset(reqpath);
-				}				
+			const char *reqpath = pop(mg_get_request_info(c)->local_uri, apiver);
+			if(apiver) {
+				api_call = true;
+				reset(reqpath);
 			}
 
-			debug("Request path set to '",path(),"'");
-
-		}
-
-		Request::Request(struct mg_connection *c, const char *path, unsigned int ver)
-			: HTTP::Request{path,mg_get_request_info(c)->request_method}, conn{c}, info{(mg_request_info *) mg_get_request_info(c)} {
-
-			apiver = ver;
-
-			debug("request_path='",Udjat::Request::c_str(),"' (",path,")");
-			
 			debug("request_uri='",mg_get_request_info(c)->request_uri,"'");
 			debug("local_uri_raw='",mg_get_request_info(c)->local_uri_raw,"'");
 			debug("local_uri='",mg_get_request_info(c)->local_uri,"'");
@@ -133,7 +107,6 @@
 
 				mg_handle_form_request(c, &input.fdh);
 
-
 			}
 
 			parse_query(info->query_string);
@@ -149,10 +122,28 @@
 
 				// Authentication failed, trace the message and clear it.
 				debug("*** Ignoring authentication cookie ***");
-				Logger::String{e.what()}.trace();
-				this->auth.reset();
+
+				const struct mg_request_info *request_info = mg_get_request_info(conn);
+
+				Logger::String{
+					request_info->remote_addr," ",
+					request_info->request_method," ",
+					request_info->local_uri," ",
+					e.what()
+				}.error();
+				
+				this->auth = make_shared<HTTP::Authentication>();
+				this->auth.reset(); // Just in case.
 
 			}
+
+		}
+
+		Request::Request(struct mg_connection *c, const char *path, unsigned int ver) : Request{c} {
+
+			apiver = ver;
+			api_call = true;
+			reset(path);
 
 		}
 

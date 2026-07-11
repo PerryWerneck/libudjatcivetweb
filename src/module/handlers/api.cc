@@ -35,63 +35,63 @@
 
  namespace Udjat {
 
-	int CivetWeb::Service::api_handler(struct mg_connection *conn, CivetWeb::Service *srvc) noexcept {
+	// int CivetWeb::Service::api_handler(struct mg_connection *conn, CivetWeb::Service *srvc) noexcept {
 
-		HTTP::Response response{MimeTypeFactory(conn)};
+	// 	HTTP::Response response{MimeTypeFactory(conn)};
 		
-		try {
+	// 	try {
 
-			unsigned int apiver = srvc->apiver;
-			const mg_request_info *info = mg_get_request_info(conn); 
-			const char *path = info->local_uri;
+	// 		unsigned int apiver = srvc->apiver;
+	// 		const mg_request_info *info = mg_get_request_info(conn); 
+	// 		const char *path = info->local_uri;
 
-			if(path && *path && !strncasecmp(path,"/api/",5)) {
-				path += 4;
-				if(isdigit(path[1])) {
-					path++;
-					apiver = 0;
-					while(*path && *path != '/') {
-						if(isdigit(*path)) {
-							apiver *= 10;
-							apiver += (*path - '0');
-						}
-						path++;
-					}
-				}
-			}
+	// 		if(path && *path && !strncasecmp(path,"/api/",5)) {
+	// 			path += 4;
+	// 			if(isdigit(path[1])) {
+	// 				path++;
+	// 				apiver = 0;
+	// 				while(*path && *path != '/') {
+	// 					if(isdigit(*path)) {
+	// 						apiver *= 10;
+	// 						apiver += (*path - '0');
+	// 					}
+	// 					path++;
+	// 				}
+	// 			}
+	// 		}
 
-			string intf;
-			{
-				if(*path == '/') {
-					path++;
-				}
-				const char *ptr = strchr(path,'/');
-				if(ptr) {
-					intf.assign(path,(ptr-path));
-					path = ptr;
-				} else {
-					intf.assign(path);
-					path = "";
-				}
-			}
+	// 		string intf;
+	// 		{
+	// 			if(*path == '/') {
+	// 				path++;
+	// 			}
+	// 			const char *ptr = strchr(path,'/');
+	// 			if(ptr) {
+	// 				intf.assign(path,(ptr-path));
+	// 				path = ptr;
+	// 			} else {
+	// 				intf.assign(path);
+	// 				path = "";
+	// 			}
+	// 		}
 
-			debug("Interface='",intf.c_str(),"' path='",path,"'");
-			CivetWeb::Request request{conn,path,apiver};
+	// 		debug("Interface='",intf.c_str(),"' path='",path,"'");
+	// 		CivetWeb::Request request{conn,path,apiver};
 
-			int rc = srvc->call(intf.c_str(),request,response);
-			if(rc) {
-				response.failed(Logger::Message{_("Unexpected error '{}' calling backend"),rc});
-			}
+	// 		int rc = srvc->call(intf.c_str(),request,response);
+	// 		if(rc) {
+	// 			response.failed(Logger::Message{_("Unexpected error '{}' calling backend"),rc});
+	// 		}
 
-		} catch(const exception &e) {
-			response.failed(e);
-		} catch(...) {
-			response.failed(_("Unexpected error"));
-		}
+	// 	} catch(const exception &e) {
+	// 		response.failed(e);
+	// 	} catch(...) {
+	// 		response.failed(_("Unexpected error"));
+	// 	}
 
-		return send(conn,response);
+	// 	return send(conn,response);
 	
-	}
+	// }
 
 
  }

@@ -34,7 +34,12 @@
 
 	namespace HTTP {
 
+		class Request;
+
 		class UDJAT_API Connection {
+		protected:
+			typedef HTTP::Connection super;
+
 		public:
 			Connection();
 			virtual ~Connection();
@@ -42,6 +47,9 @@
 			/// @brief Run method, handle exceptions.
 			/// @return HTTP error code;
 			int exec(const std::function<int(HTTP::Connection &connection)> &call) noexcept;
+
+			/// @brief Run method, handle exceptions.
+			int exec(const char *path) noexcept;
 
 			/// @brief Get the active mimetype for this connection.
 			virtual operator MimeType() const = 0;
@@ -62,13 +70,34 @@
 			/// @return true if the string
 			static std::string get(const Udjat::Response &response, const MimeType mimetype);
 
-			/// @brief Send response.
+			/// @brief Send status.
+			/// @param code HTTP error code.
+			/// @param status The status to send.
 			/// @return http error response.
-			virtual int send(const Udjat::HTTP::Response &response) const noexcept = 0;
+
+			/// @brief Send status.
+			/// @param code HTTP status code.
+			/// @param status The status to send.
+			/// @return Same value of code.
+			int send(const Udjat::HTTP::Response::Status &status) const noexcept;
+
+			/// @brief Send status.
+			/// @param code HTTP status code.
+			/// @param status The status to send.
+			/// @return Same value of code.
+			int send(int code, const Udjat::HTTP::Response::Status &status) const noexcept;
 
 			/// @brief Send string.
-			/// @return http error response (200).
-			virtual int send(const char *mime_type, const char *response, size_t length) const noexcept = 0;
+			/// @param code Error code.
+			/// @param mime_type The mimetype
+			/// @param response The http payload
+			/// @param length The response length.
+			/// @return code.
+			virtual int send(int code, const char *mime_type, const char *payload, size_t length) const noexcept = 0;
+
+			inline int send(const char *mime_type, const char *payload, size_t length) const noexcept {
+				return send(200,mime_type,payload,length);
+			}
 
 			/// @brief Send exception.
 			int send(const std::exception &e);
@@ -92,6 +121,18 @@
 				return success(mime_type,response.c_str(),response.size());
 			}
 
+			virtual int failed(int code, const char *message, const char *body) const noexcept;
+
+			virtual std::shared_ptr<HTTP::Request> RequestFactory() = 0;
+			virtual std::shared_ptr<HTTP::Response> ResponseFactory();
+
+			/// @brief Send template
+			/// @param code HTTP response code.
+			/// @param tmplt Template name
+			/// @param callback Callback to process ${name}.
+			/// @return HTTP response code.
+			int send_template(int code, const char *tmplt, const std::function<void(const char *key, std::ostream &stream)> &callback) const;
+
 			// Standard handlers
 
 			/// @brief Send standard favicon.
@@ -108,9 +149,10 @@
 			/// @return HTTP status code.
  			int image(const char *name) noexcept;
 			
-			/// @brief Handle generic request.
+			/// @brief Handle http request.
 			/// @return HTTP status code.
-			// int generic() noexcept;
+			int handle() noexcept;
+
 		};
 
 	}

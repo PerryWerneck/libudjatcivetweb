@@ -48,8 +48,8 @@
  namespace Udjat {
 
 	int HTTP::Response::status_code() const noexcept {
-		debug("Converting syscode ",Udjat::Response::status_code()," to ",HTTP::Exception::code(Udjat::Response::status_code()));
-		return HTTP::Exception::code(Udjat::Response::status_code());
+		debug("Converting syscode ",Udjat::Response::syscode()," to ",HTTP::Exception::code(Udjat::Response::syscode()));
+		return HTTP::Exception::code(Udjat::Response::syscode());
 	}
 
 	void HTTP::Response::for_each(const std::function<void(const char *header_name, const char *header_value)> &call) const noexcept {
@@ -109,11 +109,11 @@
 
 						} else if(!strcasecmp(key,"body")) {
 
-							value = this->status.details;
+							value = this->status.body;
 
 						} else if(!strcasecmp(key,"syscode")) {
 
-							value = std::to_string(this->status.code);
+							value = std::to_string(this->status.syscode);
 
 						} else {
 

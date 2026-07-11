@@ -23,6 +23,7 @@
  #include <sys/types.h>
  #include <sys/stat.h>
  #include <private/module.h>
+ #include <private/request.h>
  #include <udjat/tools/response.h>
  #include <udjat/tools/http/response.h>
  #include <udjat/tools/http/timestamp.h>
@@ -71,40 +72,74 @@
 		return apicall(conn);
 	}
 
-	int CivetWeb::Connection::send(const char *mime_type, const char *text, size_t length) const noexcept {
+	int CivetWeb::Connection::failed(int code, const char *message, const char *body) const noexcept {
 
-		mg_response_header_start(conn, 200);
+		const struct mg_request_info *request_info = mg_get_request_info(conn);
+		Logger::String{
+			request_info->remote_addr," ",
+			request_info->request_method," ",
+			request_info->local_uri," ",
+			code," ",message," (",std::to_string((MimeType) *this),")"
+		}.error();
+
+		return super::failed(code,message,body);
+
+	}
+
+	std::shared_ptr<HTTP::Request> CivetWeb::Connection::RequestFactory() {
+		return make_shared<CivetWeb::Request>(conn);
+	}
+
+	int CivetWeb::Connection::send(int code, const char *mime_type, const char *text, size_t length) const noexcept {
+
+		mg_response_header_start(conn, code);
 		mg_response_header_add(conn, "Content-Type",mime_type,-1);
 		mg_response_header_add(conn, "Content-Length", std::to_string(length).c_str(), -1);
 		mg_response_header_send(conn);
 
+		// TODO: Send cache header based on code (200=standard cache, others=no cache)
+
 		// Send response.
 		mg_write(conn, text, length);
 
-		return 200;
+		return code;
 	}
 
-	int CivetWeb::Connection::send(const Udjat::HTTP::Response &response) const noexcept {
-		return ::send(conn,response);
-	}
+	// int CivetWeb::Connection::send(const Udjat::HTTP::Response &response) const noexcept {
+	// 	return ::send(conn,response);
+	// }
 
+ }
+
+ bool parse_query_string(struct mg_connection *conn,const std::function<bool(const char *key, const char *value)> &call) {
+
+
+	return false;
  }
 
  Udjat::MimeType MimeTypeFactory(struct mg_connection *conn, const Udjat::MimeType def) noexcept {
 
 	//
-	// Check for 'format=' on query
+	// Check for 'mimetype=' on query
 	//
-	const char *query = mg_get_request_info(conn)->query_string;
-	if(query && *query) {
-		for(const auto &arg : String{query}.split("&")) {
-			if(!strncasecmp(arg.c_str(),"format=",7)) {
-				auto mime = MimeTypeFactory(arg.c_str()+7,MimeType::none);
+	{
+		const struct mg_request_info *request_info = mg_get_request_info(conn);
+
+		if(request_info->query_string) {
+
+			size_t length = strlen(request_info->query_string);
+			char buffer[256];
+			memset(buffer,0,sizeof(buffer));
+
+			if(mg_get_var(request_info->query_string,length, "mimetype", buffer, sizeof(buffer)-1) > 0) {
+				auto mime = MimeTypeFactory(buffer);
 				if(mime != MimeType::none) {
 					return mime;
 				}
 			}
+
 		}
+
 	}
 
 	//
@@ -120,6 +155,7 @@
 
 				auto mime = MimeTypeFactory(value.c_str(),MimeType::none);
 				if(mime != MimeType::none) {
+					debug("Got mimetype from header '",header,"'");
 					return mime;
 				}
 			}

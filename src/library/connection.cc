@@ -24,6 +24,7 @@
  #include <udjat/tools/http/exception.h>
  #include <udjat/tools/response.h>
  #include <udjat/tools/http/response.h>
+ #include <udjat/tools/http/template.h>
  #include <udjat/tools/intl.h>
 
  using namespace std;
@@ -41,9 +42,102 @@
 	}
 
 	int HTTP::Connection::send(const std::exception &e) {
-		HTTP::Response response{(MimeType) *this};
-		response.failed(e);
-		return send(response);
+		return send(Response::Status{e});
+	}
+
+	std::shared_ptr<HTTP::Response> HTTP::Connection::ResponseFactory() {
+		return make_shared<HTTP::Response>((MimeType) *this);
+	}
+
+	int HTTP::Connection::failed(int code, const char *message, const char *body) const noexcept {
+		Response::Status status{Response::Failure};
+		status.message = message;
+		status.body = body;
+		return send(code,status);
+	}
+
+	int HTTP::Connection::send(const Udjat::HTTP::Response::Status &status) const noexcept {
+		return send(
+			HTTP::Exception::code(status.syscode),
+			status			
+		);
+	}
+
+	int HTTP::Connection::send(int code, const Udjat::HTTP::Response::Status &status) const noexcept {
+
+		try {
+
+			if(apicall()) {
+
+				// API call, format using response.
+				MimeType mimetype = (MimeType) *this;
+				string text = status.to_string(mimetype);
+
+				return send(
+					code, 
+					std::to_string(mimetype),
+					text.c_str(), 
+					text.size()
+				);
+
+			}
+
+			// Send HTML formatted page.
+
+			Udjat::HTTP::Template text{"error",MimeType::html};
+
+			text.expand([code,&status](const char *key, std::string &value) {
+
+				if(!strcasecmp(key,"code")) {
+					Logger::String{"Using obsolete '%{code}' on template"}.warning();
+					value = std::to_string(code);
+					return true;
+				}
+
+				if(!strcasecmp(key,"error-code")) {
+					value = std::to_string(code);
+					return true;
+				}
+
+				if(!strcasecmp(key,"message")) {
+					value = status.message;
+					return true;
+				}
+				
+				if(!strcasecmp(key,"body")) {
+					value = status.body;
+					return true;
+				}
+
+				if(!strcasecmp(key,"icon")) {
+					value = "/icon/computer-fail-symbolic";
+					return true;
+				}
+
+				return false;
+
+			});
+
+			return send(
+				code, 
+				std::to_string(MimeType::html),
+				text.c_str(), 
+				text.size()
+			);
+
+		} catch(const std::exception &e) {
+
+			Logger::String{e.what()}.error();
+
+		} catch(...) {
+
+			Logger::String{_("Unexpected error while handling HTTP response")}.error();
+			
+		}
+
+		// Exception, return 500.
+		return 500;
+
 	}
 
 	int HTTP::Connection::exec(const std::function<int(HTTP::Connection &connection)> &call) noexcept {
@@ -56,9 +150,9 @@
 			return send(e);
 
 		} catch(...) {
-			HTTP::Response response{*this};
-			response.failed(_("Unexpected error"));
-			return send(response);
+			Response::Status status{Response::Failure};
+			status.message = _("Unexpected error while handling HTTP response");
+			return send(status);
 
 		}
 

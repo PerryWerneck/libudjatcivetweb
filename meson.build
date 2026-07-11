@@ -135,7 +135,6 @@ includes_dir = include_directories('src/include')
 lib_src = [
   'src/library/handler.cc',
   'src/library/icon.cc',
-  'src/library/index.cc',
   'src/library/layout/csv.cc',
   'src/library/template.cc',
   'src/library/value.cc',
@@ -146,6 +145,7 @@ lib_src = [
   'src/library/server/call.cc',
   'src/library/server/construct.cc',
   'src/library/server/handler.cc',
+  'src/library/handlers/generic.cc',
   'src/library/handlers/favicon.cc',
   'src/library/handlers/icon.cc',
   'src/library/handlers/image.cc',
@@ -165,7 +165,6 @@ module_src = [
   'src/module/handlers/images.cc',
   'src/module/handlers/product.cc',
   'src/module/handlers/user.cc',
-  'src/module/handlers/custom.cc',
   'src/module/oauth2/handler.cc',
   'src/module/oauth2/context.cc',
   'src/module/connection.cc',

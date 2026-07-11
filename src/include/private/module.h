@@ -56,10 +56,14 @@
 			bool apicall() const noexcept override;
 
 			/// @brief Send response.
-			int send(const Udjat::HTTP::Response &response) const noexcept override;
+			// int send(const Udjat::HTTP::Response &response) const noexcept override;
 
-			int send(const char *mime_type, const char *response, size_t length) const noexcept override;
+			int send(int code, const char *mime_type, const char *response, size_t length) const noexcept override;
 			int send(const HTTP::Method method, const char *filename, bool allow_index, const char *mime_type, unsigned int max_age) const override;
+
+			std::shared_ptr<HTTP::Request> RequestFactory() override;
+
+			int failed(int code, const char *message, const char *body) const noexcept override;
 
 			inline struct mg_connection * connection() {
 				return conn;
@@ -86,6 +90,9 @@
 	}
 
  }
+
+ /// @brief Handler for icon requests.
+ int defaultWebHandler(struct mg_connection *conn, void *cbdata);
 
  /// @brief Handler for icon requests.
  int iconWebHandler(struct mg_connection *conn, void *cbdata);
@@ -115,7 +122,7 @@
  int faviconWebHandler(struct mg_connection *conn, void *cbdata) noexcept;
 
  /// @brief Handler for custom requests.
- int customWebHandler(struct mg_connection *conn, void *cbdata) noexcept;
+//  int customWebHandler(struct mg_connection *conn, void *cbdata) noexcept;
 
  /// @brief Get mime-type from 'Accept' or 'Content-Type' header.
  /// @param conn Civetweb connection data.
@@ -131,3 +138,4 @@
  /// @brief Send error page.
  int http_error(struct mg_connection *conn, int code, const char *message, const char *body) noexcept;
 
+ 

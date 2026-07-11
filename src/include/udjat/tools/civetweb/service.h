@@ -55,7 +55,9 @@
 			static int favicon_handler(struct mg_connection *conn, CivetWeb::Service *srvc) noexcept;
 
 			/// @brief Handle favicon requests.
-			static int api_handler(struct mg_connection *conn, CivetWeb::Service *srvc) noexcept;
+			// static int api_handler(struct mg_connection *conn, CivetWeb::Service *srvc) noexcept;
+
+			static int web_handler(struct mg_connection *conn, CivetWeb::Service *srvc) noexcept;
 
 		protected:
 			struct mg_context *ctx = nullptr;

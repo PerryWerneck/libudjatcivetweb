@@ -25,6 +25,7 @@
 
  #include <udjat/defs.h>
  #include <udjat/module.h>
+ #include <private/module.h>
  #include <udjat/tools/service.h>
  #include <udjat/tools/http/server.h>
  #include <udjat/tools/xml.h>
@@ -187,7 +188,7 @@
 				throw runtime_error("mg_start failed.");
 			}
 
-			mg_set_request_handler(ctx, "/api/", (mg_request_handler) api_handler, this);
+			// mg_set_request_handler(ctx, "/api/", (mg_request_handler) api_handler, this);
 
 			// TODO: Refactor as interfaces.
 			mg_set_request_handler(ctx, "/icon/", (mg_request_handler) icon_handler, this);
@@ -200,6 +201,8 @@
 			}
 
 			mg_set_request_handler(ctx, "/account", userWebHandler, 0);
+
+			mg_set_request_handler(ctx, "/", (mg_request_handler) web_handler, this);
 
 		}
 
@@ -218,6 +221,10 @@
 
  	}
 
+	int CivetWeb::Service::web_handler(struct mg_connection *conn, CivetWeb::Service *srvc) noexcept {
+		return CivetWeb::Connection{conn}.handle();
+	}
+	
 	void CivetWeb::Service::start() noexcept {
 
 		struct mg_server_port ports[10];
@@ -288,7 +295,7 @@
 			uri.resize(uri.size()-1);
 		}
 
-		mg_set_request_handler(ctx, uri.c_str(), customWebHandler, handler);
+		// mg_set_request_handler(ctx, uri.c_str(), customWebHandler, handler);
 
 		if(Logger::enabled(Logger::Trace)) {
 
