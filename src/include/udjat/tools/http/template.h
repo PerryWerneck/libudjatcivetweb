@@ -25,21 +25,33 @@
  #include <udjat/defs.h>
  #include <udjat/tools/string.h>
  #include <udjat/tools/http/mimetype.h>
+ #include <udjat/tools/file/path.h>
+ #include <ostream>
 
  namespace Udjat {
 
 	namespace HTTP {
 
 		/// @brief HTTP Template page.
-		class UDJAT_API Template : public String {
+		class UDJAT_API Template {
+		private:
+			File::Path filepath;
+
 		public:
 
 			/// @brief Build a template page for mimetyppe.
-			Template(const char *name, const MimeType type = MimeType::html);
+			Template(const char *name, const MimeType mimetype = MimeType::html);
 
 			inline operator bool() const noexcept {
-				return !empty();
+				return (bool) filepath;
 			}
+
+			/// @brief Apply template.
+			/// @param code HTTP status code.
+			/// @param stream Output stream.
+			/// @param name Template name.
+			/// @param callback callback for ${} processing.
+			void apply(int code, std::ostream &stream, const std::function<void(const char *key, std::ostream &stream)> &callback);
 
 		};
 

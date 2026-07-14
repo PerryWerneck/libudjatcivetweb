@@ -38,7 +38,7 @@
 	#pragma pack(1)
 	struct Token {
 		HTTP::Authentication::Status status;
-		Authentication::Level level;
+		Authentication::Role role;
 		time_t expiration_time;
 	};
 	#pragma pack()
@@ -83,7 +83,7 @@
 			}
 
 			this->current_status = token->status;
-			this->level = token->level;
+			this->role = token->role;
 			this->expiration_time = token->expiration_time;
 
 		} catch(const std::exception &e) {
@@ -98,7 +98,7 @@
 	void HTTP::Authentication::clear() noexcept {
 		Udjat::Authentication::clear();
 		current_status = Undefined;
-		level = None;
+		role = None;
 		avatar_url.clear();
 		expiration_time = time(0) + Config::Value<time_t>("authentication","expiration-time",86400);
 	}
@@ -113,7 +113,7 @@
 		Token *token = (Token *) buffer;
 
 		token->status = this->current_status;
-		token->level = level;
+		token->role = role;
 		token->expiration_time = expiration_time;
 
 		return Authentication::encrypt(token,szBuffer);

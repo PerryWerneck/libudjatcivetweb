@@ -137,7 +137,6 @@ lib_src = [
   'src/library/icon.cc',
   'src/library/layout/csv.cc',
   'src/library/template.cc',
-  'src/library/value.cc',
   'src/library/connection.cc',
   'src/library/request.cc',
   'src/library/response.cc',

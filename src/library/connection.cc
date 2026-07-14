@@ -26,6 +26,7 @@
  #include <udjat/tools/http/response.h>
  #include <udjat/tools/http/template.h>
  #include <udjat/tools/intl.h>
+ #include <sstream>
 
  using namespace std;
 
@@ -83,47 +84,21 @@
 			}
 
 			// Send HTML formatted page.
-
-			Udjat::HTTP::Template text{"error",MimeType::html};
-
-			text.expand([code,&status](const char *key, std::string &value) {
-
-				if(!strcasecmp(key,"code")) {
-					Logger::String{"Using obsolete '%{code}' on template"}.warning();
-					value = std::to_string(code);
-					return true;
-				}
-
-				if(!strcasecmp(key,"error-code")) {
-					value = std::to_string(code);
-					return true;
-				}
+			return send_template(code,"error",[code,&status](const char *key, std::ostream &stream) {
 
 				if(!strcasecmp(key,"message")) {
-					value = status.message;
-					return true;
+					stream << status.message;
 				}
 				
 				if(!strcasecmp(key,"body")) {
-					value = status.body;
-					return true;
+					stream << status.body;
 				}
 
 				if(!strcasecmp(key,"icon")) {
-					value = "/icon/computer-fail-symbolic";
-					return true;
+					stream << "/icon/computer-fail-symbolic";
 				}
 
-				return false;
-
 			});
-
-			return send(
-				code, 
-				std::to_string(MimeType::html),
-				text.c_str(), 
-				text.size()
-			);
 
 		} catch(const std::exception &e) {
 
@@ -155,6 +130,28 @@
 			return send(status);
 
 		}
+
+	}
+
+	int HTTP::Connection::send_template(int code, const char *tmplt, const std::function<void(const char *key, std::ostream &writer)> &callback) const {
+
+		MimeType mimetype = (MimeType) *this;
+		Template text{tmplt,mimetype};
+
+		stringstream stream;
+		text.apply(
+			code,
+			stream,
+			callback
+		);
+
+		std::string payload = stream.str(); 
+		return send(
+			code, 
+			std::to_string(mimetype),
+			payload.c_str(),
+			payload.size()
+		);
 
 	}
 

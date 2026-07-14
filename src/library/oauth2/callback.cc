@@ -224,7 +224,7 @@
 				throw runtime_error("Unable to process authentication response: Json parser is not available");
 #endif // HAVE_JSON_C
 
-				if(Udjat::Authentication::level() == Authentication::None) {
+				if(Udjat::Authentication::role() == Authentication::None) {
 					
 					// Not authorized.
 
