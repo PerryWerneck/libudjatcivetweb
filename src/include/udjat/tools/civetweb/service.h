@@ -22,7 +22,6 @@
  #include <udjat/defs.h>
  #include <udjat/module.h>
  #include <udjat/tools/service.h>
- #include <udjat/tools/http/server.h>
  #include <udjat/tools/interface.h>
  #include <udjat/tools/http/request.h>
  #include <udjat/tools/http/response.h>
@@ -36,7 +35,7 @@
 
 	namespace CivetWeb {
 
-		class UDJAT_API Service : public Udjat::Service, public HTTP::Server {
+		class UDJAT_API Service : public Udjat::Service {
 		private:
 
 			static Service *instance;
@@ -54,17 +53,12 @@
 			/// @brief Handle favicon requests.
 			static int favicon_handler(struct mg_connection *conn, CivetWeb::Service *srvc) noexcept;
 
-			/// @brief Handle favicon requests.
-			// static int api_handler(struct mg_connection *conn, CivetWeb::Service *srvc) noexcept;
-
 			static int web_handler(struct mg_connection *conn, CivetWeb::Service *srvc) noexcept;
 
 		protected:
 			struct mg_context *ctx = nullptr;
 
 		public:
-
-			static Service & get_instance();
 
 			Service(const Udjat::Properties &props);
 			Service(const char *name = "httpd", const char *description = nullptr);
@@ -77,9 +71,6 @@
 
 			void start() noexcept override;
 			void stop() noexcept override;
-
-			bool push_back(HTTP::Handler *handler) override;
-			bool remove(HTTP::Handler *handler) override;
 
 		};
 

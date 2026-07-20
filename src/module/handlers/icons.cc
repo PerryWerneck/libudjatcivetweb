@@ -17,28 +17,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
- /**
-  * @brief Implements the handler for icons.
-  *
-  */
-
  #include <config.h>
  #include <udjat/defs.h>
- #include <private/module.h>
+ #include <udjat/tools/http/connection.h>
+ #include <udjat/tools/civetweb/connection.h> 
  #include <udjat/tools/civetweb/service.h>
- #include <udjat/tools/http/icon.h>
- #include <udjat/tools/http/exception.h>
- #include <udjat/tools/http/mimetype.h>
- #include <udjat/tools/configuration.h>
- #include <udjat/tools/logger.h>
- #include <udjat/tools/intl.h>
-
-#ifndef _WIN32
-	#include <unistd.h>
-#endif // _WIN32
 
  using namespace Udjat;
 
- int CivetWeb::Service::icon_handler(struct mg_connection *conn, CivetWeb::Service *) noexcept {
-	return CivetWeb::Connection(conn).icon(mg_get_request_info(conn)->local_uri);
+ int CivetWeb::Service::favicon_handler(struct mg_connection *conn, CivetWeb::Service *) noexcept {
+	return (int) CivetWeb::Connection{conn}.icon(mg_get_request_info(conn)->local_uri);
  }

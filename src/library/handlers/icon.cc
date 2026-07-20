@@ -38,36 +38,26 @@
 
  using namespace Udjat;
 
- int HTTP::Connection::icon(const char *name) noexcept {
+ HTTP::StatusCode HTTP::Connection::icon(const char *name) noexcept {
 
- 	return exec([&](HTTP::Connection &connection){
+	Config::Value<unsigned int> max_age{"theme","image-max-age",604800};
 
-	 	debug("Searching for icon",name);
-
-		const char *path = strrchr(name,'/');
-		if(path) {
-			path++;
+	{
+		if(*name == '/') {
+			name++;
 		}
-
-		if(!(path && *path)) {
-			throw HTTP::Exception(400,Logger::String{"Unable to handle icon '",name,"'"}.c_str());
+		const char *ptr = strchr(name,'/');
+		if(ptr) {
+			name = ptr+1;
 		}
+	}
 
-		debug("path='",path,"'");
-		Udjat::HTTP::Icon icon = Udjat::HTTP::Icon::getInstance(path);
+	Udjat::HTTP::Icon filename = Udjat::HTTP::Icon::getInstance(name);
 
-		if(icon.empty()) {
-			throw HTTP::Exception(404,Logger::String{"Cant find icon '",name,"'"}.c_str());
-		}
-
-		return send(
-			HTTP::Get,
-			icon.c_str(),
-			false,
-			"image/svg+xml",
-			Config::Value<unsigned int>("theme","icon-max-age",604800)
-		);
-
-	});
+	return send_file(
+		MimeType::icon,
+		(time_t) max_age,
+		filename.c_str()
+	);
 
  }

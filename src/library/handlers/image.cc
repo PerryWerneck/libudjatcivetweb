@@ -30,45 +30,35 @@
  #include <udjat/tools/logger.h>
  #include <udjat/tools/intl.h>
  #include <udjat/tools/configuration.h>
+ #include <string>
 
 #ifndef _WIN32
 	#include <unistd.h>
 #endif // _WIN32
 
  using namespace Udjat;
+ using namespace std;
 
- int HTTP::Connection::image(const char *name) noexcept {
+ HTTP::StatusCode HTTP::Connection::image(const char *name) noexcept {
 
- 	return exec([&](HTTP::Connection &connection){
+	Config::Value<unsigned int> max_age{"theme","image-max-age",604800};
 
-		{
-			if(*name == '/') {
-				name++;
-			}
-			const char *ptr = strchr(name,'/');
-			if(ptr) {
-				name = ptr+1;
-			}
+	{
+		if(*name == '/') {
+			name++;
 		}
-
-		debug("searching for image '",name,"'");
-
-		Udjat::HTTP::Image filename{name};
-
-		if(!filename) {
-			throw HTTP::Exception(404,Logger::String{"Cant find image '",name,"'"}.c_str());
+		const char *ptr = strchr(name,'/');
+		if(ptr) {
+			name = ptr+1;
 		}
+	}
 
-		Logger::String{"Sending static file '", filename.c_str(),"'"}.trace();
-		
-		return send(
-			HTTP::Get,
-			filename.c_str(),
-			false,
-			nullptr,
-			Config::Value<unsigned int>("theme","image-max-age",604800)
-		);
+	Udjat::HTTP::Image filename{name};
 
-	});
+	return send_file(
+		MimeTypeFactory(filename.c_str(),MimeType::image),
+		(time_t) max_age,
+		filename.c_str()
+	);
 
  }

@@ -18,33 +18,39 @@
  */
 
  #define LOG_DOMAIN "civetweb"
-
- #include <private/module.h>
- #include <sys/types.h>
- #include <sys/stat.h>
- #include <private/module.h>
+ #include <config.h>
+ #include <udjat/tools/civetweb/connection.h>
+ #include <udjat/tools/http/request.h>
+ #include <udjat/tools/http/mimetype.h>
+ #include <memory>
  #include <private/request.h>
- #include <udjat/tools/response.h>
- #include <udjat/tools/http/response.h>
- #include <udjat/tools/http/timestamp.h>
- #include <udjat/tools/http/exception.h>
- #include <udjat/tools/logger.h>
- #include <udjat/tools/intl.h>
- #include <udjat/tools/string.h>
- #include <udjat/tools/configuration.h>
- #include <udjat/tools/application.h>
- #include <udjat/tools/http/template.h>
 
- #ifdef HAVE_UNISTD_H
-	#include <unistd.h>
- #endif // HAVE_UNISTD_H
+//  #include <private/module.h>
+//  #include <sys/types.h>
+//  #include <sys/stat.h>
+//  #include <private/module.h>
+//  #include <private/request.h>
+//  #include <udjat/tools/response.h>
+//  #include <udjat/tools/http/response.h>
+//  #include <udjat/tools/http/timestamp.h>
+//  #include <udjat/tools/http/exception.h>
+//  #include <udjat/tools/logger.h>
+//  #include <udjat/tools/intl.h>
+//  #include <udjat/tools/string.h>
+//  #include <udjat/tools/configuration.h>
+//  #include <udjat/tools/application.h>
+//  #include <udjat/tools/http/template.h>
+
+//  #ifdef HAVE_UNISTD_H
+// 	#include <unistd.h>
+//  #endif // HAVE_UNISTD_H
 
  using namespace std;
- using namespace Udjat;
+//  using namespace Udjat;
 
  namespace Udjat {
 
-	CivetWeb::Connection::operator MimeType() const {
+	const MimeType CivetWeb::Connection::mimetype(const MimeType def = MimeType::json) const noexcept {
 
 		// Get mimetype from request header.
 		const struct mg_request_info *request_info = mg_get_request_info(conn);
@@ -52,58 +58,28 @@
 			return MimeTypeFactory(conn,MimeType::json);
 		}
 
-		return MimeTypeFactory(conn,MimeType::html);
+		return def;
 
 	}
 
-	bool CivetWeb::Connection::apicall(struct mg_connection *conn) noexcept {
-
-		const struct mg_request_info *request_info = mg_get_request_info(conn);
-
-		if(request_info->local_uri && request_info->local_uri && !strncasecmp(request_info->local_uri,"/api/",5)) {
-			return true;
-		}
-
-		return MimeTypeFactory(conn,MimeType::html) != MimeType::html;
-
-	}
-
-	bool CivetWeb::Connection::apicall() const noexcept {
-		return apicall(conn);
-	}
-
-	int CivetWeb::Connection::failed(int code, const char *message, const char *body) const noexcept {
-
-		const struct mg_request_info *request_info = mg_get_request_info(conn);
-		Logger::String{
-			request_info->remote_addr," ",
-			request_info->request_method," ",
-			request_info->local_uri," ",
-			code," ",message," (",std::to_string((MimeType) *this),")"
-		}.error();
-
-		return super::failed(code,message,body);
-
-	}
-
-	std::shared_ptr<HTTP::Request> CivetWeb::Connection::RequestFactory() {
+	std::shared_ptr<HTTP::Request> CivetWeb::Connection::RequestFactory() noexcept {
 		return make_shared<CivetWeb::Request>(conn);
 	}
 
-	int CivetWeb::Connection::send(int code, const char *mime_type, const char *text, size_t length) const noexcept {
+	// int CivetWeb::Connection::send(int code, const char *mime_type, const char *text, size_t length) const noexcept {
 
-		mg_response_header_start(conn, code);
-		mg_response_header_add(conn, "Content-Type",mime_type,-1);
-		mg_response_header_add(conn, "Content-Length", std::to_string(length).c_str(), -1);
-		mg_response_header_send(conn);
+	// 	mg_response_header_start(conn, code);
+	// 	mg_response_header_add(conn, "Content-Type",mime_type,-1);
+	// 	mg_response_header_add(conn, "Content-Length", std::to_string(length).c_str(), -1);
+	// 	mg_response_header_send(conn);
 
-		// TODO: Send cache header based on code (200=standard cache, others=no cache)
+	// 	// TODO: Send cache header based on code (200=standard cache, others=no cache)
 
-		// Send response.
-		mg_write(conn, text, length);
+	// 	// Send response.
+	// 	mg_write(conn, text, length);
 
-		return code;
-	}
+	// 	return code;
+	// }
 
 	// int CivetWeb::Connection::send(const Udjat::HTTP::Response &response) const noexcept {
 	// 	return ::send(conn,response);
@@ -111,180 +87,180 @@
 
  }
 
- bool parse_query_string(struct mg_connection *conn,const std::function<bool(const char *key, const char *value)> &call) {
+//  bool parse_query_string(struct mg_connection *conn,const std::function<bool(const char *key, const char *value)> &call) {
 
 
-	return false;
- }
+// 	return false;
+//  }
 
- Udjat::MimeType MimeTypeFactory(struct mg_connection *conn, const Udjat::MimeType def) noexcept {
+//  Udjat::MimeType MimeTypeFactory(struct mg_connection *conn, const Udjat::MimeType def) noexcept {
 
-	//
-	// Check for 'mimetype=' on query
-	//
-	{
-		const struct mg_request_info *request_info = mg_get_request_info(conn);
+// 	//
+// 	// Check for 'mimetype=' on query
+// 	//
+// 	{
+// 		const struct mg_request_info *request_info = mg_get_request_info(conn);
 
-		if(request_info->query_string) {
+// 		if(request_info->query_string) {
 
-			size_t length = strlen(request_info->query_string);
-			char buffer[256];
-			memset(buffer,0,sizeof(buffer));
+// 			size_t length = strlen(request_info->query_string);
+// 			char buffer[256];
+// 			memset(buffer,0,sizeof(buffer));
 
-			if(mg_get_var(request_info->query_string,length, "mimetype", buffer, sizeof(buffer)-1) > 0) {
-				auto mime = MimeTypeFactory(buffer);
-				if(mime != MimeType::none) {
-					return mime;
-				}
-			}
+// 			if(mg_get_var(request_info->query_string,length, "mimetype", buffer, sizeof(buffer)-1) > 0) {
+// 				auto mime = MimeTypeFactory(buffer);
+// 				if(mime != MimeType::none) {
+// 					return mime;
+// 				}
+// 			}
 
-		}
+// 		}
 
-	}
+// 	}
 
-	//
-	// Check headers
-	//
-	for(const char *header : { "Content-Type", "Accept" }) {
+// 	//
+// 	// Check headers
+// 	//
+// 	for(const char *header : { "Content-Type", "Accept" }) {
 
-		const char *hdr = mg_get_header(conn, header);
+// 		const char *hdr = mg_get_header(conn, header);
 
-		if(hdr && *hdr) {
+// 		if(hdr && *hdr) {
 
-			for(String &value : String{hdr}.split(",")) {
+// 			for(String &value : String{hdr}.split(",")) {
 
-				auto mime = MimeTypeFactory(value.c_str(),MimeType::none);
-				if(mime != MimeType::none) {
-					debug("Got mimetype from header '",header,"'");
-					return mime;
-				}
-			}
-		}
+// 				auto mime = MimeTypeFactory(value.c_str(),MimeType::none);
+// 				if(mime != MimeType::none) {
+// 					debug("Got mimetype from header '",header,"'");
+// 					return mime;
+// 				}
+// 			}
+// 		}
 
-	}
+// 	}
 
-	// Use default
-	const struct mg_request_info *info{mg_get_request_info(conn)};
-	Logger::String{info->remote_addr,": Unexpected mime-type on ",info->request_uri,", using ",std::to_string(def)}.warning();
-	return def;
+// 	// Use default
+// 	const struct mg_request_info *info{mg_get_request_info(conn)};
+// 	Logger::String{info->remote_addr,": Unexpected mime-type on ",info->request_uri,", using ",std::to_string(def)}.warning();
+// 	return def;
 
- }
+//  }
 
- int http_error(struct mg_connection *conn, int code, const char *message, const char *body) noexcept {
+//  int http_error(struct mg_connection *conn, int code, const char *message, const char *body) noexcept {
 
-	MimeType mimetype{MimeTypeFactory(conn)};
+// 	MimeType mimetype{MimeTypeFactory(conn)};
 
-	const struct mg_request_info *request_info = mg_get_request_info(conn);
+// 	const struct mg_request_info *request_info = mg_get_request_info(conn);
 
-	Logger::String{
-		request_info->remote_addr," ",
-		request_info->request_method," ",
-		request_info->local_uri," ",
-		code," ",message," (",std::to_string(mimetype),")"
-	}.error("civetweb");
+// 	Logger::String{
+// 		request_info->remote_addr," ",
+// 		request_info->request_method," ",
+// 		request_info->local_uri," ",
+// 		code," ",message," (",std::to_string(mimetype),")"
+// 	}.error("civetweb");
 
-	try {
+// 	try {
 
-		if(CivetWeb::Connection::apicall(conn)) {
+// 		if(CivetWeb::Connection::apicall(conn)) {
 
-			// It's an API call, send with HTTP::Response
+// 			// It's an API call, send with HTTP::Response
 
-			/// @brief Customized error response.
-			class Response : public HTTP::Response {
-			private:
-				int code;
+// 			/// @brief Customized error response.
+// 			class Response : public HTTP::Response {
+// 			private:
+// 				int code;
 
-			public:
-				Response(MimeType mimetype, int c, const char *message, const char *details)
-					: HTTP::Response{mimetype}, code{c} {
-					failed(message,details);
-				}
+// 			public:
+// 				Response(MimeType mimetype, int c, const char *message, const char *details)
+// 					: HTTP::Response{mimetype}, code{c} {
+// 					failed(message,details);
+// 				}
 
-				int status_code() const noexcept override {
-					return code;
-				}
+// 				int status_code() const noexcept override {
+// 					return code;
+// 				}
 
-				void for_each(const std::function<void(const char *header_name, const char *header_value)> &call) const noexcept override {
-					call("Cache-Control","no-cache, no-store, must-revalidate, private, max-age=0");
-					call("Expires", "0");
-				}
+// 				void for_each(const std::function<void(const char *header_name, const char *header_value)> &call) const noexcept override {
+// 					call("Cache-Control","no-cache, no-store, must-revalidate, private, max-age=0");
+// 					call("Expires", "0");
+// 				}
 
-			};
+// 			};
 
-			return ::send(conn,Response{mimetype,code,message,body});
+// 			return ::send(conn,Response{mimetype,code,message,body});
 
-		} else {
+// 		} else {
 
-			// It's a HTML request, send formatted page.
+// 			// It's a HTML request, send formatted page.
 			
-			Udjat::HTTP::Template text{"error",Udjat::MimeType::html};
+// 			Udjat::HTTP::Template text{"error",Udjat::MimeType::html};
 
-			// Expand request arguments.
-			text.expand([code,message,body](const char *key, std::string &value) {
+// 			// Expand request arguments.
+// 			text.expand([code,message,body](const char *key, std::string &value) {
 
-				if(!strcasecmp(key,"code")) {
-					Logger::String{"Using obsolete '${code}' on template, change to ${error-code}"}.warning();
-					value = std::to_string(code);
-					return true;
-				}
+// 				if(!strcasecmp(key,"code")) {
+// 					Logger::String{"Using obsolete '${code}' on template, change to ${error-code}"}.warning();
+// 					value = std::to_string(code);
+// 					return true;
+// 				}
 
-				if(!strcasecmp(key,"error-code")) {
-					value = std::to_string(code);
-					return true;
-				}
+// 				if(!strcasecmp(key,"error-code")) {
+// 					value = std::to_string(code);
+// 					return true;
+// 				}
 
-				if(!strcasecmp(key,"message")) {
-					value = message;
-					return true;
-				}
+// 				if(!strcasecmp(key,"message")) {
+// 					value = message;
+// 					return true;
+// 				}
 
-				if(!strcasecmp(key,"body")) {
-					value = body;
-					return true;
-				}
+// 				if(!strcasecmp(key,"body")) {
+// 					value = body;
+// 					return true;
+// 				}
 
-				return false;
+// 				return false;
 
-			});
+// 			});
 
-			size_t length = text.size();
+// 			size_t length = text.size();
 
-			mg_response_header_start(conn, code);
-			mg_response_header_add(conn, "Content-Type",std::to_string(mimetype),-1);
-			mg_response_header_add(conn, "Content-Length", std::to_string(length).c_str(), -1);
-			mg_response_header_add(conn, "Cache-Control","no-cache, no-store, must-revalidate, private, max-age=0",-1);
-			mg_response_header_add(conn, "Expires", "0", -1);
-			mg_response_header_send(conn);
+// 			mg_response_header_start(conn, code);
+// 			mg_response_header_add(conn, "Content-Type",std::to_string(mimetype),-1);
+// 			mg_response_header_add(conn, "Content-Length", std::to_string(length).c_str(), -1);
+// 			mg_response_header_add(conn, "Cache-Control","no-cache, no-store, must-revalidate, private, max-age=0",-1);
+// 			mg_response_header_add(conn, "Expires", "0", -1);
+// 			mg_response_header_send(conn);
 
-			// Send response.
-			mg_write(conn, text.c_str(), length);
+// 			// Send response.
+// 			mg_write(conn, text.c_str(), length);
 
-			return code;
+// 			return code;
 
-		}
+// 		}
 
- 	} catch(const std::exception &e) {
+//  	} catch(const std::exception &e) {
 
-		Logger::String{"Error sending standard response: ",e.what()}.warning();
+// 		Logger::String{"Error sending standard response: ",e.what()}.warning();
 
-	} catch(...) {
+// 	} catch(...) {
 
-		Logger::String{"Unexpected error sending standard response"}.warning();
+// 		Logger::String{"Unexpected error sending standard response"}.warning();
 
-	}
+// 	}
 
-	// Send error without body.
-	mg_response_header_start(conn, code);
-	mg_response_header_add(conn, "Content-Type",std::to_string(mimetype),-1);
-	mg_response_header_add(conn, "Content-Length", "0", -1);
-	mg_response_header_add(conn, "Cache-Control","no-cache, no-store, must-revalidate, private, max-age=0",-1);
-	mg_response_header_add(conn, "Expires", "0", -1);
-	mg_response_header_send(conn);
+// 	// Send error without body.
+// 	mg_response_header_start(conn, code);
+// 	mg_response_header_add(conn, "Content-Type",std::to_string(mimetype),-1);
+// 	mg_response_header_add(conn, "Content-Length", "0", -1);
+// 	mg_response_header_add(conn, "Cache-Control","no-cache, no-store, must-revalidate, private, max-age=0",-1);
+// 	mg_response_header_add(conn, "Expires", "0", -1);
+// 	mg_response_header_send(conn);
 
-	return code;
- }
+// 	return code;
+//  }
 
- int http_error(struct mg_connection *conn, int code, const char *message) noexcept {
- 	return http_error(conn,code,message,"");
- }
+//  int http_error(struct mg_connection *conn, int code, const char *message) noexcept {
+//  	return http_error(conn,code,message,"");
+//  }
 

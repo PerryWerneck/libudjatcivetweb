@@ -41,32 +41,43 @@
  using namespace Udjat;
  using namespace std;
 
- int HTTP::Connection::favicon() noexcept {
+ HTTP::StatusCode HTTP::Connection::favicon() noexcept {
 
-	return exec([](HTTP::Connection &connection){
+	Config::Value<unsigned int> max_age{"theme","icon-max-age",604800};
+	Config::Value<string> filename{"theme","favicon","/usr/share/pixmaps/distribution-logos/favicon.ico"};
 
-		Config::Value<unsigned int> max_age{"theme","icon-max-age",604800};
+	return send_file(
+		MimeType::icon,
+		(time_t) max_age,
+		filename.c_str()
+	);
 
-		//
-		// Get default favicon
-		//
-#ifndef _WIN32
-		Config::Value<string> filename{"theme","favicon","/usr/share/pixmaps/distribution-logos/favicon.ico"};
-#else
-		Udjat::HTTP::Icon filename = Udjat::HTTP::Icon::getInstance("favicon");
-#endif // _WIN32
+ }
 
-		if(!filename.empty() && access(filename.c_str(),R_OK) == 0) {
-			return connection.send(
-				HTTP::Get,
-				filename.c_str(),
-				false,
-				"image/x-icon",
-				max_age
-			);
-		}
+// 	return exec([](HTTP::Connection &connection){
 
-		throw system_error(ENOENT,system_category());
-	});
+// 		Config::Value<unsigned int> max_age{"theme","icon-max-age",604800};
+
+// 		//
+// 		// Get default favicon
+// 		//
+// #ifndef _WIN32
+// 		Config::Value<string> filename{"theme","favicon","/usr/share/pixmaps/distribution-logos/favicon.ico"};
+// #else
+// 		Udjat::HTTP::Icon filename = Udjat::HTTP::Icon::getInstance("favicon");
+// #endif // _WIN32
+
+// 		// if(!filename.empty() && access(filename.c_str(),R_OK) == 0) {
+// 		// 	return connection.send(
+// 		// 		HTTP::Get,
+// 		// 		filename.c_str(),
+// 		// 		false,
+// 		// 		"image/x-icon",
+// 		// 		max_age
+// 		// 	);
+// 		// }
+
+// 		throw system_error(ENOENT,system_category());
+// 	});
 
  }

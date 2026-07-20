@@ -23,8 +23,8 @@
  #include <udjat/defs.h>
  #include <udjat/tools/url.h>
  #include <udjat/tools/http/mimetype.h>
- #include <udjat/tools/http/report.h>
  #include <udjat/tools/http/connection.h>
+ #include <udjat/tools/http/method.h>
  #include <udjat/tools/string.h>
  #include <cstring>
  #include <string>
@@ -37,105 +37,33 @@
  using namespace Udjat;
  using namespace std;
 
- namespace Udjat {
-
-	namespace CivetWeb {
-
-		class UDJAT_PRIVATE Connection : public Udjat::HTTP::Connection {
-		private:
-			struct mg_connection *conn;
-
-		public:
-			Connection(struct mg_connection *c) : Udjat::HTTP::Connection(), conn(c) {
-			}
-
-			operator MimeType() const override;
-
-			static bool apicall(struct mg_connection *c) noexcept;
-
-			bool apicall() const noexcept override;
-
-			/// @brief Send response.
-			// int send(const Udjat::HTTP::Response &response) const noexcept override;
-
-			int send(int code, const char *mime_type, const char *response, size_t length) const noexcept override;
-			int send(const HTTP::Method method, const char *filename, bool allow_index, const char *mime_type, unsigned int max_age) const override;
-
-			std::shared_ptr<HTTP::Request> RequestFactory() override;
-
-			int failed(int code, const char *message, const char *body) const noexcept override;
-
-			inline struct mg_connection * connection() {
-				return conn;
-			}
-
-			inline const struct mg_request_info * request_info() const noexcept {
-				return mg_get_request_info(conn);
-			}
-
-			inline const char * request_uri() const noexcept {
-				return mg_get_request_info(conn)->request_uri;
-			}
-
-			inline const char * request_method() const noexcept {
-				return mg_get_request_info(conn)->request_method;
-			}
-
-			inline const char * local_uri() const noexcept {
-				return mg_get_request_info(conn)->local_uri;
-			}
-
-		};
-
-	}
-
- }
+ /// @brief Handler for icon requests.
+ UDJAT_PRIVATE int defaultWebHandler(struct mg_connection *conn, void *cbdata);
 
  /// @brief Handler for icon requests.
- int defaultWebHandler(struct mg_connection *conn, void *cbdata);
-
- /// @brief Handler for icon requests.
- int iconWebHandler(struct mg_connection *conn, void *cbdata);
+ UDJAT_PRIVATE int iconWebHandler(struct mg_connection *conn, void *cbdata);
 
  /// @brief Handler for product requests.
- int productWebHandler(struct mg_connection *conn, void *cbdata) noexcept;
+ UDJAT_PRIVATE int productWebHandler(struct mg_connection *conn, void *cbdata) noexcept;
 
  /// @brief Handler for image requests.
- int imageWebHandler(struct mg_connection *conn, void *cbdata);
+ UDJAT_PRIVATE int imageWebHandler(struct mg_connection *conn, void *cbdata);
 
  /// @brief Authentication handler.
- int oauthWebHandler(struct mg_connection *conn, void *cbdata);
+ UDJAT_PRIVATE int oauthWebHandler(struct mg_connection *conn, void *cbdata);
 
  /// @brief User information handler.
- int userWebHandler(struct mg_connection *conn, void *cbdata);
-
- /// @brief Handler for report requests.
- //int reportWebHandler(struct mg_connection *conn, void *cbdata);
-
- /// @brief Handler for swagger request.
- //int swaggerWebHandler(struct mg_connection *conn, void *cbdata);
-
- /// @brief Handler for '/' request.
- // int rootWebHandler(struct mg_connection *conn, void *cbdata) noexcept;
+ UDJAT_PRIVATE int userWebHandler(struct mg_connection *conn, void *cbdata);
 
  /// @brief Handler for '/favicon.ico' request.
- int faviconWebHandler(struct mg_connection *conn, void *cbdata) noexcept;
-
- /// @brief Handler for custom requests.
-//  int customWebHandler(struct mg_connection *conn, void *cbdata) noexcept;
+ UDJAT_PRIVATE int faviconWebHandler(struct mg_connection *conn, void *cbdata) noexcept;
 
  /// @brief Get mime-type from 'Accept' or 'Content-Type' header.
  /// @param conn Civetweb connection data.
  /// @param def The mimetype to use if connection doesnt set one.
- Udjat::MimeType MimeTypeFactory(struct mg_connection *conn, const Udjat::MimeType def = Udjat::MimeType::json) noexcept;
+ UDJAT_PRIVATE Udjat::MimeType MimeTypeFactory(struct mg_connection *conn, const Udjat::MimeType def = Udjat::MimeType::json) noexcept;
 
  /// @brief Send response.
- int send(struct mg_connection *conn, const Udjat::HTTP::Response &response) noexcept;
-
- /// @brief Send error page.
- int http_error(struct mg_connection *conn, int code, const char *message) noexcept;
-
- /// @brief Send error page.
- int http_error(struct mg_connection *conn, int code, const char *message, const char *body) noexcept;
+ UDJAT_PRIVATE int send(struct mg_connection *conn, const Udjat::HTTP::Response &response) noexcept;
 
  

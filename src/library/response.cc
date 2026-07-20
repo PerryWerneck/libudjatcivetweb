@@ -82,101 +82,101 @@
 
 	}
 
-	std::string HTTP::Response::to_string() const noexcept {
+	// std::string HTTP::Response::to_string() const noexcept {
 
-		// TODO: FIX-IT
+	// 	// TODO: FIX-IT
 
-		int code = status_code();	
-		debug("Request status code is ",code);
+	// 	int code = status_code();	
+	// 	debug("Request status code is ",code);
 
-		if(code >= 400 && code <= 599 && Config::Value<bool>("http","use-error-templates",true)) {
+	// 	if(code >= 400 && code <= 599 && Config::Value<bool>("http","use-error-templates",true)) {
 
-			try {
+	// 		try {
 
-				HTTP::Template text{"error", (MimeType) *this};
+	// 			HTTP::Template text{"error", (MimeType) *this};
 
-				if(text) {
+	// 			if(text) {
 
-					text.expand([code,this](const char *key, std::string &value){
+	// 				text.expand([code,this](const char *key, std::string &value){
 
-						if(!strcasecmp(key,"code")) {
+	// 					if(!strcasecmp(key,"code")) {
 
-							value = std::to_string(code);
+	// 						value = std::to_string(code);
 
-						} else if(!strcasecmp(key,"message")) {
+	// 					} else if(!strcasecmp(key,"message")) {
 
-							value = this->status.message;
+	// 						value = this->status.message;
 
-						} else if(!strcasecmp(key,"body")) {
+	// 					} else if(!strcasecmp(key,"body")) {
 
-							value = this->status.body;
+	// 						value = this->status.body;
 
-						} else if(!strcasecmp(key,"syscode")) {
+	// 					} else if(!strcasecmp(key,"syscode")) {
 
-							value = std::to_string(this->status.syscode);
+	// 						value = std::to_string(this->status.syscode);
 
-						} else {
+	// 					} else {
 
-							return false;
+	// 						return false;
 
-						}
+	// 					}
 
-						return true;
+	// 					return true;
 
-					});
+	// 				});
 
-					return text;
+	// 				return text;
 
-				}
+	// 			}
 
-			} catch(const std::exception &e) {
+	// 		} catch(const std::exception &e) {
 
-				Logger::String{e.what()}.error("http");
+	// 			Logger::String{e.what()}.error("http");
 
-			}
-		}
+	// 		}
+	// 	}
 
-		try {
+	// 	try {
 
-			if(mimetype == MimeType::svg) {
+	// 		if(mimetype == MimeType::svg) {
 
-				// It's an svg
-				HTTP::Icon icon;
+	// 			// It's an svg
+	// 			HTTP::Icon icon;
 
-				Udjat::Response::for_each([&icon](const char *, const Udjat::Value &value){
-					if(value == Udjat::Value::Icon) {
-						icon = HTTP::Icon::getInstance(value.to_string());
-						return (bool) icon;
-					}
-					return false;
+	// 			Udjat::Response::for_each([&icon](const char *, const Udjat::Value &value){
+	// 				if(value == Udjat::Value::Icon) {
+	// 					icon = HTTP::Icon::getInstance(value.to_string());
+	// 					return (bool) icon;
+	// 				}
+	// 				return false;
 
-				});
+	// 			});
 
-				if(!icon) {
-					throw system_error(ENOENT,system_category(),"No icon here");
-				}
+	// 			if(!icon) {
+	// 				throw system_error(ENOENT,system_category(),"No icon here");
+	// 			}
 
-				debug("Sending icon '",icon.c_str(),"'");
+	// 			debug("Sending icon '",icon.c_str(),"'");
 
-				return string{File::Text{icon.c_str()}.c_str()};
+	// 			return string{File::Text{icon.c_str()}.c_str()};
 
-			}
+	// 		}
 
-		} catch(const std::exception &e) {
+	// 	} catch(const std::exception &e) {
 
-			Logger::String{e.what()}.error("http");
-			const_cast<HTTP::Response *>(this)->failed(e);
+	// 		Logger::String{e.what()}.error("http");
+	// 		const_cast<HTTP::Response *>(this)->failed(e);
 
-		} catch(...) {
+	// 	} catch(...) {
 
-			Logger::String message{_( "Unexpected error processing response text" )};
-			message.error("http");
-			const_cast<HTTP::Response *>(this)->failed(message.c_str());
+	// 		Logger::String message{_( "Unexpected error processing response text" )};
+	// 		message.error("http");
+	// 		const_cast<HTTP::Response *>(this)->failed(message.c_str());
 
-		}
+	// 	}
 
-		return Udjat::Response::to_string();
+	// 	return Udjat::Response::to_string();
 
-	}
+	// }
 
  }

@@ -28,22 +28,13 @@
 
  #include <config.h>
  #include <udjat/defs.h>
- #include <udjat/tools/http/image.h>
- #include <udjat/tools/http/exception.h>
- #include <udjat/tools/http/mimetype.h>
- #include <udjat/tools/configuration.h>
- #include <udjat/tools/intl.h>
  #include <udjat/tools/http/connection.h>
- #include <udjat/tools/logger.h>
+ #include <udjat/tools/civetweb/connection.h> 
  #include <udjat/tools/civetweb/service.h>
 
- #include <private/module.h>
- #include <civetweb.h>
+ using namespace Udjat;
 
- #ifdef HAVE_UNISTD_H
-	#include <unistd.h>
- #endif // HAVE_UNISTD_H
-
- int CivetWeb::Service::image_handler(struct mg_connection *conn, CivetWeb::Service *) noexcept {
-	return CivetWeb::Connection(conn).image(mg_get_request_info(conn)->local_uri);
+ int CivetWeb::Service::favicon_handler(struct mg_connection *conn, CivetWeb::Service *) noexcept {
+	return (int) CivetWeb::Connection{conn}.image(mg_get_request_info(conn)->local_uri);
  }
+ 

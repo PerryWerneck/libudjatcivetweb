@@ -17,78 +17,73 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
- /**
-  * @brief Implements the product file handler.
-  *
-  */
+//  #include <config.h>
+//  #include <udjat/defs.h>
+//  #include <private/module.h>
+//  #include <udjat/tools/logger.h>
+//  #include <udjat/tools/application.h>
+//  #include <udjat/tools/intl.h>
+//  #include <stdexcept>
+//  #include <udjat/tools/civetweb/service.h>
+//  #include <udjat/tools/configuration.h>
 
- #include <config.h>
- #include <udjat/defs.h>
- #include <private/module.h>
- #include <udjat/tools/logger.h>
- #include <udjat/tools/application.h>
- #include <udjat/tools/intl.h>
- #include <stdexcept>
- #include <udjat/tools/civetweb/service.h>
- #include <udjat/tools/configuration.h>
+//  #ifdef HAVE_UNISTD_H
+// 	#include <unistd.h>
+//  #endif // HAVE_UNISTD_H
 
- #ifdef HAVE_UNISTD_H
-	#include <unistd.h>
- #endif // HAVE_UNISTD_H
+//  using namespace Udjat;
+//  using namespace std;
 
- using namespace Udjat;
- using namespace std;
+//  int CivetWeb::Service::product_handler(struct mg_connection *conn, CivetWeb::Service *) noexcept {
 
- int CivetWeb::Service::product_handler(struct mg_connection *conn, CivetWeb::Service *) noexcept {
+// 	try {
 
-	try {
+// 		static const char *prefix = "/" STRINGIZE_VALUE_OF(PRODUCT_NAME) "/";
 
-		static const char *prefix = "/" STRINGIZE_VALUE_OF(PRODUCT_NAME) "/";
+// 		const char *path = mg_get_request_info(conn)->local_uri;
 
-		const char *path = mg_get_request_info(conn)->local_uri;
-
-		if(strncasecmp(path,prefix,strlen(prefix))) {
-			throw logic_error(Logger::String{"Invalid product path '",path,"'"});
-		}
+// 		if(strncasecmp(path,prefix,strlen(prefix))) {
+// 			throw logic_error(Logger::String{"Invalid product path '",path,"'"});
+// 		}
 
 
-#ifdef _WIN32
-		Application::DataFile filename = Config::Value<string>{"httpd","root-path","www/"}.c_str();
-#else
-		Application::DataFile filename = Config::Value<string>{"httpd","root-path","/srv/www/htdocs/" STRINGIZE_VALUE_OF(PRODUCT_NAME) "/"}.c_str();
-#endif // _WIN32
+// #ifdef _WIN32
+// 		Application::DataFile filename = Config::Value<string>{"httpd","root-path","www/"}.c_str();
+// #else
+// 		Application::DataFile filename = Config::Value<string>{"httpd","root-path","/srv/www/htdocs/" STRINGIZE_VALUE_OF(PRODUCT_NAME) "/"}.c_str();
+// #endif // _WIN32
 
-		filename += (path+strlen(prefix));
+// 		filename += (path+strlen(prefix));
 
-		debug("Searching for '",filename.c_str(),"'");
+// 		debug("Searching for '",filename.c_str(),"'");
 
-		if(filename) {
+// 		if(filename) {
 
-			Logger::String{"Sending static file '", filename.c_str(),"'"}.trace("http");
-			mg_send_file(conn,filename.c_str());
-			return 200;
+// 			Logger::String{"Sending static file '", filename.c_str(),"'"}.trace("http");
+// 			mg_send_file(conn,filename.c_str());
+// 			return 200;
 
-		} else {
+// 		} else {
 
-			Logger::String{"Cant find static file '", filename.c_str(),"'"}.error("http");
+// 			Logger::String{"Cant find static file '", filename.c_str(),"'"}.error("http");
 
-		}
+// 		}
 
 
-	} catch(const HTTP::Exception &e) {
-		return http_error(conn, e.code(), e.what());
+// 	} catch(const HTTP::Exception &e) {
+// 		return http_error(conn, e.code(), e.what());
 
-	} catch(const system_error &e) {
-		return http_error(conn, HTTP::Exception::code(e), e.what());
+// 	} catch(const system_error &e) {
+// 		return http_error(conn, HTTP::Exception::code(e), e.what());
 
-	} catch(const exception &e) {
-		return http_error(conn, 500, e.what());
+// 	} catch(const exception &e) {
+// 		return http_error(conn, 500, e.what());
 
-	} catch(...) {
-		return http_error(conn, 500, "Unexpected error");
+// 	} catch(...) {
+// 		return http_error(conn, 500, "Unexpected error");
 
-	}
+// 	}
 
-	return http_error(conn, 404, _("Not available"));
+// 	return http_error(conn, 404, _("Not available"));
 
- }
+//  }

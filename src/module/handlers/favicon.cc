@@ -17,29 +17,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
- /**
-  * @brief Implements the faviconn output.
-  *
-  */
-
  #include <config.h>
  #include <udjat/defs.h>
- #include <private/module.h>
- #include <udjat/tools/http/exception.h>
+ #include <udjat/tools/http/connection.h>
+ #include <udjat/tools/civetweb/connection.h> 
  #include <udjat/tools/civetweb/service.h>
- #include <udjat/tools/http/image.h>
- #include <udjat/tools/intl.h>
- #include <udjat/tools/logger.h>
- #include <udjat/tools/configuration.h>
- #include <udjat/tools/http/icon.h>
- #include <fcntl.h>
-
- #ifdef HAVE_UNISTD_H
-	#include <unistd.h>
- #endif // HAVE_UNISTD_H
 
  using namespace Udjat;
 
  int CivetWeb::Service::favicon_handler(struct mg_connection *conn, CivetWeb::Service *) noexcept {
-	return CivetWeb::Connection{conn}.favicon();
+	return (int) CivetWeb::Connection{conn}.favicon();
  }
