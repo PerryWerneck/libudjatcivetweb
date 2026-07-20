@@ -46,7 +46,7 @@ subdir('po')
 libudjat = dependency(
   'libudjat',
   required: true, 
-  version: '>=2.7.0',
+  version: '>=3.0.0',
   fallback: ['libudjat'],
 )
 
@@ -133,10 +133,7 @@ includes_dir = include_directories('src/include')
 # Sources
 #
 lib_src = [
-  'src/library/handler.cc',
   'src/library/icon.cc',
-  'src/library/layout/csv.cc',
-  'src/library/template.cc',
   'src/library/connection.cc',
   'src/library/request.cc',
   'src/library/response.cc',
@@ -149,7 +146,7 @@ lib_src = [
   'src/library/handlers/icon.cc',
   'src/library/handlers/image.cc',
   'src/library/client/client.cc',
-  'src/library/testprogram.cc',
+  'src/library/testsuite.cc',
   'src/library/authentication.cc',
   'src/library/oauth2/context.cc',
   'src/library/oauth2/handle.cc',
@@ -158,7 +155,6 @@ lib_src = [
   ]
 
 module_src = [
-  'src/module/handlers/api.cc',
   'src/module/handlers/favicon.cc',
   'src/module/handlers/icons.cc',
   'src/module/handlers/images.cc',
@@ -345,16 +341,11 @@ executable(
 
 install_headers(
   'src/include/udjat/tools/http/connection.h',
-  'src/include/udjat/tools/http/handler.h',
   'src/include/udjat/tools/http/icon.h',
   'src/include/udjat/tools/http/image.h',
-  'src/include/udjat/tools/http/layouts.h',
   'src/include/udjat/tools/http/oauth.h',
-  'src/include/udjat/tools/http/report.h',
   'src/include/udjat/tools/http/request.h',
   'src/include/udjat/tools/http/response.h',
-  'src/include/udjat/tools/http/server.h',
-  'src/include/udjat/tools/http/template.h',
   subdir: 'udjat/tools/http'  
 )
 
