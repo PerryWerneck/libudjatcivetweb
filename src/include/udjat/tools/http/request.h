@@ -96,7 +96,7 @@
 			/// @brief HTTP cookie.
 			virtual Udjat::String cookie(const char *name) const;
 
-			bool get_property(const char *key, std::string &value) const override;
+			bool get_property(const char *key, Udjat::Value &value) const override;
 
 		};
 

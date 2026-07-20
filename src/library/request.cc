@@ -22,8 +22,6 @@
  #include <udjat/tools/application.h>
  #include <udjat/tools/http/request.h>
  #include <udjat/tools/http/timestamp.h>
- #include <udjat/tools/http/template.h>
- #include <udjat/tools/logger.h>
  #include <udjat/tools/logger.h>
  #include <udjat/tools/configuration.h>
  #include <udjat/tools/intl.h>
@@ -39,7 +37,7 @@
 	HTTP::Request::~Request() {
 	}
 
-	bool HTTP::Request::getProperty(const char *key, std::string &value) const {
+	bool HTTP::Request::get_property(const char *key, Udjat::Value &value) const {
 
 		if(!strcasecmp(key,"client-address")) {
 			value = address();
@@ -69,7 +67,7 @@
 		}
 	
 		
-		return Udjat::Request::getProperty(key,value);
+		return Udjat::Request::get_property(key,value);
 	}
 
 	String HTTP::Request::cookie(const char *) const {
@@ -98,10 +96,6 @@
 		}
 
 		return Udjat::Request::cached(timestamp);
-	}
-
-	bool HTTP::Request::html() const noexcept {
-		return !api_call && mimetype() == MimeType::html;		
 	}
 
 	MimeType HTTP::Request::mimetype() const noexcept {
@@ -145,71 +139,6 @@
 				(*this)[value.c_str()] = true;
 			}
 		}
-
 	}
-
-	// int HTTP::Request::failed(int code, const char *message, const char *body) const {
-
-	// 	if(api_call || !Config::Value<bool>("http","use-error-templates",true)) {
-
-	// 		// Format API call response.
-	// 		HTTP::Response response{mimetype()};
-	// 		response.failed(
-	// 			Logger::Message{_("HTTP Error {}"),code}.c_str(),
-	// 			message,
-	// 			body
-	// 		);
-
-	// 		return send(code,response.to_string().c_str());
-
-	// 	}
-
-	// 	Template response{"error",mimetype()};
-	// 	if(response.empty()) {
-
-	// 		// Empty template, Format API call response.
-	// 		HTTP::Response response{mimetype()};
-	// 		response.failed(
-	// 			Logger::Message{_("HTTP Error {}"),code}.c_str(),
-	// 			message,
-	// 			body
-	// 		);
-
-	// 		return send(code,response.to_string().c_str());
-
-	// 	}
-
-	// 	response.expand([&](const char *key, std::string &value){
-
-	// 		if(!(strcasecmp(key,"code") && strcasecmp(key,"error-code"))) {
-
-	// 			value = std::to_string(code);
-
-	// 		} else if(!strcasecmp(key,"message")) {
-
-	// 			value = message;
-
-	// 		} else if(!strcasecmp(key,"body")) {
-
-	// 			value = body;
-
-	// 		} else if(!strcasecmp(key,"syscode")) {
-
-	// 			value = body;
-
-	// 		} else {
-
-	// 			return false;
-
-	// 		}
-
-	// 		return true;
-	// 	});
-
-	// 	response.expand(*this);
-
-	// 	return send(code,response.c_str());
-
-	// }
 
  }

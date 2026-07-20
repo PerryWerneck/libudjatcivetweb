@@ -21,10 +21,8 @@
  #include <udjat/tools/response.h>
  #include <udjat/tools/http/response.h>
  #include <udjat/tools/value.h>
- #include <udjat/tools/http/layouts.h>
  #include <udjat/tools/http/exception.h>
  #include <udjat/tools/http/mimetype.h>
- #include <udjat/tools/http/template.h>
  #include <udjat/tools/intl.h>
  #include <udjat/tools/logger.h>
  #include <udjat/tools/http/icon.h>
@@ -47,40 +45,40 @@
 
  namespace Udjat {
 
-	int HTTP::Response::status_code() const noexcept {
-		debug("Converting syscode ",Udjat::Response::syscode()," to ",HTTP::Exception::code(Udjat::Response::syscode()));
-		return HTTP::Exception::code(Udjat::Response::syscode());
-	}
+	// int HTTP::Response::status_code() const noexcept {
+	// 	debug("Converting syscode ",Udjat::Response::syscode()," to ",HTTP::Exception::code(Udjat::Response::syscode()));
+	// 	return HTTP::Exception::code(Udjat::Response::syscode());
+	// }
 
-	void HTTP::Response::for_each(const std::function<void(const char *header_name, const char *header_value)> &call) const noexcept {
+	// void HTTP::Response::for_each(const std::function<void(const char *header_name, const char *header_value)> &call) const noexcept {
 
-		// https://stackoverflow.com/questions/3715981/what-s-the-best-restful-method-to-return-total-number-of-items-in-an-object
-		if(range.count) {
-			call("X-Total-Count",std::to_string(range.count).c_str());
-		}
+	// 	// https://stackoverflow.com/questions/3715981/what-s-the-best-restful-method-to-return-total-number-of-items-in-an-object
+	// 	if(range.count) {
+	// 		call("X-Total-Count",std::to_string(range.count).c_str());
+	// 	}
 
-		if(range.total) {
-			call("Content-Range",Udjat::String{"items ",range.from,"-",range.to,"/",range.total}.c_str());
-		}
+	// 	if(range.total) {
+	// 		call("Content-Range",Udjat::String{"items ",range.from,"-",range.to,"/",range.total}.c_str());
+	// 	}
 
-		// https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Last-Modified
-		if(timestamp.last_modified) {
-			call("last-modified",HTTP::TimeStamp{timestamp.last_modified}.to_string().c_str());
-		}
+	// 	// https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Last-Modified
+	// 	if(timestamp.last_modified) {
+	// 		call("last-modified",HTTP::TimeStamp{timestamp.last_modified}.to_string().c_str());
+	// 	}
 
-		// Check for caching.
-		// https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
-		if(timestamp.expires) {
-			time_t now = time(0);
-			time_t expires = ((time_t) timestamp.expires);
-			if(expires > now) {
-				unsigned int max_age = (now - expires);
-				call("Cache-Control",Udjat::String{"max-age=",max_age,", private"}.c_str());
-				call("Expires",HTTP::TimeStamp{expires}.to_string().c_str());
-			}
-		}
+	// 	// Check for caching.
+	// 	// https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
+	// 	if(timestamp.expires) {
+	// 		time_t now = time(0);
+	// 		time_t expires = ((time_t) timestamp.expires);
+	// 		if(expires > now) {
+	// 			unsigned int max_age = (now - expires);
+	// 			call("Cache-Control",Udjat::String{"max-age=",max_age,", private"}.c_str());
+	// 			call("Expires",HTTP::TimeStamp{expires}.to_string().c_str());
+	// 		}
+	// 	}
 
-	}
+	// }
 
 	// std::string HTTP::Response::to_string() const noexcept {
 

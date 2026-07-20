@@ -37,6 +37,10 @@
 	/// @brief Run method, handle exceptions.
 	HTTP::StatusCode HTTP::Connection::handle() noexcept {
 
+
+		
+		return HTTP::SystemError;
+
 	}
 
  }

@@ -38,26 +38,27 @@
 
  using namespace Udjat;
 
- HTTP::StatusCode HTTP::Connection::icon(const char *name) noexcept {
+ namespace Udjat {
 
-	Config::Value<unsigned int> max_age{"theme","image-max-age",604800};
+	HTTP::StatusCode HTTP::Connection::icon(const char *name) noexcept {
 
-	{
-		if(*name == '/') {
-			name++;
+		Config::Value<unsigned int> max_age{"theme","image-max-age",604800};
+
+		{
+			const char *ptr = strrchr(name,'/');
+			if(ptr) {
+				name = ptr+1;
+			}
 		}
-		const char *ptr = strchr(name,'/');
-		if(ptr) {
-			name = ptr+1;
-		}
+
+		Udjat::HTTP::Icon filename = Udjat::HTTP::Icon::getInstance(name);
+
+		return send_file(
+			MimeType::icon,
+			(time_t) max_age,
+			filename.c_str()
+		);
+
 	}
-
-	Udjat::HTTP::Icon filename = Udjat::HTTP::Icon::getInstance(name);
-
-	return send_file(
-		MimeType::icon,
-		(time_t) max_age,
-		filename.c_str()
-	);
 
  }

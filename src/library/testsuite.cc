@@ -21,7 +21,7 @@
  #include <udjat/defs.h>
  #include <udjat/tools/logger.h>
  #include <udjat/module.h>
- #include <udjat/tools/unit-test.h>
+ #include <udjat/tools/testsuite.h>
  #include <udjat/tools/url.h>
  #include <udjat/tools/url/handler.h>
  #include <string>
@@ -33,14 +33,14 @@
 
  #ifdef DEBUG 
 
- UDJAT_API void enum_udjat_unit_tests(Udjat::UnitTests &tests) noexcept {
+ UDJAT_API void enum_udjat_unit_tests(Udjat::TestSuite &testcases) noexcept {
 
-	debug(__FUNCTION__," begin -> ",tests.size());
+	using Case = TestSuite::Case;
 
-	tests.append(
-		UnitTests::Worker{
+	testcases.add(
+		Case{
 			"httpclient", "Test HTTP client",
-			[]() {
+			[](std::ostream &stream) {
 
 				Udjat::URL url{"http://127.0.0.1/udjat/css/style.css"};
 
@@ -51,10 +51,10 @@
 
 				auto response = handler->get("/tmp/style.css");
 
-				cout << "-----" << endl << response << endl << "-----" << endl;
+				stream << "-----" << endl << response << endl << "-----" << endl;
 
-
-				return true;
+				return "Got response";
+				
 			}
 		}
 	);

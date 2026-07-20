@@ -22,6 +22,7 @@
  #include <udjat/defs.h>
  #include <udjat/tools/http/connection.h>
  #include <udjat/tools/http/statuscodes.h>
+ #include <udjat/tools/http/status.h>
  #include <udjat/tools/http/mimetype.h>
  #include <udjat/tools/http/authentication.h>
  #include <udjat/tools/http/request.h>

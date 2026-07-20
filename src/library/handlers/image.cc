@@ -36,29 +36,32 @@
 	#include <unistd.h>
 #endif // _WIN32
 
- using namespace Udjat;
  using namespace std;
 
- HTTP::StatusCode HTTP::Connection::image(const char *name) noexcept {
+ namespace Udjat {
 
-	Config::Value<unsigned int> max_age{"theme","image-max-age",604800};
+	HTTP::StatusCode HTTP::Connection::image(const char *name) noexcept {
 
-	{
-		if(*name == '/') {
-			name++;
+		Config::Value<unsigned int> max_age{"theme","image-max-age",604800};
+
+		{
+			if(*name == '/') {
+				name++;
+			}
+			const char *ptr = strchr(name,'/');
+			if(ptr) {
+				name = ptr+1;
+			}
 		}
-		const char *ptr = strchr(name,'/');
-		if(ptr) {
-			name = ptr+1;
-		}
+
+		Udjat::HTTP::Image filename{name};
+
+		return send_file(
+			MimeTypeFactory(filename.c_str(),MimeType::image),
+			(time_t) max_age,
+			filename.c_str()
+		);
+
 	}
-
-	Udjat::HTTP::Image filename{name};
-
-	return send_file(
-		MimeTypeFactory(filename.c_str(),MimeType::image),
-		(time_t) max_age,
-		filename.c_str()
-	);
 
  }
