@@ -25,8 +25,8 @@
  #include <udjat/tools/http/status.h>
  #include <udjat/tools/http/mimetype.h>
  #include <udjat/tools/http/authentication.h>
- #include <udjat/tools/http/request.h>
  #include <memory>
+ #include <string>
  
  namespace Udjat {
 
@@ -39,32 +39,54 @@
 			typedef HTTP::Connection super;
 
 			/// @brief Authentication for this connection.
-			std::shared_ptr<HTTP::Authentication> auth;
-
-			/// @brief Send file to client.
-			/// @param mimetype The mime-type for http header.
-			/// @param max_age The max-age value to http headers (0 to no-cache).
-			/// @param filename The file to send.
-			/// @return The status code (404 if the file was not found).
-			virtual HTTP::StatusCode send_file(const MimeType mimetype, time_t max_age, const char *filename) noexcept = 0;
-
-			/// @brief Send response to client.
-			/// @param status The status for http header.
-			/// @param payload The payload (if available).
-			/// @return The status code.
-			virtual HTTP::StatusCode send_response(const HTTP::Status &status, const std::string &payload) noexcept = 0;
-
-			/// @brief Build request for this connection.
-			/// @param The request for this connection.
-			virtual std::shared_ptr<HTTP::Request> RequestFactory() noexcept;
+			HTTP::Authentication auth;
 
 		public:
 			Connection() = default;
 			virtual ~Connection();
 
-			inline std::shared_ptr<HTTP::Authentication> authentication() const noexcept {
+			/// @brief Get authentication for this connection.
+			/// @return The authentication object associated with this connection.
+			inline const HTTP::Authentication & authentication() const noexcept {
 				return auth;
 			}
+
+			/// @brief Send file to client.
+			/// @param mimetype The mime-type for http header (MimeType::None to get it from filename).
+			/// @param max_age The max-age value to http headers (0 to no-cache).
+			/// @param filename The file to send.
+			/// @return The status code (404 if the file was not found).
+			virtual HTTP::StatusCode send(const char *filename, time_t max_age, const MimeType mimetype = MimeType::none) noexcept = 0;
+
+			/// @brief Send response to client.
+			/// @param status The status for http header.
+			/// @param payload The payload.
+			/// @return The response code.
+			virtual HTTP::StatusCode send(const HTTP::StatusCode code, const MimeType mimetype, const char *payload) noexcept = 0;
+
+			/// @brief Send response to client.
+			/// @param status The response status.
+			/// @param apicall True if the request is an api call.
+			/// @return The response code.
+			HTTP::StatusCode send(const HTTP::Status &status, const MimeType mimetype, bool apicall = true) noexcept;
+
+			/// @brief Send success response to client.
+			/// @param payload The response payload
+			/// @return The response code (Usually 200)
+			inline HTTP::StatusCode send(const MimeType mimetype, const char *payload) noexcept {
+				return send(HTTP::Ok,mimetype,payload);
+			}
+
+			/// @brief Send a redirect response.
+			/// @param location The new location.
+			/// @return The status code (Usually HTTP::Redirect)
+			virtual HTTP::StatusCode redirect(const char *location) const = 0;
+
+			/// @brief Get the client address (if available).
+			/// @return The client address, empty if not available.
+			virtual String address() const noexcept = 0;
+
+			virtual bool get_property(const char *key, Udjat::Value &value) const;
 
 			/// @brief Send standard favicon.
 			/// @return HTTP status code.
@@ -81,9 +103,29 @@
  			HTTP::StatusCode image(const char *name) noexcept;
 			
 			/// @brief Handle http request.
+			/// @param request The HTTP request to handle.
 			/// @return HTTP status code.
-			HTTP::StatusCode handle() noexcept;
+			HTTP::StatusCode handle(HTTP::Request &request) noexcept;
 
+			/// @brief Send logger message.
+			virtual HTTP::StatusCode logger(HTTP::StatusCode code, const char *message, Logger::Level level) const;
+
+			inline HTTP::StatusCode info(HTTP::StatusCode code, const char *message) const {
+				return logger(code,message,Logger::Info);
+			}
+
+			inline HTTP::StatusCode warning(HTTP::StatusCode code, const char *message) const {
+				return logger(code,message,Logger::Warning);
+			}
+			
+			inline HTTP::StatusCode error(HTTP::StatusCode code, const char *message) const {
+				return logger(code,message,Logger::Error);
+			}
+			
+			inline HTTP::StatusCode notice(HTTP::StatusCode code, const char *message) const {
+				return logger(code,message,Logger::Notice);
+			}
+			
 		};
 
 	}

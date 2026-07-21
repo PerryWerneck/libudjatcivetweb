@@ -22,7 +22,6 @@
  #include <config.h>
  #include <udjat/defs.h>
  #include <udjat/module.h>
- #include <udjat/tools/xml.h>
  #include <udjat/tools/properties.h>
  #include <udjat/tools/civetweb/service.h>
  #include <udjat/tools/interface.h>

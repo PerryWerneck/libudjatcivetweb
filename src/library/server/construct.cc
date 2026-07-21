@@ -17,79 +17,79 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
- #include <config.h>
+//  #include <config.h>
 
- #undef LOG_DOMAIN
- #define LOG_DOMAIN "httpd"
- #include <udjat/tools/logger.h>
+//  #undef LOG_DOMAIN
+//  #define LOG_DOMAIN "httpd"
+//  #include <udjat/tools/logger.h>
 
- #include <stdexcept>
- #include <udjat/tools/http/server.h>
- #include <udjat/tools/http/handler.h>
- #include <udjat/tools/logger.h>
- #include <udjat/tools/configuration.h>
- #include <udjat/tools/interface.h>
- #include <iostream>
+//  #include <stdexcept>
+//  #include <udjat/tools/http/server.h>
+//  #include <udjat/tools/http/handler.h>
+//  #include <udjat/tools/logger.h>
+//  #include <udjat/tools/configuration.h>
+//  #include <udjat/tools/interface.h>
+//  #include <iostream>
 
- using namespace std;
+//  using namespace std;
 
- namespace Udjat {
+//  namespace Udjat {
 
-	HTTP::Server * HTTP::Server::instance = nullptr;
+// 	HTTP::Server * HTTP::Server::instance = nullptr;
 
-	HTTP::Server & HTTP::Server::getInstance() {
-		if(instance) {
-			return *instance;
-		}
+// 	HTTP::Server & HTTP::Server::getInstance() {
+// 		if(instance) {
+// 			return *instance;
+// 		}
 
-		throw runtime_error("The HTTP service is unavailable");
-	}
+// 		throw runtime_error("The HTTP service is unavailable");
+// 	}
 
-	HTTP::Server::Server(const char *name) : Interface::Factory{name}, apiver{100} {
+// 	HTTP::Server::Server(const char *name) : Interface::Factory{name}, apiver{100} {
 
-		// Check for secondary instance.
-		if(instance) {
-			Logger::String{"Building a new HTTP server instance"}.trace();
-		} else {
-			instance = this;
-		}
-	}
+// 		// Check for secondary instance.
+// 		if(instance) {
+// 			Logger::String{"Building a new HTTP server instance"}.trace();
+// 		} else {
+// 			instance = this;
+// 		}
+// 	}
 
-	HTTP::Server::Server(const XML::Node &node) : Server{String{node,"interface-name","web"}.as_quark()} {
-		apiver = XML::AttributeFactory(node,"api-version").as_uint(apiver);
-	}
+// 	HTTP::Server::Server(const XML::Node &node) : Server{String{node,"interface-name","web"}.as_quark()} {
+// 		apiver = XML::AttributeFactory(node,"api-version").as_uint(apiver);
+// 	}
 
-	HTTP::Server::~Server() {
-		if(instance == this) {
-			instance = nullptr;
-			Logger::String{"Deleting default HTTP server instance"}.trace();
-		} else {
-			Logger::String{"Deleting non default HTTP server instance"}.trace();
-		}
-	}
+// 	HTTP::Server::~Server() {
+// 		if(instance == this) {
+// 			instance = nullptr;
+// 			Logger::String{"Deleting default HTTP server instance"}.trace();
+// 		} else {
+// 			Logger::String{"Deleting non default HTTP server instance"}.trace();
+// 		}
+// 	}
 
-	Udjat::Interface & HTTP::Server::InterfaceFactory(const Properties &props) {
+// 	Udjat::Interface & HTTP::Server::InterfaceFactory(const Properties &props) {
 
-		const char * path{props["http-path"].as_quark()};
+// 		const char * path{props["http-path"].as_quark()};
 
-		if(!(path && *path)) {
-			path = props["path"].as_quark();
-		}
+// 		if(!(path && *path)) {
+// 			path = props["path"].as_quark();
+// 		}
 
-		if(!(path && *path)) {
-			path = props["name"].as_quark();
-		}
+// 		if(!(path && *path)) {
+// 			path = props["name"].as_quark();
+// 		}
 
-		for(Interface &intf : interfaces) {
-			if(!strcasecmp(path,intf.name())) {
-				Logger::String{"Reusing interface '",path,"'"}.trace();
-				return intf;
-			}
-		}
+// 		for(Interface &intf : interfaces) {
+// 			if(!strcasecmp(path,intf.name())) {
+// 				Logger::String{"Reusing interface '",path,"'"}.trace();
+// 				return intf;
+// 			}
+// 		}
 
-		interfaces.emplace_back(props,path);
-		return interfaces.back();
-	}
+// 		interfaces.emplace_back(props,path);
+// 		return interfaces.back();
+// 	}
 
- }
+//  }
 

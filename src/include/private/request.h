@@ -24,6 +24,7 @@
  #include <udjat/tools/request.h>
  #include <udjat/tools/http/request.h>
  #include <civetweb.h>
+ #include <udjat/tools/civetweb/connection.h>
  #include <map>
 
  namespace Udjat {
@@ -32,25 +33,18 @@
 
 		class UDJAT_PRIVATE Request : public HTTP::Request {
 		private:
-			struct mg_connection *conn;
-			struct mg_request_info *info;
+			CivetWeb::Connection conn;
 
 		public:
 
 			/// @brief Build request, process path and apiver.
 			/// @param conn The connection for this request.
-			Request(struct mg_connection *conn);
-
-			/// @brief Build request with pre-processed path and apiver
-			/// @param conn The connection for this request.
-			/// @param path The request path with api and version prefix stripped.
-			/// @param apiver The API version for this request.
-			Request(struct mg_connection *conn, const char *path, unsigned int apiver);
+			Request(CivetWeb::Connection &conn);
 
 			const char * query(const char *def = "") const override;
 
 			// bool for_each(const std::function<bool(const char *name, const char *value)> &call) const override;
-			bool getProperty(const char *key, std::string &value) const override;
+			bool get_property(const char *key, Udjat::Value &value) const override;
 
 			const char * header(const char *name) const noexcept override;
 

@@ -18,6 +18,7 @@
  */
 
  #include <config.h>
+
  #include <udjat/ui/icon.h>
  #include <udjat/tools/http/icon.h>
  #include <map>
@@ -50,9 +51,7 @@
 				auto search = cache.find(string{name});
 				if (search != cache.end()) {
 					// Found it.
-#ifdef DEBUG
-					cout << "Found cached '" << search->second << "'" << endl;
-#endif // DEBUG
+					debug("Found cached '",search->second,"'");
 					return search->second;
 				}
 
@@ -61,7 +60,7 @@
 				auto inserted = cache.emplace(make_pair(std::string{name},Icon(name)));
 
 				if(!inserted.first->second.empty()) {
-					cout << "civetweb\tCaching " << inserted.first->second << " as " << name << endl;
+					Logger::String{"Caching ",inserted.first->second," as ",name}.trace();
 				}
 				return inserted.first->second;
 

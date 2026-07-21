@@ -36,15 +36,6 @@
 		private:
 			struct mg_connection *conn;
 
-
-		protected:
-
-			HTTP::StatusCode send_file(const MimeType mimetype, time_t max_age, const char *filename) noexcept override;
-
-			HTTP::StatusCode send_response(const HTTP::Status &status, const std::string &payload) noexcept override;
-
-			std::shared_ptr<HTTP::Request> RequestFactory() noexcept override;
-
 		public:
 			Connection(struct mg_connection *c) : Udjat::HTTP::Connection(), conn(c) {
 			}
@@ -70,6 +61,21 @@
 			inline const char * local_uri() const noexcept {
 				return mg_get_request_info(conn)->local_uri;
 			}
+
+			const char * header(const char *name, const char *def = "") const noexcept override;
+
+			String address() const noexcept override;
+			String cookie(const char *name, const char *def = "") const override;
+
+			HTTP::StatusCode send(const char *filename, time_t max_age, const MimeType mimetype = MimeType::none) noexcept override;
+
+			HTTP::StatusCode send(const HTTP::Status &status, const MimeType mimetype, const std::string &payload) noexcept override;
+
+			HTTP::StatusCode redirect(const char *location) const override;
+
+			std::shared_ptr<HTTP::Request> RequestFactory() noexcept override;
+
+			HTTP::StatusCode logger(HTTP::StatusCode code, const char *message, Logger::Level level) const override;
 
 		};
 

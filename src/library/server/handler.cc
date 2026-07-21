@@ -17,48 +17,48 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
- #include <config.h>
- #include <stdexcept>
- #include <udjat/tools/http/server.h>
- #include <udjat/tools/http/request.h>
- #include <udjat/tools/interface.h>
- #include <udjat/tools/request.h>
- #include <udjat/tools/logger.h>
- #include <iostream>
+//  #include <config.h>
+//  #include <stdexcept>
+//  #include <udjat/tools/http/server.h>
+//  #include <udjat/tools/http/request.h>
+//  #include <udjat/tools/interface.h>
+//  #include <udjat/tools/request.h>
+//  #include <udjat/tools/logger.h>
+//  #include <iostream>
 
- using namespace std;
+//  using namespace std;
 
- namespace Udjat {
+//  namespace Udjat {
 
-	HTTP::Server::Handler::Handler(const Properties &props) 
-		: Udjat::Interface::Handler{props}, method{HTTP::MethodFactory(props)} {	
-	}
+// 	HTTP::Server::Handler::Handler(const Properties &props) 
+// 		: Udjat::Interface::Handler{props}, method{HTTP::MethodFactory(props)} {	
+// 	}
 
-	bool HTTP::Server::Handler::operator==(const HTTP::Request &request) const {
+// 	bool HTTP::Server::Handler::operator==(const HTTP::Request &request) const {
 
-		if(request.verb() != method) {
-			debug("Method '",std::to_string(request.verb()),"' mismatch");
-			return false;
-		}
+// 		if(request.verb() != method) {
+// 			debug("Method '",std::to_string(request.verb()),"' mismatch");
+// 			return false;
+// 		}
 
-		if(!strcasecmp(c_str(),std::to_string(request.verb()))) {
-			debug("Handler name match request action, accepting it");
-			return true;
-		}
+// 		if(!strcasecmp(c_str(),std::to_string(request.verb()))) {
+// 			debug("Handler name match request action, accepting it");
+// 			return true;
+// 		}
 
-		const char *ptr = request.path();
-		if(ptr && *ptr && *ptr != '/') {
-			throw runtime_error(Logger::String{"The request path '",ptr,"' is invalid. It should start with '/'"});
-		}
+// 		const char *ptr = request.path();
+// 		if(ptr && *ptr && *ptr != '/') {
+// 			throw runtime_error(Logger::String{"The request path '",ptr,"' is invalid. It should start with '/'"});
+// 		}
 
-		ptr++;
+// 		ptr++;
 
-		debug("checking for name '",ptr,"'");
+// 		debug("checking for name '",ptr,"'");
 
-		// TODO: Pending implementation.
+// 		// TODO: Pending implementation.
 		
-		return false;
-	}
+// 		return false;
+// 	}
 
- }
+//  }
 

@@ -20,7 +20,7 @@
  #include <config.h>
  #include <udjat/defs.h>
  #include <udjat/module.h>
- #include <udjat/tools/xml.h>
+ #include <udjat/tools/properties.h>
  #include <udjat/module/civetweb.h>
  #include <udjat/tools/string.h>
  #include <private/client.h>
@@ -30,8 +30,8 @@
 	/// @brief Client & server module
 	class Hybrid : public CivetWeb::Module {
 	private:
-		CivetWeb::Client::Factory http{"http","CivetWEB " CIVETWEB_VERSION " HTTP module for " STRINGIZE_VALUE_OF(PRODUCT_NAME)};
-		CivetWeb::Client::Factory https{"https","CivetWEB " CIVETWEB_VERSION " HTTPS module for " STRINGIZE_VALUE_OF(PRODUCT_NAME)};
+		CivetWeb::Client::Factory http{"http","CivetWEB " CIVETWEB_VERSION " HTTP server module for " STRINGIZE_VALUE_OF(PRODUCT_NAME)};
+		CivetWeb::Client::Factory https{"https","CivetWEB " CIVETWEB_VERSION " HTTPS server module for " STRINGIZE_VALUE_OF(PRODUCT_NAME)};
 
 	public:
 		Hybrid(const Udjat::Properties &props) : CivetWeb::Module{props} {
@@ -79,7 +79,6 @@
 		}
 
 	CivetWeb::Module::~Module() {
-		interfaces.clear();
 	}
 
  }

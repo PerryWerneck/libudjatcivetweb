@@ -17,59 +17,59 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
- #include <config.h>
+//  #include <config.h>
 
- #include <udjat/defs.h>
- #include <udjat/tools/http/server.h>
- #include <udjat/tools/http/request.h>
- #include <udjat/tools/http/response.h>
- #include <udjat/tools/logger.h>
- #include <udjat/tools/interface.h>
+//  #include <udjat/defs.h>
+//  #include <udjat/tools/http/server.h>
+//  #include <udjat/tools/http/request.h>
+//  #include <udjat/tools/http/response.h>
+//  #include <udjat/tools/logger.h>
+//  #include <udjat/tools/interface.h>
 
- #include <udjat/tools/logger.h>
- #include <udjat/tools/intl.h>
+//  #include <udjat/tools/logger.h>
+//  #include <udjat/tools/intl.h>
  
- #include <civetweb.h>
+//  #include <civetweb.h>
 
  
- using namespace std;
+//  using namespace std;
 
- namespace Udjat {
+//  namespace Udjat {
 
-	int HTTP::Server::call(const char *name, HTTP::Request &request, HTTP::Response &response) {
+// 	int HTTP::Server::call(const char *name, HTTP::Request &request, HTTP::Response &response) {
 
-		try {
+// 		try {
 
-			//
-			// Check for interfaces
-			//
-			for(auto &intf : interfaces) {
+// 			//
+// 			// Check for interfaces
+// 			//
+// 			for(auto &intf : interfaces) {
 
-				if(strcasecmp(name,intf.name())) {
-					debug("Ignoring '",intf.name(),"'");
-					continue;
-				}
+// 				if(strcasecmp(name,intf.name())) {
+// 					debug("Ignoring '",intf.name(),"'");
+// 					continue;
+// 				}
 
-				debug("Calling interface '",name,"'");
-				intf.call(request,response);
+// 				debug("Calling interface '",name,"'");
+// 				intf.call(request,response);
 
-				return 0;
+// 				return 0;
 
-			}
+// 			}
 
-			// Dont know how to handle, fail as 'not found'.
-			response.failed(ENOENT);
-			return 0;
+// 			// Dont know how to handle, fail as 'not found'.
+// 			response.failed(ENOENT);
+// 			return 0;
 
-		} catch(const exception &e) {
-			response.failed(e);
-		} catch(...) {
-			response.failed(_("Unexpected error"));
-		}
+// 		} catch(const exception &e) {
+// 			response.failed(e);
+// 		} catch(...) {
+// 			response.failed(_("Unexpected error"));
+// 		}
 
-		return 0;
+// 		return 0;
 
-	}
+// 	}
 
- }
+//  }
 

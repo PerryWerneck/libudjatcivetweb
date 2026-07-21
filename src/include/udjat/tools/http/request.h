@@ -41,22 +41,16 @@
 		class UDJAT_API Request : public Udjat::Request {
 		private:
 			/// @brief Request method.
-			const HTTP::Method method = HTTP::Get;
+			const HTTP::Method http_method = HTTP::Get;
 
 		protected:
-
-			/// @brief Parse URL query into named values.
-			/// @param query The query string.
-			void parse_query(const char *query);
 
 			/// @brief Is this request an API call?
 			bool api_call = false;
 
 		public:
 
-			#define TOKEN_USERNAME_LEN 40
-
-			Request(const char *path = "", HTTP::Method m = HTTP::Get) : Udjat::Request{path}, method{m} {
+			Request(const char *path = "", HTTP::Method method = HTTP::Get) : Udjat::Request{path}, http_method{method} {
 			}
 
 			Request(const char *path, const char *method) : Request{path,HTTP::MethodFactory(method)} {
@@ -64,26 +58,33 @@
 
 			virtual ~Request();
 
-			/// @brief Get session cookie name.
-			/// @return The session cookie.
-			Udjat::String session_cookie() const;
+			/// @brief Get connection who originated this request.
+			virtual HTTP::Connection & connection() const = 0;
 
-			inline operator HTTP::Method() const noexcept {
-				return this->method;
-			}
+			/// @brief Get HTTP header for this request.
+			/// @param name Header name
+			/// @param def Default value if not found (nullptr to launch exception if not found);
+			/// @return Header value, or 'def' if not found.
+			virtual const char * header(const char *name, const char *def = "") const noexcept = 0;
 
-			inline HTTP::Method verb() const noexcept {
-				return this->method;
+			inline HTTP::Method method() const noexcept {
+				return http_method;
 			}
 
 			inline bool operator==(HTTP::Method method) const noexcept {
-				return this->method == method;
+				return http_method == method;
+			}
+
+			inline bool operator!=(HTTP::Method method) const noexcept {
+				return http_method != method;
 			}
 
 			bool cached(const Udjat::TimeStamp &timestamp) const override;
 
 			/// @brief The client address.
-			virtual Udjat::String address() const = 0;
+			inline Udjat::String address() const {
+				return connection().address();
+			}
 
 			/// @brief The request URI.
 			virtual Udjat::String uri() const = 0;
@@ -92,9 +93,6 @@
 			MimeType mimetype() const noexcept;
 
 			bool for_each(const std::function<bool(const char *name, const char *value)> &call) const override;
-
-			/// @brief HTTP cookie.
-			virtual Udjat::String cookie(const char *name) const;
 
 			bool get_property(const char *key, Udjat::Value &value) const override;
 

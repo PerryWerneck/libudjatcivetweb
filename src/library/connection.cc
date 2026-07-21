@@ -18,14 +18,10 @@
  */
 
  #include <config.h>
- #include <stdexcept>
- #include <udjat/tools/http/server.h>
  #include <udjat/tools/http/connection.h>
- #include <udjat/tools/http/exception.h>
- #include <udjat/tools/response.h>
- #include <udjat/tools/http/response.h>
- #include <udjat/tools/http/template.h>
- #include <udjat/tools/intl.h>
+ #include <udjat/tools/http/status.h>
+ #include <udjat/tools/logger.h>
+ #include <udjat/tools/template.h>
  #include <sstream>
 
  using namespace std;
@@ -38,122 +34,50 @@
 	HTTP::Connection::~Connection() {
 	}
 
-	int HTTP::Connection::success(const char *mime_type, const char *response, size_t length) const noexcept {
-		return send(mime_type,response,length);
+	bool HTTP::Connection::get_property(const char *key, Udjat::Value &value) const {
+		return false;
 	}
 
-	int HTTP::Connection::send(const std::exception &e) {
-		return send(Response::Status{e});
-	}
+	HTTP::StatusCode HTTP::Connection::send(const HTTP::Status &status, const MimeType mimetype, bool apicall = true) {
 
-	std::shared_ptr<HTTP::Response> HTTP::Connection::ResponseFactory() {
-		return make_shared<HTTP::Response>((MimeType) *this);
-	}
+		stringstream out;
 
-	int HTTP::Connection::failed(int code, const char *message, const char *body) const noexcept {
-		Response::Status status{Response::Failure};
-		status.message = message;
-		status.body = body;
-		return send(code,status);
-	}
+		if(apicall) {
 
-	int HTTP::Connection::send(const Udjat::HTTP::Response::Status &status) const noexcept {
-		return send(
-			HTTP::Exception::code(status.syscode),
-			status			
-		);
-	}
+			// Api call, just serialize the response.
+			status.serialize(out,mimetype);
 
-	int HTTP::Connection::send(int code, const Udjat::HTTP::Response::Status &status) const noexcept {
+		} else if(status.code == HTTP::NoContent || status.code == HTTP::NotModified) {
+			
+			// Send only the http header.
+			return send(status.code,mimetype,"");
 
-		try {
+		} else {
 
-			if(apicall()) {
+			// Send template.
+			Template tmplt{
+				(status.success() ? "success" : "failed"),
+				mimetype
+			};
 
-				// API call, format using response.
-				MimeType mimetype = (MimeType) *this;
-				string text = status.to_string(mimetype);
+			if(!tmplt) {
 
-				return send(
-					code, 
-					std::to_string(mimetype),
-					text.c_str(), 
-					text.size()
-				);
+				// Cant find template, just serialize.
+				status.serialize(out,mimetype);
+
+			} else {
+
+				// Found template, use it.
+				tmplt.apply(out,status);
 
 			}
 
-			// Send HTML formatted page.
-			return send_template(code,"error",[code,&status](const char *key, std::ostream &stream) {
-
-				if(!strcasecmp(key,"message")) {
-					stream << status.message;
-				}
-				
-				if(!strcasecmp(key,"body")) {
-					stream << status.body;
-				}
-
-				if(!strcasecmp(key,"icon")) {
-					stream << "/icon/computer-fail-symbolic";
-				}
-
-			});
-
-		} catch(const std::exception &e) {
-
-			Logger::String{e.what()}.error();
-
-		} catch(...) {
-
-			Logger::String{_("Unexpected error while handling HTTP response")}.error();
-			
 		}
 
-		// Exception, return 500.
-		return 500;
+		return send(status.code,mimetype,out.str().c_str());
 
 	}
 
-	int HTTP::Connection::exec(const std::function<int(HTTP::Connection &connection)> &call) noexcept {
-
-		try {
-
-			return call(*this);
-
-		} catch(const std::exception &e) {
-			return send(e);
-
-		} catch(...) {
-			Response::Status status{Response::Failure};
-			status.message = _("Unexpected error while handling HTTP response");
-			return send(status);
-
-		}
-
-	}
-
-	int HTTP::Connection::send_template(int code, const char *tmplt, const std::function<void(const char *key, std::ostream &writer)> &callback) const {
-
-		MimeType mimetype = (MimeType) *this;
-		Template text{tmplt,mimetype};
-
-		stringstream stream;
-		text.apply(
-			code,
-			stream,
-			callback
-		);
-
-		std::string payload = stream.str(); 
-		return send(
-			code, 
-			std::to_string(mimetype),
-			payload.c_str(),
-			payload.size()
-		);
-
-	}
 
  }
 

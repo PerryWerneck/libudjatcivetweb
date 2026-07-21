@@ -22,6 +22,7 @@
  #include <udjat/tools/civetweb/connection.h>
  #include <udjat/tools/http/request.h>
  #include <udjat/tools/http/mimetype.h>
+ #include <udjat/tools/http/statuscodes.h>
  #include <memory>
  #include <private/request.h>
 
@@ -64,6 +65,152 @@
 
 	std::shared_ptr<HTTP::Request> CivetWeb::Connection::RequestFactory() noexcept {
 		return make_shared<CivetWeb::Request>(conn);
+	}
+
+	HTTP::StatusCode CivetWeb::Connection::logger(HTTP::StatusCode code, const char *message, Logger::Level level) const {
+
+		const struct mg_request_info *request_info = mg_get_request_info(conn);
+
+		Logger::String{
+			request_info->remote_addr," ",
+			request_info->request_method," ",
+			request_info->local_uri," ",
+			code," ",message
+		}.write(level,"httpd");
+
+		return code;
+
+	}
+
+	const char * CivetWeb::Connection::header(const char *name, const char *def) const noexcept {
+
+		const struct mg_request_info *info = mg_get_request_info(conn);
+
+		for(int header = 0; header < info->num_headers; header++) {
+			if(!strcasecmp(info->http_headers[header].name,name)) {
+				return info->http_headers[header].value;
+			}
+		}
+
+		if(def) {
+			return def;
+		}
+
+		throw runtime_error(String{"The required http header '",name,"' is not available"});
+	}
+
+	String CivetWeb::Connection::address() const noexcept {
+
+		const struct mg_request_info *info = mg_get_request_info(conn);
+
+		for(int header = 0; header < info->num_headers; header++) {
+			if(!strcasecmp(info->http_headers[header].name,"X-Forwarded-For")) {
+				Udjat::String proxy{info->http_headers[header].value};
+				auto separator = proxy.find(',');
+				if(separator != string::npos) {
+					proxy.resize(separator);
+				}
+				return proxy;
+			}
+		}
+
+		return info->remote_addr;
+	}
+
+	String CivetWeb::Connection::cookie(const char *name, const char *def) const {
+
+		const char *cookie = mg_get_header(conn, "Cookie");
+
+		if(cookie && *cookie) {
+			char buffer[4096];
+			int length = mg_get_cookie(cookie,name,buffer,4095);
+			if(length > 0) {
+				buffer[length] = 0;
+				return buffer;
+			}
+		}
+
+		if(def) {
+			return def;
+		}
+
+		throw runtime_error(String{"The required http cookie '",name,"' is not available"});
+	}
+
+	HTTP::StatusCode CivetWeb::Connection::redirect(const char *location) const {
+
+		if(Logger::enabled(Logger::Debug)) {
+
+			const struct mg_request_info *request_info = mg_get_request_info(conn);
+			Logger::String{
+				request_info->remote_addr," ",
+				request_info->local_uri," redirected to ",
+				location
+			}.write(Logger::Info,"httpd");
+			
+		}
+
+		mg_response_header_start(conn, (int) HTTP::SeeOther);
+		mg_response_header_add(conn, "Location",location,-1);
+		mg_response_header_add(conn, "Content-Length", "0", -1);
+
+		// TODO: Set authentication cookie
+
+		mg_response_header_send(conn);
+
+		return HTTP::SeeOther;
+	}
+
+	HTTP::StatusCode CivetWeb::Connection::send(const char *filename, time_t max_age, const MimeType mimetype = MimeType::none) noexcept {
+
+		if(Logger::enabled(Logger::Debug)) {
+
+			const struct mg_request_info *request_info = mg_get_request_info(conn);
+			Logger::String{
+				request_info->remote_addr," ",
+				request_info->local_uri," Sending static file ",
+				filename
+			}.write(Logger::Info,"httpd");
+			
+		}
+
+		throw runtime_error("Incomplete");
+
+	}
+
+	HTTP::StatusCode CivetWeb::Connection::send(const HTTP::Status &status, const MimeType mimetype, const std::string &payload) noexcept {
+
+		if(Logger::enabled(Logger::Debug)) {
+
+			const struct mg_request_info *request_info = mg_get_request_info(conn);
+			Logger::String{
+				request_info->remote_addr," ",
+				request_info->local_uri," Sending response ",
+				status.code
+			}.write(Logger::Info,"httpd");
+			
+		}
+
+		size_t length = payload.size();
+		if(status.code == HTTP::NoContent || status.code == HTTP::NotModified) {
+			length = 0;
+		}
+
+		mg_response_header_start(conn, status.code);
+		mg_response_header_add(conn, "Content-Type",std::to_string(mimetype),-1);
+		mg_response_header_add(conn, "Content-Length", std::to_string(length).c_str(), -1);
+		mg_response_header_send(conn);
+
+		// TODO: Send authentication cookie
+		// TODO: Send cache header based on code (200=standard cache, others=no cache)
+
+		// Send response.
+		if(length) {
+			mg_write(conn, payload.c_str(), length);
+		}
+
+		return status.code;
+
 	}
 
 	// int CivetWeb::Connection::send(int code, const char *mime_type, const char *text, size_t length) const noexcept {

@@ -17,66 +17,66 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
- #include <config.h>
- #include <udjat/defs.h>
- #include <udjat/tools/string.h>
- #include <udjat/tools/value.h>
- #include <udjat/tools/http/server.h>
- #include <udjat/tools/logger.h>
- #include <udjat/tools/interface.h>
- #include <udjat/tools/intl.h>
- #include <udjat/tools/http/request.h>
- #include <udjat/tools/http/response.h>
- #include <udjat/tools/properties.h>
- #include <civetweb.h>
- #include <private/request.h>
- #include <stdexcept>
+//  #include <config.h>
+//  #include <udjat/defs.h>
+//  #include <udjat/tools/string.h>
+//  #include <udjat/tools/value.h>
+//  #include <udjat/tools/http/server.h>
+//  #include <udjat/tools/logger.h>
+//  #include <udjat/tools/interface.h>
+//  #include <udjat/tools/intl.h>
+//  #include <udjat/tools/http/request.h>
+//  #include <udjat/tools/http/response.h>
+//  #include <udjat/tools/properties.h>
+//  #include <civetweb.h>
+//  #include <private/request.h>
+//  #include <stdexcept>
 
- using namespace Udjat;
- using namespace std;
+//  using namespace Udjat;
+//  using namespace std;
 
- HTTP::Server::Interface::Interface(const Properties &props, const char *p) : Udjat::Interface{props}, path{p} {
-	if(path[0] == '/' || (strlen(path)>1 && path[strlen(path)-1] == '/')) {
-		throw runtime_error(String{"Path '",path,"' is invalid, cant start or end with '/'"});
-	}
- }
+//  HTTP::Server::Interface::Interface(const Properties &props, const char *p) : Udjat::Interface{props}, path{p} {
+// 	if(path[0] == '/' || (strlen(path)>1 && path[strlen(path)-1] == '/')) {
+// 		throw runtime_error(String{"Path '",path,"' is invalid, cant start or end with '/'"});
+// 	}
+//  }
 
- HTTP::Server::Interface::~Interface() {
- }
+//  HTTP::Server::Interface::~Interface() {
+//  }
 
- void HTTP::Server::Interface::call(HTTP::Request &request, HTTP::Response &response) {
+//  void HTTP::Server::Interface::call(HTTP::Request &request, HTTP::Response &response) {
 
-	if(empty()) {
+// 	if(empty()) {
 
-		Logger::String{"Empty interface, using default handler"}.info(c_str());
-		Udjat::Interface::Handler{c_str()}.call(request,response);
+// 		Logger::String{"Empty interface, using default handler"}.info(c_str());
+// 		Udjat::Interface::Handler{c_str()}.call(request,response);
 
-	} else {
+// 	} else {
 
-		for(auto &handler : *this) {
-			if(handler == request) {
-				handler.call(request,response);
-			}
-#ifdef DEBUG
-			else {
-				debug("Ignoring handler '",handler.name(),"'");
-			}
-#endif 
-		}
+// 		for(auto &handler : *this) {
+// 			if(handler == request) {
+// 				handler.call(request,response);
+// 			}
+// #ifdef DEBUG
+// 			else {
+// 				debug("Ignoring handler '",handler.name(),"'");
+// 			}
+// #endif 
+// 		}
 
-	}
+// 	}
 
- }
+//  }
 
- Udjat::Interface::Handler & HTTP::Server::Interface::push_back(const Properties &props) {
-	return emplace_back(props);
- }
+//  Udjat::Interface::Handler & HTTP::Server::Interface::push_back(const Properties &props) {
+// 	return emplace_back(props);
+//  }
 
- bool HTTP::Server::Interface::push_back(const Properties &props, std::shared_ptr<Action> action) {
-	HTTP::Method method{HTTP::MethodFactory(props)};
-	Handler &handler = emplace_back(method,std::to_string(method));
-	handler.push_back(action);
-	debug("Adding action '",handler.name(),"' on interface '",name(),"'");
-	return true;
- }
+//  bool HTTP::Server::Interface::push_back(const Properties &props, std::shared_ptr<Action> action) {
+// 	HTTP::Method method{HTTP::MethodFactory(props)};
+// 	Handler &handler = emplace_back(method,std::to_string(method));
+// 	handler.push_back(action);
+// 	debug("Adding action '",handler.name(),"' on interface '",name(),"'");
+// 	return true;
+//  }
 

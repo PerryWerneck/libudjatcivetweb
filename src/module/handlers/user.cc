@@ -34,15 +34,12 @@
 
  #include <config.h>
  #include <udjat/defs.h>
- #include <private/module.h>
  #include <udjat/tools/logger.h>
  #include <udjat/tools/intl.h>
- #include <udjat/tools/http/handler.h>
- #include <udjat/tools/http/request.h>
- #include <private/request.h>
  #include <private/oauth.h>
  #include <udjat/authentication.h>
  #include <udjat/tools/configuration.h>
+ #include <private/request.h>
 
  #ifdef HAVE_UNISTD_H
 	#include <unistd.h>
@@ -61,8 +58,8 @@
 		return CivetWeb::OAuthContext(conn).authenticate();
 	}
 
-	debug("User is authenticated with level ",std::to_string(request.authentication()->level()),"(",request.authentication()->level(),")");
+	debug("User is authenticated with level ",std::to_string(request.authentication()->role()),"(",request.authentication()->role(),")");
 
+	return HTTP::SystemError;
 
-	return 500;
  }

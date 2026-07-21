@@ -45,25 +45,8 @@
 
 	namespace CivetWeb {
 
-		Request::Request(struct mg_connection *c) {
-
-			const char *reqpath = pop(mg_get_request_info(c)->local_uri, apiver);
-			if(apiver) {
-				api_call = true;
-				reset(reqpath);
-			}
-
-			debug("request_uri='",mg_get_request_info(c)->request_uri,"'");
-			debug("local_uri_raw='",mg_get_request_info(c)->local_uri_raw,"'");
-			debug("local_uri='",mg_get_request_info(c)->local_uri,"'");
-
-// #ifdef DEBUG
-// 			{
-// 				for(int header = 0; header < info->num_headers; header++) {
-// 					debug("header(",info->http_headers[header].name,")='",info->http_headers[header].value,"'");
-// 				}
-// 			}
-// #endif // DEBUG
+		Request::Request(CivetWeb::Connection &c) 
+			: HTTP::Request{c.local_uri(),c.method()}, conn{c} {
 
 			// https://github.com/civetweb/civetweb/blob/master/examples/embedded_c/embedded_c.c
 			if(!strcasecmp(header("Content-Type"),"application/x-www-form-urlencoded")) {
@@ -109,121 +92,63 @@
 
 			}
 
-			parse_query(info->query_string);
+			// parse_query(conn.query_string());
 			
-			// Check for authentication
-			try {
+			// // Check for authentication
+			// try {
 
-				auto cookie = session_cookie();
-				debug("Authentication cookie: '",cookie,"'");
-				this->auth = make_shared<HTTP::Authentication>(cookie.c_str());
+			// 	auto cookie = session_cookie();
+			// 	debug("Authentication cookie: '",cookie,"'");
+			// 	auth = cookie.c_str();
 
-			} catch(const std::exception &e) {
+			// } catch(const std::exception &e) {
 
-				// Authentication failed, trace the message and clear it.
-				debug("*** Ignoring authentication cookie ***");
+			// 	// Authentication failed, trace the message and clear it.
+			// 	debug("*** Ignoring authentication cookie ***");
 
-				const struct mg_request_info *request_info = mg_get_request_info(conn);
+			// 	conn.error(HTTP::SystemError,e.what());
+			// 	this.auth.reset(); // Just in case.
 
-				Logger::String{
-					request_info->remote_addr," ",
-					request_info->request_method," ",
-					request_info->local_uri," ",
-					e.what()
-				}.error();
-				
-				this->auth = make_shared<HTTP::Authentication>();
-				this->auth.reset(); // Just in case.
-
-			}
+			// }
 
 		}
 
-		Request::Request(struct mg_connection *c, const char *path, unsigned int ver) : Request{c} {
-
-			apiver = ver;
-			api_call = true;
-			reset(path);
-
-		}
-
- 		const char * Request::query(const char *) const {
-			return info->query_string;
-		}
+ 		// const char * Request::query(const char *) const {
+		// 	return conn.query_string();
+		// }
 
 		Udjat::String Request::uri() const {
-			return mg_get_request_info(conn)->local_uri;
+			return conn.local_uri();
 		}
 
-		bool Request::getProperty(const char *key, std::string &value) const {
+		bool Request::get_property(const char *key, Udjat::Value &value) const {
 
 			if(!strcasecmp(key,"redirect-uri")) {
 				Udjat::String uri{
-					Config::Value<string>{"authentication","redirect-uri",""}.c_str(),
-					
+					Config::Value<string>{"authentication","redirect-uri",""}.c_str(),	
 				};
 				value = uri.escape();
 				return true;
 			}
 
-			return HTTP::Request::getProperty(key,value);
-		}
-
-		String Request::address() const {
-
-			for(int header = 0; header < info->num_headers; header++) {
-				if(!strcasecmp(info->http_headers[header].name,"X-Forwarded-For")) {
-					Udjat::String proxy{info->http_headers[header].value};
-					auto separator = proxy.find(',');
-					if(separator != string::npos) {
-						proxy.resize(separator);
-					}
-					return proxy;
-				}
-			}
-
-			return info->remote_addr;
+			return HTTP::Request::get_property(key,value);
 		}
 
 		String Request::cookie(const char *name) const {
-
-			const char *cookie = mg_get_header(conn, "Cookie");
-
-			if(cookie && *cookie) {
-				char buffer[4096];
-				int length = mg_get_cookie(cookie,name,buffer,4095);
-				if(length > 0) {
-					buffer[length] = 0;
-					return buffer;
-				}
-			}
-
-			// Return default response.
-			return HTTP::Request::cookie(name);
+			return conn.cookie(name);
 		}
 
-		const char * Request::header(const char *name) const noexcept {
+		// int Request::redirect(const char *location) const {
 
-			for(int header = 0; header < info->num_headers; header++) {
-				if(!strcasecmp(info->http_headers[header].name,name)) {
-					return info->http_headers[header].value;
-				}
-			}
+		// 	debug("Redirecting to '",location,"'");
 
-			return "";
-		}
+		// 	mg_response_header_start(conn, 303);
+		// 	mg_response_header_add(conn, "Location",location,-1);
+		// 	mg_response_header_add(conn, "Content-Length", "0", -1);
+		// 	mg_response_header_send(conn);
 
-		int Request::redirect(const char *location) const {
-
-			debug("Redirecting to '",location,"'");
-
-			mg_response_header_start(conn, 303);
-			mg_response_header_add(conn, "Location",location,-1);
-			mg_response_header_add(conn, "Content-Length", "0", -1);
-			mg_response_header_send(conn);
-
-			return 303;
-		}
+		// 	return 303;
+		// }
 
 // 		int Request::send(int code, const char *text) const {
 

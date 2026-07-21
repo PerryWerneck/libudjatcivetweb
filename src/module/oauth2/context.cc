@@ -32,6 +32,7 @@
  #include <udjat/tools/configuration.h>
  #include <udjat/tools/memory.h>
  #include <udjat/tools/url.h>
+ #include <udjat/tools/value.h>
  #include <string>
  #include <private/client.h>
  #include <udjat/tools/intl.h>
@@ -88,9 +89,9 @@
 	CivetWeb::OAuthContext::~OAuthContext() {
 	}
 
-	bool CivetWeb::OAuthContext::getProperty(const char *key, std::string &value) const {
+	bool CivetWeb::OAuthContext::get_property(const char *key, Udjat::Value &value) const {
 
-		if(super::getProperty(key,value)) {
+		if(super::get_property(key,value)) {
 			return true;
 		}
 

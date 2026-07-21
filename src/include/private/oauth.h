@@ -44,7 +44,7 @@
 			
 			~OAuthContext();
 
-			bool getProperty(const char *key, std::string &value) const override;
+			bool get_property(const char *key, Udjat::Value &value) const override;
 
 			int send_html_response(int code, const char *text) const override;
 

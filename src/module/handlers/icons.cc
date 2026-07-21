@@ -25,6 +25,6 @@
 
  using namespace Udjat;
 
- int CivetWeb::Service::favicon_handler(struct mg_connection *conn, CivetWeb::Service *) noexcept {
+ int CivetWeb::Service::icon_handler(struct mg_connection *conn, CivetWeb::Service *) noexcept {
 	return (int) CivetWeb::Connection{conn}.icon(mg_get_request_info(conn)->local_uri);
  }
