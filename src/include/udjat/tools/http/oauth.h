@@ -17,15 +17,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
- /**
-  * @brief Dclare OAuth2 objects.
-  */
-
  #pragma once
 
  #include <udjat/defs.h>
  #include <udjat/tools/string.h>
- #include <udjat/tools/abstract/object.h>
+ #include <udjat/tools/object.h>
  #include <udjat/tools/http/authentication.h>
  
  namespace Udjat {
@@ -89,7 +85,7 @@
 			Context(const char *path = nullptr);
 			virtual ~Context();
 
-			bool getProperty(const char *key, std::string &value) const override;
+			bool get_property(const char *key, Udjat::Value &value) const override;
 
 			inline bool empty() const noexcept {
 				return path.empty();

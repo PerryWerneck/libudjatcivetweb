@@ -36,9 +36,9 @@
  #include <udjat/tools/http/oauth.h>
  #include <udjat/tools/intl.h>
  #include <udjat/tools/configuration.h>
- #include <udjat/tools/http/template.h>
  #include <udjat/tools/http/method.h>
  #include <udjat/tools/url.h>
+ #include <udjat/tools/value.h>
  #include <private/client.h>
  #include <udjat/tools/memory.h>
 
@@ -118,17 +118,7 @@
 		return rc;
 	}
 
-	bool OAuth::Context::getProperty(const char *key, std::string &value) const {
-
-		// if(!strcasecmp(key,"message")) {
-		// 	value = this->status.message;
-		// 	return true;
-		// }
-
-		// if(!strcasecmp(key,"body")) {
-		// 	value = this->status.body;
-		// 	return true;
-		// }
+	bool OAuth::Context::get_property(const char *key, Udjat::Value &value) const {
 
 		if(!strcasecmp(key,"authentication-state")) {
 
@@ -146,13 +136,13 @@
 			memcpy((buffer+sizeof(uint16_t)),uri.c_str(),uri.size());
 			buffer[szBuffer] = 0;			
 
-			value = encrypt(buffer,szBuffer).escape();
+			value = encrypt(buffer,szBuffer).escape().c_str();
 
 			return true;
 		}
 
 		if(!strcasecmp(key,"redirect-uri")) {
-			value = uri;
+			value = uri.c_str();
 			return true;
 		}
 

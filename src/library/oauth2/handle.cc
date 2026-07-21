@@ -36,7 +36,6 @@
  #include <udjat/tools/http/oauth.h>
  #include <udjat/tools/intl.h>
  #include <udjat/tools/configuration.h>
- #include <udjat/tools/http/template.h>
  #include <udjat/tools/http/method.h>
  #include <udjat/tools/url.h>
  #include <private/client.h>
@@ -92,7 +91,6 @@
 		}
 
 	}
-
 
  }
 

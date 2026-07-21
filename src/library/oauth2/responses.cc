@@ -36,11 +36,12 @@
  #include <udjat/tools/http/oauth.h>
  #include <udjat/tools/intl.h>
  #include <udjat/tools/configuration.h>
- #include <udjat/tools/http/template.h>
+ #include <udjat/tools/template.h>
  #include <udjat/tools/http/method.h>
  #include <udjat/tools/url.h>
  #include <private/client.h>
  #include <udjat/tools/memory.h>
+ #include <udjat/tools/value.h>
 
  #if defined(HAVE_JSON_C)
 	#include <json.h>
@@ -55,37 +56,45 @@
 
 		debug(__FUNCTION__,"(",code,",'",message,"')");
 		
-		Udjat::HTTP::Template text{"error",Udjat::MimeType::html};
+		Udjat::Template tmplt{"error",Udjat::MimeType::html};
 
-		text.expand([this,code,message,body](const char *key, std::string &value) {
+		auto text = tmplt.to_string([this,code,message,body](const char *key, std::ostream &stream) {
 
 			if(!strcasecmp(key,"code")) {
 				Logger::String{"Using obsolete '%{code}' on template"}.warning();
-				value = std::to_string(code);
+				stream << code;
 				return true;
 			}
 
 			if(!strcasecmp(key,"error-code")) {
-				value = std::to_string(code);
+				stream << code;
 				return true;
 			}
 
 			if(!strcasecmp(key,"message")) {
-				value = message;
+				stream << message;
 				return true;
 			}
 			
 			if(!strcasecmp(key,"body")) {
-				value = body;
+				stream << body;
 				return true;
 			}
 
 			if(!strcasecmp(key,"icon")) {
-				value = "/icon/computer-fail-symbolic";
+				stream << "/icon/computer-fail-symbolic";
 				return true;
 			}
 
-			return this->getProperty(key,value);
+			{
+				Udjat::Value val;
+				if(this->get_property(key,val)) {
+					stream << val;
+					return true;
+				}
+			}
+
+			return false;
 
 		});
 
@@ -93,30 +102,38 @@
 		
 	}
 
-	int OAuth::Context::send_template(int code, const char *action, const char *tmplt) {
+	int OAuth::Context::send_template(int code, const char *action, const char *name) {
 
-		Udjat::HTTP::Template text{tmplt,Udjat::MimeType::html};
+		Udjat::Template tmplt{name,Udjat::MimeType::html};
 
 		// Expand request arguments.
-		text.expand([this,code,action](const char *key, std::string &value) {
+		auto text = tmplt.to_string([this,code,action](const char *key, std::ostream &stream) {
 
 			if(!strcasecmp(key,"code")) {
 				Logger::String{"Using obsolete '%{code}' on template"}.warning();
-				value = std::to_string(code);
+				stream << code;
 				return true;
 			}
 
 			if(!strcasecmp(key,"error-code")) {
-				value = std::to_string(code);
+				stream << code;
 				return true;
 			}
 
 			if(!strcasecmp(key,"action")) {
-				value = String{"/oauth2/",action};
+				stream << String{"/oauth2/",action}.c_str();
 				return true;
 			}
 
-			return this->getProperty(key,value);
+			{
+				Udjat::Value v;
+				if(this->get_property(key,v)) {
+					stream << v;
+					return true;
+				}
+			}
+
+			return false;
 
 		});
 

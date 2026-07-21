@@ -38,7 +38,6 @@
 		class UDJAT_API Service : public Udjat::Service {
 		private:
 
-			static Service *instance;
 			static int request_handler(struct mg_connection *conn, CivetWeb::Service *srvc) noexcept;
 
 			/// @brief Handle /icon/ requests
