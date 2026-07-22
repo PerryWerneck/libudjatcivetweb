@@ -254,7 +254,7 @@ if host_machine.system() == 'windows'
   )
 
   # https://mesonbuild.com/Reference-manual_functions.html#shared_library
-  module = shared_library(
+  shared_library(
     'civetweb', 
     config_src + module_src + [ 'src/module/init.cc' ],
     name_prefix: 'udjat-module-',
@@ -284,7 +284,7 @@ else
   )
 
   # https://mesonbuild.com/Reference-manual_functions.html#shared_library
-  module = shared_library(
+  shared_library(
     'civetweb', 
     config_src + module_src + [ 'src/module/init.cc' ],
     name_prefix: 'udjat-module-',
