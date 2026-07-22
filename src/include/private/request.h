@@ -48,6 +48,8 @@
 
 			const char * header(const char *name, const char *def = nullptr) const noexcept override;
 
+			HTTP::Connection & connection() const override;
+
 			/// @brief The request URI.
 			Udjat::String uri() const override;
 

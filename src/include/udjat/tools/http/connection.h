@@ -51,6 +51,10 @@
 				return auth;
 			}
 
+			inline bool allow(const Authentication::Role role = Authentication::None) const {
+				return auth.allow(role);
+			}
+
 			/// @brief Send file to client.
 			/// @param mimetype The mime-type for http header (MimeType::None to get it from filename).
 			/// @param max_age The max-age value to http headers (0 to no-cache).

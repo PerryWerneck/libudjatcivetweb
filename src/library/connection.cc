@@ -38,7 +38,7 @@
 		return false;
 	}
 
-	HTTP::StatusCode HTTP::Connection::send(const HTTP::Status &status, bool apicall) {
+	HTTP::StatusCode HTTP::Connection::send(const HTTP::Status &status, bool apicall) noexcept {
 
 		stringstream out;
 
@@ -70,6 +70,16 @@
 		}
 
 		return send(status,out.str().c_str());
+
+	}
+
+	HTTP::StatusCode HTTP::Connection::logger(HTTP::StatusCode code, const char *message, Logger::Level level) const {
+
+		Logger::String{
+			code," ",message
+		}.write(level,"httpd");
+
+		return code;
 
 	}
 

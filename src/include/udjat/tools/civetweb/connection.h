@@ -36,8 +36,6 @@
 		private:
 			struct mg_connection *conn;
 
-			void response_header_add_authentication() const;
-
 		public:
 			Connection(struct mg_connection *c);
 
@@ -71,8 +69,8 @@
 			HTTP::StatusCode redirect(const char *location) const override;
 			HTTP::StatusCode logger(HTTP::StatusCode code, const char *message, Logger::Level level) const override;
 			
-			inline HTTP::StatusCode send(const HTTP::Status &status, const MimeType mimetype, bool apicall = true) noexcept {
-				return HTTP::Connection::send(status,mimetype,apicall);
+			inline HTTP::StatusCode send(const HTTP::Status &status, bool apicall = true) noexcept {
+				return HTTP::Connection::send(status,apicall);
 			}
 
 		};
@@ -81,33 +79,3 @@
 
  }
 
- /// @brief Handler for icon requests.
- int defaultWebHandler(struct mg_connection *conn, void *cbdata);
-
- /// @brief Handler for icon requests.
- int iconWebHandler(struct mg_connection *conn, void *cbdata);
-
- /// @brief Handler for product requests.
- int productWebHandler(struct mg_connection *conn, void *cbdata) noexcept;
-
- /// @brief Handler for image requests.
- int imageWebHandler(struct mg_connection *conn, void *cbdata);
-
- /// @brief Authentication handler.
- int oauthWebHandler(struct mg_connection *conn, void *cbdata);
-
- /// @brief User information handler.
- int userWebHandler(struct mg_connection *conn, void *cbdata);
-
- /// @brief Handler for '/' request.
- // int rootWebHandler(struct mg_connection *conn, void *cbdata) noexcept;
-
- /// @brief Handler for '/favicon.ico' request.
- int faviconWebHandler(struct mg_connection *conn, void *cbdata) noexcept;
-
- /// @brief Get mime-type from 'Accept' or 'Content-Type' header.
- /// @param conn Civetweb connection data.
- /// @param def The mimetype to use if connection doesnt set one.
- Udjat::MimeType MimeTypeFactory(struct mg_connection *conn, const Udjat::MimeType def = Udjat::MimeType::json) noexcept;
-
- 

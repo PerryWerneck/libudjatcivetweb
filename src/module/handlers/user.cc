@@ -52,14 +52,14 @@
 
 	debug("------------------ ",__FUNCTION__," ------------------");
 
-	CivetWeb::Request request{conn};
+	CivetWeb::Connection connection{conn};
 
-	if(!request.allow(Authentication::Guest)) {
+	if(!connection.allow(Authentication::Guest)) {
 		return CivetWeb::OAuthContext(conn).authenticate();
 	}
 
-	debug("User is authenticated with level ",std::to_string(request.authentication()->role()),"(",request.authentication()->role(),")");
-
+	debug("User is authenticated");
+	
 	return HTTP::SystemError;
 
  }

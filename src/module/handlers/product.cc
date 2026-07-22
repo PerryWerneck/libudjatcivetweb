@@ -50,19 +50,19 @@
 				client.local_uri()
 			};
 
-			return (int) client.send_file(
-				MimeTypeFactory(filename.c_str()),
-				Config::Value<unsigned int>{"theme","file-max-age",604800},
-				filename.c_str()
+			return (int) client.send(
+				filename.c_str(),
+				(time_t) Config::Value<unsigned int>{"theme","file-max-age",3600},
+				MimeTypeFactory(filename.c_str())
 			);
 
 		} catch(const std::exception &e) {
 
-			return (int) client.send_response(e,_("Unexpected error"));
+			return (int) client.send(e,_("Unexpected error"));
 
 		} catch(...) {
 
-			return (int) client.send_response(HTTP::SystemError,_("Unexpected error"));
+			return (int) client.send(HTTP::SystemError,_("Unexpected error"));
 
 		}
 

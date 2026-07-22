@@ -63,7 +63,4 @@
  /// @param def The mimetype to use if connection doesnt set one.
  UDJAT_PRIVATE Udjat::MimeType MimeTypeFactory(struct mg_connection *conn, const Udjat::MimeType def = Udjat::MimeType::json) noexcept;
 
- /// @brief Send response.
- UDJAT_PRIVATE int send(struct mg_connection *conn, const Udjat::HTTP::Response &response) noexcept;
-
  
