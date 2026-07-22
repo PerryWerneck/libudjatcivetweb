@@ -196,7 +196,7 @@
 
 		for(const auto &cfg : cfgvals) {
 			if(!strcasecmp(key,cfg.key)) {
-				value = Config::Value<string>{"authentication",key,cfg.def};
+				value = Config::Value<string>{"authentication",key,cfg.def}.c_str();
 				debug(key,"='",value.c_str(),"'");
 				if(value.empty()) {
 					Logger::String{"Missing required value '",key,"' in authentication engine configuration"}.error();

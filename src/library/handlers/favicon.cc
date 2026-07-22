@@ -29,6 +29,7 @@
  #include <udjat/tools/intl.h>
  #include <udjat/tools/logger.h>
  #include <udjat/tools/configuration.h>
+ #include <udjat/tools/http/status.h>
  #include <udjat/tools/http/icon.h>
  #include <udjat/tools/http/connection.h>
  #include <fcntl.h>
@@ -45,17 +46,17 @@
 
 	HTTP::StatusCode HTTP::Connection::favicon() noexcept {
 
-		Config::Value<unsigned int> max_age{"theme","icon-max-age",604800};
+		Config::Value<time_t> maxage{"theme","icon-max-age",604800};
 #ifdef _WIN32
 		Config::Value<string> filename{"theme","favicon","icons/favicon.ico"};
 #else
 		Config::Value<string> filename{"theme","favicon","/usr/share/pixmaps/distribution-logos/favicon.ico"};
 #endif // _WIN32
 
-		return send_file(
-			MimeType::icon,
-			(time_t) max_age,
-			filename.c_str()
+		return send(
+			filename.c_str(), 
+			(time_t) maxage, 
+			MimeType::icon
 		);
 
 	}

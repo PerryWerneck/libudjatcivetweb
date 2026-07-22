@@ -24,10 +24,12 @@
  #include <udjat/tools/intl.h>
  #include <udjat/tools/http/connection.h>
  #include <udjat/tools/http/exception.h>
+ #include <udjat/tools/http/request.h>
  #include <udjat/tools/interface.h>
  #include <udjat/tools/file/path.h>
  #include <udjat/tools/configuration.h>
  #include <udjat/tools/application.h>
+ #include <udjat/tools/http/status.h>
  #include <stdexcept>
 
  using namespace std;
@@ -35,11 +37,18 @@
  namespace Udjat {
 
 	/// @brief Run method, handle exceptions.
-	HTTP::StatusCode HTTP::Connection::handle() noexcept {
+	HTTP::StatusCode HTTP::Connection::handle(HTTP::Request &request) noexcept {
 
 
 		
-		return HTTP::SystemError;
+		// Send 404 response
+		return send(
+			HTTP::Status{
+				HTTP::NotFound,
+				request.mimetype()
+			},
+			request.apicall()
+		);
 
 	}
 

@@ -42,7 +42,7 @@
 
 	HTTP::StatusCode HTTP::Connection::icon(const char *name) noexcept {
 
-		Config::Value<unsigned int> max_age{"theme","image-max-age",604800};
+		Config::Value<unsigned int> maxage{"theme","image-max-age",604800};
 
 		{
 			const char *ptr = strrchr(name,'/');
@@ -53,10 +53,10 @@
 
 		Udjat::HTTP::Icon filename = Udjat::HTTP::Icon::getInstance(name);
 
-		return send_file(
-			MimeType::icon,
-			(time_t) max_age,
-			filename.c_str()
+		return send(
+			filename.c_str(), 
+			(time_t) maxage, 
+			MimeType::icon
 		);
 
 	}

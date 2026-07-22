@@ -45,7 +45,7 @@
 		}
 
 		if(!strcasecmp(key,"client-id")) {
-			value = Config::Value<string>{"authentication","client-id"};
+			value = Config::Value<string>{"authentication","client-id"}.c_str();
 			if(value.empty()) {
 				throw logic_error("The required client-id for authentication is empty");
 			}

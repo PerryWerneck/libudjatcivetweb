@@ -38,27 +38,27 @@
 		return false;
 	}
 
-	HTTP::StatusCode HTTP::Connection::send(const HTTP::Status &status, time_t maxage, const MimeType mimetype, bool apicall) {
+	HTTP::StatusCode HTTP::Connection::send(const HTTP::Status &status, bool apicall) {
 
 		stringstream out;
 
 		if(apicall) {
 
 			// Api call, just serialize the response.
-			status.serialize(out,mimetype);
+			status.serialize(out);
 
 		} else if(status.code != HTTP::NoContent && status.code != HTTP::NotModified) {
 
 			// Load template
 			Template tmplt{
 				(status.success() ? "success" : "failed"),
-				mimetype
+				status.mimetype
 			};
 
 			if(!tmplt) {
 
 				// Cant find template, just serialize.
-				status.serialize(out,mimetype);
+				status.serialize(out);
 
 			} else {
 
@@ -69,7 +69,7 @@
 
 		}
 
-		return send(status,maxage,mimetype,out.str().c_str());
+		return send(status,out.str().c_str());
 
 	}
 

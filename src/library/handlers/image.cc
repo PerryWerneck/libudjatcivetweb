@@ -42,7 +42,7 @@
 
 	HTTP::StatusCode HTTP::Connection::image(const char *name) noexcept {
 
-		Config::Value<unsigned int> max_age{"theme","image-max-age",604800};
+		Config::Value<unsigned int> maxage{"theme","image-max-age",604800};
 
 		{
 			if(*name == '/') {
@@ -56,10 +56,10 @@
 
 		Udjat::HTTP::Image filename{name};
 
-		return send_file(
-			MimeTypeFactory(filename.c_str(),MimeType::image),
-			(time_t) max_age,
-			filename.c_str()
+		return send(
+			filename.c_str(), 
+			(time_t) maxage, 
+			MimeTypeFactory(filename.c_str(),MimeType::image)
 		);
 
 	}

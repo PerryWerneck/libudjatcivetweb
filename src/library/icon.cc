@@ -51,7 +51,7 @@
 				auto search = cache.find(string{name});
 				if (search != cache.end()) {
 					// Found it.
-					debug("Found cached '",search->second,"'");
+					debug("Found cached '",search->second.c_str(),"'");
 					return search->second;
 				}
 
@@ -60,7 +60,7 @@
 				auto inserted = cache.emplace(make_pair(std::string{name},Icon(name)));
 
 				if(!inserted.first->second.empty()) {
-					Logger::String{"Caching ",inserted.first->second," as ",name}.trace();
+					Logger::String{"Caching ",inserted.first->second.c_str()," as ",name}.trace();
 				}
 				return inserted.first->second;
 

@@ -20,7 +20,6 @@
  #pragma once
 
  #include <udjat/defs.h>
- #include <udjat/tools/http/connection.h>
  #include <udjat/tools/http/statuscodes.h>
  #include <udjat/tools/http/status.h>
  #include <udjat/tools/http/mimetype.h>
@@ -43,7 +42,7 @@
 			HTTP::Authentication auth;
 
 		public:
-			Connection() = default;
+			Connection();
 			virtual ~Connection();
 
 			/// @brief Get authentication for this connection.
@@ -63,19 +62,19 @@
 			/// @param status The status for http header.
 			/// @param payload The payload.
 			/// @return The response code.
-			virtual HTTP::StatusCode send(const HTTP::Status &status, const MimeType mimetype, const char *payload) noexcept = 0;
+			virtual HTTP::StatusCode send(const HTTP::Status &status, const char *payload) noexcept = 0;
 
 			/// @brief Send response to client.
 			/// @param status The response status.
 			/// @param apicall True if the request is an api call.
 			/// @return The response code.
-			HTTP::StatusCode send(const HTTP::Status &status, const MimeType mimetype, bool apicall = true) noexcept;
+			HTTP::StatusCode send(const HTTP::Status &status, bool apicall = true) noexcept;
 
 			/// @brief Send success response to client.
 			/// @param payload The response payload
 			/// @return The response code (200)
 			inline HTTP::StatusCode send(const MimeType mimetype, const char *payload) noexcept {
-				return send(HTTP::Status{HTTP::Ok},mimetype,payload);
+				return send(HTTP::Status{HTTP::Ok,mimetype},payload);
 			}
 
 			/// @brief Send a redirect response.

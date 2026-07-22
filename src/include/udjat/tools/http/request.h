@@ -98,8 +98,6 @@
 
 			bool for_each(const std::function<bool(const char *name, const char *value)> &call) const override;
 
-			bool get_property(const char *key, Udjat::Value &value) const override;
-
 		};
 
 

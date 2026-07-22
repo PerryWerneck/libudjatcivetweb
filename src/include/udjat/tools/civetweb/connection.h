@@ -67,7 +67,7 @@
 
 			String address() const noexcept override;
 			HTTP::StatusCode send(const char *filename, time_t maxage, const MimeType mimetype = MimeType::none) noexcept override;
-			HTTP::StatusCode send(const HTTP::Status &status, const MimeType mimetype, const char *payload) noexcept override;
+			HTTP::StatusCode send(const HTTP::Status &status, const char *payload) noexcept override;
 			HTTP::StatusCode redirect(const char *location) const override;
 			HTTP::StatusCode logger(HTTP::StatusCode code, const char *message, Logger::Level level) const override;
 			
