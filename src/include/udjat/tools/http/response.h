@@ -20,6 +20,7 @@
  #pragma once
  #include <udjat/defs.h>
  #include <udjat/tools/response.h>
+ #include <udjat/tools/http/connection.h>
 
  namespace Udjat {
 
@@ -29,6 +30,9 @@
 		public:
 			Response(Udjat::MimeType mimetype) : Udjat::Response{mimetype} {
 			}
+
+			/// @brief Get target connection.
+			virtual HTTP::Connection & connection() const = 0;
 
 			void state(const char *object_name,const char *value, const char *message) override;
 

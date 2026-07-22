@@ -28,9 +28,6 @@
 	namespace HTTP {
 
 		class UDJAT_API Authentication : public Udjat::Authentication {
-			protected:
-				void token(const char *b64);
-
 			public:
 
 				enum Status : uint8_t {
@@ -41,6 +38,10 @@
 				/// @brief Build an authentication from cookie.
 				/// @param b64 Encrypted token.
 				Authentication(const char *b64 = nullptr);
+
+				/// @brief Assign new token value.
+				/// @param b64 Encrypted token.
+				void token(const char *b64);
 
 				/// @brief Get encrypted token.
 				/// @return String with base 64 encrypted token.
@@ -60,6 +61,10 @@
 				inline void set(const Status status) noexcept {
 					current_status = status;
 				}
+
+				/// @brief Build http headers.
+				/// @param callback Callback method to receive the headers.
+				void http_headers(const std::function<void(const char *name, const char *value)> &callback) const noexcept;
 
 			protected:
 				time_t expiration_time = 0;

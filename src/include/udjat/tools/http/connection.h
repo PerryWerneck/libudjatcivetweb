@@ -25,6 +25,7 @@
  #include <udjat/tools/http/status.h>
  #include <udjat/tools/http/mimetype.h>
  #include <udjat/tools/http/authentication.h>
+ #include <udjat/tools/logger.h>
  #include <memory>
  #include <string>
  
@@ -56,13 +57,13 @@
 			/// @param max_age The max-age value to http headers (0 to no-cache).
 			/// @param filename The file to send.
 			/// @return The status code (404 if the file was not found).
-			virtual HTTP::StatusCode send(const char *filename, time_t max_age, const MimeType mimetype = MimeType::none) noexcept = 0;
+			virtual HTTP::StatusCode send(const char *filename, time_t maxage, const MimeType mimetype = MimeType::none) noexcept = 0;
 
 			/// @brief Send response to client.
 			/// @param status The status for http header.
 			/// @param payload The payload.
 			/// @return The response code.
-			virtual HTTP::StatusCode send(const HTTP::StatusCode code, const MimeType mimetype, const char *payload) noexcept = 0;
+			virtual HTTP::StatusCode send(const HTTP::Status &status, const MimeType mimetype, const char *payload) noexcept = 0;
 
 			/// @brief Send response to client.
 			/// @param status The response status.
@@ -72,16 +73,16 @@
 
 			/// @brief Send success response to client.
 			/// @param payload The response payload
-			/// @return The response code (Usually 200)
+			/// @return The response code (200)
 			inline HTTP::StatusCode send(const MimeType mimetype, const char *payload) noexcept {
-				return send(HTTP::Ok,mimetype,payload);
+				return send(HTTP::Status{HTTP::Ok},mimetype,payload);
 			}
 
 			/// @brief Send a redirect response.
 			/// @param location The new location.
 			/// @return The status code (Usually HTTP::Redirect)
 			virtual HTTP::StatusCode redirect(const char *location) const = 0;
-
+		
 			/// @brief Get the client address (if available).
 			/// @return The client address, empty if not available.
 			virtual String address() const noexcept = 0;

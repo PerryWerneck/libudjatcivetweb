@@ -24,6 +24,7 @@
 
  #include <udjat/authentication.h>
  #include <udjat/tools/http/authentication.h>
+ #include <udjat/tools/http/timestamp.h>
  #include <udjat/tools/configuration.h>
  #include <udjat/tools/logger.h> 
  #include <udjat/tools/application.h>
@@ -117,6 +118,20 @@
 		token->expiration_time = expiration_time;
 
 		return Authentication::encrypt(token,szBuffer);
+
+	}
+
+	void HTTP::Authentication::http_headers(const std::function<void(const char *name, const char *value)> &callback) const noexcept {
+
+		callback(
+			"Set-Cookie",
+			String{
+				cookie_name().c_str(),"=",
+				token().c_str(),
+				"; path=/; Expires=",
+				HTTP::TimeStamp::to_string(expires()).c_str()
+			}.c_str()
+		);
 
 	}
 

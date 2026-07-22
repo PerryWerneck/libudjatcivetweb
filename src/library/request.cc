@@ -52,30 +52,20 @@
 			return true;
 		}
 
-		if(!strcasecmp(key,"redirect-uri")) {
-			value = uri();
+		// if(!strcasecmp(key,"redirect-uri")) {
+		// 	Config::Value<Udjat::String> uri{"authentication","redirect-uri"};
+		// 	if(value.empty()) {
+		// 		throw logic_error("The required redirect-uri for authentication is empty");
+		// 	}
+		// 	value = uri.escape();
+		// 	return true;
+		// }
+
+		if(connection().get_property(key,value)) {
 			return true;
 		}
 
-		if(!strcasecmp(key,"redirect-uri")) {
-			Config::Value<Udjat::String> uri{"authentication","redirect-uri"};
-			if(value.empty()) {
-				throw logic_error("The required redirect-uri for authentication is empty");
-			}
-			value = uri.escape();
-			return true;
-		}
-	
-		
 		return Udjat::Request::get_property(key,value);
-	}
-
-	String HTTP::Request::cookie(const char *) const {
-		return "";
-	}
-
-	Udjat::String HTTP::Request::session_cookie() const {
-		return cookie(Udjat::String{Application::Name().c_str(),"-session"}.c_str());
 	}
 
 	bool HTTP::Request::for_each(const std::function<bool(const char *name, const char *value)> &call) const {
@@ -120,25 +110,11 @@
 		return MimeType::none;
 	}
 
-	void HTTP::Request::parse_query(const char *query) {
-
-		if(!(query && *query)) {
-			return;
+	Udjat::String HTTP::Request::cookie(const char *name, const char *def) const {
+		if(def) {
+			return def;
 		}
-
-		debug("Parsing query '",query,"'");
-
-		for(const Udjat::String &value : Udjat::String{query}.unescape().split("&")) {
-			debug(value.c_str());
-			const char *ptr = strchr(value.c_str(),'=');
-			if(ptr) {
-				debug("request[",string{value.c_str(),(size_t) (ptr-value.c_str())}.c_str(),"]='",(ptr+1),"'");
-				(*this)[string{value.c_str(),(size_t) (ptr-value.c_str())}.c_str()] = (const char *) (ptr+1);
-			} else {
-				debug("request[",value.c_str(),"]='true'");
-				(*this)[value.c_str()] = true;
-			}
-		}
+		throw runtime_error(Udjat::String{"The required http cookie '",name,"' is not available"});
 	}
 
  }

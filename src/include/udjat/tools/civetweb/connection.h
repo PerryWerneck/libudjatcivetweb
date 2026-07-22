@@ -36,11 +36,16 @@
 		private:
 			struct mg_connection *conn;
 
+			void response_header_add_authentication() const;
+
 		public:
-			Connection(struct mg_connection *c) : Udjat::HTTP::Connection(), conn(c) {
+			Connection(struct mg_connection *c);
+
+			inline struct mg_connection * connection() const {
+				return conn;
 			}
 
-			inline struct mg_connection * connection() {
+			inline operator struct mg_connection *() const {
 				return conn;
 			}
 
@@ -56,26 +61,19 @@
 				return HTTP::MethodFactory(mg_get_request_info(conn)->request_method);
 			}
 
- 			const MimeType mimetype(const MimeType def = MimeType::json) const noexcept;
-
 			inline const char * local_uri() const noexcept {
 				return mg_get_request_info(conn)->local_uri;
 			}
 
-			const char * header(const char *name, const char *def = "") const noexcept override;
-
 			String address() const noexcept override;
-			String cookie(const char *name, const char *def = "") const override;
-
-			HTTP::StatusCode send(const char *filename, time_t max_age, const MimeType mimetype = MimeType::none) noexcept override;
-
-			HTTP::StatusCode send(const HTTP::Status &status, const MimeType mimetype, const std::string &payload) noexcept override;
-
+			HTTP::StatusCode send(const char *filename, time_t maxage, const MimeType mimetype = MimeType::none) noexcept override;
+			HTTP::StatusCode send(const HTTP::Status &status, const MimeType mimetype, const char *payload) noexcept override;
 			HTTP::StatusCode redirect(const char *location) const override;
-
-			std::shared_ptr<HTTP::Request> RequestFactory() noexcept override;
-
 			HTTP::StatusCode logger(HTTP::StatusCode code, const char *message, Logger::Level level) const override;
+			
+			inline HTTP::StatusCode send(const HTTP::Status &status, const MimeType mimetype, bool apicall = true) noexcept {
+				return HTTP::Connection::send(status,mimetype,apicall);
+			}
 
 		};
 

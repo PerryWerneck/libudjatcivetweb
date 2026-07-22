@@ -67,6 +67,10 @@
 			/// @return Header value, or 'def' if not found.
 			virtual const char * header(const char *name, const char *def = "") const noexcept = 0;
 
+			virtual Udjat::String cookie(const char *name, const char *def = nullptr) const;
+
+			bool get_property(const char *key, Udjat::Value &value) const override;
+
 			inline HTTP::Method method() const noexcept {
 				return http_method;
 			}

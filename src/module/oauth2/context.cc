@@ -165,14 +165,9 @@
 		}
 
 		if(cookie) {
-			// Setup cookie
-			String str{
-				cookie_name().c_str(),"=",
-				token().c_str(),
-				"; path=/; Expires=",
-				HTTP::TimeStamp::to_string(expires).c_str()
-			};
-			mg_response_header_add(conn, "Set-Cookie", str.c_str(),-1);
+			http_headers([this](const char *key, const char *value){
+				mg_response_header_add(conn,key,value,-1);
+			});
 		}
 
 		mg_response_header_send(conn);

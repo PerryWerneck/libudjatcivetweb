@@ -27,13 +27,12 @@
  #include <udjat/module.h>
  #include <private/module.h>
  #include <udjat/tools/service.h>
- #include <udjat/tools/http/server.h>
- #include <udjat/tools/xml.h>
  #include <udjat/tools/string.h>
  #include <udjat/tools/logger.h>
  #include <udjat/tools/configuration.h>
- #include <udjat/tools/http/handler.h>
  #include <udjat/tools/intl.h>
+ #include <udjat/tools/civetweb/connection.h>
+ #include <udjat/tools/http/status.h>
  #include <string>
  #include <udjat/authentication.h>
 
@@ -74,26 +73,14 @@
  };
 
  static int log_message(const struct mg_connection *conn, const char *message);
- 
+ static int http_error(struct mg_connection *conn, int code, const char *message) noexcept;
+
  namespace Udjat {
-
-	CivetWeb::Service * CivetWeb::Service::instance = nullptr;
-
-	CivetWeb::Service & CivetWeb::Service::get_instance() {
-		if(!instance) {
-			throw runtime_error("HTTP server is undefined");
-		}
-		return *instance;
-	}
 
  	CivetWeb::Service::Service(const Udjat::Properties &props) 
 		: Udjat::Service{props.get("name","http").as_quark(),props.get("description","CivetWEB " CIVETWEB_VERSION " HTTP module for " STRINGIZE_VALUE_OF(PRODUCT_NAME)).as_quark()} {
 
-		if(instance) {
-			throw runtime_error("HTTP server is already defined");
-		}
-
-		// Init library from XML definitions
+		// Init library
 		{
 			unsigned int init = 0;
 			Logger::String info{"CivetWeb Features: "};
@@ -197,12 +184,12 @@
 			mg_set_request_handler(ctx, "/favicon.ico", (mg_request_handler) favicon_handler, this);
 
 			if(Authentication::available()) {
-				mg_set_request_handler(ctx, "/oauth2", oauthWebHandler, 0);
+				mg_set_request_handler(ctx, "/oauth2", oauthWebHandler, this);
 			}
 
-			mg_set_request_handler(ctx, "/account", userWebHandler, 0);
+			mg_set_request_handler(ctx, "/user", userWebHandler, this);
 
-			mg_set_request_handler(ctx, "/", (mg_request_handler) web_handler, this);
+			mg_set_request_handler(ctx, "/", (mg_request_handler) defaultWebHandler, this);
 
 		}
 
@@ -211,7 +198,6 @@
  	CivetWeb::Service::~Service() {
 
 		Logger::String{"Stopping service"}.trace(name());
-		instance = nullptr;
 
 		if(ctx) {
 			mg_stop(ctx);
@@ -221,10 +207,6 @@
 
  	}
 
-	int CivetWeb::Service::web_handler(struct mg_connection *conn, CivetWeb::Service *srvc) noexcept {
-		return CivetWeb::Connection{conn}.handle();
-	}
-	
 	void CivetWeb::Service::start() noexcept {
 
 		struct mg_server_port ports[10];
@@ -254,20 +236,6 @@
 						Logger::String{"Authentication service available on ",baseref,"/oauth2"}.trace();
 					}
 
-					if(interfaces.empty()) {
-						Logger::String{"The interface list is empty"}.trace();
-					} else {
-						for(auto &intf : interfaces) {
-							const char *name = intf.name();
-							if(name && *name) {
-								Logger::String{"Interface ",baseref,"/api/",apiver,"/",intf.name()}.trace();
-							} else {
-								Logger::String("Ignoring unnamed interface").warning();
-							}
-
-						}
-					}
-
 				}
 
 			}
@@ -287,60 +255,28 @@
 		Udjat::Service::stop();
 	}
 
-	bool CivetWeb::Service::push_back(HTTP::Handler *handler) {
-
-		string uri{handler->c_str()};
-
-		if(uri[uri.size()-1] == '/') {
-			uri.resize(uri.size()-1);
-		}
-
-		// mg_set_request_handler(ctx, uri.c_str(), customWebHandler, handler);
-
-		if(Logger::enabled(Logger::Trace)) {
-
-			struct mg_server_port ports[10];
-			if(mg_get_server_ports(ctx,10,ports) > 0) {
-
-				Logger::String{
-					"New request handler was activated on ",
-					(ports[0].is_ssl ? "https" : "http"),
-					"://",
-					(ports[0].protocol == 1 ? "127.0.0.1" : "localhost"),
-					":",
-					ports[0].port,
-					uri
-				}.write(Logger::Trace,"civetweb");
-
-			}
-
-		} else {
-			Logger::String{"Custom handler for '",handler->c_str(),"' added"}.info();
-		}
-
-		return true;
-
-	}
-
-	bool CivetWeb::Service::remove(HTTP::Handler *handler) {
-
-		string uri{handler->c_str()};
-
-		if(uri[uri.size()-1] == '/') {
-			uri.resize(uri.size()-1);
-		}
-
-		mg_set_request_handler(ctx, uri.c_str(), NULL, NULL);
-		Logger::String{"Custom handler for '",handler->c_str(),"' removed"}.info();
-
-		return true;
-
-	}
-
  }
 
  int log_message(const struct mg_connection *, const char *message) {
 	Logger::String{message}.info("civetweb");
 	return 1;
+ }
+
+ int http_error(struct mg_connection *conn, int code, const char *message) noexcept {
+
+	debug("Callback ",__FUNCTION__," called, formatting output");
+	
+	const struct mg_request_info *request_info = mg_get_request_info(conn);
+
+	HTTP::Status status{(HTTP::StatusCode) code};
+	status.body = message;
+
+	CivetWeb::Connection{conn}.send(
+		status,
+		MimeTypeFactory(conn),
+		strncasecmp("/api/",request_info->local_uri,5) == 0
+	);
+
+	return 0;
  }
 
