@@ -32,38 +32,50 @@
  #include <udjat/tools/http/status.h>
  #include <udjat/tools/logger.h>
  #include <udjat/tools/intl.h>
+ #include <string>
+ #include <fcntl.h> 
 
-#ifndef _WIN32
+#ifdef HAVE_UNISTD_H
 	#include <unistd.h>
-#endif // _WIN32
+#endif // HAVE_UNISTD_H
 
- using namespace Udjat;
+ using namespace std;
 
  namespace Udjat {
 
-	HTTP::StatusCode HTTP::Connection::icon(const char *name) noexcept {
+	HTTP::StatusCode HTTP::Connection::theme(const char *name) noexcept {
 
+		while(*name && *name == '/') {
+			name++;
+		}
+
+		{
+			const char *ptr = strchr(name,'/');
+			if(ptr) {
+				name = ptr+1;
+			}
+		}
+
+		debug("------------------ ",__FUNCTION__,"(",name,") --------------------------");
 		if(strstr(name,"..")) {
 			return send(
 				HTTP::Status{HTTP::BadRequest,MimeType::html}
 			);
 		}
 
-		Config::Value<unsigned int> maxage{"theme","image-max-age",604800};
+		Config::Value<unsigned int> maxage{"theme","theme-max-age",604800};
 
-		{
-			const char *ptr = strrchr(name,'/');
-			if(ptr) {
-				name = ptr+1;
-			}
-		}
+		String filename{
+			Config::Value<string>{"theme","rootdir","/srv/www/htdocs/" STRINGIZE_VALUE_OF(PRODUCT_NAME) "/"}.c_str(),
+			name
+		};
 
-		Udjat::HTTP::Icon filename = Udjat::HTTP::Icon::getInstance(name);
+		debug("Filename='",filename.c_str(),"'");
 
 		return send(
 			filename.c_str(), 
 			(time_t) maxage, 
-			MimeType::icon
+			MimeTypeFactory(filename.c_str(),MimeType::html)
 		);
 
 	}

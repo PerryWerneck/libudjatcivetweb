@@ -17,55 +17,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
- /**
-  * @brief Implements the handler for icons.
-  *
-  */
-
  #include <config.h>
  #include <udjat/defs.h>
  #include <udjat/tools/http/connection.h>
- #include <udjat/tools/http/icon.h>
- #include <udjat/tools/http/exception.h>
- #include <udjat/tools/http/mimetype.h>
- #include <udjat/tools/configuration.h>
- #include <udjat/tools/http/status.h>
- #include <udjat/tools/logger.h>
- #include <udjat/tools/intl.h>
-
-#ifndef _WIN32
-	#include <unistd.h>
-#endif // _WIN32
+ #include <udjat/tools/civetweb/connection.h> 
+ #include <udjat/tools/civetweb/service.h>
 
  using namespace Udjat;
 
- namespace Udjat {
-
-	HTTP::StatusCode HTTP::Connection::icon(const char *name) noexcept {
-
-		if(strstr(name,"..")) {
-			return send(
-				HTTP::Status{HTTP::BadRequest,MimeType::html}
-			);
-		}
-
-		Config::Value<unsigned int> maxage{"theme","image-max-age",604800};
-
-		{
-			const char *ptr = strrchr(name,'/');
-			if(ptr) {
-				name = ptr+1;
-			}
-		}
-
-		Udjat::HTTP::Icon filename = Udjat::HTTP::Icon::getInstance(name);
-
-		return send(
-			filename.c_str(), 
-			(time_t) maxage, 
-			MimeType::icon
-		);
-
-	}
-
+ int CivetWeb::Service::theme_handler(struct mg_connection *conn, CivetWeb::Service *srvc) noexcept {
+	return (int) CivetWeb::Connection{conn}.theme(mg_get_request_info(conn)->local_uri);
  }

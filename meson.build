@@ -144,6 +144,7 @@ lib_src = [
   'src/library/handlers/generic.cc',
   'src/library/handlers/favicon.cc',
   'src/library/handlers/icon.cc',
+  'src/library/handlers/theme.cc',
   'src/library/handlers/image.cc',
   'src/library/client/client.cc',
   'src/library/testsuite.cc',
@@ -157,6 +158,7 @@ lib_src = [
 module_src = [
   'src/module/handlers/favicon.cc',
   'src/module/handlers/icons.cc',
+  'src/module/handlers/theme.cc',
   'src/module/handlers/images.cc',
   'src/module/handlers/product.cc',
   'src/module/handlers/default.cc',

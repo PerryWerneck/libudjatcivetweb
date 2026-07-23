@@ -106,6 +106,11 @@
 			/// @return HTTP status code.
  			HTTP::StatusCode image(const char *name) noexcept;
 			
+			/// @brief Send file from theme.
+ 			/// @param name The image name.
+			/// @return HTTP status code.
+ 			HTTP::StatusCode theme(const char *name) noexcept;
+			
 			/// @brief Handle http request.
 			/// @param request The HTTP request to handle.
 			/// @return HTTP status code.

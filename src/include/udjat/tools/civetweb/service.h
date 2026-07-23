@@ -43,6 +43,9 @@
 			/// @brief Handle /icon/ requests
 			static int icon_handler(struct mg_connection *conn, CivetWeb::Service *srvc) noexcept;
 
+			/// @brief Handle /theme/ requests
+			static int theme_handler(struct mg_connection *conn, CivetWeb::Service *srvc) noexcept;
+
 			/// @brief Handle /PRODUCT_NAME/ requests
 			static int product_handler(struct mg_connection *conn, CivetWeb::Service *srvc) noexcept;
 

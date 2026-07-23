@@ -179,6 +179,7 @@
 
 			// TODO: Refactor as interfaces.
 			mg_set_request_handler(ctx, "/icon/", (mg_request_handler) icon_handler, this);
+			mg_set_request_handler(ctx, "/theme/", (mg_request_handler) theme_handler, this);
 			mg_set_request_handler(ctx, "/" STRINGIZE_VALUE_OF(PRODUCT_NAME) "/", (mg_request_handler) product_handler, this);
 			mg_set_request_handler(ctx, "/image/", (mg_request_handler) image_handler, this);
 			mg_set_request_handler(ctx, "/favicon.ico", (mg_request_handler) favicon_handler, this);
