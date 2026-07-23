@@ -66,7 +66,7 @@
 		Config::Value<unsigned int> maxage{"theme","theme-max-age",604800};
 
 		String filename{
-			Config::Value<string>{"theme","rootdir","/srv/www/htdocs/" STRINGIZE_VALUE_OF(PRODUCT_NAME) "/"}.c_str(),
+			Config::Value<string>{"theme","rootdir","/srv/www/htdocs/" STRINGIZE_VALUE_OF(PRODUCT_NAME) "/theme/default/"}.c_str(),
 			name
 		};
 
