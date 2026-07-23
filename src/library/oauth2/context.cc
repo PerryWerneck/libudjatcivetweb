@@ -77,19 +77,19 @@
 	OAuth::Context::~Context() {
 	}
 
-	int OAuth::Context::authenticate(const char *target) {
+	HTTP::StatusCode OAuth::Context::authenticate(const char *target) {
 
 		debug(__FUNCTION__,"(",target,")");
 
 		clear();
 
 		if(!Authentication::available()) {
-			return failed(503,_("Configuration Error"),_("An authentication method has not been configured for this webpage. Please reach out to the system administrator."));
+			return failed(HTTP::Unavailable,_("Configuration Error"),_("An authentication method has not been configured for this webpage. Please reach out to the system administrator."));
 		}
 
 		Config::Value<Udjat::String> endpoint{"authentication","endpoint"};
 		if(endpoint.empty()) {
-			return failed(503,_("Configuration Error"),_("Connection failed. The system authentication endpoint is undefined or improperly configured."));
+			return failed(HTTP::Unavailable,_("Configuration Error"),_("Connection failed. The system authentication endpoint is undefined or improperly configured."));
 		}
 
 		endpoint.expand(this);
@@ -221,7 +221,7 @@
 
 	}
 
-	int OAuth::Context::authenticated() {
+	HTTP::StatusCode OAuth::Context::authenticated() {
 
 		if(uri.empty()) {
 			uri = Config::Value<string>{"authentication","authenticated","/"}.c_str();

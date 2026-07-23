@@ -63,6 +63,11 @@
 				return mg_get_request_info(conn)->local_uri;
 			}
 
+			/// @brief Get mimetype from connection for convenience.
+			/// @param def Default value.
+			/// @return The mimetype for connection.
+			Udjat::MimeType mimetype(const Udjat::MimeType def = MimeType::html) const noexcept; 
+
 			String address() const noexcept override;
 			HTTP::StatusCode send(const char *filename, time_t maxage, const MimeType mimetype = MimeType::none) noexcept override;
 			HTTP::StatusCode send(const HTTP::Status &status, const char *payload) noexcept override;

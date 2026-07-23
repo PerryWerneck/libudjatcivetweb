@@ -32,6 +32,7 @@
  #include <udjat/tools/logger.h>
  #include <udjat/tools/http/authentication.h>
  #include <udjat/tools/http/oauth.h>
+ #include <udjat/tools/http/statuscodes.h>
  #include <udjat/tools/intl.h>
  #include <udjat/tools/configuration.h>
  #include <udjat/tools/http/method.h>
@@ -48,14 +49,14 @@
 
  namespace Udjat {
 
-	int OAuth::Context::callback() {
+	HTTP::StatusCode OAuth::Context::callback() {
 
 		debug("---> callback");
 		debug("uri=",uri.c_str())
 		debug("code=",code.c_str())
 
 		if(code.empty()) {
-			return failed(400,strerror(EPERM),_("Invalid response from authentication server"));
+			return failed(HTTP::BadRequest,strerror(EPERM),_("Invalid response from authentication server"));
 		}
 
 		// Get access token
@@ -72,7 +73,7 @@
 
 			if(url.empty()) {
 				Logger::Message{"Missing required value for authentication attribute '{}'","get-token-url"}.error();
-				return failed(400,strerror(EPERM),_("Invalid authentication engine configuration. Please check server settings."));
+				return failed(HTTP::BadRequest,strerror(EPERM),_("Invalid authentication engine configuration. Please check server settings."));
 			}
 
 			Config::Value<String> payload{"authentication","get-token-payload",""};
@@ -138,7 +139,7 @@
 
 			if(!error_description.empty()) {
 				return failed(
-						400,
+						HTTP::BadRequest,
 						_("Failed to retrieve information from the authentication server."),
 						error_description.c_str()
 					);
@@ -146,7 +147,7 @@
 
 			if(!error.empty()) {
 				return failed(
-						400,
+						HTTP::BadRequest,
 						_("Failed to retrieve information from the authentication server."),
 						error.c_str()
 					);
@@ -154,7 +155,7 @@
 
 			if(access_token.empty()) {
 				return failed(
-						400,
+						HTTP::BadRequest,
 						_("Failed to retrieve information from the authentication server."),
 						_("Empty token on authentication server response")
 					);
@@ -176,7 +177,7 @@
 				if(url.empty()) {
 					Logger::Message{"Missing required value for authentication attribute '{}'","get-user-account"}.error();
 					return failed(
-						500,
+						HTTP::SystemError,
 						_( "Configuration error" ),
 						_( "Invalid authentication engine configuration. Please check server settings." )
 					);
@@ -233,14 +234,14 @@
 					if(!(username && *username)) {
 						Logger::Message{"Missing required value for authentication response '{}'","name"}.error();
 						return failed(
-							400,
+							HTTP::BadRequest,
 							strerror(EPERM),
 							_("The authentication server did not provide a username.")
 						);
 					} else {
 						Logger::Message{"Access unauthorized for '{}'",username}.error();
 						return failed(
-							400,
+							HTTP::BadRequest,
 							strerror(EPERM),
 							_("Access unauthorized. Please contact your system administrator if you believe this is an error.")
 						);
@@ -253,7 +254,7 @@
 				Logger::String{url.c_str()," returned  '",e.what(),"'"}.error();
 
 				return failed(
-					500,
+					HTTP::SystemError,
 					_("Failed to retrieve user information from the authentication server."),
 					e.what()
 				);

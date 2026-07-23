@@ -119,7 +119,7 @@
 
 	}
 
-	int CivetWeb::OAuthContext::failed(int code, const char *message, const char *body) const {
+	HTTP::StatusCode CivetWeb::OAuthContext::failed(HTTP::StatusCode code, const char *message, const char *body) const {
 
 		const struct mg_request_info *request_info = mg_get_request_info(conn);
 
@@ -133,7 +133,7 @@
 		return super::failed(code,message,body);
 	}
 
-	int CivetWeb::OAuthContext::send_html_response(int code, const char *text) const {
+	HTTP::StatusCode CivetWeb::OAuthContext::send_html_response(HTTP::StatusCode code, const char *text) const {
 		size_t szText = strlen(text);
 		mg_response_header_start(conn, code);
 		mg_response_header_add(conn, "Content-Type",std::to_string(MimeType::html),-1);
@@ -143,12 +143,12 @@
 		return code;
 	}
 
-	int CivetWeb::OAuthContext::send_redirect_response(const char *location, bool cookie) const {
-		mg_response_header_start(conn, 303);
+	HTTP::StatusCode CivetWeb::OAuthContext::send_redirect_response(const char *location, bool cookie) const {
+		mg_response_header_start(conn, HTTP::SeeOther);
 		mg_response_header_add(conn, "Location",location,-1);
 		mg_response_header_add(conn, "Content-Length", "0", -1);
 		send_header(cookie);
-		return 303;
+		return HTTP::SeeOther;
 	}
 
 	void CivetWeb::OAuthContext::send_header(bool cookie) const {

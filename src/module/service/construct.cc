@@ -266,15 +266,19 @@
 
 	debug("Callback ",__FUNCTION__," called, formatting output");
 	
-	const struct mg_request_info *request_info = mg_get_request_info(conn);
+	CivetWeb::Connection connection{conn};
+	connection.error((HTTP::StatusCode) code, message);
 
-	HTTP::Status status{(HTTP::StatusCode) code};
-	status.body = message;
+	HTTP::Status status{MimeTypeFactory(conn)};
+	status.assign(
+		(HTTP::StatusCode) code,
+		message
+		
+	);
 
-	CivetWeb::Connection{conn}.send(
+	connection.send(
 		status,
-		MimeTypeFactory(conn),
-		strncasecmp("/api/",request_info->local_uri,5) == 0
+		strncasecmp("/api/",mg_get_request_info(conn)->local_uri,5) == 0
 	);
 
 	return 0;

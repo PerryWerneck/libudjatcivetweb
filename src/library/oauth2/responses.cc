@@ -52,7 +52,7 @@
 
  namespace Udjat {
 
-	int OAuth::Context::failed(int code, const char *message, const char *body) const {
+	HTTP::StatusCode OAuth::Context::failed(HTTP::StatusCode code, const char *message, const char *body) const {
 
 		debug(__FUNCTION__,"(",code,",'",message,"')");
 		
@@ -102,7 +102,7 @@
 		
 	}
 
-	int OAuth::Context::send_template(int code, const char *action, const char *name) {
+	HTTP::StatusCode OAuth::Context::send_template(HTTP::StatusCode code, const char *action, const char *name) {
 
 		Udjat::Template tmplt{name,Udjat::MimeType::html};
 

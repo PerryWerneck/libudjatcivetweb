@@ -99,6 +99,37 @@
 		return info->remote_addr;
 	}
 
+	Udjat::MimeType CivetWeb::Connection::mimetype(const Udjat::MimeType def) const noexcept {
+
+		static const char *headers[] = { "Content-Type", "Accept" };
+
+		for(const char *header : headers) {
+
+			// Check 'accept' header.
+			const char *hdr = mg_get_header(conn, header);
+
+			if(hdr && *hdr) {
+
+				for(String &value : String{hdr}.split(",")) {
+
+					auto mime = MimeTypeFactory(value.c_str(),MimeType::none);
+					if(mime != MimeType::none) {
+							return mime;
+					}
+
+				}
+
+			}
+
+		}
+
+		// Use default
+		const struct mg_request_info *info{mg_get_request_info(conn)};
+		Logger::String{info->remote_addr,": Unexpected mime-type on ",info->request_uri,", using ",std::to_string(def)}.warning("civetweb");
+		return def;
+
+	}
+
 	HTTP::StatusCode CivetWeb::Connection::send(const HTTP::Status &status, const char *payload) noexcept {
 
 		if(Logger::enabled(Logger::Debug)) {

@@ -23,7 +23,8 @@
  #include <udjat/tools/string.h>
  #include <udjat/tools/object.h>
  #include <udjat/tools/http/authentication.h>
- 
+ #include <udjat/tools/http/statuscodes.h>
+
  namespace Udjat {
 
 	namespace OAuth {
@@ -33,7 +34,7 @@
 
 			/// @brief Handle callback from oauth server.
 			/// @return The HTTP status code.
-			int callback();
+			HTTP::StatusCode callback();
 
 		protected:
 			String path;
@@ -53,9 +54,9 @@
 			/// @param action The action name (for template expansion)
 			/// @param tmplt The template name.
 			/// @return The HTTP status code.
-			int send_template(int code, const char *action, const char *tmplt);
+			HTTP::StatusCode send_template(HTTP::StatusCode code, const char *action, const char *tmplt);
 
-			inline int send_template(int code, const char *tmplt) {
+			inline HTTP::StatusCode send_template(HTTP::StatusCode code, const char *tmplt) {
 				return send_template(code,"",tmplt);
 			}
 
@@ -63,22 +64,22 @@
 			/// @param tmplt The template name.
 			/// @param code The HTTP status code.
 			/// @return The HTTP status code.
-			virtual int send_html_response(int code, const char *text) const = 0;
+			virtual HTTP::StatusCode send_html_response(HTTP::StatusCode code, const char *text) const = 0;
 
  			/// @brief Send redirect response.
 			/// @return The HTTP status code.
- 			virtual int send_redirect_response(const char *location, bool cookie = true) const = 0;
+ 			virtual HTTP::StatusCode send_redirect_response(const char *location, bool cookie = true) const = 0;
 
 			/// @brief Format and send error page.
 			/// @param code The http status code.
 			/// @param message The message to user.
 			/// @param body The message body.
 			/// @return The HTTP status code.
-			virtual int failed(int code, const char *message, const char *body = "") const;
+			virtual HTTP::StatusCode failed(HTTP::StatusCode code, const char *message, const char *body = "") const;
 
 			/// @brief Authentication complete, redirect to main page.
 			/// @return The HTTP status code.
-			int authenticated();
+			HTTP::StatusCode authenticated();
 
 		public:
 
@@ -93,7 +94,7 @@
 
 			/// @brief Handle authentication requests.
 			/// @return The HTTP status code.
-			int handle();
+			HTTP::StatusCode handle();
 
 			/// @brief Pop one element from path.
 			/// @return 
@@ -103,7 +104,7 @@
 			/// @param api True if the request started from an API call.
 			/// @param target URL to redirect when the flow finished.
 			/// @return HTTP error code to forward.
-			int authenticate(const char *target = "");
+			HTTP::StatusCode authenticate(const char *target = "");
 
 			/// @brief Run 'signin'
 			/// @param request The request info

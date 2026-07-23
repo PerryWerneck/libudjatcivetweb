@@ -22,6 +22,7 @@
  #include <udjat/defs.h>
  #include <udjat/tools/http/authentication.h>
  #include <udjat/tools/http/oauth.h>
+ #include <udjat/tools/http/statuscodes.h>
  #include <civetweb.h>
 
  namespace Udjat {
@@ -37,7 +38,7 @@
 
 			typedef OAuth::Context super;
 
-			int failed(int code, const char *message, const char *body = "") const override;
+			HTTP::StatusCode failed(HTTP::StatusCode code, const char *message, const char *body = "") const override;
 
 		public:
 			OAuthContext(struct mg_connection *c);
@@ -46,9 +47,9 @@
 
 			bool get_property(const char *key, Udjat::Value &value) const override;
 
-			int send_html_response(int code, const char *text) const override;
+			HTTP::StatusCode send_html_response(HTTP::StatusCode code, const char *text) const override;
 
-			int send_redirect_response(const char *location, bool cookie = true) const override;
+			HTTP::StatusCode send_redirect_response(const char *location, bool cookie = true) const override;
 
 			void send_header(bool cookie = true) const override;
 

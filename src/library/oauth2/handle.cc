@@ -50,14 +50,14 @@
 
  namespace Udjat {
 
-	int OAuth::Context::handle() {
+	HTTP::StatusCode OAuth::Context::handle() {
 
 		try {
 
 			if(empty()) {
 				Logger::String{"Empty html request, sending login page"}.trace();
 				set(HTTP::Authentication::LoginPage);
-				return send_template(200,"signin","login");
+				return send_template(HTTP::Ok,"signin","login");
 			}
 
 			debug("--------------- Checking for options ---------------");
@@ -73,7 +73,7 @@
 
 			// Unknow request, send error page.
 			return failed(
-				404,
+				HTTP::NotFound,
 				_("Unrecognized request"),
 				Logger::Message{_("The requested action '{}' is not available on this server"), action.c_str()}.c_str()
 			);
@@ -83,7 +83,7 @@
 			Logger::String{e.what()}.error();
 			clear();
 			return failed(
-				500,
+				HTTP::SystemError,
 				_("We're sorry, but we encountered an error while processing your request."),
 				e.what()
 			);

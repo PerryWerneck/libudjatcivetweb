@@ -44,22 +44,19 @@
  
  int oauthWebHandler(struct mg_connection *conn, void *) {
 
+	CivetWeb::OAuthContext context{conn};
 	try {
 
-		debug("---- ",__FUNCTION__," ----");
-		
-		CivetWeb::OAuthContext context{conn};
 		return context.handle();
 
 	} catch(const std::exception &e) {
 
-		return http_error(
-			conn,
-			500,
-			_("An unexpected error occurred during the login process."),
-			e.what()
-		);
+		Logger::String{e.what()}.error();
 
+		return (int) context.send_html_response(
+			HTTP::SystemError,
+			_("An unexpected error occurred during the login process.")
+		);
 
 	}
 
