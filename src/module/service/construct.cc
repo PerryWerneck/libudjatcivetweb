@@ -269,11 +269,10 @@
 	CivetWeb::Connection connection{conn};
 	connection.error((HTTP::StatusCode) code, message);
 
-	HTTP::Status status{MimeTypeFactory(conn)};
+	HTTP::Status status{connection.mimetype()};
 	status.assign(
 		(HTTP::StatusCode) code,
 		message
-		
 	);
 
 	connection.send(

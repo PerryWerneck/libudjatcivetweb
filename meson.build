@@ -159,6 +159,7 @@ module_src = [
   'src/module/handlers/icons.cc',
   'src/module/handlers/images.cc',
   'src/module/handlers/product.cc',
+  'src/module/handlers/default.cc',
   'src/module/handlers/user.cc',
   'src/module/oauth2/handler.cc',
   'src/module/oauth2/context.cc',
