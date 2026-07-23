@@ -43,7 +43,6 @@
 
 			const char * query(const char *def = "") const override;
 
-			// bool for_each(const std::function<bool(const char *name, const char *value)> &call) const override;
 			bool get_property(const char *key, Udjat::Value &value) const override;
 
 			const char * header(const char *name, const char *def = nullptr) const noexcept override;
@@ -52,9 +51,6 @@
 
 			/// @brief The request URI.
 			Udjat::String uri() const override;
-
-			/// @brief redirect
-			int redirect(const char *location) const;
 
 			Udjat::String cookie(const char *name, const char *def = nullptr) const override;
 

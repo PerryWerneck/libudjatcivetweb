@@ -121,8 +121,16 @@
 			}
 		}
 
+		HTTP::Connection & Request::connection() const {
+			return (HTTP::Connection &) conn;
+		}
+
 		Udjat::String Request::uri() const {
 			return conn.local_uri();
+		}
+
+		const char * Request::query(const char *def) const {
+			return mg_get_request_info(conn.connection())->query_string;
 		}
 
 		bool Request::get_property(const char *key, Udjat::Value &value) const {
