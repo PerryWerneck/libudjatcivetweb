@@ -22,6 +22,7 @@
  #include <udjat/tools/http/status.h>
  #include <udjat/tools/logger.h>
  #include <udjat/tools/template.h>
+ #include <udjat/tools/http/request.h>
  #include <sstream>
 
  using namespace std;
@@ -36,6 +37,44 @@
 
 	bool HTTP::Connection::get_property(const char *key, Udjat::Value &value) const {
 		return false;
+	}
+
+	bool HTTP::Connection::process_template(HTTP::Status &status, const char *key, std::ostream &stream) const noexcept {
+
+		try {
+
+			if(!strcasecmp(key,"page-summary")) {
+
+				// TODO: Get root agent, format summary, update status.last_modified and status.expires
+
+				return true;
+			}
+
+			Udjat::Value value;
+			if(get_property(key,value)) {
+				stream << value.serialize(status.mimetype);
+				return true;
+			}
+
+		} catch(const std::exception &e) {
+
+			Logger::String{e.what()}.error();
+			status.assign(e);
+
+		}
+
+		return false;
+		
+	}
+
+	HTTP::StatusCode HTTP::Connection::send(const HTTP::StatusCode code, const Request &request) noexcept {
+		return send(
+			HTTP::Status{
+				code,
+				request.mimetype()
+			},
+			request.apicall()
+		);
 	}
 
 	HTTP::StatusCode HTTP::Connection::send(const HTTP::Status &status, bool apicall) noexcept {

@@ -41,6 +41,12 @@
 			/// @brief Authentication for this connection.
 			HTTP::Authentication auth;
 
+			/// @brief Apply values on template.
+			/// @param status The status response, can change the 'last-modified' value.
+			/// @param key The template key.
+			/// @param stream Stream to receive the value for key.
+			bool process_template(HTTP::Status &status,const char *key, std::ostream &stream) const noexcept;
+
 		public:
 			Connection();
 			virtual ~Connection();
@@ -80,6 +86,11 @@
 			inline HTTP::StatusCode send(const MimeType mimetype, const char *payload) noexcept {
 				return send(HTTP::Status{HTTP::Ok,mimetype},payload);
 			}
+
+			/// @brief Send response based on request data.
+			/// @param status The status for http header.
+			/// @param request The client request as reference.
+			HTTP::StatusCode send(const HTTP::StatusCode code, const Request &request) noexcept;
 
 			/// @brief Send a redirect response.
 			/// @param location The new location.

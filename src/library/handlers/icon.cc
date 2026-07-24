@@ -49,7 +49,7 @@
 			);
 		}
 
-		Config::Value<unsigned int> maxage{"theme","image-max-age",604800};
+		Config::Value<unsigned int> maxage{"theme","icon-max-age",604800};
 
 		{
 			const char *ptr = strrchr(name,'/');
