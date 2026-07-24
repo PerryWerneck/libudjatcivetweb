@@ -45,6 +45,7 @@
 	#pragma pack()
 
 	HTTP::Authentication::Authentication(const char *b64) {
+		clear();
 		token(b64);
 	}
 
@@ -100,13 +101,14 @@
 		Udjat::Authentication::clear();
 		current_status = Undefined;
 		role = None;
-		avatar_url.clear();
+		avatar_url = "/icon/avatar-default";
 		expiration_time = time(0) + Config::Value<time_t>("authentication","expiration-time",86400);
 	}
 
 	std::string HTTP::Authentication::token() const {
 
-		size_t szBuffer = sizeof(Token);
+		const char *name = this->name();
+		size_t szBuffer = sizeof(Token) + avatar_url.size() + strlen(name) + 2;
 
 		uint8_t buffer[szBuffer+1];
 		memset(buffer,0,sizeof(szBuffer+1));
@@ -116,6 +118,22 @@
 		token->status = this->current_status;
 		token->role = role;
 		token->expiration_time = expiration_time;
+
+		char *ptr = (char *) (token+1);
+
+		// Append user name
+		{
+			size_t length = strlen(name);
+			strlcpy(ptr,name,length);
+			ptr[length] = 0;
+			ptr += (length+1);
+		}
+
+		// Append avatar URL
+		{
+			strlcpy(ptr,avatar_url.c_str(),avatar_url.size());
+			ptr[avatar_url.size()] = 0;
+		}
 
 		return Authentication::encrypt(token,szBuffer);
 
