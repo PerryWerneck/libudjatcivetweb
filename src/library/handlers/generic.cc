@@ -43,13 +43,15 @@
 
 		debug("\n\n------------ Request::path = '",request.path(),"'");
 
-		const char *path = request.path();
-		if(path[0] == '/' && !path[1] && !request.apicall()) {
+		HTTP::Status status{HTTP::Ok,request.mimetype()};
 
-			// The path is '/' and it's not an apicall, send index.
-			HTTP::Status status{request.mimetype()};
+		try {
 
-			try {
+			const char *path = request.path();
+
+			if(path[0] == '/' && !path[1] && !request.apicall()) {
+
+				// The path is '/' and it's not an apicall, send index.
 
 				// empty request, send index
 				stringstream response;
@@ -65,7 +67,19 @@
 
 					status.last_modified = tmplt.last_modified();
 					tmplt.apply(response,[this,&status](const char *key, std::ostream &stream){
-						return process_template(status,key,stream);
+
+						if(process_template(status,key,stream)) {
+							return true;
+						}
+
+						if(!strcasecmp(key,"page-contents")) {
+
+							// TODO: Implement page-contents for index
+							return true;
+							
+						}
+
+						return false;
 					});
 
 				} else {
@@ -85,25 +99,27 @@
 				status.assign(HTTP::Ok);
 				return send(status,response.str().c_str());
 
-			} catch(const std::exception &e) {
-
-				status.assign(e);
-
-			} catch(...) {
-
-				status.assign(HTTP::SystemError);
-
 			}
 
-			return send(status,request.apicall());
+			// Search for interfaces
+
+
+
+			// Cant find interface, return 'not found'.
+			status.assign(HTTP::NotFound);
+
+		} catch(const std::exception &e) {
+
+			status.assign(e);
+
+		} catch(...) {
+
+			status.assign(HTTP::SystemError);
+			Logger::String{"Unexpected error processing request"}.error();
 
 		}
 
-		// Search for interfaces
-
-
-		// Send 404 response
-		return send(HTTP::NotFound,request);
+		return send(status,request.apicall());
 
 	}
 

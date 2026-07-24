@@ -23,6 +23,8 @@
  #include <udjat/tools/logger.h>
  #include <udjat/tools/template.h>
  #include <udjat/tools/http/request.h>
+ #include <udjat/tools/configuration.h>
+ #include <udjat/tools/string.h>
  #include <sstream>
 
  using namespace std;
@@ -50,9 +52,24 @@
 				return true;
 			}
 
+	
 			Udjat::Value value;
 			if(get_property(key,value)) {
 				stream << value.serialize(status.mimetype);
+				return true;
+			}
+
+			if(!strcasecmp(key,"page-title")) {
+				Config::Value<String> title{"theme","page-title",STRINGIZE_VALUE_OF(PRODUCT_NAME) "@${HOSTNAME}"};
+				title.expand(true,true);
+				stream << title.c_str();
+				return true;
+			}
+
+			if(!strcasecmp(key,"navbar")) {
+
+				// TODO: Implement navbar
+
 				return true;
 			}
 
@@ -64,7 +81,7 @@
 		}
 
 		return false;
-		
+
 	}
 
 	HTTP::StatusCode HTTP::Connection::send(const HTTP::StatusCode code, const Request &request) noexcept {

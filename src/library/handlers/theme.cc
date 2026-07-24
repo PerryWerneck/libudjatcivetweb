@@ -32,6 +32,7 @@
  #include <udjat/tools/http/status.h>
  #include <udjat/tools/logger.h>
  #include <udjat/tools/intl.h>
+ #include <udjat/tools/request.h>
  #include <string>
  #include <fcntl.h> 
 
@@ -43,32 +44,30 @@
 
  namespace Udjat {
 
-	HTTP::StatusCode HTTP::Connection::theme(const char *name) noexcept {
+	HTTP::StatusCode HTTP::Connection::theme(const char *path) noexcept {
 
-		while(*name && *name == '/') {
-			name++;
-		}
-
-		{
-			const char *ptr = strchr(name,'/');
-			if(ptr) {
-				name = ptr+1;
-			}
-		}
-
-		debug("------------------ ",__FUNCTION__,"(",name,") --------------------------");
-		if(strstr(name,"..")) {
+		if(strstr(path,"..")) {
 			return send(
 				HTTP::Status{HTTP::BadRequest,MimeType::html}
 			);
 		}
 
+		Udjat::Request::pop("theme",path);
 		Config::Value<unsigned int> maxage{"theme","theme-max-age",604800};
 
-		String filename{
-			Config::Value<string>{"theme","rootdir","/srv/www/htdocs/" STRINGIZE_VALUE_OF(PRODUCT_NAME) "/theme/default/"}.c_str(),
-			name
-		};
+		std::string filename;
+
+		if(Udjat::Request::pop("logo",path)) {
+			filename = String{
+				Config::Value<string>{"theme","logos","/usr/share/pixmaps/distribution-logos"}.c_str(),
+				path
+			}.c_str();
+		} else  {
+			filename = String{
+				Config::Value<string>{"theme","rootdir","/srv/www/htdocs/" STRINGIZE_VALUE_OF(PRODUCT_NAME) "/theme/default"}.c_str(),
+				path
+			}.c_str();
+		}
 
 		debug("Filename='",filename.c_str(),"'");
 
