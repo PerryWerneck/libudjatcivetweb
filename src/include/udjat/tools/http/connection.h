@@ -61,6 +61,11 @@
 				return auth.allow(role);
 			}
 
+			/// @brief Get mimetype from connection for convenience.
+			/// @param def Default value.
+			/// @return The mimetype for connection.
+			virtual Udjat::MimeType mimetype(const Udjat::MimeType def = MimeType::html) const noexcept = 0; 
+
 			/// @brief Send file to client.
 			/// @param mimetype The mime-type for http header (MimeType::None to get it from filename).
 			/// @param max_age The max-age value to http headers (0 to no-cache).

@@ -66,7 +66,7 @@
 			/// @brief Get mimetype from connection for convenience.
 			/// @param def Default value.
 			/// @return The mimetype for connection.
-			Udjat::MimeType mimetype(const Udjat::MimeType def = MimeType::html) const noexcept; 
+			Udjat::MimeType mimetype(const Udjat::MimeType def = MimeType::html) const noexcept override; 
 
 			String address() const noexcept override;
 			HTTP::StatusCode send(const char *filename, time_t maxage, const MimeType mimetype = MimeType::none) noexcept override;

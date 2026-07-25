@@ -62,6 +62,10 @@
 					current_status = status;
 				}
 
+				inline const char * avatar() const noexcept {
+					return avatar_url.c_str();
+				}
+
 				/// @brief Build http headers.
 				/// @param callback Callback method to receive the headers.
 				void http_headers(const std::function<void(const char *name, const char *value)> &callback) const noexcept;

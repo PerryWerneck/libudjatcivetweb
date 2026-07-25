@@ -25,6 +25,8 @@
  #include <udjat/tools/http/request.h>
  #include <udjat/tools/configuration.h>
  #include <udjat/tools/string.h>
+ #include <udjat/tools/intl.h>
+ #include <udjat/tools/application.h>
  #include <sstream>
 
  using namespace std;
@@ -59,11 +61,44 @@
 				return true;
 			}
 
-			if(!strcasecmp(key,"page-title")) {
-				Config::Value<String> title{"theme","page-title",STRINGIZE_VALUE_OF(PRODUCT_NAME) "@${HOSTNAME}"};
+			if(!(strcasecmp(key,"page-title") && strcasecmp(key,"title"))) {
+				Config::Value<String> title{
+					"theme",
+					"title",
+#ifdef _WIN32
+					Application::Description().c_str()
+#else
+					STRINGIZE_VALUE_OF(PRODUCT_NAME)
+#endif
+				};
 				title.expand(true,true);
 				stream << title.c_str();
 				return true;
+			}
+
+			if(!strcasecmp(key,"user-link")) {
+
+				if(auth.available() && mimetype(MimeType::html) == MimeType::html) {
+
+					if(auth >= Authentication::Guest) {
+						stream << "** TODO **";
+					} else {
+						stream << _( "Signin" );
+					}
+
+				}
+
+				return true;
+
+			}
+
+			if(!strcasecmp(key,"avatar")) {
+
+				if(auth.available()) {
+					stream << auth.avatar();
+				}
+				return true;
+
 			}
 
 			if(!strcasecmp(key,"navbar")) {
