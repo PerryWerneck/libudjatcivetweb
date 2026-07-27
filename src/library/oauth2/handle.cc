@@ -65,8 +65,11 @@
 
 			debug("Requested action: '",action.c_str(),"'");
 
-			switch(action.select("callback",NULL)) {
-			case 0: // callback
+			switch(action.select("authenticate","callback",NULL)) {
+			case 0:	// /oauth2/authenticate
+				return authenticate();
+
+			case 1: // /oauth2/callback
 				return callback();
 
 			}

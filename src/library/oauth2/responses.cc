@@ -56,7 +56,7 @@
 
 		debug(__FUNCTION__,"(",code,",'",message,"')");
 		
-		Udjat::Template tmplt{"error",Udjat::MimeType::html};
+		Udjat::Template tmplt{"failed",Udjat::MimeType::html};
 
 		auto text = tmplt.to_string([this,code,message,body](const char *key, std::ostream &stream) {
 
@@ -66,22 +66,22 @@
 				return true;
 			}
 
-			if(!strcasecmp(key,"error-code")) {
+			if(!strcasecmp(key,"status-code")) {
 				stream << code;
 				return true;
 			}
 
-			if(!strcasecmp(key,"message")) {
+			if(!strcasecmp(key,"status-message")) {
 				stream << message;
 				return true;
 			}
 			
-			if(!strcasecmp(key,"body")) {
+			if(!strcasecmp(key,"status-body")) {
 				stream << body;
 				return true;
 			}
 
-			if(!strcasecmp(key,"icon")) {
+			if(!strcasecmp(key,"status-icon")) {
 				stream << "/icon/computer-fail-symbolic";
 				return true;
 			}
