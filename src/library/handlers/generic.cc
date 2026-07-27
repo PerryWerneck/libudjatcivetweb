@@ -85,7 +85,13 @@
 
 					if(!strcasecmp(key,"page-contents")) {
 						if(intf) {
+#ifdef DEBUG
+							stream << endl << "<!-- Begin interface block -->" << endl;
+#endif
 							intf->process(request,status,stream);
+#ifdef DEBUG
+							stream << endl << "<!-- End interface block -->" << endl;
+#endif
 						}
 						return true;
 					}
@@ -94,11 +100,13 @@
 
 				});
 
+				if(status.code >= 200 && status.code <= 299) {
+					return send(status,response.str().c_str());
+				}
+
 			} else {
 				status = HTTP::NotFound;
 			}
-
-			return send(status,response.str().c_str());
 
 		} catch(const std::exception &e) {
 

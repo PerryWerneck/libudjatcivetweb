@@ -107,7 +107,8 @@
 			}
 		}
 
-		return MimeType::none;
+		// Default to html.
+		return MimeType::html;
 	}
 
 	Udjat::String HTTP::Request::cookie(const char *name, const char *def) const {
