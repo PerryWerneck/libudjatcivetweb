@@ -180,17 +180,17 @@
 			// TODO: Refactor as interfaces.
 			mg_set_request_handler(ctx, "/icon/", (mg_request_handler) icon_handler, this);
 			mg_set_request_handler(ctx, "/theme/", (mg_request_handler) theme_handler, this);
-			mg_set_request_handler(ctx, "/" STRINGIZE_VALUE_OF(PRODUCT_NAME) "/", (mg_request_handler) product_handler, this);
+			// mg_set_request_handler(ctx, "/" STRINGIZE_VALUE_OF(PRODUCT_NAME) "/", (mg_request_handler) product_handler, this);
 			mg_set_request_handler(ctx, "/image/", (mg_request_handler) image_handler, this);
 			mg_set_request_handler(ctx, "/favicon.ico", (mg_request_handler) favicon_handler, this);
 
 			if(Authentication::available()) {
-				mg_set_request_handler(ctx, "/oauth2", oauthWebHandler, this);
+				mg_set_request_handler(ctx, "/oauth2", (mg_request_handler) auth_handler, this);
 			}
 
-			mg_set_request_handler(ctx, "/user", userWebHandler, this);
+			mg_set_request_handler(ctx, "/user", (mg_request_handler) user_handler, this);
 
-			mg_set_request_handler(ctx, "/", (mg_request_handler) defaultWebHandler, this);
+			mg_set_request_handler(ctx, "/", (mg_request_handler) default_handler, this);
 
 		}
 

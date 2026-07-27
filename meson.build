@@ -156,20 +156,12 @@ lib_src = [
   ]
 
 module_src = [
-  'src/module/handlers/favicon.cc',
-  'src/module/handlers/icons.cc',
-  'src/module/handlers/theme.cc',
-  'src/module/handlers/images.cc',
-  'src/module/handlers/product.cc',
-  'src/module/handlers/default.cc',
-  'src/module/handlers/user.cc',
-  'src/module/oauth2/handler.cc',
+  'src/module/handlers.cc',
   'src/module/oauth2/context.cc',
   'src/module/connection.cc',
   'src/module/request.cc',
   'src/module/connection.cc',
   'src/module/init.cc',
-
   'src/module/factory.cc',
   'src/module/service/send.cc',
   'src/module/service/construct.cc',

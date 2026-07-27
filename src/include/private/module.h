@@ -37,26 +37,26 @@
  using namespace Udjat;
  using namespace std;
 
- /// @brief Handler for icon requests.
- UDJAT_PRIVATE int defaultWebHandler(struct mg_connection *conn, void *cbdata);
+//  /// @brief Handler for icon requests.
+//  UDJAT_PRIVATE int defaultWebHandler(struct mg_connection *conn, void *cbdata);
 
- /// @brief Handler for icon requests.
- UDJAT_PRIVATE int iconWebHandler(struct mg_connection *conn, void *cbdata);
+//  /// @brief Handler for icon requests.
+//  UDJAT_PRIVATE int iconWebHandler(struct mg_connection *conn, void *cbdata);
 
- /// @brief Handler for product requests.
- UDJAT_PRIVATE int productWebHandler(struct mg_connection *conn, void *cbdata) noexcept;
+//  /// @brief Handler for product requests.
+//  UDJAT_PRIVATE int productWebHandler(struct mg_connection *conn, void *cbdata) noexcept;
 
- /// @brief Handler for image requests.
- UDJAT_PRIVATE int imageWebHandler(struct mg_connection *conn, void *cbdata);
+//  /// @brief Handler for image requests.
+//  UDJAT_PRIVATE int imageWebHandler(struct mg_connection *conn, void *cbdata);
 
- /// @brief Authentication handler.
- UDJAT_PRIVATE int oauthWebHandler(struct mg_connection *conn, void *cbdata);
+//  /// @brief Authentication handler.
+//  UDJAT_PRIVATE int oauthWebHandler(struct mg_connection *conn, void *cbdata);
 
- /// @brief User information handler.
- UDJAT_PRIVATE int userWebHandler(struct mg_connection *conn, void *cbdata);
+//  /// @brief User information handler.
+//  UDJAT_PRIVATE int userWebHandler(struct mg_connection *conn, void *cbdata);
 
- /// @brief Handler for '/favicon.ico' request.
- UDJAT_PRIVATE int faviconWebHandler(struct mg_connection *conn, void *cbdata) noexcept;
+//  /// @brief Handler for '/favicon.ico' request.
+//  UDJAT_PRIVATE int faviconWebHandler(struct mg_connection *conn, void *cbdata) noexcept;
 
  /// @brief Get mime-type from 'Accept' or 'Content-Type' header.
  /// @param conn Civetweb connection data.
