@@ -51,7 +51,7 @@
 		return (int) CivetWeb::Connection{conn}.theme(mg_get_request_info(conn)->local_uri);
 	}
 
-	int CivetWeb::Service::auth_handler(struct mg_connection *conn, CivetWeb::Service *) {
+	int CivetWeb::Service::auth_handler(struct mg_connection *conn, CivetWeb::Service *) noexcept {
 
 		CivetWeb::OAuthContext context{conn};
 		try {

@@ -25,6 +25,7 @@
  #include <udjat/tools/http/connection.h>
  #include <udjat/tools/http/exception.h>
  #include <udjat/tools/http/request.h>
+ #include <udjat/tools/http/response.h>
  #include <udjat/tools/template.h>
  #include <udjat/tools/interface.h>
  #include <udjat/tools/file/path.h>
@@ -41,72 +42,63 @@
 	/// @brief Run method, handle exceptions.
 	HTTP::StatusCode HTTP::Connection::handle(HTTP::Request &request) noexcept {
 
-		debug("\n\n------------ Request::path = '",request.path(),"'");
-
+		// Build status.
 		HTTP::Status status{HTTP::Ok,request.mimetype()};
+
+		// Scan for interface.
+		Interface *intf = nullptr;
+		
+		if(!request.root()) {
+
+			// It's not the root path, search for interface
+			intf = Interface::find(request);
+
+			if(!intf) {
+				status = HTTP::NotFound;
+				error(
+					status.code,
+					String{"Cant find interface for '",request.path(),"'"}.c_str()
+				);
+				return send(status,request.apicall());
+			}
+
+		}
 
 		try {
 
-			const char *path = request.path();
+			stringstream response;
 
-			if(path[0] == '/' && !path[1] && !request.apicall()) {
+			Template tmplt{
+				Config::Value<string>{"theme","index","main"},
+				status.mimetype
+			};
 
-				// The path is '/' and it's not an apicall, send index.
+			if(tmplt) {
 
-				// empty request, send index
-				stringstream response;
+				debug("Got index template");
 
-				Template tmplt{
-					Config::Value<string>{"theme","index","main"},
-					status.mimetype
-				};
+				tmplt.apply(response,[this,&status,&request,intf](const char *key, std::ostream &stream){
 
-				if(tmplt) {
+					if(process_template(status,key,stream)) {
+						return true;
+					}
 
-					debug("Got index template");
-
-					status.last_modified = tmplt.last_modified();
-					tmplt.apply(response,[this,&status](const char *key, std::ostream &stream){
-
-						if(process_template(status,key,stream)) {
-							return true;
+					if(!strcasecmp(key,"page-contents")) {
+						if(intf) {
+							intf->process(request,status,stream);
 						}
+						return true;
+					}
 
-						if(!strcasecmp(key,"page-contents")) {
+					return false;
 
-							// TODO: Implement page-contents for index
-							return true;
-							
-						}
+				});
 
-						return false;
-					});
-
-				} else {
-
-					Logger::String{"Cant find template for 'main' on current theme"}.error();
-					status.clear();
-					status.assign(HTTP::NotFound,request);
-
-				}
-
-				if(request.cached(TimeStamp{status.last_modified})) {
-					status.assign(HTTP::NotModified);
-					return send(status,"");
-				}
-
-				// Send template
-				status.assign(HTTP::Ok);
-				return send(status,response.str().c_str());
-
+			} else {
+				status = HTTP::NotFound;
 			}
 
-			// Search for interfaces
-
-
-
-			// Cant find interface, return 'not found'.
-			status.assign(HTTP::NotFound);
+			return send(status,response.str().c_str());
 
 		} catch(const std::exception &e) {
 

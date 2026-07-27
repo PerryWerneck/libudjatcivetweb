@@ -172,11 +172,7 @@
 				}
 			}
 
-			if(def) {
-				return def;
-			}
-
-			throw runtime_error(Udjat::String{"The required http header '",name,"' is not available"});
+			return def;
 
 		}
 
