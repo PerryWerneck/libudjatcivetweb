@@ -33,6 +33,7 @@
 				enum Status : uint8_t {
 					Undefined,
 					LoginPage,
+					Authenticated,
 				};
 
 				/// @brief Build an authentication from cookie.
@@ -41,7 +42,8 @@
 
 				/// @brief Assign new token value.
 				/// @param b64 Encrypted token.
-				void token(const char *b64);
+				/// @return true if the token is valid.
+				bool token(const char *b64);
 
 				/// @brief Get encrypted token.
 				/// @return String with base 64 encrypted token.

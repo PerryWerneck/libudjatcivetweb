@@ -30,29 +30,35 @@
  namespace Udjat {
 
 	int CivetWeb::Service::default_handler(struct mg_connection *conn, CivetWeb::Service *srvc) noexcept {
+		debug("-------- ",__FUNCTION__,"(",mg_get_request_info(conn)->local_uri,") --------");
 		CivetWeb::Connection client{conn};
 		CivetWeb::Request request{client};
 		return (int) client.handle(request);
 	}
 
 	int CivetWeb::Service::favicon_handler(struct mg_connection *conn, CivetWeb::Service *) noexcept {
+		debug("-------- ",__FUNCTION__,"(",mg_get_request_info(conn)->local_uri,") --------");
 		return (int) CivetWeb::Connection{conn}.favicon();
 	}
 
 	int CivetWeb::Service::icon_handler(struct mg_connection *conn, CivetWeb::Service *) noexcept {
+		debug("-------- ",__FUNCTION__,"(",mg_get_request_info(conn)->local_uri,") --------");
 		return (int) CivetWeb::Connection{conn}.icon(mg_get_request_info(conn)->local_uri);
 	}
 
 	int CivetWeb::Service::image_handler(struct mg_connection *conn, CivetWeb::Service *) noexcept {
+		debug("-------- ",__FUNCTION__,"(",mg_get_request_info(conn)->local_uri,") --------");
 		return (int) CivetWeb::Connection{conn}.image(mg_get_request_info(conn)->local_uri);
 	}
 
 	int CivetWeb::Service::theme_handler(struct mg_connection *conn, CivetWeb::Service *srvc) noexcept {
+		debug("-------- ",__FUNCTION__,"(",mg_get_request_info(conn)->local_uri,") --------");
 		return (int) CivetWeb::Connection{conn}.theme(mg_get_request_info(conn)->local_uri);
 	}
 
 	int CivetWeb::Service::auth_handler(struct mg_connection *conn, CivetWeb::Service *) noexcept {
 
+		debug("-------- ",__FUNCTION__,"(",mg_get_request_info(conn)->local_uri,") --------");
 		CivetWeb::OAuthContext context{conn};
 		try {
 

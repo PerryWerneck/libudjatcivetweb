@@ -54,11 +54,11 @@
 
 		try {
 
-			if(empty()) {
-				Logger::String{"Empty html request, sending login page"}.trace();
-				set(HTTP::Authentication::LoginPage);
-				return send_template(HTTP::Ok,"signin","login");
-			}
+			// if(empty()) {
+			// 	Logger::String{"Empty html request, sending login page"}.trace();
+			// 	set(HTTP::Authentication::LoginPage);
+			// 	return send_template(HTTP::Ok,"signin","login");
+			// }
 
 			debug("--------------- Checking for options ---------------");
 			String action = pop();

@@ -78,7 +78,6 @@
 
 					clear();
 					Logger::String{"State '",buffer,"' is invalid: ",e.what()}.error();
-					throw logic_error(_("Invalid state received from authentication server"));
 
 				}
 			}

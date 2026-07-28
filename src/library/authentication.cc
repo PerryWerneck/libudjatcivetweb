@@ -56,14 +56,14 @@
 		};
 	}
 
-	void HTTP::Authentication::token(const char *b64) {
+	bool HTTP::Authentication::token(const char *b64) {
 		
 		debug(__FUNCTION__,"(",b64,")");
 
 		if(!(b64 && *b64)) {
 			debug("Ignoring empty token");
 			clear();
-			return;
+			return false;
 		}
 
 		try {
@@ -75,18 +75,47 @@
 			buffer[len] = 0;
 
 			if(len < sizeof(Token)) {
-				throw runtime_error("The authentication token is too small");
+				clear();
+				Logger::String{"The authentication token is too small"}.error();
+				return false;
 			}
 
 			Token *token = (Token *) buffer;
 
-			if(time(0) < token->expiration_time) {
-				throw runtime_error("The authentication token is expired");
+			if(time(0) > token->expiration_time) {
+				clear();
+				Logger::String{"The authentication token is expired"}.trace();
+				return false;
 			}
 
 			this->current_status = token->status;
 			this->role = token->role;
 			this->expiration_time = token->expiration_time;
+
+			debug("Role=",std::to_string(this->role));
+
+			{
+				char *ptr = (char *) (token+1);
+
+				// Get user name
+				{
+					debug("Username: '",ptr,"'");					
+
+					ptr += (strlen(ptr)+1);
+				}
+
+				// Get avatar URL
+				{
+					debug("Avatar URL: '",ptr,"'");
+				}
+
+			}
+
+
+#ifdef DEBUG
+			Logger::String{"Authentication expires on ",TimeStamp(this->expiration_time).to_string().c_str()}.info();
+#endif
+			return true;
 
 		} catch(const std::exception &e) {
 
@@ -94,6 +123,8 @@
 			Logger::String{e.what()}.trace();
 
 		}
+
+		return false;
 
 	}
 
@@ -107,13 +138,20 @@
 
 	std::string HTTP::Authentication::token() const {
 
+		debug("---- Encoding token");
+
 		const char *name = this->name();
 		size_t szBuffer = sizeof(Token) + avatar_url.size() + strlen(name) + 2;
 
 		uint8_t buffer[szBuffer+1];
-		memset(buffer,0,sizeof(szBuffer+1));
+		memset(buffer,0,szBuffer+1);
 
 		Token *token = (Token *) buffer;
+
+		debug(
+			"User role: ", std::to_string(this->role),
+			" Username: '",name,"'"
+		);
 
 		token->status = this->current_status;
 		token->role = role;
@@ -124,15 +162,16 @@
 		// Append user name
 		{
 			size_t length = strlen(name);
-			strlcpy(ptr,name,length);
+			memcpy(ptr,name,length);
 			ptr[length] = 0;
 			ptr += (length+1);
 		}
 
 		// Append avatar URL
 		{
-			strlcpy(ptr,avatar_url.c_str(),avatar_url.size());
-			ptr[avatar_url.size()] = 0;
+			size_t length = avatar_url.size();
+			memcpy(ptr,avatar_url.c_str(),length);
+			ptr[length] = 0;
 		}
 
 		return Authentication::encrypt(token,szBuffer);
