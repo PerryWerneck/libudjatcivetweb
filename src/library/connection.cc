@@ -94,7 +94,7 @@
 							<< "<a id=\"login-button\" href=\""
 							<< Config::Value<string>("authentication","begin","/oauth2/authenticate").c_str()
 							<< "\">"
-							<< _( "Signin" )
+							<< _( "Log in" )
 							<< "</a>";
 					}
 
