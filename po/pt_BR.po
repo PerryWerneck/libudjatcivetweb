@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udjat-module-httpd 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-09 08:40-0300\n"
-"PO-Revision-Date: 2026-07-09 07:41-0300\n"
+"POT-Creation-Date: 2026-07-28 12:25-0300\n"
+"PO-Revision-Date: 2026-07-28 12:31-0300\n"
 "Last-Translator: Perry Werneck <perry.werneck@gmail.com>\n"
 "Language-Team: Brazilian Portuguese <perry.werneck@gmail.com>\n"
 "Language: pt_BR\n"
@@ -19,27 +19,6 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "X-Poedit-SourceCharset: utf-8\n"
 "X-Generator: Poedit 3.9\n"
-
-#: src/library/connection.cc:60 src/library/server/call.cc:67
-#: src/module/handlers/api.cc:89 src/module/service/send.cc:304
-msgid "Unexpected error"
-msgstr "Erro inesperado"
-
-#: src/library/index.cc:55
-msgid "en"
-msgstr "pt_BR"
-
-#: src/library/index.cc:71
-msgid "Active agents"
-msgstr "Agentes ativos"
-
-#: src/library/index.cc:81
-msgid "Application"
-msgstr "Aplicação"
-
-#: src/library/index.cc:123
-msgid "Interfaces"
-msgstr "Interfaces"
 
 #: src/library/os/linux/oauth2user.cc:271
 msgid "Invalid username"
@@ -60,16 +39,16 @@ msgstr "Informe o nome de usuário"
 msgid "Please, inform password"
 msgstr "Informe a senha de acesso"
 
-#: src/library/response.cc:172
-msgid "Unexpected error processing response text"
-msgstr "Erro inesperado ao processar o texto da resposta"
+#: src/library/connection.cc:97
+msgid "Signin"
+msgstr "Login"
 
 #: src/library/oauth2/callback.cc:59
 msgid "Invalid response from authentication server"
 msgstr "Servidor de autenticação enviou uma resposta inválida"
 
 #: src/library/oauth2/callback.cc:76 src/library/oauth2/callback.cc:182
-#: src/library/oauth2/context.cc:213 src/library/oauth2/context.cc:230
+#: src/library/oauth2/context.cc:203 src/library/oauth2/context.cc:220
 msgid ""
 "Invalid authentication engine configuration. Please check server settings."
 msgstr ""
@@ -138,59 +117,77 @@ msgstr ""
 "Conexão falhou. O endpoint de autenticação não está definido ou configurado "
 "errado."
 
-#: src/library/oauth2/context.cc:165
+#: src/library/oauth2/context.cc:155
 msgid "Authorized use only. All activity is monitored for security."
-msgstr ""
+msgstr "Apenas uso autorizado."
 
-#: src/library/oauth2/context.cc:173
+#: src/library/oauth2/context.cc:163
 msgid "Access to ${product-name}"
 msgstr "Acesso ${product-name}"
 
-#: src/library/oauth2/context.cc:177
+#: src/library/oauth2/context.cc:167
 msgid "Sign in"
-msgstr "Acessar"
+msgstr "Login"
 
-#: src/library/oauth2/context.cc:181
+#: src/library/oauth2/context.cc:171
 msgid "Username"
 msgstr "Usuário"
 
-#: src/library/oauth2/context.cc:185
+#: src/library/oauth2/context.cc:175
 msgid "Password"
 msgstr "Senha"
 
-#: src/library/oauth2/handle.cc:78
+#: src/library/oauth2/handle.cc:80
 msgid "Unrecognized request"
 msgstr "Requisição desconhecida"
 
-#: src/library/oauth2/handle.cc:79
+#: src/library/oauth2/handle.cc:81
 #, c++-format
 msgid "The requested action '{}' is not available on this server"
 msgstr "A ação '{}' não está disponível nesse servidor"
 
-#: src/library/oauth2/handle.cc:88
+#: src/library/oauth2/handle.cc:90
 msgid "We're sorry, but we encountered an error while processing your request."
-msgstr ""
+msgstr "Desculpe, encontramos um erro ao processar seu pedido."
 
-#: src/module/handlers/api.cc:83
-#, c++-format
-msgid "Unexpected error '{}' calling backend"
-msgstr "Erro inesperado '{}' no controlador http"
+#: src/module/service/send.cc:42
+msgid "Empty filename on request"
+msgstr "Nome de arquivo vazio na requisição"
 
-#: src/module/handlers/product.cc:92
-msgid "Not available"
-msgstr "Não disponível"
-
-#: src/module/oauth2/context.cc:80
-msgid "Invalid state received from authentication server"
-msgstr "Servidor de autenticação enviou um estado inválido"
-
-#: src/module/oauth2/handler.cc:59
+#: src/module/handlers.cc:73
 msgid "An unexpected error occurred during the login process."
 msgstr "Um erro inesperado aconteceu durante o processo de login."
 
-#: src/module/custom.cc:59
-msgid "Unexpected error on http handler"
-msgstr "Erro inesperado no controlador http"
+#~ msgid "Unexpected error"
+#~ msgstr "Erro inesperado"
+
+#~ msgid "en"
+#~ msgstr "pt_BR"
+
+#~ msgid "Active agents"
+#~ msgstr "Agentes ativos"
+
+#~ msgid "Application"
+#~ msgstr "Aplicação"
+
+#~ msgid "Interfaces"
+#~ msgstr "Interfaces"
+
+#~ msgid "Unexpected error processing response text"
+#~ msgstr "Erro inesperado ao processar o texto da resposta"
+
+#, c++-format
+#~ msgid "Unexpected error '{}' calling backend"
+#~ msgstr "Erro inesperado '{}' no controlador http"
+
+#~ msgid "Not available"
+#~ msgstr "Não disponível"
+
+#~ msgid "Invalid state received from authentication server"
+#~ msgstr "Servidor de autenticação enviou um estado inválido"
+
+#~ msgid "Unexpected error on http handler"
+#~ msgstr "Erro inesperado no controlador http"
 
 #~ msgid "Unsupported"
 #~ msgstr "Não suportado"
