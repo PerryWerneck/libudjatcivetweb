@@ -89,10 +89,11 @@
 			}
 
 			this->current_status = token->status;
-			this->role = token->role;
 			this->expiration_time = token->expiration_time;
+			
+			role(token->role);
 
-			debug("Role=",std::to_string(this->role));
+			debug("Role=",std::to_string(role()));
 
 			{
 				char *ptr = (char *) (token+1);
@@ -100,13 +101,21 @@
 				// Get user name
 				{
 					debug("Username: '",ptr,"'");					
+					name(ptr);
+					ptr += (strlen(ptr)+1);
+				}
 
+				// Get e-mail
+				{
+					debug("E-Mail: '",ptr,"'");					
+					email(ptr);
 					ptr += (strlen(ptr)+1);
 				}
 
 				// Get avatar URL
 				{
 					debug("Avatar URL: '",ptr,"'");
+					avatar_url = ptr;
 				}
 
 			}
@@ -131,7 +140,6 @@
 	void HTTP::Authentication::clear() noexcept {
 		Udjat::Authentication::clear();
 		current_status = Undefined;
-		role = None;
 		avatar_url = "/icon/avatar-default";
 		expiration_time = time(0) + Config::Value<time_t>("authentication","expiration-time",86400);
 	}
@@ -141,7 +149,8 @@
 		debug("---- Encoding token");
 
 		const char *name = this->name();
-		size_t szBuffer = sizeof(Token) + avatar_url.size() + strlen(name) + 2;
+		const char *email = this->email();
+		size_t szBuffer = sizeof(Token) + avatar_url.size() + strlen(email) + strlen(name) + 3;
 
 		uint8_t buffer[szBuffer+1];
 		memset(buffer,0,szBuffer+1);
@@ -149,13 +158,13 @@
 		Token *token = (Token *) buffer;
 
 		debug(
-			"User role: ", std::to_string(this->role),
+			"User role: ", std::to_string(role()),
 			" Username: '",name,"'"
 		);
 
 		token->status = this->current_status;
-		token->role = role;
 		token->expiration_time = expiration_time;
+		token->role = role();
 
 		char *ptr = (char *) (token+1);
 
@@ -163,6 +172,14 @@
 		{
 			size_t length = strlen(name);
 			memcpy(ptr,name,length);
+			ptr[length] = 0;
+			ptr += (length+1);
+		}
+
+		// Append email
+		{
+			size_t length = strlen(email);
+			memcpy(ptr,email,length);
 			ptr[length] = 0;
 			ptr += (length+1);
 		}

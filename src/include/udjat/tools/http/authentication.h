@@ -76,7 +76,6 @@
 				time_t expiration_time = 0;
 				Status current_status = Undefined;
 				std::string avatar_url;
-				Authentication::Role role = Authentication::None;
 
 		};
 

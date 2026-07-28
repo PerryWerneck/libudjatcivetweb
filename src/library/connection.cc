@@ -28,6 +28,8 @@
  #include <udjat/tools/intl.h>
  #include <udjat/tools/application.h>
  #include <sstream>
+ #include <udjat/authentication.h>
+ #include <udjat/tools/http/authentication.h>
 
  using namespace std;
 
@@ -81,7 +83,12 @@
 				if(auth.available() && mimetype(MimeType::html) == MimeType::html) {
 
 					if(auth >= Authentication::Guest) {
-						stream << "** TODO **";
+						stream
+							<< "<a id=\"user-info\" href=\""
+							<< Config::Value<string>("authentication","userinfo","/user").c_str()
+							<< "\">"
+							<< auth.name()
+							<< "</a>";
 					} else {
 						stream 
 							<< "<a id=\"login-button\" href=\""
