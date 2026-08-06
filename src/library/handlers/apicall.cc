@@ -69,12 +69,9 @@
 
 						debug("Searching for icon at '",item.name(),"'");
 
-						Variant icon;
-						if(intf->get_property(request.path(),item.name(),icon)) {
-
-							debug("---> ICON=",icon.to_string().c_str());
-
-
+						Variant prop;
+						if(intf->get_property(request.path(),item.name(),prop)) {
+							return icon(prop.to_string().c_str());
 						}
 #ifdef DEBUG
 						else {
