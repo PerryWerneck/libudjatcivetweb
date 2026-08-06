@@ -29,6 +29,7 @@
  #include <udjat/tools/schema.h>
  #include <udjat/tools/http/status.h>
  #include <udjat/tools/intl.h>
+ #include <udjat/tools/interface.h>
 
  using namespace std;
 
@@ -50,8 +51,8 @@
 				return send(response);
 			}
 
-			Schema::Output schema;
-			if(!intf->schema(schema)) {
+			Schema::Output out;
+			if(!intf->schema(out)) {
 				response.assign(
 					HTTP::SystemError,
 					String{"Interface '",intf->name(),"' doesnt provide an output schema"}.c_str()
@@ -59,16 +60,43 @@
 				return send(response);
 			}
 
-			// if(request.root()) {
+			if(request.root()) {
 
-			// 	if(schema.options & schema.Enumerable) {
+				if( (out.options & out.Enumerable) != 0) {
 
-			// 	}
+					// Run enumeration.
+					response.Variant::clear(Variant::Array);
 
+					intf->for_each([&response,&out](const Udjat::Variant &value){
+						auto &item = response.append(Variant::Object);
+						for(const auto &s : out) {
+							item[s.name()] = value[s.name()];
+						}
+						return false;
+					});
 
-			// }
+					return send(response);
+				}
 
-			throw runtime_error("incomplete");
+				Schema::Input in;
+				intf->schema(in);
+
+				if( (in.options & in.AllowRoot) == 0) {
+					response.assign(
+						HTTP::BadRequest,
+						_("An object path is required")
+					);
+					return send(response);
+				}
+
+			}
+
+			if(!intf->process(request,response)) {
+				response.assign(
+					HTTP::NotFound,
+					_("Request rejected by backend")
+				);
+			}
 
 		} catch(const std::exception &e) {
 
