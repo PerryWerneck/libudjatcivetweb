@@ -63,10 +63,29 @@
 			if(response.mimetype() == MimeType::svg) {
 
 				// TODO: It's an svg, search for an icon.
+				for(const auto &item : out) {
+
+					if(item.type() == Schema::Icon) {
+
+						debug("Searching for icon at '",item.name(),"'");
+
+						Variant icon;
+						if(intf->get_property(request.path(),item.name(),icon)) {
+
+							debug("---> ICON=",icon.to_string().c_str());
 
 
+						}
+#ifdef DEBUG
+						else {
+							Logger::String{"Cant find property '",item.name(),"'"}.info();
+						}
+#endif
 
-				
+					}
+
+				}
+
 				HTTP::Status status{
 					HTTP::NotFound,
 					MimeType::text
