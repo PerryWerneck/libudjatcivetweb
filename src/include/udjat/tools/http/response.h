@@ -34,11 +34,6 @@
 			/// @brief Get target connection.
 			virtual HTTP::Connection & connection() const = 0;
 
-			void state(const char *object_name,const char *value, const char *message) override;
-
-			/// @brief Enumerate headers.
-			virtual void for_each(const std::function<void(const char *header_name, const char *header_value)> &call) const noexcept;
-
 		};
 
 	}	

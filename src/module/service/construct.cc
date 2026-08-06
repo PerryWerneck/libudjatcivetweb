@@ -21,8 +21,6 @@
 
  #define LOG_DOMAIN "civetweb"
 
- #include <udjat/tools/civetweb/service.h>
-
  #include <udjat/defs.h>
  #include <udjat/module.h>
  #include <private/module.h>
@@ -33,6 +31,7 @@
  #include <udjat/tools/intl.h>
  #include <udjat/tools/civetweb/connection.h>
  #include <udjat/tools/http/status.h>
+ #include <udjat/tools/civetweb/service.h>
  #include <string>
  #include <udjat/authentication.h>
 
@@ -178,9 +177,9 @@
 			// mg_set_request_handler(ctx, "/api/", (mg_request_handler) api_handler, this);
 
 			// TODO: Refactor as interfaces.
+			mg_set_request_handler(ctx, "/api/", (mg_request_handler) api_handler, this);
 			mg_set_request_handler(ctx, "/icon/", (mg_request_handler) icon_handler, this);
 			mg_set_request_handler(ctx, "/theme/", (mg_request_handler) theme_handler, this);
-			// mg_set_request_handler(ctx, "/" STRINGIZE_VALUE_OF(PRODUCT_NAME) "/", (mg_request_handler) product_handler, this);
 			mg_set_request_handler(ctx, "/image/", (mg_request_handler) image_handler, this);
 			mg_set_request_handler(ctx, "/favicon.ico", (mg_request_handler) favicon_handler, this);
 

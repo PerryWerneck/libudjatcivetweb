@@ -105,7 +105,10 @@
 				}
 
 			} else {
+
+				// Todo: Use generic response.
 				status = HTTP::NotFound;
+
 			}
 
 		} catch(const std::exception &e) {

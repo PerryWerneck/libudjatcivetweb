@@ -23,6 +23,7 @@
  #include <udjat/tools/logger.h>
  #include <udjat/tools/template.h>
  #include <udjat/tools/http/request.h>
+ #include <udjat/tools/http/response.h>
  #include <udjat/tools/configuration.h>
  #include <udjat/tools/string.h>
  #include <udjat/tools/intl.h>
@@ -139,6 +140,25 @@
 			},
 			request.apicall()
 		);
+	}
+
+	HTTP::StatusCode HTTP::Connection::send(const HTTP::Response &response) noexcept {
+		
+		debug("Sending response");
+
+		try {
+	
+			stringstream out;
+			response.serialize(out);
+			return send(response.status(),out.str().c_str());
+
+		} catch(const std::exception &e) {
+
+			return send(HTTP::Status{e},true);
+
+		}
+
+		return response.status_code();
 	}
 
 	HTTP::StatusCode HTTP::Connection::send(const HTTP::Status &status, bool apicall) noexcept {

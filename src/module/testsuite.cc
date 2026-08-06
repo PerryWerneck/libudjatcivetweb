@@ -24,6 +24,9 @@
  #include <udjat/tools/testsuite.h>
  #include <udjat/tools/url.h>
  #include <udjat/tools/url/handler.h>
+ #include <udjat/tools/service.h>
+ #include <udjat/tools/mainloop.h>
+ #include <udjat/tools/civetweb/service.h>
  #include <string>
  
  #include <private/client.h>
@@ -33,11 +36,33 @@
 
  #ifdef DEBUG 
 
- UDJAT_API void enum_udjat_unit_tests(Udjat::TestSuite &testcases) noexcept {
+ UDJAT_API void udjat_register_tests(Udjat::TestSuite &testcases) noexcept {
 
 	using Case = TestSuite::Case;
 
 	testcases.add(
+		// Case{
+		// 	"httpserver", "Test HTTP server",
+		// 	[](std::ostream &stream) {
+
+		// 		CivetWeb::Service srvc{Properties{}};
+
+		// 		Service::for_each([](Service &service){
+		// 			service.start();
+		// 			return false;
+		// 		});
+
+		// 		MainLoop::getInstance().run();
+
+		// 		Service::for_each([](Service &service){
+		// 			service.stop();
+		// 			return false;
+		// 		});
+
+		// 		return "Test complete";
+				
+		// 	}
+		// },
 		Case{
 			"httpclient", "Test HTTP client",
 			[](std::ostream &stream) {

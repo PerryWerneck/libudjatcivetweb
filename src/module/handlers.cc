@@ -20,6 +20,7 @@
  #include <config.h>
  #include <udjat/defs.h>
  #include <udjat/tools/http/connection.h>
+ #include <udjat/tools/http/response.h>
  #include <udjat/tools/civetweb/connection.h> 
  #include <udjat/tools/civetweb/service.h>
  #include <udjat/tools/configuration.h>
@@ -34,6 +35,29 @@
 		CivetWeb::Connection client{conn};
 		CivetWeb::Request request{client};
 		return (int) client.handle(request);
+	}
+
+	int CivetWeb::Service::api_handler(struct mg_connection *conn, CivetWeb::Service *srvc) noexcept {
+		debug("-------- ",__FUNCTION__,"(",mg_get_request_info(conn)->local_uri,") --------");
+		CivetWeb::Connection client{conn};
+		CivetWeb::Request request{client};
+
+		class Response : public HTTP::Response {
+		private:
+			HTTP::Connection &conn;
+		public:
+			Response(HTTP::Connection &c, Udjat::MimeType mimetype) : HTTP::Response{mimetype}, conn{c} {
+			}
+
+			HTTP::Connection & connection() const override {
+				return conn;
+			}
+
+		};
+
+		Response response{client,request.mimetype()};
+
+		return (int) client.apicall(request,response);
 	}
 
 	int CivetWeb::Service::favicon_handler(struct mg_connection *conn, CivetWeb::Service *) noexcept {

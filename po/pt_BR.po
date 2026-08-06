@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: udjat-module-httpd 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-28 12:25-0300\n"
+"POT-Creation-Date: 2026-07-28 12:46-0300\n"
 "PO-Revision-Date: 2026-07-28 12:31-0300\n"
 "Last-Translator: Perry Werneck <perry.werneck@gmail.com>\n"
 "Language-Team: Brazilian Portuguese <perry.werneck@gmail.com>\n"
@@ -38,10 +38,6 @@ msgstr "Informe o nome de usuário"
 #: src/library/os/windows/oauth2user.cc:176
 msgid "Please, inform password"
 msgstr "Informe a senha de acesso"
-
-#: src/library/connection.cc:97
-msgid "Signin"
-msgstr "Login"
 
 #: src/library/oauth2/callback.cc:59
 msgid "Invalid response from authentication server"
@@ -150,6 +146,10 @@ msgstr "A ação '{}' não está disponível nesse servidor"
 msgid "We're sorry, but we encountered an error while processing your request."
 msgstr "Desculpe, encontramos um erro ao processar seu pedido."
 
+#: src/library/connection.cc:97
+msgid "Log in"
+msgstr ""
+
 #: src/module/service/send.cc:42
 msgid "Empty filename on request"
 msgstr "Nome de arquivo vazio na requisição"
@@ -157,6 +157,9 @@ msgstr "Nome de arquivo vazio na requisição"
 #: src/module/handlers.cc:73
 msgid "An unexpected error occurred during the login process."
 msgstr "Um erro inesperado aconteceu durante o processo de login."
+
+#~ msgid "Signin"
+#~ msgstr "Login"
 
 #~ msgid "Unexpected error"
 #~ msgstr "Erro inesperado"

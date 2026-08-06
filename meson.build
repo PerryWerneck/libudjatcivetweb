@@ -136,7 +136,6 @@ lib_src = [
   'src/library/icon.cc',
   'src/library/connection.cc',
   'src/library/request.cc',
-  'src/library/response.cc',
   'src/library/server/interface.cc',
   'src/library/server/call.cc',
   'src/library/server/construct.cc',
@@ -146,8 +145,8 @@ lib_src = [
   'src/library/handlers/icon.cc',
   'src/library/handlers/theme.cc',
   'src/library/handlers/image.cc',
+  'src/library/handlers/apicall.cc',
   'src/library/client/client.cc',
-  'src/library/testsuite.cc',
   'src/library/authentication.cc',
   'src/library/oauth2/context.cc',
   'src/library/oauth2/handle.cc',
@@ -165,6 +164,7 @@ module_src = [
   'src/module/factory.cc',
   'src/module/service/send.cc',
   'src/module/service/construct.cc',
+  'src/module/testsuite.cc',
 ]
 
 test_src = [

@@ -57,6 +57,9 @@
 			/// @brief Handle favicon requests.
 			static int favicon_handler(struct mg_connection *conn, CivetWeb::Service *srvc) noexcept;
 
+			/// @brief Handle API calls.
+			static int api_handler(struct mg_connection *conn, CivetWeb::Service *srvc) noexcept;
+
 			static int user_handler(struct mg_connection *conn, CivetWeb::Service *srvc) noexcept;
 
 			static int auth_handler(struct mg_connection *conn, CivetWeb::Service *srvc) noexcept;
@@ -67,7 +70,6 @@
 		public:
 
 			Service(const Udjat::Properties &props);
-			Service(const char *name = "httpd", const char *description = nullptr);
 
 			virtual ~Service();
 

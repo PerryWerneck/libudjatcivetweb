@@ -33,6 +33,7 @@
 	namespace HTTP {
 
 		class Request;
+		class Response;
 
 		class UDJAT_API Connection {
 		protected:
@@ -85,6 +86,11 @@
 			/// @return The response code.
 			HTTP::StatusCode send(const HTTP::Status &status, bool apicall = true) noexcept;
 
+			/// @brief Send API response to client.
+			/// @param response The response to send.
+			/// @return Status code.
+			HTTP::StatusCode send(const HTTP::Response &response) noexcept;
+
 			/// @brief Send success response to client.
 			/// @param payload The response payload
 			/// @return The response code (200)
@@ -126,8 +132,13 @@
  			/// @param name The image name.
 			/// @return HTTP status code.
  			HTTP::StatusCode theme(const char *name) noexcept;
-			
-			/// @brief Handle http request.
+
+			/// @brief Handle API call.
+			/// @param request The api request to handle.
+			/// @return HTTP status code.			
+			HTTP::StatusCode apicall(HTTP::Request &request, HTTP::Response &response) noexcept;
+
+			/// @brief Handle generic http request.
 			/// @param request The HTTP request to handle.
 			/// @return HTTP status code.
 			HTTP::StatusCode handle(HTTP::Request &request) noexcept;
