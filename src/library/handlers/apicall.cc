@@ -59,8 +59,22 @@
 				);
 				return send(response);
 			}
+ 
+			if(response.mimetype() == MimeType::svg) {
 
-			if(request.root()) {
+				// TODO: It's an svg, search for an icon.
+
+
+
+				
+				HTTP::Status status{
+					HTTP::NotFound,
+					MimeType::text
+				};
+
+				return send(status,false);
+
+			} else if(request.root()) {
 
 				if( (out.options & out.Enumerable) != 0) {
 
