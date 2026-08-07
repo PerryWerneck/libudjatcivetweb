@@ -150,7 +150,10 @@
 	
 			stringstream out;
 			response.serialize(out);
-			return send(response.status(),out.str().c_str());
+			return send(
+				response.status(),
+				out.str().c_str()
+			);
 
 		} catch(const std::exception &e) {
 

@@ -60,6 +60,9 @@
 				return send(response);
 			}
  
+			Schema::Input in;
+			intf->schema(in);
+
 			if(response.mimetype() == MimeType::svg) {
 
 				// TODO: It's an svg, search for an icon.
@@ -108,9 +111,6 @@
 					return send(response);
 				}
 
-				Schema::Input in;
-				intf->schema(in);
-
 				if( (in.options & in.AllowRoot) == 0) {
 					response.assign(
 						HTTP::BadRequest,
@@ -121,11 +121,8 @@
 
 			}
 
-			if(!intf->process(request,response)) {
-				response.assign(
-					HTTP::NotFound,
-					_("Request rejected by backend")
-				);
+			if(in.validate(request,(HTTP::Status &) response)) {
+				intf->process(request,response);
 			}
 
 		} catch(const std::exception &e) {
