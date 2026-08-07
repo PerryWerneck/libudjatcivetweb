@@ -73,9 +73,7 @@
 		//
 		// It's a file, send it.
 		//
-		if(Logger::enabled(Logger::Debug)) {
-			info(HTTP::Ok,filename.c_str());
-		}
+		info(HTTP::Ok,filename.c_str());
 
 		mg_response_header_start(conn, HTTP::Ok);
 		mg_response_header_add(conn, "Content-Length", std::to_string(st.st_size).c_str(), -1);
@@ -83,7 +81,6 @@
 		// https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Repr-Digest
 		// calculate md5
 		// mg_response_header_add(conn, "Repr-Digest", String{"md5=",md5.c_str()}.c_str(), -1);
-
 
 		status.timestamp.expiration = time(0)+maxage;
 		status.http_headers([this](const char *name, const char *value){
