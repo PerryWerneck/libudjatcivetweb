@@ -68,7 +68,7 @@
 
 		}
 
-		status.last_modified = st.st_mtime;
+		status.timestamp.modification = st.st_mtime;
 
 		//
 		// It's a file, send it.
@@ -85,7 +85,7 @@
 		// mg_response_header_add(conn, "Repr-Digest", String{"md5=",md5.c_str()}.c_str(), -1);
 
 
-		status.expires = time(0)+maxage;
+		status.timestamp.expiration = time(0)+maxage;
 		status.http_headers([this](const char *name, const char *value){
 			mg_response_header_add(conn, name, value, -1);
 		});

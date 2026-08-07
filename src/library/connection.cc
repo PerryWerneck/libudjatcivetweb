@@ -151,7 +151,7 @@
 			stringstream out;
 			response.serialize(out);
 			return send(
-				response.status(),
+				response,
 				out.str().c_str()
 			);
 
@@ -161,7 +161,7 @@
 
 		}
 
-		return response.status_code();
+		return response.code;
 	}
 
 	HTTP::StatusCode HTTP::Connection::send(const HTTP::Status &status, bool apicall) noexcept {

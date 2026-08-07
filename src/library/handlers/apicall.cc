@@ -63,7 +63,7 @@
 			Schema::Input in;
 			intf->schema(in);
 
-			if(response.mimetype() == MimeType::svg) {
+			if(response == MimeType::svg) {
 
 				// TODO: It's an svg, search for an icon.
 				for(const auto &item : out) {

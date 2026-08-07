@@ -17,8 +17,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
- #define LOG_DOMAIN "image"
-
  #include <config.h>
  #include <udjat/tools/http/image.h>
  #include <udjat/tools/configuration.h>
